@@ -1,0 +1,81 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "npm: install",
+      "type": "shell",
+      "command": "npm install",
+      "problemMatcher": []
+    },
+    {
+      "label": "npm: dev",
+      "type": "shell",
+      "command": "npm run dev",
+      "isBackground": true,
+      "dependsOn": "npm: install",
+      "problemMatcher": {
+        "owner": "vite",
+        "pattern": { "regexp": "^x{0}$" },
+        "background": {
+          "activesBegin": "VITE",
+          "beginsPattern": "VITE",
+          "endsPattern": "Local:.*http://localhost:5173"
+        }
+      }
+    },
+    {
+      "label": "npm: build",
+      "type": "shell",
+      "command": "npm run build",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "npm: preview",
+      "type": "shell",
+      "command": "npm run preview",
+      "isBackground": true,
+      "dependsOn": "npm: build",
+      "problemMatcher": {
+        "owner": "vite",
+        "pattern": { "regexp": "^x{0}$" },
+        "background": {
+          "beginsPattern": "preview",
+          "endsPattern": "Local:.*http://localhost:4173"
+        }
+      }
+    },
+    {
+      "label": "npm: typecheck",
+      "type": "shell",
+      "command": "npm run typecheck",
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "npm: test",
+      "type": "shell",
+      "command": "npm test",
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "npm: clean reinstall",
+      "type": "shell",
+      "command": "rm -rf node_modules dist && npm install",
+      "options": { "shell": { "executable": "bash", "args": ["-c"] } },
+      "problemMatcher": []
+    },
+    {
+      "label": "vercel: deploy preview",
+      "type": "shell",
+      "command": "npx vercel",
+      "problemMatcher": []
+    },
+    {
+      "label": "kill dev servers",
+      "type": "shell",
+      "command": "npx kill-port 5173 4173",
+      "problemMatcher": []
+    }
+  ]
+}
