@@ -25,7 +25,7 @@ export default function Mountains() {
               <div className="mountain-body">
                 <h3>{m.name}</h3>
                 <p>{m.description}</p>
-                <Link className="text-link" to="/open-climbs">Explore route →</Link>
+                <Link className="text-link" to="/activities/open-climbs">Explore route →</Link>
               </div>
             </article>
           ))}

@@ -28,7 +28,7 @@ export interface ProgramPageData {
 
 // Placeholder program content — replace with official MMS details.
 export const bmcPage: ProgramPageData = {
-  path: '/bmc',
+  path: '/training/bmcm',
   eyebrow: 'For new members',
   title: 'Basic Mountaineering Course',
   intro: 'The foundation of every MMS member. Learn to climb safely, responsibly, and as part of a team, then earn your place with a graduation climb.',
@@ -74,7 +74,7 @@ export const bmcPage: ProgramPageData = {
 };
 
 export const openClimbsPage: ProgramPageData = {
-  path: '/open-climbs',
+  path: '/activities/open-climbs',
   eyebrow: 'Guests welcome',
   title: 'Open Climbs',
   intro: 'Climbs open to members and non-members alike. No membership needed: join a climb, meet the community, and experience the MMS adventure firsthand.',
@@ -107,7 +107,7 @@ export const openClimbsPage: ProgramPageData = {
 };
 
 export const outreachPage: ProgramPageData = {
-  path: '/outreach',
+  path: '/community/outreach',
   eyebrow: 'Give back',
   title: 'Outreach Programs',
   intro: 'The trails we climb pass through communities that welcome us. Our outreach programs give back to the people and places that make every climb possible.',
@@ -136,7 +136,7 @@ export const outreachPage: ProgramPageData = {
 };
 
 export const sartPage: ProgramPageData = {
-  path: '/sart',
+  path: '/community/sart',
   eyebrow: 'Safety',
   title: 'Search and Rescue Team',
   intro: 'SART is the MMS Search and Rescue Team: trained members who keep our climbs safe and stand ready to respond to trail emergencies.',

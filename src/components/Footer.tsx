@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { footerLinks, membershipEmail, motto, socials } from '../data/content';
+import { membershipEmail, motto, socials } from '../data/content';
+import { sectionPath, sitemap, subpagePath } from '../data/sitemap';
 
 export default function Footer() {
   return (
@@ -14,10 +15,18 @@ export default function Footer() {
             {socials.map((s) => (
               <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer">{s.label}</a>
             ))}
+            <Link to="/surveys">Surveys</Link>
           </div>
         </div>
-        <div className="footer-links">
-          {footerLinks.map((link) => <Link key={link.href} to={link.href}>{link.label}</Link>)}
+        <div className="footer-sitemap">
+          {sitemap.map((section) => (
+            <div key={section.slug}>
+              <Link className="footer-heading" to={sectionPath(section)}>{section.label}</Link>
+              {section.pages.map((page) => (
+                <Link key={page.slug} to={subpagePath(section, page)}>{page.label}</Link>
+              ))}
+            </div>
+          ))}
         </div>
         <div className="footer-note">Prototype content and event details are illustrative. Photos via Wikimedia Commons — <Link to="/credits">photo credits</Link>.</div>
       </div>

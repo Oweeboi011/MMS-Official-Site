@@ -23,6 +23,15 @@ const images = [
   { slug: 'gallery-kibungan', width: 1000, file: 'File:Kibuñgan Cross country (KXC) -1.jpg', place: 'Kibungan, Benguet' },
   { slug: 'gallery-marami', width: 1000, file: 'File:Mt. Marami.jpg', place: 'Mt. Marami, Cavite' },
   { slug: 'gallery-tarak', width: 1000, file: 'File:Tarak Ridge campsite, Mount Mariveles.jpg', place: 'Tarak Ridge, Bataan' },
+  { slug: 'section-about', width: 2400, file: 'File:Guiting-guiting 1.jpg', place: 'Mt. Guiting-Guiting, Romblon' },
+  { slug: 'section-explore', width: 2400, file: 'File:Mt.Pinatubo-The Crater Paradise.jpg', place: 'Mt. Pinatubo crater lake' },
+  { slug: 'section-activities', width: 2400, file: 'File:Mount Guiting Guiting 4.jpg', place: 'Mt. Guiting-Guiting, Romblon' },
+  { slug: 'section-training', width: 2400, file: 'File:Mount Kitanglad.jpg', place: 'Mt. Kitanglad, Bukidnon' },
+  { slug: 'section-community', width: 2400, file: 'File:Mount Canlaon.JPG', place: 'Mt. Kanlaon, Negros Island' },
+  { slug: 'section-media', width: 2400, file: 'File:Philippines Highest Summit.jpg', place: 'Mt. Apo, Mindanao' },
+  { slug: 'gallery-pinatubo-crater', width: 1000, file: 'File:Crater of Mt.Pinatubo.jpg', place: 'Mt. Pinatubo crater lake' },
+  { slug: 'gallery-arayat', width: 1000, file: 'File:Mount Arayat nature gem.jpg', place: 'Mt. Arayat, Pampanga' },
+  { slug: 'gallery-halcon', width: 1000, file: 'File:Morning View of Halcon.jpg', place: 'Mt. Halcon, Oriental Mindoro' },
 ];
 
 const strip = (html = '') => html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();

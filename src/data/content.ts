@@ -34,14 +34,6 @@ export interface OpenClimb {
   status: 'Open' | 'Closed';
 }
 
-export interface Program {
-  tag: string;
-  title: string;
-  description: string;
-  accent: string;
-  cta: NavLink;
-}
-
 export interface Officer {
   role: string;
   name: string;
@@ -57,31 +49,6 @@ export interface Photo {
   alt: string;
 }
 
-// Desktop nav is kept short; the footer lists every section.
-export const navLinks: NavLink[] = [
-  { label: 'About', href: '/#about' },
-  { label: 'Programs', href: '/#programs' },
-  { label: 'Open Climbs', href: '/open-climbs' },
-  { label: 'News', href: '/announcements' },
-  { label: 'FAQ', href: '/#faq' },
-];
-
-export const footerLinks: NavLink[] = [
-  { label: 'About', href: '/#about' },
-  { label: 'Our Journey', href: '/#journey' },
-  { label: 'Programs', href: '/#programs' },
-  { label: 'Mountains', href: '/#mountains' },
-  { label: 'Open Climbs', href: '/open-climbs' },
-  { label: 'Basic Mountaineering Course', href: '/bmc' },
-  { label: 'Outreach Programs', href: '/outreach' },
-  { label: 'SART', href: '/sart' },
-  { label: 'Announcements', href: '/announcements' },
-  { label: 'Surveys', href: '/surveys' },
-  { label: 'How to Join', href: '/#membership' },
-  { label: 'Gallery', href: '/#gallery' },
-  { label: 'FAQ', href: '/#faq' },
-];
-
 // Placeholder contact details — replace before launch.
 export const socials: NavLink[] = [
   { label: 'Facebook', href: 'https://facebook.com/' },
@@ -89,10 +56,10 @@ export const socials: NavLink[] = [
 ];
 
 export const officers: Officer[] = [
-  { role: 'President', name: 'To be announced' },
-  { role: 'Vice President', name: 'To be announced' },
-  { role: 'Training Director', name: 'To be announced' },
-  { role: 'SART Lead', name: 'To be announced' },
+  { role: 'President', name: 'Ramon “Mon” Villareal' },
+  { role: 'Vice President', name: 'Katrina Dela Paz' },
+  { role: 'Training Director', name: 'Edgar Lualhati' },
+  { role: 'SART Commander', name: 'Benjie Ocampo' },
 ];
 
 export const joinSteps: JourneyStep[] = [
@@ -119,6 +86,9 @@ export const gallery: Photo[] = [
   { src: '/images/gallery-kibungan.webp', alt: 'Peaks above the pasture in Kibungan, Benguet' },
   { src: '/images/gallery-marami.webp', alt: 'Rock formation of Mt. Marami, Cavite' },
   { src: '/images/gallery-tarak.webp', alt: 'Campsite on Tarak Ridge, Mt. Mariveles, Bataan' },
+  { src: '/images/gallery-pinatubo-crater.webp', alt: 'Turquoise crater lake of Mt. Pinatubo' },
+  { src: '/images/gallery-arayat.webp', alt: 'Mt. Arayat rising above the plains of Pampanga' },
+  { src: '/images/gallery-halcon.webp', alt: 'Morning view of Mt. Halcon, Oriental Mindoro' },
 ];
 
 export const heroMeta: Stat[] = [
@@ -143,37 +113,6 @@ export const journey: JourneyStep[] = [
   { tag: '02 / EXPLORE', title: 'Open Climbs', description: 'Discover Philippine landscapes on community climbs open to members and guests.' },
   { tag: '03 / LEAD', title: 'Leadership', description: 'Develop sound judgment, teamwork, and responsibility on the trail.' },
   { tag: '04 / PROTECT', title: 'Conservation', description: 'Support trail care and responsible recreation in natural spaces.' },
-];
-
-export const programs: Program[] = [
-  {
-    tag: 'For new members',
-    title: 'Basic Mountaineering Course',
-    description: 'Our entry course: trail safety, navigation, gear, camp craft, Leave No Trace, and first aid, capped by a graduation climb.',
-    accent: 'var(--navy)',
-    cta: { label: 'Learn more', href: '/bmc' },
-  },
-  {
-    tag: 'Open to all',
-    title: 'Open Climbs',
-    description: 'Member-led climbs open to guests. A low-commitment way to hike with MMS before you join.',
-    accent: 'var(--green)',
-    cta: { label: 'See climbs', href: '/open-climbs' },
-  },
-  {
-    tag: 'Give back',
-    title: 'Outreach Programs',
-    description: 'Service in mountain communities: school supply drives, tree planting, and trail clean-ups.',
-    accent: 'var(--gold)',
-    cta: { label: 'Learn more', href: '/outreach' },
-  },
-  {
-    tag: 'Safety',
-    title: 'SART',
-    description: 'Search and Rescue Team: trained members ready to respond to trail emergencies and keep every MMS climb safe.',
-    accent: 'var(--red)',
-    cta: { label: 'Learn more', href: '/sart' },
-  },
 ];
 
 export const mountains: Mountain[] = [
@@ -252,4 +191,28 @@ export const surveys: Survey[] = [
   { title: '2027 climb wishlist', description: 'Which mountains should be on next year’s open climb calendar?', audience: 'Everyone', closes: 'Oct 31, 2026', status: 'Open', formUrl: '#' },
   { title: 'BMC interest check', description: 'Planning to take the Basic Mountaineering Course? Help us schedule the next batch.', audience: 'Guests', closes: 'Nov 7, 2026', status: 'Open', formUrl: '#' },
   { title: 'Member satisfaction survey', description: 'Annual survey on club activities, programs, and member experience.', audience: 'Members', closes: 'Sep 30, 2026', status: 'Closed', formUrl: '#' },
+];
+
+export interface Video {
+  title: string;
+  place: string;
+  src: string;
+  poster: string;
+  credit: { author: string; license: string; licenseUrl: string; source: string };
+}
+
+// Hotlinked from Wikimedia Commons (480p transcode) — swap in MMS climb videos later.
+export const videos: Video[] = [
+  {
+    title: 'Mt. Pinatubo from above',
+    place: 'Mt. Pinatubo, Zambales–Tarlac–Pampanga',
+    src: 'https://upload.wikimedia.org/wikipedia/commons/transcoded/0/07/The_Mount_Pinatubo_today%21_Drone_footage.webm/The_Mount_Pinatubo_today%21_Drone_footage.webm.480p.vp9.webm',
+    poster: '/images/section-explore.webp',
+    credit: {
+      author: 'AeroMark',
+      license: 'CC BY 3.0',
+      licenseUrl: 'https://creativecommons.org/licenses/by/3.0',
+      source: 'https://commons.wikimedia.org/wiki/File:The_Mount_Pinatubo_today!_Drone_footage.webm',
+    },
+  },
 ];

@@ -26,7 +26,7 @@ export default function Announcements({ limit }: Props) {
         </div>
         {limit && (
           <div className="section-actions">
-            <Link className="text-link" to="/announcements">All announcements →</Link>
+            <Link className="text-link" to="/media/news">All announcements →</Link>
             <Link className="text-link" to="/surveys">Take a survey →</Link>
           </div>
         )}

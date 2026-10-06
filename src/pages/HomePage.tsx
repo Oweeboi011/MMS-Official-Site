@@ -1,17 +1,19 @@
+import { Fragment, type ReactNode } from 'react';
 import Hero from '../components/Hero';
 import Ticker from '../components/Ticker';
 import Intro from '../components/Intro';
-import About from '../components/About';
-import Journey from '../components/Journey';
-import Programs from '../components/Programs';
-import Mountains from '../components/Mountains';
+import HomeSection from '../components/HomeSection';
 import OpenClimbs from '../components/OpenClimbs';
 import Announcements from '../components/Announcements';
-import HowToJoin from '../components/HowToJoin';
-import Passport from '../components/Passport';
-import Gallery from '../components/Gallery';
 import Faq from '../components/Faq';
 import JoinCta from '../components/JoinCta';
+import { sitemap } from '../data/sitemap';
+
+// Live previews shown right after a section's cards.
+const previews: Record<string, ReactNode> = {
+  activities: <OpenClimbs limit={4} />,
+  media: <Announcements limit={3} />,
+};
 
 export default function HomePage() {
   return (
@@ -20,15 +22,12 @@ export default function HomePage() {
       <Ticker />
       <main>
         <Intro />
-        <About />
-        <Journey />
-        <Programs />
-        <Mountains />
-        <OpenClimbs limit={4} />
-        <Announcements limit={3} />
-        <HowToJoin />
-        <Passport />
-        <Gallery />
+        {sitemap.map((section) => (
+          <Fragment key={section.slug}>
+            <HomeSection section={section} />
+            {previews[section.slug]}
+          </Fragment>
+        ))}
         <Faq />
         <JoinCta />
       </main>

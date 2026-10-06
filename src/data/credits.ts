@@ -153,5 +153,86 @@ export const photoCredits: PhotoCredit[] = [
     "license": "CC BY-SA 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Tarak_Ridge_campsite,_Mount_Mariveles.jpg"
+  },
+  {
+    "src": "/images/section-about.webp",
+    "place": "Mt. Guiting-Guiting, Romblon",
+    "title": "Guiting-guiting 1",
+    "author": "Androkoy",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Guiting-guiting_1.jpg"
+  },
+  {
+    "src": "/images/section-explore.webp",
+    "place": "Mt. Pinatubo crater lake",
+    "title": "Mt.Pinatubo-The Crater Paradise",
+    "author": "Emman Asuncion Foronda",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Mt.Pinatubo-The_Crater_Paradise.jpg"
+  },
+  {
+    "src": "/images/section-activities.webp",
+    "place": "Mt. Guiting-Guiting, Romblon",
+    "title": "Mount Guiting Guiting 4",
+    "author": "Ray Santa Maria",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Mount_Guiting_Guiting_4.jpg"
+  },
+  {
+    "src": "/images/section-training.webp",
+    "place": "Mt. Kitanglad, Bukidnon",
+    "title": "Mount Kitanglad",
+    "author": "Ray Santa Maria",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Mount_Kitanglad.jpg"
+  },
+  {
+    "src": "/images/section-community.webp",
+    "place": "Mt. Kanlaon, Negros Island",
+    "title": "Mount Canlaon",
+    "author": "Studphil",
+    "license": "Public domain",
+    "licenseUrl": "",
+    "source": "https://commons.wikimedia.org/wiki/File:Mount_Canlaon.JPG"
+  },
+  {
+    "src": "/images/section-media.webp",
+    "place": "Mt. Apo, Mindanao",
+    "title": "Philippines Highest Summit",
+    "author": "Margareth16",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Philippines_Highest_Summit.jpg"
+  },
+  {
+    "src": "/images/gallery-pinatubo-crater.webp",
+    "place": "Mt. Pinatubo crater lake",
+    "title": "Crater of Mt.Pinatubo",
+    "author": "Ambience28",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Crater_of_Mt.Pinatubo.jpg"
+  },
+  {
+    "src": "/images/gallery-arayat.webp",
+    "place": "Mt. Arayat, Pampanga",
+    "title": "Mount Arayat nature gem",
+    "author": "Mr ShmilyDigital",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Mount_Arayat_nature_gem.jpg"
+  },
+  {
+    "src": "/images/gallery-halcon.webp",
+    "place": "Mt. Halcon, Oriental Mindoro",
+    "title": "Morning View of Halcon",
+    "author": "Orlan Rovira Frane",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Morning_View_of_Halcon.jpg"
   }
 ];

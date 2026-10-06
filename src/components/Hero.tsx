@@ -15,8 +15,8 @@ export default function Hero() {
           exploration, leadership, and conservation.
         </p>
         <div className="hero-actions">
-          <Link className="btn btn-primary" to="/open-climbs">Join an open climb <span aria-hidden="true">→</span></Link>
-          <a className="btn btn-ghost" href="#join">Become a member</a>
+          <Link className="btn btn-primary" to="/activities/open-climbs">Join an open climb <span aria-hidden="true">→</span></Link>
+          <Link className="btn btn-ghost" to="/membership/join">Become a member</Link>
         </div>
         <div className="hero-meta" aria-label="Highlights">
           {heroMeta.map((item) => (

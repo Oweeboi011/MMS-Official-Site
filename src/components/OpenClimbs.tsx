@@ -32,7 +32,7 @@ export default function OpenClimbs({ limit }: Props) {
         </div>
         <div className="event-cta">
           {limit ? (
-            <Link className="btn btn-primary" to="/open-climbs">See all open climbs <span aria-hidden="true">→</span></Link>
+            <Link className="btn btn-primary" to="/activities/open-climbs">See all open climbs <span aria-hidden="true">→</span></Link>
           ) : (
             <Link className="btn btn-primary" to="/#join">Ask to join a climb <span aria-hidden="true">→</span></Link>
           )}
