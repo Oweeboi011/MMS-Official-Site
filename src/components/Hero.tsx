@@ -1,11 +1,9 @@
 import { Link } from 'react-router-dom';
 import { heroMeta } from '../data/content';
-import Nav from './Nav';
 
 export default function Hero() {
   return (
     <header className="hero" id="home">
-      <Nav />
 
       <div className="shell hero-content">
         <div className="eyebrow">Metropolitan Mountaineering Society</div>

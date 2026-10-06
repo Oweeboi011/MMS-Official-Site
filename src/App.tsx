@@ -3,6 +3,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Footer from './components/Footer';
 import BottomNav from './components/BottomNav';
+import Nav from './components/Nav';
 import ScrollManager from './components/ScrollManager';
 import About from './components/About';
 import Faq from './components/Faq';
@@ -49,6 +50,8 @@ export default function App() {
   return (
     <>
       <ScrollManager />
+      {/* Rendered at the root so the fixed nav sits above every page section. */}
+      <Nav />
       <Routes>
         <Route path="/" element={<HomePage />} />
         {/* Sections live on the home page; /about etc. jump to them. */}

@@ -1,4 +1,3 @@
-import Nav from '../components/Nav';
 import { asset } from '../lib/asset';
 import { photoCredits } from '../data/credits';
 
@@ -6,7 +5,6 @@ export default function CreditsPage() {
   return (
     <>
       <header className="simple-header">
-        <Nav />
       </header>
       <main>
         <section className="section">

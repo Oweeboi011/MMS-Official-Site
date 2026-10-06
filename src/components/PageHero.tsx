@@ -2,7 +2,6 @@ import type { CSSProperties } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { asset } from '../lib/asset';
 import { sectionPath, sitemap } from '../data/sitemap';
-import Nav from './Nav';
 
 interface Props {
   eyebrow: string;
@@ -30,7 +29,6 @@ function Breadcrumbs({ title }: { title: string }) {
 export default function PageHero({ eyebrow, title, intro, image }: Props) {
   return (
     <header className="hero page-hero" style={{ '--hero-image': `url("${asset(image)}")` } as CSSProperties}>
-      <Nav />
       <div className="shell hero-content">
         <Breadcrumbs title={title} />
         <div className="eyebrow">{eyebrow}</div>
