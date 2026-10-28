@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { ContentBlock } from '../data/subpages';
 
 interface Props {
@@ -14,6 +15,42 @@ function Head({ eyebrow, title, intro }: { eyebrow?: string; title?: string; int
       </div>
       {intro && <p>{intro}</p>}
     </div>
+  );
+}
+
+function Table({ columns, rows, pageSize }: { columns: string[]; rows: string[][]; pageSize?: number }) {
+  // Page is tied to the rows it was picked for, so a new table (e.g. after navigating) starts at page 1.
+  const [state, setState] = useState({ rows, page: 0 });
+  const page = state.rows === rows ? state.page : 0;
+  const setPage = (p: number) => setState({ rows, page: p });
+  const size = pageSize && pageSize > 0 ? pageSize : Math.max(rows.length, 1);
+  const pages = Math.max(1, Math.ceil(rows.length / size));
+  const shown = rows.slice(page * size, (page + 1) * size);
+  return (
+    <>
+      <div className="table-wrap">
+        <table className="data-table">
+          <thead><tr>{columns.map((c) => <th key={c} scope="col">{c}</th>)}</tr></thead>
+          <tbody>
+            {shown.map((row) => (
+              <tr key={row.join('|')}>{row.map((cell, i) => <td key={i}>{cell}</td>)}</tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {pages > 1 && (
+        <nav className="pager" aria-label="Table pages">
+          <span aria-live="polite">{page * size + 1}–{Math.min((page + 1) * size, rows.length)} of {rows.length}</span>
+          <div>
+            <button type="button" onClick={() => setPage(page - 1)} disabled={page === 0} aria-label="Previous page">‹</button>
+            {Array.from({ length: pages }, (_, i) => (
+              <button type="button" key={i} onClick={() => setPage(i)} aria-current={i === page ? 'true' : undefined}>{i + 1}</button>
+            ))}
+            <button type="button" onClick={() => setPage(page + 1)} disabled={page === pages - 1} aria-label="Next page">›</button>
+          </div>
+        </nav>
+      )}
+    </>
   );
 }
 
@@ -57,18 +94,7 @@ function Block({ block }: { block: ContentBlock }) {
         </ol>
       );
     case 'table':
-      return (
-        <div className="table-wrap">
-          <table className="data-table">
-            <thead><tr>{block.columns.map((c) => <th key={c} scope="col">{c}</th>)}</tr></thead>
-            <tbody>
-              {block.rows.map((row) => (
-                <tr key={row.join('|')}>{row.map((cell, i) => <td key={i}>{cell}</td>)}</tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      );
+      return <Table columns={block.columns} rows={block.rows} pageSize={block.pageSize} />;
     case 'timeline':
       return (
         <ol className="timeline">

@@ -1,0 +1,9 @@
+{
+  "path": ["src", "scripts", "tests"],
+  "ignore": ["**/src/data/**"],
+  "minTokens": 60,
+  "threshold": 3,
+  "reporters": ["console"],
+  "gitignore": true,
+  "silent": false
+}

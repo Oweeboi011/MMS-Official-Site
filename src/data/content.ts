@@ -56,10 +56,10 @@ export const socials: NavLink[] = [
 ];
 
 export const officers: Officer[] = [
-  { role: 'President', name: 'Ramon “Mon” Villareal' },
-  { role: 'Vice President', name: 'Katrina Dela Paz' },
-  { role: 'Training Director', name: 'Edgar Lualhati' },
-  { role: 'SART Commander', name: 'Benjie Ocampo' },
+  { role: 'President', name: 'Admer Dablio' },
+  { role: 'Vice President', name: 'Kenneth Esguerra' },
+  { role: 'Secretary', name: 'Daniella Ruanes' },
+  { role: 'Treasurer', name: 'Elizabeth Villacino' },
 ];
 
 export const joinSteps: JourneyStep[] = [
@@ -158,6 +158,8 @@ export const passportStats: Stat[] = [
 ];
 
 export const membershipEmail = 'membership@example.com';
+export const contactName = 'Admer Dablio';
+export const contactPhone = '+63 945 683 1874';
 
 export interface Announcement {
   date: string;

@@ -1,11 +1,12 @@
 import type { Stat } from './content';
+import type { ContentBlock } from './subpages';
 
-export interface PageItem {
+interface PageItem {
   title: string;
   description: string;
 }
 
-export interface PageSection {
+interface PageSection {
   eyebrow: string;
   title: string;
   intro?: string;
@@ -23,6 +24,8 @@ export interface ProgramPageData {
   facts: Stat[];
   sections: PageSection[];
   checklist?: { title: string; items: string[] };
+  // Extra content blocks shown after the sections.
+  blocks?: ContentBlock[];
   cta: { title: string; text: string; label: string; href: string; external?: boolean };
 }
 
@@ -31,13 +34,13 @@ export const bmcPage: ProgramPageData = {
   path: '/training/bmcm',
   eyebrow: 'For new members',
   title: 'Basic Mountaineering Course',
-  intro: 'The foundation of every MMS member. Learn to climb safely, responsibly, and as part of a team, then earn your place with a graduation climb.',
+  intro: 'A 6-month training period of lectures, demos, hands-on exercises, and workshops that gives every new member the knowledge and skills for a safe and fun climbing experience.',
   image: '/images/page-bmc.webp',
   accent: 'var(--navy)',
   facts: [
-    { value: '6', label: 'Lecture modules' },
-    { value: '2', label: 'Field sessions' },
-    { value: '1', label: 'Graduation climb' },
+    { value: '6', label: 'Months of training' },
+    { value: '9', label: 'Core modules' },
+    { value: '4', label: 'Field climbs' },
     { value: 'LNT', label: 'Trail ethics' },
   ],
   sections: [
@@ -46,12 +49,26 @@ export const bmcPage: ProgramPageData = {
       title: 'What you will learn.',
       variant: 'cards',
       items: [
-        { title: 'Mountaineering basics', description: 'Trail etiquette, pacing, group movement, and climb classifications.' },
-        { title: 'Gear & packing', description: 'Choosing, packing, and caring for the gear you carry on the mountain.' },
-        { title: 'Navigation', description: 'Reading maps and trails, using a compass and GPS apps, and staying oriented.' },
-        { title: 'First aid & safety', description: 'Basic wilderness first aid, hydration, heat and cold injuries, and emergency response.' },
-        { title: 'Camp craft', description: 'Setting up camp, outdoor cooking, and weather-proofing your site.' },
-        { title: 'Leave No Trace', description: 'The seven LNT principles and how MMS applies them on every climb.' },
+        { title: 'Physical assessment', description: 'A baseline fitness check at the start of the course.' },
+        { title: 'First Aid & Basic Life Support', description: 'Wilderness first aid and BLS for emergencies on the trail.' },
+        { title: 'Camp management', description: 'Setting up, running, and breaking camp as a team.' },
+        { title: 'Orienteering', description: 'Map reading, compass work, and staying oriented on the trail.' },
+        { title: 'Cookfest', description: 'Outdoor cooking and meal planning, tested on the first minor climb.' },
+        { title: 'Team building', description: 'Working as one batch, on and off the mountain.' },
+        { title: 'Indoor wall climb', description: 'Climbing basics on an indoor wall.' },
+        { title: 'Rappelling', description: 'Outdoor rappelling sessions, run in two batches.' },
+        { title: 'Outdoor rock climb', description: 'Putting wall and rope skills to work on real rock.' },
+      ],
+    },
+    {
+      eyebrow: 'Built with experts',
+      title: 'Where the curriculum comes from.',
+      variant: 'cards',
+      items: [
+        { title: 'Philippine Air Force SAR Group', description: 'Rappelling and search and rescue.' },
+        { title: 'Philippine National Red Cross', description: 'Wilderness First Aid.' },
+        { title: 'DENR', description: 'NIPAS and environmental protection.' },
+        { title: 'Leave No Trace', description: 'Outdoor ethics on every climb.' },
       ],
     },
     {
@@ -61,8 +78,8 @@ export const bmcPage: ProgramPageData = {
       items: [
         { title: 'Enroll', description: 'Submit your application and attend the BMC orientation.' },
         { title: 'Lectures', description: 'Attend the lecture modules with MMS instructors.' },
-        { title: 'Field sessions', description: 'Practice skills outdoors: packing, camp setup, navigation.' },
-        { title: 'Graduation climb', description: 'Put it all together on the trail and get inducted.' },
+        { title: 'Field climbs', description: 'Two minor climbs (one with a night trek) and two major climbs.' },
+        { title: 'Graduation & oath', description: 'Graduate in June, then take your oath at the MMS Christmas party.' },
       ],
     },
   ],
@@ -70,6 +87,31 @@ export const bmcPage: ProgramPageData = {
     title: 'Requirements',
     items: ['At least 18 years old (or with guardian consent)', 'Completed application form', 'Medical certificate', 'Signed waiver', 'Course fee (announced per batch)'],
   },
+  // BMC season calendar from the 2024 training season (metropolitanms.org).
+  blocks: [
+    {
+      type: 'table', eyebrow: 'Season calendar', title: 'A BMC season, week by week.',
+      intro: 'The 2024 season, as a guide to how each batch runs. Dates change every year.',
+      columns: ['Date', 'Activity'],
+      rows: [
+        ['Jan 20', 'Orientation'],
+        ['Jan 27–28', 'Basic Mountaineering Course for Members (BMCM)'],
+        ['Feb 3–4', 'First Aid & Basic Life Support · Indoor wall climb · Outdoor rappelling (batch 1) · MMS Kiddie Camp'],
+        ['Feb 17–18', 'Map reading, orienteering & team building'],
+        ['Mar 2–3', 'First minor climb & cookfest'],
+        ['Mar 16', 'MMS anniversary celebration'],
+        ['Mar 30–31', 'Second minor climb with night trek'],
+        ['Apr 13–14', 'First major climb'],
+        ['Apr 27–28', 'Outdoor rappelling (batch 2) · Rock climb'],
+        ['May 11–12', 'Second major climb'],
+        ['May 25–26', 'Sportsfest'],
+        ['Jun 8–9', 'Beachineering'],
+        ['Jun 22–23', 'Graduation'],
+        ['Jul–Dec', 'Open climb season'],
+        ['Dec 7', 'MMS Christmas party & oath taking'],
+      ],
+    },
+  ],
   cta: { title: 'Ready to start?', text: 'BMC batches open each season. Send us a message to reserve a slot in the next batch.', label: 'Ask about the next batch', href: '/#join' },
 };
 

@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import ContentBlocks from '../components/ContentBlocks';
 import PageHero from '../components/PageHero';
 import type { ProgramPageData } from '../data/pages';
 
@@ -55,6 +56,8 @@ export default function ProgramPage({ page, children }: Props) {
             </div>
           </section>
         ))}
+
+        {page.blocks && <ContentBlocks blocks={page.blocks} />}
 
         {page.checklist && (
           <section className="section page-section">

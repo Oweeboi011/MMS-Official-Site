@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { membershipEmail, motto, socials } from '../data/content';
+import { contactName, contactPhone, membershipEmail, motto, socials } from '../data/content';
 import { sectionPath, sitemap, subpagePath } from '../data/sitemap';
 
 export default function Footer() {
@@ -11,6 +11,7 @@ export default function Footer() {
           <p className="motto">{motto}</p>
           <p>A concept prototype for a modern Philippine mountaineering organization.</p>
           <div className="footer-contact">
+            <a href={`tel:${contactPhone.replace(/\s/g, '')}`}>{contactName} · {contactPhone}</a>
             <a href={`mailto:${membershipEmail}`}>{membershipEmail}</a>
             {socials.map((s) => (
               <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer">{s.label}</a>
@@ -28,7 +29,7 @@ export default function Footer() {
             </div>
           ))}
         </div>
-        <div className="footer-note">Prototype content and event details are illustrative. Photos via Wikimedia Commons — <Link to="/credits">photo credits</Link>.</div>
+        <div className="footer-note">Prototype content and event details are illustrative. Photos via Wikimedia Commons, mountain data via Wikipedia — <Link to="/credits">credits</Link>.</div>
       </div>
     </footer>
   );

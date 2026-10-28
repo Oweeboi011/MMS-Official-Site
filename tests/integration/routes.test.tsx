@@ -1,12 +1,9 @@
-import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import App from './App';
-import { announcements, openClimbs, surveys } from './data/content';
-import { photoCredits } from './data/credits';
-import { bmcPage, openClimbsPage, outreachPage, sartPage } from './data/pages';
-import { legacyRedirects, sectionPath, sitemap, subpagePath } from './data/sitemap';
-
-const renderAt = (path: string) => render(<MemoryRouter initialEntries={[path]}><App /></MemoryRouter>);
+import { screen } from '@testing-library/react';
+import { renderAt } from '../helpers';
+import { announcements, openClimbs, surveys } from '../../src/data/content';
+import { photoCredits } from '../../src/data/credits';
+import { bmcPage, openClimbsPage, outreachPage, sartPage } from '../../src/data/pages';
+import { legacyRedirects, sectionPath, sitemap, subpagePath } from '../../src/data/sitemap';
 
 describe('Home page', () => {
   it('renders the hero headline and official logo', () => {
@@ -97,3 +94,4 @@ describe('Site structure', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(expected ?? '');
   });
 });
+

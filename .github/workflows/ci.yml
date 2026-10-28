@@ -1,0 +1,42 @@
+# CI quality gates. NOT ENABLED: manual trigger only while we deploy with `azd up`.
+# To enable, add:  push: { branches: [main] }  and  pull_request: {}  under `on:`.
+name: CI
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - run: npm run check        # secrets, types, lint, layers/cycles, dead code, dupes, tests
+      - run: npm run check:audit  # vulnerable packages
+      - run: npm run build
+      - run: npm run test:perf    # bundle budget
+
+  e2e:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: playwright-report, path: playwright-report, retention-days: 7 }
