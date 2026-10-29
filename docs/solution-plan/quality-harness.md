@@ -40,7 +40,7 @@ Generated data files (`src/data/credits.ts`, `src/data/topMountains.ts`) are exc
 | Component | `tests/component` | vitest + Testing Library | `ContentBlocks` (all block types, table paging) |
 | Integration | `tests/integration` | vitest + Testing Library | every route renders, redirects, nav, page flows |
 | E2E | `tests/e2e` | Playwright (Chromium) | smoke: home, deep link, paging on the real build |
-| Performance | `tests/performance` | node script | gzipped bundle budget: JS ≤ 120 KB, CSS ≤ 20 KB |
+| Performance | `tests/performance` | node script | gzipped bundle JS ≤ 120 KB, CSS ≤ 20 KB; `image-budget.mjs`: `public/images` ≤ 1.2 MB each, ≤ 15 MB total (in `check`) |
 
 Add a test at the lowest level that can catch the bug. E2E stays a short smoke suite.
 

@@ -9,6 +9,7 @@ Checked **2026-10-29** at **₱58 = US$1**. Providers bill in USD, so peso amoun
 | Static hosting + CDN + SSL | **Vercel Hobby** (now) | Info site, non-commercial | ₱0 |
 | Hosting, auth, database, functions, storage | Phase 2+, provider open (see options) | Working site | see below |
 | PayMongo | PayMongo (PH) | Online payments | No monthly fee; per payment |
+| Album storage | MMS Google Drive folder ([media](media.md)) | Full climb albums, linked | ₱0 (15 GB free) |
 | Domain `metropolitanms.org` | Current registrar | Site address | ~US$10–11/yr ≈ **₱55/mo** |
 | Officer email | Google Workspace for Nonprofits | climbs@, treasurer@ | ₱0 if MMS qualifies |
 | GitHub | GitHub | Code + CI | ₱0 |
@@ -36,7 +37,7 @@ Free quotas used in A are well above MMS's expected traffic (< 1,000 users, < 15
 ### Staying inside free quotas
 
 - WebP images (done); cache headers in `vercel.json` (`/assets` 1 yr immutable, `/images` 1 week).
-- No SMS login (billed per text). No self-hosted video (embed YouTube/Facebook).
+- No SMS login (billed per text). Media rules: [media](media.md).
 
 ## Per-payment fees (outside the monthly bill)
 

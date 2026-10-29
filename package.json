@@ -18,7 +18,8 @@
     "check:dead": "knip",
     "check:dupes": "jscpd",
     "check:audit": "npm audit --audit-level=high",
-    "check": "npm run check:secrets && npm run typecheck && npm run lint && npm run check:deps && npm run check:dead && npm run check:dupes && npm test",
+    "check:images": "node tests/performance/image-budget.mjs",
+    "check": "npm run check:secrets && npm run typecheck && npm run lint && npm run check:deps && npm run check:dead && npm run check:dupes && npm run check:images && npm test",
     "prepare": "simple-git-hooks"
   },
   "dependencies": {

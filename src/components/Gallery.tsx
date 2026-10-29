@@ -1,4 +1,4 @@
-import { gallery } from '../data/content';
+import { gallery, photoAlbumsUrl } from '../data/content';
 import { asset } from '../lib/asset';
 
 export default function Gallery() {
@@ -20,6 +20,9 @@ export default function Gallery() {
             />
           ))}
         </div>
+        {photoAlbumsUrl && (
+          <p><a className="btn" href={photoAlbumsUrl} target="_blank" rel="noopener noreferrer" aria-label="View all albums (opens in new tab)">View all albums <span aria-hidden="true">↗</span></a></p>
+        )}
       </div>
     </section>
   );

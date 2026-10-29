@@ -7,10 +7,13 @@ interface BlockHead {
   intro?: string;
 }
 
+// href: external link (e.g. a Google Drive / Photos album), opened in a new tab.
+interface CardItem { title: string; description: string; tag?: string; meta?: string; href?: string; linkLabel?: string }
+
 export type ContentBlock = BlockHead & (
   | { type: 'text'; paragraphs: string[] }
   | { type: 'stats'; items: Stat[] }
-  | { type: 'cards'; items: { title: string; description: string; tag?: string; meta?: string }[] }
+  | { type: 'cards'; items: CardItem[] }
   | { type: 'steps'; items: { title: string; description: string }[] }
   | { type: 'table'; columns: string[]; rows: string[][]; pageSize?: number }
   | { type: 'timeline'; items: { year: string; title: string; description: string }[] }
@@ -506,7 +509,9 @@ export const subpageContent: Record<string, ContentBlock[]> = {
   ],
   '/media/photos': [
     {
+      // Sample albums. Media Committee: add `href` = MMS-owned Drive/Photos folder link (see docs/solution-plan/media.md).
       type: 'cards', eyebrow: 'Albums', title: 'Recent albums.',
+      intro: 'Full albums will be linked here once the MMS photo Drive is set up.',
       items: [
         { tag: '86 photos', title: 'Mt. Apo special climb', meta: 'Sep 2026', description: 'Lake Venado, the boulder face, and sunrise on the summit.' },
         { tag: '120 photos', title: 'BMC Batch 31 graduation', meta: 'Jul 2026', description: 'Tarak Ridge in the rain, and the induction that followed.' },

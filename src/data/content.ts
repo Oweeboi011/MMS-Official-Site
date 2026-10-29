@@ -79,6 +79,9 @@ export const faqs: Faq[] = [
 ];
 
 // Philippine mountain photos from Wikimedia Commons (see /credits) — swap in MMS climb photos later.
+// MMS-owned Drive/Photos folder with every album. Empty = button hidden. See docs/solution-plan/media.md.
+export const photoAlbumsUrl = '';
+
 export const gallery: Photo[] = [
   { src: '/images/gallery-pulag-sunrise.webp', alt: 'Hikers watching the sunrise from the summit of Mt. Pulag, Benguet' },
   { src: '/images/gallery-lake-venado.webp', alt: 'Lake Venado on the slopes of Mt. Apo' },

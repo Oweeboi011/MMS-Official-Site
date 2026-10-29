@@ -369,6 +369,7 @@ a.program-card:hover { transform: translateY(-3px); }
 .prose { max-width: 760px; font-size: 1.06rem; }
 .prose p { margin: 0 0 16px; }
 .card-meta { color: var(--navy); font-size: .8rem; font-weight: 800; }
+.card-link { color: var(--green); font-weight: 800; margin-top: auto; }
 .people .officer small { display: block; margin-top: 4px; color: var(--muted); font-size: .8rem; }
 .table-wrap { overflow-x: auto; border-radius: 22px; border: 1px solid var(--line); background: #fff; }
 .data-table { width: 100%; border-collapse: collapse; font-size: .9rem; }

@@ -77,6 +77,11 @@ function Block({ block }: { block: ContentBlock }) {
               <h3>{item.title}</h3>
               {item.meta && <span className="card-meta">{item.meta}</span>}
               <p>{item.description}</p>
+              {item.href && (
+                <a className="card-link" href={item.href} target="_blank" rel="noopener noreferrer" aria-label={`${item.linkLabel ?? 'Open'}: ${item.title} (opens in new tab)`}>
+                  {item.linkLabel ?? 'Open'} <span aria-hidden="true">↗</span>
+                </a>
+              )}
             </article>
           ))}
         </div>

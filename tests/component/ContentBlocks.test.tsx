@@ -21,6 +21,18 @@ describe('ContentBlocks', () => {
     blocks.forEach((b) => expect(screen.getByRole('heading', { name: b.title })).toBeInTheDocument());
   });
 
+  it('renders a card link only when href is set, opening in a new tab', () => {
+    render(<ContentBlocks blocks={[{ type: 'cards', items: [
+      { title: 'Album', description: 'D', href: 'https://drive.google.com/drive/folders/x', linkLabel: 'View album' },
+      { title: 'No link', description: 'D' },
+    ] }]} />);
+    const link = screen.getByRole('link', { name: /view album/i });
+    expect(link).toHaveAttribute('href', 'https://drive.google.com/drive/folders/x');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(screen.getAllByRole('link')).toHaveLength(1);
+  });
+
   it('shows all rows and no pager without pageSize', () => {
     render(<ContentBlocks blocks={[{ type: 'table', columns: ['Name', 'Elevation'], rows }]} />);
     expect(screen.getAllByRole('row')).toHaveLength(rows.length + 1);
