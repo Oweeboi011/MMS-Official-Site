@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { asset } from '../lib/asset';
 import { photoCredits } from '../data/credits';
 
@@ -27,6 +28,18 @@ export default function CreditsPage() {
                 </li>
               ))}
             </ul>
+          </div>
+        </section>
+        <section className="section">
+          <div className="shell">
+            <div className="section-head">
+              <div><div className="eyebrow" style={{ color: 'var(--red)' }}>Credits</div><h2>Data credits.</h2></div>
+              <p>
+                Mountain names, elevations, and provinces on the <Link to="/explore/mountains">Mountains</Link> page are adapted from{' '}
+                “<a href="https://en.wikipedia.org/wiki/List_of_mountains_in_the_Philippines" target="_blank" rel="noopener noreferrer">List of mountains in the Philippines</a>” by Wikipedia contributors,{' '}
+                <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Trail classes and climb types are estimates pending Climbs Committee review.
+              </p>
+            </div>
           </div>
         </section>
       </main>

@@ -56,10 +56,10 @@ export const socials: NavLink[] = [
 ];
 
 export const officers: Officer[] = [
-  { role: 'President', name: 'Ramon “Mon” Villareal' },
-  { role: 'Vice President', name: 'Katrina Dela Paz' },
-  { role: 'Training Director', name: 'Edgar Lualhati' },
-  { role: 'SART Commander', name: 'Benjie Ocampo' },
+  { role: 'President', name: 'Admer Dablio' },
+  { role: 'Vice President', name: 'Kenneth Esguerra' },
+  { role: 'Secretary', name: 'Daniella Ruanes' },
+  { role: 'Treasurer', name: 'Elizabeth Villacino' },
 ];
 
 export const joinSteps: JourneyStep[] = [
@@ -79,6 +79,9 @@ export const faqs: Faq[] = [
 ];
 
 // Philippine mountain photos from Wikimedia Commons (see /credits) — swap in MMS climb photos later.
+// MMS-owned Drive/Photos folder with every album. Empty = button hidden. See docs/solution-plan/media.md.
+export const photoAlbumsUrl = '';
+
 export const gallery: Photo[] = [
   { src: '/images/gallery-pulag-sunrise.webp', alt: 'Hikers watching the sunrise from the summit of Mt. Pulag, Benguet' },
   { src: '/images/gallery-lake-venado.webp', alt: 'Lake Venado on the slopes of Mt. Apo' },
@@ -158,6 +161,8 @@ export const passportStats: Stat[] = [
 ];
 
 export const membershipEmail = 'membership@example.com';
+export const contactName = 'Admer Dablio';
+export const contactPhone = '+63 945 683 1874';
 
 export interface Announcement {
   date: string;

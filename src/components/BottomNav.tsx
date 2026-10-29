@@ -5,10 +5,14 @@ import { sectionPath, sitemap, subpagePath } from '../data/sitemap';
 export default function BottomNav() {
   const [open, setOpen] = useState(false);
   const { pathname, hash } = useLocation();
+  const [route, setRoute] = useState(pathname + hash);
   const current = (match: boolean) => (match && !open ? 'page' : undefined);
 
-  // Close the menu after navigating, and on Escape.
-  useEffect(() => setOpen(false), [pathname, hash]);
+  // Close the menu after navigating (adjusted during render, not in an effect), and on Escape.
+  if (route !== pathname + hash) {
+    setRoute(pathname + hash);
+    setOpen(false);
+  }
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);

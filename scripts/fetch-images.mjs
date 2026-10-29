@@ -34,7 +34,9 @@ const images = [
   { slug: 'gallery-halcon', width: 1000, file: 'File:Morning View of Halcon.jpg', place: 'Mt. Halcon, Oriental Mindoro' },
 ];
 
-const strip = (html = '') => html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+// Drops HTML tags without a backtracking regex.
+const strip = (html = '') =>
+  html.split('<').map((part, i) => (i === 0 ? part : part.slice(part.indexOf('>') + 1))).join('').split(/\s+/).filter(Boolean).join(' ');
 
 const api = 'https://commons.wikimedia.org/w/api.php?' + new URLSearchParams({
   action: 'query', format: 'json', titles: images.map((i) => i.file).join('|'),
