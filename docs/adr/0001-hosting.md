@@ -13,7 +13,7 @@
 
 ## Decision
 
-1. **Now:** info site on **Vercel Hobby**, deployed by CLI (`vercel.json`). ₱0 hosting.
+1. **Now (temporary):** GitHub Pages from `main` (`pages.yml`). **Next:** **Vercel Hobby** by CLI (`vercel.json`). ₱0 hosting either way.
 2. **Before phase 2 (backend)**, pick the full-stack host; must allow payments for phase 3 ([options](../solution-plan/hosting-and-billing.md#options-for-phase-2-needs-payments)):
    - If only the Firebase console/CLI is blocked on laptops → **Firebase**, deployed from CI. Fits budget.
    - Otherwise → **Vercel Pro + Supabase** (≈ ₱1,215+, over budget). No in-budget fallback yet; revisit before phase 2.

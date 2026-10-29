@@ -1,6 +1,13 @@
 # Deploy
 
-## Now: Vercel Hobby (CLI)
+## Now: GitHub Pages (temporary)
+
+- Push/merge to `main` → `.github/workflows/pages.yml` builds (`npm test`, `BASE_PATH=/<repo>/`) and deploys. Only `main` may deploy (environment rule).
+- URL: `https://oweeboi011.github.io/MMS-Official-Site/`. Deep links via `404.html` copy.
+- `vercel.json` headers/cache don't apply on Pages.
+- Run `npm run check` before merging; the workflow doesn't.
+
+## Next: Vercel Hobby (CLI)
 
 ```sh
 npx vercel login

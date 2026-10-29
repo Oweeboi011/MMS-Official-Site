@@ -38,5 +38,5 @@ MMS official site. React 19 + Vite SPA, content in `src/data/*.ts`. Start here: 
 
 ## Deploy
 
-- Now: Vercel Hobby via CLI (`npx vercel --prod`). Non-commercial ([ADR 0001](docs/adr/0001-hosting.md#consequences)). No Azure. CI `.github/workflows/ci.yml` manual-only, not enabled.
-- Legacy (pending removal): `pages.yml` (still auto-deploys!).
+- Now (temporary): GitHub Pages, auto on push to `main` (`pages.yml`). Next: Vercel Hobby via CLI (`npx vercel --prod`). Non-commercial ([ADR 0001](docs/adr/0001-hosting.md#consequences)). No Azure. CI `.github/workflows/ci.yml` manual-only, not enabled.
+- `pages.yml` removed once Vercel prod is live.
