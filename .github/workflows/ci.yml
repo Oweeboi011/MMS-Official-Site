@@ -1,4 +1,4 @@
-# CI quality gates. NOT ENABLED: manual trigger only while we deploy with `azd up`.
+# CI quality gates. NOT ENABLED: manual trigger only while we deploy with the Vercel CLI.
 # To enable, add:  push: { branches: [main] }  and  pull_request: {}  under `on:`.
 name: CI
 

@@ -1,23 +1,26 @@
 # ADR 0001 — Hosting
 
-- **Status:** Accepted for now (azd → Azure SWA Free). Phase 2+ host **open**.
+- **Status:** Accepted for now (Vercel Hobby). Phase 2+ host **open**.
 - **Date:** 2026-10-29
+- **Supersedes:** earlier draft (azd → Azure SWA Free). Azure dropped by decision of the project owner.
 
 ## Context
 
-- Budget ₱500/month. Phase 3 needs online payments.
-- Free tiers (Vercel Hobby, Azure SWA Free) are for personal / non-commercial use. Vercel's terms explicitly count "requesting or processing payment" as commercial.
+- Budget ₱500/month. Phase 2 needs DB + auth + functions; phase 3 needs online payments.
+- Vercel Hobby is free but non-commercial; Vercel's terms count "requesting or processing payment" as commercial.
 - Firebase was the cheapest full stack (≈ ₱55–₱125/month), but **Firebase is blocked on company laptops**.
-- "Vercel under Google Cloud" isn't a thing. They're separate providers.
+- Azure: ruled out by owner (was ≈ ₱580/month, just over budget).
 
 ## Decision
 
-1. **Now:** deploy the info site with **azd to Azure Static Web Apps Free** (`azure.yaml`, `infra/`). ₱0 hosting.
-2. **Before phase 2**, pick the full stack ([options](../solution-plan/hosting-and-billing.md#options-for-phase-2-needs-payments)):
-   - If the block is only the console/CLI on dev laptops → **Firebase** (deploy from CI, not laptops). Fits budget.
-   - If visitors on company networks are blocked too → **Azure** (SWA Standard ≈ ₱522 + free-tier DB/functions). Slightly over; needs ~₱80 more, or keep SWA Free for static pages plus Azure Functions for the API.
+1. **Now:** info site on **Vercel Hobby**, deployed by CLI (`vercel.json`). ₱0 hosting.
+2. **Before phase 2 (backend)**, pick the full-stack host; must allow payments for phase 3 ([options](../solution-plan/hosting-and-billing.md#options-for-phase-2-needs-payments)):
+   - If only the Firebase console/CLI is blocked on laptops → **Firebase**, deployed from CI. Fits budget.
+   - Otherwise → **Vercel Pro + Supabase** (≈ ₱1,215+, over budget). No in-budget fallback yet; revisit before phase 2.
 
 ## Consequences
 
-- Vercel and GitHub Pages configs become legacy; delete them once azd is live ([deploy](../guides/deploy.md#legacy-targets-to-delete-once-azd-is-live)).
-- The app stays host-agnostic (static build in `dist/`), so switching later is a config change.
+- **Non-commercial rule (Hobby):** no payments, sponsors, or paid ads on the site while on Hobby. Single source; other docs link here.
+
+- GitHub Pages becomes legacy; delete `pages.yml` + `BASE_PATH` handling once Vercel prod is live ([deploy](../guides/deploy.md#legacy-to-delete-once-vercel-prod-is-live)).
+- App stays host-agnostic (static `dist/`), so switching is a config change.

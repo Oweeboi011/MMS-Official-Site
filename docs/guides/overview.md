@@ -23,7 +23,7 @@ tests/
   e2e/                            playwright, against the production build
   performance/                    bundle size budget
 scripts/        one-off build tools (image fetch)
-infra/          azd / Bicep for the temporary Azure deploy
+vercel.json     Vercel config: SPA rewrite, headers, cache
 docs/           you are here
 ```
 

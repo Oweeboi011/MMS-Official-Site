@@ -29,7 +29,7 @@ flowchart LR
   F -->|confirmations, reminders| E[Email]
 ```
 
-Rule: the browser only talks to **our domain** and Google/Azure API endpoints. Payment keys live only in server functions.
+Rule: the browser only talks to **our domain** and the phase 2 backend API endpoints. Payment keys live only in server functions.
 
 ## Data model
 

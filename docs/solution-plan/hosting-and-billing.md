@@ -6,7 +6,7 @@ Checked **2026-10-29** at **₱58 = US$1**. Providers bill in USD, so peso amoun
 
 | Service | Provider | For | Cost |
 |---------|----------|-----|------|
-| Static hosting + CDN + SSL | **Azure Static Web Apps Free** (now) | Info site | ₱0 |
+| Static hosting + CDN + SSL | **Vercel Hobby** (now) | Info site, non-commercial | ₱0 |
 | Hosting, auth, database, functions, storage | Phase 2+, provider open (see options) | Working site | see below |
 | PayMongo | PayMongo (PH) | Online payments | No monthly fee; per payment |
 | Domain `metropolitanms.org` | Current registrar | Site address | ~US$10–11/yr ≈ **₱55/mo** |
@@ -17,25 +17,25 @@ Checked **2026-10-29** at **₱58 = US$1**. Providers bill in USD, so peso amoun
 
 | Phase | Items | ₱/month |
 |-------|-------|---------|
-| Now (info site) | SWA Free + domain | **≈ ₱55** |
-| Phase 2+ on option A or B | Free quotas + domain + small overage buffer | **≈ ₱55–₱125** |
+| Now (info site) | Vercel Hobby + domain | **≈ ₱55** |
+| Phase 2+ on option A | Free quotas + domain + small overage buffer | **≈ ₱55–₱125** |
 | Cap | Budget alert | **₱500** |
 
 ## Options for phase 2+ (needs payments)
 
-| | A. Firebase (Google Cloud) | B. Azure SWA Standard + Functions + Cosmos DB free tier | C. Vercel Pro + Supabase | D. Free static only (SWA Free / Vercel Hobby) |
-|---|---|---|---|---|
-| Payments allowed? | ✅ | ✅ | ✅ | ❌ Free/Hobby plans are for personal/non-commercial use |
-| Hosting | Free quota (10 GB, 360 MB/day) | **~US$9/mo ≈ ₱522** (third-party figure; confirm in Azure calculator) | US$20 ≈ ₱1,160 | ₱0 |
-| DB + auth + functions | Free quotas (Firestore 50K reads/day, Auth 50K MAU, Functions 2M/mo) | Cosmos free tier + Functions free grant (verify) | Supabase Free (pauses after 1 week idle) or Pro US$25 | — |
-| **Total incl. domain** | **≈ ₱55–₱125** ✅ | **≈ ₱580** ❌ (just over) | **≈ ₱1,215–₱2,665** ❌ | ≈ ₱55, no payments |
-| Catch | **Firebase is blocked on company laptops** ([ADR 0001](../adr/0001-hosting.md)) | Over budget by ~₱80 | Over budget | Doesn't solve payment chasing |
+| | A. Firebase (Google Cloud) | B. Vercel Pro + Supabase | C. Free static only (Vercel Hobby, now) |
+|---|---|---|---|
+| Payments allowed? | ✅ | ✅ | ❌ Free/Hobby plans are for personal/non-commercial use |
+| Hosting | Free quota (10 GB, 360 MB/day) | US$20 ≈ ₱1,160 | ₱0 |
+| DB + auth + functions | Free quotas (Firestore 50K reads/day, Auth 50K MAU, Functions 2M/mo) | Supabase Free (pauses after 1 week idle) or Pro US$25 | — |
+| **Total incl. domain** | **≈ ₱55–₱125** ✅ | **≈ ₱1,215–₱2,665** ❌ | ≈ ₱55, no payments |
+| Catch | **Firebase is blocked on company laptops** ([ADR 0001](../adr/0001-hosting.md)) | Over budget | Doesn't solve payment chasing |
 
 Free quotas used in A are well above MMS's expected traffic (< 1,000 users, < 15 GB/month transfer).
 
 ### Staying inside free quotas
 
-- WebP images (done); long cache headers on `/assets` and `/images`.
+- WebP images (done); cache headers in `vercel.json` (`/assets` 1 yr immutable, `/images` 1 week).
 - No SMS login (billed per text). No self-hosted video (embed YouTube/Facebook).
 
 ## Per-payment fees (outside the monthly bill)
@@ -58,4 +58,4 @@ PayMongo rates + 12% VAT on the fee. Build into the climb fee as a convenience f
 
 ## Sources
 
-[Vercel pricing](https://vercel.com/pricing) · [Vercel fair use](https://vercel.com/docs/limits/fair-use-guidelines) · [Firebase pricing](https://firebase.google.com/pricing) · [Supabase pricing](https://supabase.com/pricing) · [Azure SWA plans](https://learn.microsoft.com/en-us/azure/static-web-apps/plans) · [SWA Standard price (TrustRadius)](https://www.trustradius.com/products/azure-static-web-apps/pricing) · [PayMongo pricing](https://www.paymongo.com/pricing) · [Workspace for Nonprofits](https://support.google.com/nonprofits/answer/2858465) · [.org renewal (aggregator)](https://domainoffer.net/tld/org/cloudflare)
+[Vercel pricing](https://vercel.com/pricing) · [Vercel fair use](https://vercel.com/docs/limits/fair-use-guidelines) · [Firebase pricing](https://firebase.google.com/pricing) · [Supabase pricing](https://supabase.com/pricing) · [PayMongo pricing](https://www.paymongo.com/pricing) · [Workspace for Nonprofits](https://support.google.com/nonprofits/answer/2858465) · [.org renewal (aggregator)](https://domainoffer.net/tld/org/cloudflare)

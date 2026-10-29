@@ -38,5 +38,5 @@ MMS official site. React 19 + Vite SPA, content in `src/data/*.ts`. Start here: 
 
 ## Deploy
 
-- Now: `azd up` / `azd deploy` (Azure SWA Free). CI `.github/workflows/ci.yml` manual-only, not enabled.
-- Legacy (pending removal): `pages.yml` (still auto-deploys!), `vercel.json`, `@vercel/analytics`.
+- Now: Vercel Hobby via CLI (`npx vercel --prod`). Non-commercial ([ADR 0001](docs/adr/0001-hosting.md#consequences)). No Azure. CI `.github/workflows/ci.yml` manual-only, not enabled.
+- Legacy (pending removal): `pages.yml` (still auto-deploys!).
