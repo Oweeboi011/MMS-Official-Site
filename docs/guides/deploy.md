@@ -19,12 +19,13 @@ npx vercel --prod      # production
 - Config: `vercel.json` (SPA rewrite, security headers, `/assets` cache).
 - Run `npm run check` before `--prod`. CI (`.github/workflows/ci.yml`) is **manual-only** until enabled.
 - Push-to-deploy off: `"git": { "deploymentEnabled": false }` in `vercel.json`, so `vercel link` connecting the repo won't auto-deploy.
-- Custom domain: Vercel → Project → Settings → Domains → add `metropolitanms.org` → set DNS at the registrar.
+- Custom domain `metropolitanms.org` (registrar: **Namecheap**): Vercel → Project → Settings → Domains → add apex + `www` → copy the A / CNAME records Vercel shows → Namecheap → Domain List → Manage → Advanced DNS (delete parking records first). SSL is automatic.
+- Namecheap: auto-renew on, WHOIS privacy on, account owned by MMS ([architecture](../solution-plan/architecture.md)).
 - Hobby is non-commercial — see [ADR 0001](../adr/0001-hosting.md#consequences).
 
 ## Budget
 
-Hobby has no billing, so no overage. Phase 2+ host, day one: budget **US$8.50/month** (≈ ₱500), alerts at 50/80/100%.
+**Hard cap ₱54–₱100/month** ([ADR 0001](../adr/0001-hosting.md)). Hobby and Cloudflare free have no billing, so no overage. Any billed account, day one: budget **US$1.70/month** (≈ ₱100), alerts at 50/80/100%.
 
 - **Google Cloud / Firebase:** Billing → Budgets & alerts.
 - **Vercel Pro:** Settings → Billing → Spend Management.

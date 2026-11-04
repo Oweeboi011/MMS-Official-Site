@@ -2,7 +2,7 @@
 
 ## Goal
 
-Replace metropolitanms.org (Google Sites) with a site MMS runs itself, for **₱500/month or less**:
+Replace metropolitanms.org (Google Sites) with a site MMS runs itself, for **₱54–₱100/month, hard cap** ([ADR 0001](../adr/0001-hosting.md)):
 
 - Public info pages (done in the prototype).
 - Open climb registration + online payment + payment tracking, so officers stop chasing balances and advancing their own money.

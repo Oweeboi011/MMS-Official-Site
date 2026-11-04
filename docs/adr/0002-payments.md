@@ -15,6 +15,6 @@ Officers chase balances and advance their own money for transport and LGU fees. 
 
 ## Consequences
 
-- No monthly fee, so this doesn't touch the ₱500 budget.
+- No monthly fee, so this doesn't touch the ₱54–₱100 monthly cap ([ADR 0001](0001-hosting.md)).
 - Needs PayMongo KYC with SEC documents and an MMS bank account.
 - Needs a server function (webhook), which drives the phase 2 host choice ([ADR 0001](0001-hosting.md)).

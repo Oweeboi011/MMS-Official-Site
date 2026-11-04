@@ -5,7 +5,7 @@
 
 ## Context
 
-MMS has hundreds of climb photos and some videos. Budget ₱500/month; Vercel Hobby has a bandwidth cap. Drive "share publicly" is free and familiar to officers, but Drive isn't built for hotlinking: direct image links have been unreliable since 2024, there's no resizing or caching, and videos only play in Drive's own player.
+MMS has hundreds of climb photos and some videos. Cap ₱54–₱100/month ([ADR 0001](0001-hosting.md)); Vercel Hobby has a bandwidth cap. Drive "share publicly" is free and familiar to officers, but Drive isn't built for hotlinking: direct image links have been unreliable since 2024, there's no resizing or caching, and videos only play in Drive's own player.
 
 ## Decision
 
