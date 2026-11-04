@@ -9,7 +9,10 @@
 
 ## Next: Cloudflare Pages (free, Wrangler CLI)
 
-Before first deploy: open `dash.cloudflare.com` on a company laptop; blocked → stop, see [ADR 0001](../adr/0001-hosting.md). Account on an **MMS email**, 2-step verification, ≥2 officer admins.
+Before first deploy: open `dash.cloudflare.com` on a company laptop; blocked → stop, see [ADR 0001](../adr/0001-hosting.md). Account owner: **MMS shared Gmail** (officers know the address; owns Namecheap now, Cloudflare Registrar after transfer). 2-step verification on Gmail + Cloudflare; recovery known to ≥2 officers.
+
+- **2 owners:** MMS account + Owee Penaranda as **Super Administrator** (Manage Account → Members, own login). Other officers: Administrator. Never share the password.
+- Wrangler logged in as a member sees several accounts → set `CLOUDFLARE_ACCOUNT_ID` to the MMS account ID before deploying.
 
 ```sh
 npx wrangler login        # once; wrangler is a pinned devDependency
@@ -17,7 +20,8 @@ npm run deploy:preview    # check → build → preview URL
 npm run deploy:prod       # check → build → production
 ```
 
-- First run creates the project; production branch = `main`. URL: `https://mms-official-site.pages.dev`.
+- Create the project once per account: `npx wrangler pages project create mms-official-site --production-branch main --force`. `--force` keeps it on classic Pages; without it wrangler delegates to Workers, rewrites `vite.config.ts`/`package.json`, adds `wrangler.jsonc`, and (4.151–4.157) crashes. Never pass `--force` again after. URL: `https://mms-official-site.pages.dev`.
+- New `*.pages.dev` hostnames take a few minutes to get TLS; handshake errors right after first deploy are normal.
 - `scripts/deploy.mjs` clears `BASE_PATH` (base `/`). No top-level `404.html` → Pages serves `index.html` for deep links (SPA). `public/{assets,images}/404.html` make missing files there a real 404, not cached HTML.
 - Headers/cache: `public/_headers` (security headers, `/assets` 1 yr immutable, `/images` 1 week).
 - No Git integration: CLI deploys only. CI (`.github/workflows/ci.yml`) is **manual-only** until enabled.
