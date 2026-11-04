@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { Analytics } from '@vercel/analytics/react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Footer from './components/Footer';
 import BottomNav from './components/BottomNav';
@@ -76,8 +75,6 @@ export default function App() {
       </Routes>
       <Footer />
       <BottomNav />
-      {/* Vercel Analytics only works on Vercel deployments (served from the root). */}
-      {import.meta.env.BASE_URL === '/' && <Analytics />}
     </>
   );
 }

@@ -23,7 +23,7 @@ tests/
   e2e/                            playwright, against the production build
   performance/                    bundle size budget
 scripts/        one-off build tools (image fetch)
-vercel.json     Vercel config: SPA rewrite, headers, cache
+public/_headers Cloudflare Pages headers + cache
 docs/           you are here
 ```
 

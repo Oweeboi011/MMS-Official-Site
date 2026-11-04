@@ -11,6 +11,7 @@
   ],
   "ignoreDependencies": [
     "@secretlint/secretlint-rule-preset-recommend",
-    "kill-port"
+    "kill-port",
+    "wrangler"
   ]
 }

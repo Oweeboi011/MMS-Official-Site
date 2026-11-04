@@ -4,7 +4,7 @@ Why: [ADR 0004](../adr/0004-media.md).
 
 | Media | Where | Shown on site as |
 |-------|-------|------------------|
-| Site photos (hero, cards, ~10 gallery shots) | `public/images/`, WebP, ≤ 1.2 MB each, ≤ 15 MB total (`npm run check:images`, part of `check`) | `<img>`, served by Vercel |
+| Site photos (hero, cards, ~10 gallery shots) | `public/images/`, WebP, ≤ 1.2 MB each, ≤ 15 MB total (`npm run check:images`, part of `check`) | `<img>`, served by the static host |
 | Videos | YouTube (public/unlisted) or MMS Facebook page | Embedded player |
 | Full climb albums | **MMS-owned** Google Drive folder (one subfolder per climb) | Link only: `href` on album cards (`src/data/subpages.ts` `/media/photos`) + `photoAlbumsUrl` (`src/data/content.ts`) |
 

@@ -20,10 +20,11 @@
     "check:audit": "npm audit --audit-level=high",
     "check:images": "node tests/performance/image-budget.mjs",
     "check": "npm run check:secrets && npm run typecheck && npm run lint && npm run check:deps && npm run check:dead && npm run check:dupes && npm run check:images && npm test",
+    "deploy:preview": "node scripts/deploy.mjs preview",
+    "deploy:prod": "node scripts/deploy.mjs main",
     "prepare": "simple-git-hooks"
   },
   "dependencies": {
-    "@vercel/analytics": "^2.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.18.4"
@@ -55,7 +56,8 @@
     "typescript": "^5.6.0",
     "typescript-eslint": "^8.72.1",
     "vite": "^7.0.0",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.3",
+    "wrangler": "4.151.1"
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"

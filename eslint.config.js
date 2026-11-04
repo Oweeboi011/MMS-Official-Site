@@ -6,7 +6,7 @@ import sonarjs from 'eslint-plugin-sonarjs';
 import globals from 'globals';
 
 export default tseslint.config(
-  { ignores: ['dist', 'coverage', 'playwright-report', 'test-results', 'src/data/credits.ts', 'src/data/topMountains.ts'] },
+  { ignores: ['dist', 'coverage', 'playwright-report', 'test-results', '.wrangler','src/data/credits.ts', 'src/data/topMountains.ts'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   sonarjs.configs.recommended,

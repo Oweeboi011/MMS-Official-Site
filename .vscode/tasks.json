@@ -66,9 +66,9 @@
       "problemMatcher": []
     },
     {
-      "label": "vercel: deploy preview",
+      "label": "cloudflare: deploy preview",
       "type": "shell",
-      "command": "npx vercel",
+      "command": "npm run deploy:preview",
       "problemMatcher": []
     },
     {
