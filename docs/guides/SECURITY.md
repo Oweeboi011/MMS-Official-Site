@@ -1,0 +1,28 @@
+# Security
+
+## Secrets
+
+- Never in code, docs, chat, or commits. Server keys → Firebase Secret Manager; Quality Gates → GitHub repo secrets.
+- gitleaks blocks them: pre-commit (staged), `npm run check` (tree), Quality Gates. Config `.config/gitleaks.toml`.
+- Old Firebase project's password hash parameters: private, used once for `importUsers`, never stored in repo.
+- Leaked → rotate first, then purge history.
+
+## Code
+
+- Banned (eslint): `eval`, `new Function`, `innerHTML`, `dangerouslySetInnerHTML`. React escapes text by default.
+- `npm audit` high+ blocks Quality Gates (site + backend). Moderate: [open items](../solution-plan/SOLUTION-PLAN.md#open-items).
+- Headers (`public/_headers`): `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`.
+- Access control in Firestore/Storage rules + functions, never only UI ([roles](ARCHITECTURE.md#roles-planned)).
+
+## Accounts
+
+- Every account MMS-owned: **MMS Gmail = primary owner**, Owee = second owner/admin. 2-step verification; recovery known to ≥ 2 officers; hand over at turnover.
+- Least privilege: officers = Administrator, not owner. Never share passwords.
+
+## Privacy (RA 10173)
+
+- Consent + privacy notice at registration (what, why, who sees, how long).
+- Collect minimum. Auto-delete medical certs + receipts **90 days after the climb**; keep payment records.
+- Private bucket; short-lived signed URLs.
+- DPO assigned; NPC registration checked; breach → notify NPC + people within 72 h.
+- Albums: "anyone with link" = public → photo consent + takedown window (needs officer approval).

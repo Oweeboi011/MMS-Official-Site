@@ -1,24 +1,27 @@
 import { screen } from '@testing-library/react';
 import { renderAt } from '../helpers';
-import { announcements, openClimbs, surveys } from '../../src/data/content';
-import { photoCredits } from '../../src/data/credits';
-import { bmcPage, openClimbsPage, outreachPage, sartPage } from '../../src/data/pages';
-import { legacyRedirects, sectionPath, sitemap, subpagePath } from '../../src/data/sitemap';
+import { announcements, openClimbs, surveys } from '../../src/frontend/data/content';
+import { photoCredits } from '../../src/frontend/data/credits';
+import { bmcPage, openClimbsPage, outreachPage, sartPage } from '../../src/frontend/data/pages';
+import { legacyRedirects, sectionPath, sitemap, subpagePath } from '../../src/frontend/data/sitemap';
 
 describe('Home page', () => {
   it('renders the hero headline and official logo', () => {
     const { container } = renderAt('/');
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Go beyondthe trail.');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Looking fora new hobby?');
     expect(container.querySelector('.brand-mark img')).toHaveAttribute('src', '/mms-logo.png');
   });
 
-  it('has a section for each top-nav item, with a card linking to every subpage', () => {
+  it('summarizes each section: first 3 cards + link to the full section page', () => {
     const { container } = renderAt('/');
     for (const section of sitemap) {
       const el = container.querySelector(`#${section.slug}`);
       expect(el).toBeInTheDocument();
       const hrefs = [...el!.querySelectorAll('.section-grid a')].map((a) => a.getAttribute('href'));
-      expect(hrefs).toEqual(section.pages.map((p) => subpagePath(section, p)));
+      expect(hrefs).toEqual(section.pages.slice(0, 3).map((p) => subpagePath(section, p)));
+      const seeAll = el!.querySelector('.see-all');
+      if (section.pages.length > 3) expect(seeAll).toHaveAttribute('href', sectionPath(section));
+      else expect(seeAll).toBeNull();
     }
   });
 
@@ -72,9 +75,18 @@ describe('Site structure', () => {
     expect(container.querySelector('.desktop-links a[aria-current]')).toHaveTextContent('Training');
   });
 
-  it.each(sitemap.map((s) => [`/${s.slug}`, s] as const))('redirects %s to its home page section', (path, section) => {
+  it.each(sitemap.map((s) => [sectionPath(s), s] as const))('section page %s lists every subpage', (path, section) => {
     const { container } = renderAt(path);
-    expect(container.querySelector(`#${section.slug}`)).toBeInTheDocument();
+    const hrefs = [...container.querySelectorAll(`#${section.slug} .section-grid a`)].map((a) => a.getAttribute('href'));
+    expect(hrefs).toEqual(section.pages.map((p) => subpagePath(section, p)));
+  });
+
+  it('explains abbreviations: tooltip in text, full list on the glossary page', () => {
+    const { container } = renderAt('/about/glossary');
+    expect(screen.getByText('Leave No Trace', { exact: false })).toBeInTheDocument();
+    expect(container.querySelectorAll('.program-card').length).toBeGreaterThanOrEqual(5);
+    const home = renderAt('/');
+    expect(home.container.querySelector('abbr[title="Leave No Trace"]')).toBeInTheDocument();
   });
 
   it.each(sitemap.flatMap((s) => s.pages.map((p) => [subpagePath(s, p), s] as const)))('renders subpage %s with breadcrumbs and content', (path, section) => {

@@ -1,4 +1,4 @@
-// Site image budget (no build needed). Over budget → put photos in a Drive album (docs/solution-plan/media.md).
+// Site image budget (no build needed). Over budget → put photos in a Drive album (docs/solution-plan/SOLUTION-PLAN.md#media).
 import { readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "tools/*.mjs",
+    "scripts/*.mjs",
+    "tests/**/*.{ts,tsx,mjs}"
+  ],
+  "project": [
+    "src/frontend/**/*.{ts,tsx}",
+    "tools/**/*.mjs",
+    "scripts/**/*.mjs",
+    "tests/**/*.{ts,tsx,mjs}"
+  ],
+  "ignoreDependencies": [
+    "kill-port",
+    "lint-staged",
+    "wrangler"
+  ],
+  "ignoreBinaries": [
+    "gitleaks"
+  ]
+}

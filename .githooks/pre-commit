@@ -1,0 +1,4 @@
+#!/bin/sh
+# Secrets + eslint on staged files (~2 s). Never bypass with --no-verify.
+node tools/secrets.mjs --staged || exit 1
+npx lint-staged --config .config/lint-staged.json

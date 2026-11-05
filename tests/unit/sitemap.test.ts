@@ -1,5 +1,5 @@
-import { legacyRedirects, sectionPath, sitemap, subpagePath } from '../../src/data/sitemap';
-import { subpageContent } from '../../src/data/subpages';
+import { legacyRedirects, sectionPath, sitemap, subpagePath } from '../../src/frontend/data/sitemap';
+import { subpageContent } from '../../src/frontend/data/subpages';
 
 describe('sitemap', () => {
   it('has unique section and subpage slugs', () => {

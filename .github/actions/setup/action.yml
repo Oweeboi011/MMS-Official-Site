@@ -1,0 +1,22 @@
+name: Setup Toolchain
+description: Node + npm ci + pinned gitleaks (checksum verified)
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with: { node-version: 24, cache: npm }
+    - name: Install Dependencies
+      run: npm ci
+      shell: bash
+    - name: Install gitleaks (pinned, checksum verified)
+      shell: bash
+      env: { V: 8.28.0 }
+      run: |
+        cd "$RUNNER_TEMP"
+        base="https://github.com/gitleaks/gitleaks/releases/download/v$V"
+        curl -sSfLO "$base/gitleaks_${V}_linux_x64.tar.gz"
+        curl -sSfLO "$base/gitleaks_${V}_checksums.txt"
+        sha256sum --ignore-missing -c "gitleaks_${V}_checksums.txt"
+        tar -xzf "gitleaks_${V}_linux_x64.tar.gz" gitleaks
+        echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
