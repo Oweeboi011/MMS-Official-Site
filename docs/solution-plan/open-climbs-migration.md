@@ -2,7 +2,7 @@
 
 Goal: every feature of [mms-open-climbs](https://github.com/Oweeboi011/mms-open-climbs) (`mms-open-climbs.web.app`) runs at `www.metropolitanms.org/open-climbs/*`, on a **new MMS-owned Firebase project**. Same users: nobody re-registers. No shared resources: the old site keeps its own project until the owner retires it (planned 2027).
 
-## Decision ([ADR 0005](../adr/0005-open-climbs-firebase.md), proposed)
+## Decision ([ADR 0005](../adr/0005-open-climbs-firebase.md), accepted)
 
 | Layer | Old: `mms-open-climbs` | New: MMS project (`mms-site-…`, owner = MMS account) |
 |---|---|---|
@@ -35,7 +35,7 @@ Announcements, officers and surveys go to the new Firestore too: one login, one 
 
 | # | Phase | Scope | Done when |
 |---|---|---|---|
-| 0 | Decide | ADR 0005; owner signs off the cost-rule exception (Blaze ≈ ₱0, budget US$1.70 → billing hard stop); laptop check for Firebase console | Owner approves |
+| 0 | Decide | ✅ ADR 0005 + cost-rule exception accepted 2026-11-05. Open: laptop check for Firebase console | Laptop check passes |
 | 1 | New project | Owner creates the project with the MMS account (Blaze, budget alert); Auth email + Google, authorized domain `www.metropolitanms.org`; Firestore + Storage; rules + indexes + functions copied here and deployed (email triggers off) | Rules + functions tests pass here, emulator |
 | 2 | Sync | Sync function; first full copy; verify counts (users, climbs, registrations, files) | Counts match; an existing user signs in on the new project |
 | 3 | Public read | `firebase` SDK in `src/services/`; schedule (season, filters, stats), event page (profile, itinerary, weather, trail maps, photos, officers, announcements, participants) | Matches old site for all climbs |

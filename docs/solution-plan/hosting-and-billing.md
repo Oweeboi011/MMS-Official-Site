@@ -7,7 +7,7 @@ Checked **2026-10-29** at **₱58 = US$1**. Providers bill in USD, so peso amoun
 | Service | Provider | For | Cost |
 |---------|----------|-----|------|
 | Static hosting + CDN + SSL | **Cloudflare Pages** free (live) | Info site | ₱0 |
-| Hosting, auth, database, functions, storage | Phase 2+, provider open (see options) | Working site | see below |
+| Accounts, database, functions, storage | **Firebase Blaze**, new MMS project ([ADR 0005](../adr/0005-open-climbs-firebase.md)) | Open Climbs + live data | ≈ ₱0 (free quota); hard stop at US$1.70/mo disables billing |
 | PayMongo | PayMongo (PH) | Online payments | No monthly fee; per payment |
 | Album storage | MMS Google Drive folder ([media](media.md)) | Full climb albums, linked | ₱0 (15 GB free) |
 | Domain `metropolitanms.org` | **Namecheap** now → Cloudflare Registrar (transfer allowed now; a registrant change locks it 60 days) | Site address | Namecheap renewal US$18.98/yr ≈ **₱92/mo**; Cloudflare US$11.20/yr ≈ **₱54/mo** (list prices 2026-11-05). Expires 2027-01-05; MMS Namecheap account (push 2026-11-05), Cloudflare Registrar later ([deploy](../guides/deploy.md#domain-metropolitanmsorg)). |

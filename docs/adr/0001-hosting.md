@@ -1,6 +1,6 @@
 # ADR 0001 — Hosting
 
-- **Status:** Accepted. Cloudflare Pages (free) live at https://www.metropolitanms.org/ since 2026-11-05. Phase 2+ backend: replacement proposed in [ADR 0005](0005-open-climbs-firebase.md).
+- **Status:** Accepted. Cloudflare Pages (free) live at https://www.metropolitanms.org/ since 2026-11-05. Phase 2+ backend superseded by [ADR 0005](0005-open-climbs-firebase.md) (Firebase).
 - **Date:** 2026-10-29, updated 2026-11-05
 - **Supersedes:** Vercel Hobby plan (dropped 2026-11-04: non-commercial terms forbid payments, so phase 3 would force a move); earlier azd → Azure SWA draft (Azure dropped by owner).
 
@@ -15,7 +15,7 @@
 ## Decision
 
 1. **Cloudflare Pages, free plan**, deployed by Wrangler CLI (`public/_headers`), MMS Cloudflare account. ₱0 hosting. GitHub Pages (temporary host) retired 2026-11-05.
-2. **Phase 2+:** Workers + D1, free plan only. **Proposed replacement:** [ADR 0005](0005-open-climbs-firebase.md) (new MMS Firebase project, Blaze with a billing hard stop); this line changes when 0005 is accepted. Options compared: [hosting and billing](../solution-plan/hosting-and-billing.md#options-for-phase-2-needs-payments).
+2. **Phase 2+:** ~~Workers + D1~~ superseded by [ADR 0005](0005-open-climbs-firebase.md): new MMS Firebase project, Blaze with a billing hard stop. Cloudflare stays host + DNS. Options compared: [hosting and billing](../solution-plan/hosting-and-billing.md#options-for-phase-2-needs-payments).
 3. **Open checks** (owner): Cloudflare not blocked on company laptops; Firebase console reachable from company laptops (ADR 0005).
 
 ## Consequences

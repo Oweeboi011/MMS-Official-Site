@@ -1,6 +1,6 @@
 # ADR 0005 — Open Climbs on a new MMS Firebase project
 
-- **Status:** Proposed. Needs owner sign-off on the cost-rule exception below.
+- **Status:** Accepted (owner, 2026-11-05), including the cost-rule exception below.
 - **Date:** 2026-11-05
 
 ## Context
@@ -17,7 +17,7 @@
 ## Consequences
 
 - Replaces ADR 0001's phase 2 choice (Workers + D1). Cloudflare stays the host for the static site and DNS.
-- **Conflicts with the cost rule** (CLAUDE.md, ADR 0001: no overage-billing services): Blaze bills overage and alerts don't stop spend. Mitigation = hard stop: budget US$1.70/month → Pub/Sub → function that **disables billing** on the project (Google's documented cap pattern); Functions then stop until re-enabled. Accepting this ADR updates CLAUDE.md's cost rule to allow Blaze with that hard stop. Free quotas are well above MMS traffic.
+- **Conflicts with the cost rule** (CLAUDE.md, ADR 0001: no overage-billing services): Blaze bills overage and alerts don't stop spend. Mitigation = hard stop: budget US$1.70/month → Pub/Sub → function that **disables billing** on the project (Google's documented cap pattern); Functions then stop until re-enabled. CLAUDE.md's cost rule now allows Blaze with that hard stop. Free quotas are well above MMS traffic.
 - Two Firebase projects until 2027; the old one is untouched and is the fallback until the switch.
 
 ## Rejected

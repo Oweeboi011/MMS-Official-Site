@@ -16,7 +16,7 @@ MMS official site. React 19 + Vite SPA, content in `src/data/*.ts`. Start here: 
 - SOLID + clean architecture: small single-purpose components, data separate from UI, no god files.
 - Banned: `eval`, `innerHTML`, `dangerouslySetInnerHTML`, lodash/moment/axios. Secrets never in code.
 - Don't hand-edit generated files: `src/data/credits.ts` (scripts/fetch-images.mjs), `src/data/topMountains.ts`.
-- Cost hard cap: **₱54–₱100/month** total (domain + free plans). No paid plans or overage-billing services. [ADR 0001](docs/adr/0001-hosting.md).
+- Cost hard cap: **₱54–₱100/month** total (domain + free plans). No paid plans or overage-billing services, except Firebase Blaze **with the billing hard stop** (budget US$1.70/month → billing disabled) ([ADR 0001](docs/adr/0001-hosting.md), [ADR 0005](docs/adr/0005-open-climbs-firebase.md)).
 - Don't invent facts (officers, fees, dates, trail classes). Mark unknowns, ask.
 
 ## Harness (minimum viable)
