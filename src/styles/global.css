@@ -68,6 +68,8 @@ button { font: inherit; }
   color: #fff;
   transition: background .25s ease, padding .25s ease, box-shadow .25s ease;
 }
+.preview-banner { margin: -18px 0 12px; padding: 6px 16px; background: var(--red); color: #fff; font-size: .72rem; font-weight: 800; line-height: 1.35; text-align: center; transition: margin .25s ease; }
+.nav.is-scrolled .preview-banner { margin: -8px 0 8px; }
 .nav.is-scrolled { padding: 8px 0; background: rgba(9,18,27,.94); box-shadow: 0 8px 30px rgba(0,0,0,.25); backdrop-filter: blur(12px); }
 .nav.is-scrolled .brand-mark { width: 48px; height: 48px; }
 .brand-mark { transition: width .25s ease, height .25s ease; }

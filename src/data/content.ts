@@ -160,6 +160,9 @@ export const passportStats: Stat[] = [
   { value: '62', label: 'Volunteer hours' },
 ];
 
+// Site-wide notice while sample content is live. Set to '' once officers confirm the real data.
+export const previewNotice = 'Preview site: names, dates, fees and contact details are sample content, not official MMS information.';
+
 export const membershipEmail = 'membership@example.com';
 export const contactName = 'Admer Dablio';
 export const contactPhone = '+63 945 683 1874';

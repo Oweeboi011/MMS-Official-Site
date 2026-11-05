@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { asset } from '../lib/asset';
 import { sectionPath, sitemap } from '../data/sitemap';
+import { previewNotice } from '../data/content';
 
 // Which top-nav item is current: the section under the viewport on the home page, else the subpage's section.
 function useActiveSection() {
@@ -39,6 +40,7 @@ export default function Nav() {
 
   return (
     <nav className={`nav${scrolled ? ' is-scrolled' : ''}`} aria-label="Primary navigation">
+      {previewNotice && <p className="preview-banner" role="note">{previewNotice}</p>}
       <div className="shell nav-inner">
         <Link className="brand" to="/" aria-label="MMS home">
           <span className="brand-mark" aria-hidden="true">
