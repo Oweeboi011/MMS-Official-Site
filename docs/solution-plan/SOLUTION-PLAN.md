@@ -16,7 +16,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 |---|------|-------|--------|
 | 1 | MMS Google Cloud billing account; move `mms-official-site-513809` to it; US$1.70 alerts-only budget → Pub/Sub `billing-budget` | MMS Gmail owner, Owee | Open Climbs phase 1 |
 | 2 | Grant **Project Billing Manager** to `729371585953-compute@developer.gserviceaccount.com` (hard stop can't unlink billing without it) | Owee | Phase 1 |
-| 3 | Merge PR #2 → tag + release v1.0.0 | Owee | — |
+| 3 | ~~Merge PR #2~~ (done). Publish release v1.0.0 on `24db012` (`gh release create`) | Owee | — |
 | 4 | Accept Namecheap push (MMS account), auto-renew on (expires 2027-01-05); add Owee as Cloudflare Super Administrator | MMS Gmail owner | Domain safety |
 | 5 | Cloudflare API token (Pages:Edit) + account id → repo secrets for `continuous-delivery.yml` | MMS Cloudflare owner | Quality Gates deploy (local deploy works) |
 | 6 | Firebase console/CLI reachable from company laptops | Owee | Phase 1 |
@@ -25,7 +25,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 9 | `npm audit`: 11 moderate (minimatch via eslint 10, undici via wrangler deps); below the high gate. High undici fixed by wrangler 4.158.0 (2026-11-05) | upstream | — |
 | 10 | Open Climbs feature parity: 25 `it.todo` in `tests/parity/open-climbs.test.ts` | dev | Switch |
 | 11 | Content from MMS ([below](#content-needed-from-mms)); then set `previewNotice = ''` | officers | Remove preview banner |
-| 12 | Create `development` branch on GitHub; protect `development` + `main` (PR, Quality Gates required, no force push); `production` environment with reviewer | Owee | SDLC flow |
+| 12 | ~~Create `development` branch~~ (done 2026-11-05). Protect `development` + `main` (PR, Quality Gates required, no force push); `production` environment with reviewer | Owee | SDLC flow |
 | 13 | Leads: who is TCOM + notification recipients (by role); official FB page URL; is Viber a must (likely paid)? | leads | L2 |
 | 14 | Leads: real active-member count + recent climb photos with consent; ITI + expected expenses per upcoming climb; who approves reviews | leads, climb officers | L4, L5, L6 |
 | 15 | Officers confirm glossary wording (`src/frontend/data/glossary.ts`) and the new hero line | officers | — |
