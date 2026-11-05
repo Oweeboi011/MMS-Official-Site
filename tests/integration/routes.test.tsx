@@ -58,6 +58,13 @@ describe('Program pages', () => {
     expect(screen.queryAllByRole('link', { name: 'Take survey' })).toHaveLength(open);
   });
 
+  it('searches the site from /search?q=', () => {
+    const { container } = renderAt('/search?q=glossary');
+    expect(screen.getByRole('searchbox', { name: 'Search the site' })).toHaveValue('glossary');
+    expect(container.querySelector('.search-results a[href="/about/glossary"]')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Search the site' })).toHaveAttribute('aria-current', 'page');
+  });
+
   it('credits every local photo on /credits', () => {
     const { container } = renderAt('/credits');
     expect(container.querySelectorAll('.credits li')).toHaveLength(photoCredits.length);
