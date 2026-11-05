@@ -29,6 +29,8 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 13 | Leads: who is TCOM + notification recipients (by role); official FB page URL; is Viber a must (likely paid)? | leads | L2 |
 | 14 | Leads: real active-member count + recent climb photos with consent; ITI + expected expenses per upcoming climb; who approves reviews | leads, climb officers | L4, L5, L6 |
 | 15 | Officers confirm glossary wording (`src/frontend/data/glossary.ts`) and the new hero line | officers | — |
+| 16 | MMS Google Forms (MMS Gmail) for all surveys incl. joiner experience; replace `formUrl: '#'` in `content.ts` | officers | L6, L7 |
+| 17 | Officers confirm climb-finder rules + tips (`climbFinder` in `content.ts`) and rate climbs marked "Not yet rated" | climbs committee | L7 |
 
 ## Leads input (2026-11-05)
 
@@ -40,7 +42,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | L4 | Active members + recent climb photos on home | stats + photo strip on home, real data only | waiting on item 14 |
 | L5 | Join a climb → details (ITI, expected expenses) → join per climb | per-climb detail page; Join → that climb on Open Climbs; later native ([phases 3, 5](#open-climbs-migration)) | waiting on item 14 |
 | L6 | Review/feedback for past climbs, moderated | Google Form → officers approve → quotes block; later in-app rating | waiting on item 14 |
-| L7 | Joiner experience survey; recommend a climb to first-timers | Google Form on Surveys page; rule-based pick (no experience → easy/moderate minor climbs) | next |
+| L7 | Joiner experience survey; recommend a climb to first-timers | "Joiner experience survey" on `/surveys` ("Form coming soon" until a real link); climb finder on `/activities/open-climbs`: rules by difficulty in `content.ts` (`climbFinder`) | built; waits on items 16, 17 |
 | L8 | Define BMCM, AMC, LNT, SART | tooltips (`GlossaryText`) + `/about/glossary` | **done**, wording to confirm (item 15) |
 | L9 | Not one long page on phone; summary home or search | each section has its own page (`/about` …); home shows 3 cards + "See all"; in-browser search `/search?q=` (`lib/search.ts`, `data/searchIndex.ts`), Search link in nav | **done** |
 

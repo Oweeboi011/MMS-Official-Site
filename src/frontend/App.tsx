@@ -12,6 +12,7 @@ import HowToJoin from './components/HowToJoin';
 import JoinCta from './components/JoinCta';
 import Mountains from './components/Mountains';
 import OpenClimbs from './components/OpenClimbs';
+import ClimbFinder from './components/ClimbFinder';
 import Passport from './components/Passport';
 import RelatedPages from './components/RelatedPages';
 import Videos from './components/Videos';
@@ -28,7 +29,7 @@ import { legacyRedirects, sectionPath, sitemap, subpagePath } from './data/sitem
 
 // Subpages with their own full page layout.
 const programExtras: Record<string, ReactNode> = {
-  '/activities/open-climbs': <OpenClimbs />,
+  '/activities/open-climbs': <><ClimbFinder /><OpenClimbs /></>,
 };
 const fullPages: Record<string, ReactNode> = {
   ...Object.fromEntries(programPages.map((p) => [p.path, <ProgramPage key={p.path} page={p}>{programExtras[p.path]}</ProgramPage>])),

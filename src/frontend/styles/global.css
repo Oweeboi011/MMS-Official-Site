@@ -419,3 +419,13 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .search-results a { display: block; color: var(--navy); font-size: 1.1rem; font-weight: 800; }
 .search-results p { margin: 4px 0 0; color: var(--muted); }
 .search-section { color: var(--red); font-size: .72rem; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }
+/* Climb finder (L7). */
+.finder-options { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; padding: 0; border: 0; }
+.finder-options legend { margin-bottom: 12px; font-weight: 800; }
+.finder-options label { padding: 10px 16px; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; }
+.finder-options label.is-selected { border-color: var(--green); background: var(--green); color: #fff; }
+.finder-options input { position: absolute; opacity: 0; pointer-events: none; }
+.finder-options label:has(input:focus-visible) { outline: 2px solid var(--navy); outline-offset: 2px; }
+.finder-result { margin-top: 22px; }
+.finder-result ul { margin: 12px 0; padding-left: 20px; }
+.finder-more { color: var(--muted); }
