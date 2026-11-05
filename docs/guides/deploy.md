@@ -21,6 +21,7 @@ npm run deploy:prod       # check → build → production
 
 - Cloudflare owner: **MMS shared Gmail** (officers know the address). 2-step verification on Gmail + Cloudflare; recovery known to ≥2 officers.
 - **2 owners:** MMS account + Owee Penaranda as **Super Administrator** (Manage Account → Members, own login). Other officers: Administrator. Never share the password.
+- MMS Gmail is held by another officer: every MMS-owned account also has Owee as a second owner/admin (Cloudflare Super Administrator, Firebase IAM Owner).
 - Wrangler logged in as a member sees several accounts → set `CLOUDFLARE_ACCOUNT_ID` to the MMS account ID before deploying.
 - Open check ([ADR 0001](../adr/0001-hosting.md)): `dash.cloudflare.com` not blocked on company laptops.
 
