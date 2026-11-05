@@ -2,8 +2,7 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  // BASE_PATH is set by the GitHub Pages workflow (e.g. /MMS-Official-Site/); Vercel serves from the root.
-  base: process.env.BASE_PATH ?? '/',
+  base: '/', // Cloudflare Pages serves from the root
   plugins: [react()],
   server: { port: 5173, strictPort: true },
   preview: { port: 4173, strictPort: true },
@@ -12,6 +11,6 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './tests/setup.ts',
-    include: ['tests/{unit,component,integration}/**/*.test.{ts,tsx}'],
+    include: ['tests/{unit,component,integration,parity}/**/*.test.{ts,tsx}'],
   },
 });

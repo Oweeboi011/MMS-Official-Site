@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import ContentBlocks from '../../src/components/ContentBlocks';
-import type { ContentBlock } from '../../src/data/subpages';
+import ContentBlocks from '../../src/frontend/components/ContentBlocks';
+import type { ContentBlock } from '../../src/frontend/data/subpages';
 
 const rows = Array.from({ length: 45 }, (_, i) => [`Peak ${i + 1}`, `${3000 - i} MASL`]);
 

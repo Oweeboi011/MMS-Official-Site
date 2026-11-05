@@ -4,6 +4,7 @@ test('home loads with hero and nav', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'Primary navigation' })).toBeVisible();
+  await expect(page.getByRole('note')).toContainText('Preview site');
 });
 
 test('deep link renders a subpage (SPA rewrite works)', async ({ page }) => {

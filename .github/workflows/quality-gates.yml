@@ -1,0 +1,54 @@
+# Quality Gates: every PR into and push to development/main. Delivery: continuous-delivery.yml.
+name: Quality Gates
+
+on:
+  pull_request:
+    branches: [development, main]
+  push:
+    branches: [development, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-gates-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  code-quality:
+    name: Code Quality & Security
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Toolchain
+        uses: ./.github/actions/setup
+      - name: Static Analysis, Secret Scan & Tests
+        run: npm run check
+      - name: Dependency Vulnerability Audit
+        run: npm run check:audit
+      - name: Production Build
+        run: npm run build
+      - name: Performance Budget
+        run: npm run test:perf
+
+  e2e:
+    name: End-to-End Tests
+    needs: code-quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Toolchain
+        uses: ./.github/actions/setup
+      - name: Install Browser
+        run: npx playwright install --with-deps chromium
+      - name: Playwright Smoke Suite
+        run: npm run test:e2e
+      - name: Upload Test Results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with: { name: e2e-test-results, path: test-results, retention-days: 7 }

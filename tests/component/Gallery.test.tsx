@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import Gallery from '../../src/components/Gallery';
+import Gallery from '../../src/frontend/components/Gallery';
 
-vi.mock('../../src/data/content', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../../src/data/content')>()),
+vi.mock('../../src/frontend/data/content', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../src/frontend/data/content')>()),
   photoAlbumsUrl: 'https://drive.google.com/drive/folders/abc',
 }));
 

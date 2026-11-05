@@ -103,11 +103,11 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "Deploy: Vercel preview",
+      "name": "Deploy: Cloudflare Pages preview",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["vercel"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "deploy:preview"],
       "console": "integratedTerminal"
     }
   ],

@@ -10,20 +10,22 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test -c .config/playwright.config.ts",
     "test:perf": "node tests/performance/bundle-budget.mjs",
     "lint": "eslint .",
-    "check:secrets": "secretlint \"**/*\"",
-    "check:deps": "depcruise src",
-    "check:dead": "knip",
-    "check:dupes": "jscpd",
-    "check:audit": "npm audit --audit-level=high",
+    "check:secrets": "node tools/secrets.mjs",
+    "check:deps": "depcruise --config .config/dependency-cruiser.cjs src/frontend src/backend/functions/src",
+    "check:dead": "knip --config .config/knip.json",
+    "check:dupes": "jscpd --config .config/jscpd.json",
+    "check:audit": "npm audit --audit-level=high && npm audit --prefix src/backend/functions --audit-level=high",
     "check:images": "node tests/performance/image-budget.mjs",
     "check": "npm run check:secrets && npm run typecheck && npm run lint && npm run check:deps && npm run check:dead && npm run check:dupes && npm run check:images && npm test",
-    "prepare": "simple-git-hooks"
+    "deploy:preview": "node scripts/deploy.mjs preview",
+    "deploy:prod": "node scripts/deploy.mjs main",
+    "prepare": "git config core.hooksPath .githooks",
+    "test:parity": "node scripts/prod-parity.mjs"
   },
   "dependencies": {
-    "@vercel/analytics": "^2.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.18.4"
@@ -31,7 +33,6 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.64.1",
-    "@secretlint/secretlint-rule-preset-recommend": "^13.1.0",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
@@ -49,19 +50,11 @@
     "kill-port": "^2.0.1",
     "knip": "^6.43.0",
     "lint-staged": "^17.6.0",
-    "secretlint": "^13.1.0",
     "sharp": "^0.35.5",
-    "simple-git-hooks": "^2.14.0",
     "typescript": "^5.6.0",
     "typescript-eslint": "^8.72.1",
     "vite": "^7.0.0",
-    "vitest": "^5.0.3"
-  },
-  "simple-git-hooks": {
-    "pre-commit": "npx lint-staged"
-  },
-  "lint-staged": {
-    "*": "secretlint",
-    "*.{ts,tsx,js,mjs}": "eslint --max-warnings=50"
+    "vitest": "^5.0.3",
+    "wrangler": "4.158.0"
   }
 }

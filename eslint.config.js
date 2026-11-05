@@ -1,4 +1,4 @@
-// Harness: bad patterns, banned APIs, complexity (errors); style/naming (warnings). See docs/solution-plan/quality-harness.md.
+// Harness: bad patterns, banned APIs, complexity (errors); style/naming (warnings). See docs/guides/CODE-QUALITY.md.
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
@@ -6,7 +6,7 @@ import sonarjs from 'eslint-plugin-sonarjs';
 import globals from 'globals';
 
 export default tseslint.config(
-  { ignores: ['dist', 'coverage', 'playwright-report', 'test-results', 'src/data/credits.ts', 'src/data/topMountains.ts'] },
+  { ignores: ['dist', 'coverage', 'playwright-report', 'test-results', '.wrangler', 'src/frontend/data/credits.ts', 'src/frontend/data/topMountains.ts'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   sonarjs.configs.recommended,
@@ -51,7 +51,7 @@ export default tseslint.config(
   },
   { files: ['**/*.cjs'], languageOptions: { sourceType: 'commonjs', globals: globals.node } },
   {
-    files: ['tests/**', 'scripts/**', '*.config.{ts,js}'],
+    files: ['tests/**', 'tools/**', 'scripts/**', '.config/**', '*.config.{ts,js}'],
     rules: { 'sonarjs/no-nested-functions': 'off', 'no-console': 'off' },
   },
 );

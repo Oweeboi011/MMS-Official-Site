@@ -1,0 +1,51 @@
+# Continuous Delivery: development → preview, main → production (approval via `production` environment). Manual run too.
+# Needs repo secrets CLOUDFLARE_API_TOKEN (Pages:Edit) + CLOUDFLARE_ACCOUNT_ID (MMS account); skips if unset.
+name: Continuous Delivery
+
+on:
+  push:
+    branches: [development, main]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: preview or main (production; only from main)
+        type: choice
+        options: [preview, main]
+        default: preview
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Cloudflare Pages (${{ github.ref_name == 'main' && 'Production' || 'Preview' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TARGET: ${{ github.event_name == 'push' && (github.ref_name == 'main' && 'main' || 'preview') || inputs.target }}
+    environment: ${{ (github.ref_name == 'main' && (github.event_name == 'push' || inputs.target == 'main')) && 'production' || 'preview' }}
+    steps:
+      - name: Release Guard
+        id: guard
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          REF: ${{ github.ref_name }}
+        run: |
+          if [ "$TARGET" = main ] && [ "$REF" != main ]; then echo "production only from main"; exit 1; fi
+          if [ -z "$TOKEN" ]; then echo "::warning::CLOUDFLARE_API_TOKEN not set; skipping deploy"; echo "skip=1" >> "$GITHUB_OUTPUT"; fi
+      - name: Checkout
+        if: steps.guard.outputs.skip != '1'
+        uses: actions/checkout@v4
+      - name: Setup Toolchain
+        if: steps.guard.outputs.skip != '1'
+        uses: ./.github/actions/setup
+      - name: Quality Gates, Build, Deploy & Parity Check
+        if: steps.guard.outputs.skip != '1'
+        run: node scripts/deploy.mjs "$TARGET"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

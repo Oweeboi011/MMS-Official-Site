@@ -1,0 +1,10 @@
+#!/bin/sh
+# Commit rules: short subject, Signed-off-by required, no AI co-author/attribution.
+msg="$1"
+subject=$(head -n1 "$msg")
+if [ ${#subject} -gt 72 ]; then echo "commit-msg: subject > 72 chars"; exit 1; fi
+if grep -qiE '^co-authored-by:.*(claude|anthropic|openai|chatgpt|copilot|gemini)|generated with .*(claude|ai)|noreply@anthropic\.com' "$msg"; then
+  echo "commit-msg: remove co-author / AI attribution"; exit 1
+fi
+case "$subject" in Merge*|Revert*) exit 0 ;; esac  # git merge/revert auto-messages
+if ! grep -q '^Signed-off-by: ' "$msg"; then echo "commit-msg: missing sign-off (git commit -s)"; exit 1; fi

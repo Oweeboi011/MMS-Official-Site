@@ -15,6 +15,8 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "noEmit": true,
+    "allowJs": true,
+    "tsBuildInfoFile": "node_modules/.tmp/tsconfig.tsbuildinfo",
     "types": [
       "vite/client",
       "vitest/globals",
@@ -23,9 +25,9 @@
     ]
   },
   "include": [
-    "src",
+    "src/frontend",
     "tests",
     "vite.config.ts",
-    "playwright.config.ts"
+    ".config/playwright.config.ts"
   ]
 }

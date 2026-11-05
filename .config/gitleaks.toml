@@ -1,0 +1,10 @@
+# gitleaks: default rules + skip generated/vendor paths.
+[extend]
+useDefault = true
+
+[allowlist]
+paths = [
+  '''(^|[\\/])(node_modules|dist|\.wrangler|test-results|playwright-report|coverage)([\\/]|$)''',
+  '''package-lock\.json$''',
+  '''\.(png|jpe?g|webp|gif|ico)$''',
+]

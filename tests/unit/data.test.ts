@@ -1,7 +1,7 @@
-import { asset } from '../../src/lib/asset';
-import { topMountainColumns, topMountains } from '../../src/data/topMountains';
-import { subpageContent } from '../../src/data/subpages';
-import { photoAlbumsUrl } from '../../src/data/content';
+import { asset } from '../../src/frontend/lib/asset';
+import { topMountainColumns, topMountains } from '../../src/frontend/data/topMountains';
+import { subpageContent } from '../../src/frontend/data/subpages';
+import { photoAlbumsUrl } from '../../src/frontend/data/content';
 
 const elevation = (row: string[]) => Number(row[3].replace(/[^\d]/g, ''));
 
