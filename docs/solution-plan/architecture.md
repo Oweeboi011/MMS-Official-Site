@@ -15,7 +15,7 @@ Inner layers never import outer ones. `data` has no React. `lib` is pure.
 
 ## Target (phase 2+)
 
-Provider is open ([ADR 0001](../adr/0001-hosting.md)), but the shape is the same:
+Backend: new MMS Firebase project ([ADR 0005](../adr/0005-open-climbs-firebase.md), [migration plan](open-climbs-migration.md)). Shape:
 
 ```mermaid
 flowchart LR
@@ -33,13 +33,7 @@ Rule: the browser only talks to **our domain** and the phase 2 backend API endpo
 
 ## Data model
 
-| Collection | Key fields |
-|------------|-----------|
-| `climbs` | title, mountain, dates, type, trailClass, feeBreakdown[], slots, status, officerIds[] |
-| `registrations` | climbId, user or guest contact, emergencyContact, waiverAccepted, medicalCertPath, status (pending/paid/cancelled), amountDue |
-| `payments` | registrationId, method (qrph/manual/…), amount, gatewayFee, reference, receiptPath, verifiedBy, paidAt |
-| `members` | name, email, bmcBatch, tribe, role, emergencyContact |
-| `announcements` | date, category, title, body, published |
+Firestore shapes follow the Open Climbs app: [DATA](https://github.com/Oweeboi011/mms-open-climbs/blob/main/docs/guides/DATA.md) (copied here at phase 1).
 
 ## Roles
 

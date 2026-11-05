@@ -1,6 +1,6 @@
 # ADR 0001 — Hosting
 
-- **Status:** Accepted. Cloudflare Pages (free) live at https://www.metropolitanms.org/ since 2026-11-05; Workers + D1 for phase 2+, pending open checks (Decision 3).
+- **Status:** Accepted. Cloudflare Pages (free) live at https://www.metropolitanms.org/ since 2026-11-05. Phase 2+ backend: replacement proposed in [ADR 0005](0005-open-climbs-firebase.md).
 - **Date:** 2026-10-29, updated 2026-11-05
 - **Supersedes:** Vercel Hobby plan (dropped 2026-11-04: non-commercial terms forbid payments, so phase 3 would force a move); earlier azd → Azure SWA draft (Azure dropped by owner).
 
@@ -15,10 +15,8 @@
 ## Decision
 
 1. **Cloudflare Pages, free plan**, deployed by Wrangler CLI (`public/_headers`), MMS Cloudflare account. ₱0 hosting. GitHub Pages (temporary host) retired 2026-11-05.
-2. **Phase 2+:** same Cloudflare account adds **Workers + D1, free plan only**. Domain moves to Cloudflare Registrar. Outgrowing free → trim usage, not Workers Paid (₱290 breaks cap). Options compared: [hosting and billing](../solution-plan/hosting-and-billing.md#options-for-phase-2-needs-payments).
-3. **Open checks** (owner): Cloudflare not blocked on company laptops (before first deploy); payments allowed on free plan (before phase 3). If either fails, revisit:
-   - If only the Firebase console/CLI is blocked on laptops → **Firebase**, deployed from CI, only if spend can be held under the cap (Blaze bills overage; alerts don't stop it). Unverified.
-   - **Ruled out (over cap):** Vercel Pro + Supabase (≈ ₱1,215+), Supabase Pro, any paid plan.
+2. **Phase 2+:** Workers + D1, free plan only. **Proposed replacement:** [ADR 0005](0005-open-climbs-firebase.md) (new MMS Firebase project, Blaze with a billing hard stop); this line changes when 0005 is accepted. Options compared: [hosting and billing](../solution-plan/hosting-and-billing.md#options-for-phase-2-needs-payments).
+3. **Open checks** (owner): Cloudflare not blocked on company laptops; Firebase console reachable from company laptops (ADR 0005).
 
 ## Consequences
 
