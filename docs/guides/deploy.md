@@ -26,16 +26,19 @@ npm run deploy:prod       # check → build → production
 - Headers/cache: `public/_headers` (security headers, `/assets` 1 yr immutable, `/images` 1 week).
 - No Git integration: CLI deploys only. CI (`.github/workflows/ci.yml`) is **manual-only** until enabled.
 
-### Custom domain `metropolitanms.org` (registrar: Namecheap)
+### Custom domain `metropolitanms.org`
 
-Domain still serves the old Google Sites site; may carry email (MX) records. Don't lose them.
+Owner decision: **MMS owns the domain**. Registered 2023-01-05 at Namecheap; expires **2027-01-05**, auto-renew **off**. 2026-11-05: Namecheap "Change Ownership" push from the personal account to the MMS Namecheap account; MMS must accept it, then turn auto-renew on. Registrant contacts → MMS: do it **after** the Cloudflare transfer below if that's planned (a registrant change locks transfers 60 days), otherwise any time.
 
-1. Cloudflare → Add site → `metropolitanms.org` → Free. **Check the scanned DNS records include the Google Sites + MX records** before continuing.
-2. Namecheap → Domain List → Manage → Nameservers → Custom DNS → the 2 Cloudflare nameservers. Old site keeps working.
-3. Cutover: Pages project → Custom domains → add `metropolitanms.org` + `www`. New site replaces Google Sites. SSL automatic.
-4. 60 days after purchase: transfer registration to Cloudflare Registrar (≈ ₱54/mo vs Namecheap ≈ ₱73–92).
+DNS (done 2026-11-05): zone in the MMS Cloudflare account (Free), nameservers `magnolia` / `syeef`.ns.cloudflare.com set at Namecheap. Root + `www` = proxied CNAME → `mms-official-site-1qd.pages.dev`; both attached as Pages custom domains. No MX: no email on the domain. Old zone in the personal account (NS `bart` / `itzel`): delete once the MMS zone is Active.
 
-- Namecheap until transfer: auto-renew on, WHOIS privacy on, account owned by MMS ([architecture](../solution-plan/architecture.md)).
+Later (optional, cheaper renewal ≈ US$11.20/yr): registrar transfer Namecheap → Cloudflare (MMS). A registrant change may lock transfers 60 days. In this order:
+
+1. MMS zone shows **Active** (required for transfer).
+2. Namecheap → Domain → Sharing & Transfer → Domain Lock **off** → get the EPP/auth code (emailed to the registrant). **Don't edit registrant contacts at Namecheap first**: a registrant change starts a 60-day transfer lock.
+3. Cloudflare (MMS) → Domain Registration → Transfer Domains → `metropolitanms.org` → auth code → pay transfer (≈ US$11, adds 1 year) → registrant contact = MMS.
+4. Approve Namecheap's transfer email (or it completes in ~5 days).
+5. Cloudflare: auto-renew **on**. Close the Namecheap listing.
 
 ## Budget
 

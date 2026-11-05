@@ -10,7 +10,7 @@ Checked **2026-10-29** at **₱58 = US$1**. Providers bill in USD, so peso amoun
 | Hosting, auth, database, functions, storage | Phase 2+, provider open (see options) | Working site | see below |
 | PayMongo | PayMongo (PH) | Online payments | No monthly fee; per payment |
 | Album storage | MMS Google Drive folder ([media](media.md)) | Full climb albums, linked | ₱0 (15 GB free) |
-| Domain `metropolitanms.org` | **Namecheap** now → Cloudflare Registrar (transfer allowed 60 days after purchase) | Site address | Namecheap renewal ≈ US$15–19/yr ≈ **₱73–92/mo**; Cloudflare ≈ US$11/yr ≈ **₱54/mo**. Exact renewal price + date: TODO (Namecheap dashboard) |
+| Domain `metropolitanms.org` | **Namecheap** now → Cloudflare Registrar (transfer allowed now; a registrant change locks it 60 days) | Site address | Namecheap renewal ≈ US$15–19/yr ≈ **₱73–92/mo**; Cloudflare ≈ US$11/yr ≈ **₱54/mo**. Expires 2027-01-05; MMS Namecheap account (push 2026-11-05), Cloudflare Registrar later ([deploy](../guides/deploy.md#custom-domain-metropolitanmsorg)). Namecheap renewal price: TODO |
 | Officer email | Google Workspace for Nonprofits | climbs@, treasurer@ | ₱0 if MMS qualifies |
 | GitHub | GitHub | Code + CI | ₱0 |
 
