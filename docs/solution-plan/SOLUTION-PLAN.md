@@ -25,7 +25,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 9 | `npm audit`: 11 moderate (minimatch via eslint 10, undici via wrangler deps); below the high gate. High undici fixed by wrangler 4.158.0 (2026-11-05) | upstream | — |
 | 10 | Open Climbs feature parity: 25 `it.todo` in `tests/parity/open-climbs.test.ts` | dev | Switch |
 | 11 | Content from MMS ([below](#content-needed-from-mms)); then set `previewNotice = ''` | officers | Remove preview banner |
-| 12 | ~~`development` branch, branch protection on `development` + `main`~~ (done 2026-11-05: PR required, Quality Gates checks required, no force push, admins included). Left: `production` environment required reviewer; default branch → `development` | Owee | approval before production deploys |
+| 12 | ~~SDLC setup~~ (done 2026-11-05): `development` default branch; `development` + `main` protected (PR, Quality Gates required, no force push, admins included); `production` environment needs Owee approval, protected branches only | Owee | — |
 | 13 | Leads: who is TCOM + notification recipients (by role); official FB page URL; is Viber a must (likely paid)? | leads | L2 |
 | 14 | Leads: real active-member count + recent climb photos with consent; ITI + expected expenses per upcoming climb; who approves reviews | leads, climb officers | L4, L5, L6 |
 | 15 | Officers confirm glossary wording (`src/frontend/data/glossary.ts`) and the new hero line | officers | — |
