@@ -12,6 +12,7 @@ import HowToJoin from './components/HowToJoin';
 import JoinCta from './components/JoinCta';
 import Mountains from './components/Mountains';
 import OpenClimbs from './components/OpenClimbs';
+import ClimbFinder from './components/ClimbFinder';
 import Passport from './components/Passport';
 import RelatedPages from './components/RelatedPages';
 import Videos from './components/Videos';
@@ -28,7 +29,7 @@ import { legacyRedirects, sectionPath, sitemap, subpagePath } from './data/sitem
 // Subpages with their own full page layout.
 const fullPages: Record<string, ReactNode> = {
   '/training/bmcm': <ProgramPage page={bmcPage} />,
-  '/activities/open-climbs': <ProgramPage page={openClimbsPage}><OpenClimbs /></ProgramPage>,
+  '/activities/open-climbs': <ProgramPage page={openClimbsPage}><ClimbFinder /><OpenClimbs /></ProgramPage>,
   '/community/outreach': <ProgramPage page={outreachPage} />,
   '/community/sart': <ProgramPage page={sartPage} />,
   '/media/news': <AnnouncementsPage />,

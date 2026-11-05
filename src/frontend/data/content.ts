@@ -22,13 +22,15 @@ export interface Mountain {
   alt: string;
 }
 
+type Difficulty = 'Easy' | 'Moderate' | 'Advanced' | 'Not yet rated';
+
 export interface OpenClimb {
   day: string;
   month: string;
   dates: string;
   title: string;
   location: string;
-  difficulty: string;
+  difficulty: Difficulty;
   elevation?: string;
   type: 'Major' | 'Minor' | 'Special';
   status: 'Open' | 'Closed';
@@ -153,6 +155,24 @@ export const openClimbs: OpenClimb[] = [
   { day: '12', month: 'Dec', dates: 'Dec 12–13', title: 'Nasugbu Trilogy', location: 'Nasugbu, Batangas', difficulty: 'Not yet rated', type: 'Minor', status: 'Open' },
 ];
 
+export interface ExperienceOption {
+  label: string;
+  // Open climbs at these difficulties are suggested ('all' = every open climb).
+  difficulties: readonly Difficulty[] | 'all';
+  tip: string;
+}
+
+// Climb finder (L7). Proposed rules + copy: officers to confirm (open item 17).
+export const climbFinder = {
+  question: 'Have you hiked before?',
+  none: 'No matching open climbs right now. Send us a message and we will suggest one.',
+  options: [
+    { label: 'Never, first time', difficulties: ['Easy', 'Moderate'], tip: 'Suggested: easy or moderate climbs.' },
+    { label: 'A few times', difficulties: ['Easy', 'Moderate', 'Not yet rated'], tip: 'Suggested: easy and moderate climbs, plus climbs not yet rated (ask us about the trail).' },
+    { label: 'Regularly', difficulties: 'all', tip: 'Suggested: every open climb, including advanced ones.' },
+  ] satisfies ExperienceOption[],
+};
+
 export const passportStats: Stat[] = [
   { value: '18', label: 'Climbs logged' },
   { value: '12', label: 'Summits' },
@@ -178,7 +198,8 @@ export interface Survey {
   title: string;
   description: string;
   audience: 'Members' | 'Guests' | 'Everyone';
-  closes: string;
+  // Omit for surveys that stay open.
+  closes?: string;
   status: 'Open' | 'Closed';
   formUrl: string;
 }
@@ -195,6 +216,7 @@ export const announcements: Announcement[] = [
 
 // Placeholder surveys — formUrl should point to the actual form (e.g. Google Forms).
 export const surveys: Survey[] = [
+  { title: 'Joiner experience survey', description: 'First climb with us or a seasoned hiker? Share your dos and don’ts, what put you off on past climbs, and what you want next.', audience: 'Everyone', status: 'Open', formUrl: '#' },
   { title: 'Post-climb feedback: Mt. Apo', description: 'Tell us how the climb went: logistics, team leaders, and what we can improve.', audience: 'Everyone', closes: 'Oct 15, 2026', status: 'Open', formUrl: '#' },
   { title: '2027 climb wishlist', description: 'Which mountains should be on next year’s open climb calendar?', audience: 'Everyone', closes: 'Oct 31, 2026', status: 'Open', formUrl: '#' },
   { title: 'BMC interest check', description: 'Planning to take the Basic Mountaineering Course? Help us schedule the next batch.', audience: 'Guests', closes: 'Nov 7, 2026', status: 'Open', formUrl: '#' },
