@@ -22,15 +22,16 @@ import SurveysPage from './pages/SurveysPage';
 import CreditsPage from './pages/CreditsPage';
 import SubPage from './pages/SubPage';
 import SectionPage from './pages/SectionPage';
-import { bmcPage, openClimbsPage, outreachPage, sartPage } from './data/pages';
+import SearchPage from './pages/SearchPage';
+import { programPages } from './data/pages';
 import { legacyRedirects, sectionPath, sitemap, subpagePath } from './data/sitemap';
 
 // Subpages with their own full page layout.
+const programExtras: Record<string, ReactNode> = {
+  '/activities/open-climbs': <OpenClimbs />,
+};
 const fullPages: Record<string, ReactNode> = {
-  '/training/bmcm': <ProgramPage page={bmcPage} />,
-  '/activities/open-climbs': <ProgramPage page={openClimbsPage}><OpenClimbs /></ProgramPage>,
-  '/community/outreach': <ProgramPage page={outreachPage} />,
-  '/community/sart': <ProgramPage page={sartPage} />,
+  ...Object.fromEntries(programPages.map((p) => [p.path, <ProgramPage key={p.path} page={p}>{programExtras[p.path]}</ProgramPage>])),
   '/media/news': <AnnouncementsPage />,
 };
 
@@ -70,6 +71,7 @@ export default function App() {
           <Route key={from} path={from} element={<Navigate to={to} replace />} />
         ))}
         <Route path="/surveys" element={<SurveysPage />} />
+        <Route path="/search" element={<SearchPage />} />
         <Route path="/credits" element={<CreditsPage />} />
         <Route path="*" element={<HomePage />} />
       </Routes>

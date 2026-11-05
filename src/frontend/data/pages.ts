@@ -209,3 +209,6 @@ export const sartPage: ProgramPageData = {
   },
   cta: { title: 'Serve on SART.', text: 'SART is open to trained MMS members. Send us a message to learn about the next training cycle.', label: 'Ask about SART', href: '/#join' },
 };
+
+// Every program page (own route + layout); App and the search index both read this list.
+export const programPages: ProgramPageData[] = [bmcPage, openClimbsPage, outreachPage, sartPage];

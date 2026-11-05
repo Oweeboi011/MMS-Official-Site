@@ -405,3 +405,17 @@ a.program-card:hover { transform: translateY(-3px); }
 abbr[title] { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
 abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /* tap/keyboard shows meaning */
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* Site search (L9). */
+.nav-search { margin-left: auto; padding: 8px 14px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; font-size: .8rem; font-weight: 800; transition: background .2s ease; }
+.nav-search:hover, .nav-search[aria-current] { background: rgba(255,255,255,.18); }
+.nav-search:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.search-form { display: grid; gap: 8px; max-width: 640px; }
+.search-form label { font-weight: 800; }
+.search-form input { padding: 14px 18px; border: 1px solid var(--line); border-radius: 999px; font: inherit; font-size: 1rem; }
+.search-count { margin: 18px 0 0; color: var(--muted); }
+.search-results { display: grid; gap: 4px; margin: 12px 0 0; padding: 0; list-style: none; }
+.search-results li { padding: 16px 0; border-bottom: 1px solid var(--line); }
+.search-results a { display: block; color: var(--navy); font-size: 1.1rem; font-weight: 800; }
+.search-results p { margin: 4px 0 0; color: var(--muted); }
+.search-section { color: var(--red); font-size: .72rem; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }

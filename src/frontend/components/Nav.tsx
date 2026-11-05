@@ -28,6 +28,7 @@ function useActiveSection() {
 
 export default function Nav() {
   const active = useActiveSection();
+  const { pathname } = useLocation();
   const [scrolled, setScrolled] = useState(false);
 
   // The nav is fixed; it turns solid once the page scrolls past the hero's top edge.
@@ -56,6 +57,7 @@ export default function Nav() {
             </li>
           ))}
         </ul>
+        <Link className="nav-search" to="/search" aria-label="Search the site" aria-current={pathname === '/search' ? 'page' : undefined}>Search</Link>
       </div>
     </nav>
   );
