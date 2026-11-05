@@ -22,7 +22,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 6 | Firebase console/CLI reachable from company laptops | Owee | Phase 1 |
 | 7 | Old project's password hash parameters (private, never in repo/chat) | Owee | Phase 2 |
 | 8 | Brevo account owned by MMS; SPF/DKIM for `metropolitanms.org` | MMS | Phase 4 |
-| 9 | `npm audit`: 6 moderate (minimatch via eslint 10); no non-breaking fix; below the high gate | upstream | — |
+| 9 | `npm audit`: 11 moderate (minimatch via eslint 10, undici via wrangler deps); below the high gate. High undici fixed by wrangler 4.158.0 (2026-11-05) | upstream | — |
 | 10 | Open Climbs feature parity: 25 `it.todo` in `tests/parity/open-climbs.test.ts` | dev | Switch |
 | 11 | Content from MMS ([below](#content-needed-from-mms)); then set `previewNotice = ''` | officers | Remove preview banner |
 | 12 | Create `development` branch on GitHub; protect `development` + `main` (PR, Quality Gates required, no force push); `production` environment with reviewer | Owee | SDLC flow |
