@@ -1,6 +1,7 @@
 import { screen } from '@testing-library/react';
 import { renderAt } from '../helpers';
 import { announcements, openClimbs, surveys } from '../../src/frontend/data/content';
+import { surveyState } from '../../src/frontend/lib/survey';
 import { photoCredits } from '../../src/frontend/data/credits';
 import { bmcPage, openClimbsPage, outreachPage, sartPage } from '../../src/frontend/data/pages';
 import { legacyRedirects, sectionPath, sitemap, subpagePath } from '../../src/frontend/data/sitemap';
@@ -53,7 +54,8 @@ describe('Program pages', () => {
   it('lists every survey on /surveys, with a button only for open ones', () => {
     renderAt('/surveys');
     surveys.forEach((s) => expect(screen.getByRole('heading', { name: s.title })).toBeInTheDocument());
-    expect(screen.getAllByRole('link', { name: 'Take survey' })).toHaveLength(surveys.filter((s) => s.status === 'Open').length);
+    const open = surveys.filter((s) => surveyState(s, new Date()) === 'open').length;
+    expect(screen.queryAllByRole('link', { name: 'Take survey' })).toHaveLength(open);
   });
 
   it('credits every local photo on /credits', () => {
