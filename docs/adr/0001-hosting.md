@@ -1,7 +1,7 @@
 # ADR 0001 — Hosting
 
-- **Status:** Accepted, pending open checks (see Decision 3): Cloudflare Pages (free) next, Workers + D1 for phase 2+.
-- **Date:** 2026-10-29, updated 2026-11-04
+- **Status:** Accepted. Cloudflare Pages (free) live at https://www.metropolitanms.org/ since 2026-11-05; Workers + D1 for phase 2+, pending open checks (Decision 3).
+- **Date:** 2026-10-29, updated 2026-11-05
 - **Supersedes:** Vercel Hobby plan (dropped 2026-11-04: non-commercial terms forbid payments, so phase 3 would force a move); earlier azd → Azure SWA draft (Azure dropped by owner).
 
 ## Context
@@ -14,7 +14,7 @@
 
 ## Decision
 
-1. **Now (temporary):** GitHub Pages from `main` (`pages.yml`). **Next:** **Cloudflare Pages, free plan**, by Wrangler CLI (`public/_headers`). ₱0 hosting.
+1. **Cloudflare Pages, free plan**, deployed by Wrangler CLI (`public/_headers`), MMS Cloudflare account. ₱0 hosting. GitHub Pages (temporary host) retired 2026-11-05.
 2. **Phase 2+:** same Cloudflare account adds **Workers + D1, free plan only**. Domain moves to Cloudflare Registrar. Outgrowing free → trim usage, not Workers Paid (₱290 breaks cap). Options compared: [hosting and billing](../solution-plan/hosting-and-billing.md#options-for-phase-2-needs-payments).
 3. **Open checks** (owner): Cloudflare not blocked on company laptops (before first deploy); payments allowed on free plan (before phase 3). If either fails, revisit:
    - If only the Firebase console/CLI is blocked on laptops → **Firebase**, deployed from CI, only if spend can be held under the cap (Blaze bills overage; alerts don't stop it). Unverified.
@@ -24,5 +24,4 @@
 
 - One host from info site to payments; no mid-project migration.
 - Vercel removed: `vercel.json`, `@vercel/analytics`. Analytics, if wanted: Cloudflare Web Analytics (dashboard toggle, no code).
-- GitHub Pages becomes legacy; delete `pages.yml` + `BASE_PATH` handling once Cloudflare prod is live ([deploy](../guides/deploy.md#legacy-to-delete-once-cloudflare-prod-is-live)).
 - App stays host-agnostic (static `dist/`), so switching is a config change.

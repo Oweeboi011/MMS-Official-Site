@@ -39,5 +39,5 @@ MMS official site. React 19 + Vite SPA, content in `src/data/*.ts`. Start here: 
 
 ## Deploy
 
-- Now (temporary): GitHub Pages, auto on push to `main` (`pages.yml`). Next: Cloudflare Pages free via Wrangler CLI ([deploy](docs/guides/deploy.md), [ADR 0001](docs/adr/0001-hosting.md)). No Azure, no Vercel. CI `.github/workflows/ci.yml` manual-only, not enabled.
-- `pages.yml` removed once Cloudflare prod is live.
+- Prod: https://www.metropolitanms.org/ on Cloudflare Pages free, MMS account. `npm run deploy:preview` / `deploy:prod` (Wrangler CLI, manual) ([deploy](docs/guides/deploy.md), [ADR 0001](docs/adr/0001-hosting.md)). No Azure, no Vercel, no GitHub Pages.
+- CI `.github/workflows/ci.yml` manual-only, not enabled.

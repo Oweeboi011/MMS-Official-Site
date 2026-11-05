@@ -1,6 +1,6 @@
 # Overview
 
-Official site of the Metropolitan Mountaineering Society (MMS). It's a React 19 + Vite single-page app. Content currently lives in TypeScript data files; there is no backend yet ([plan](../solution-plan/plan.md)).
+Official site of the Metropolitan Mountaineering Society (MMS), live at https://www.metropolitanms.org/ ([deploy](deploy.md)). It's a React 19 + Vite single-page app. Content currently lives in TypeScript data files; there is no backend yet ([plan](../solution-plan/plan.md)).
 
 ## Run
 

@@ -6,11 +6,11 @@ Checked **2026-10-29** at **₱58 = US$1**. Providers bill in USD, so peso amoun
 
 | Service | Provider | For | Cost |
 |---------|----------|-----|------|
-| Static hosting + CDN + SSL | GitHub Pages (now) → **Cloudflare Pages** free (next) | Info site | ₱0 |
+| Static hosting + CDN + SSL | **Cloudflare Pages** free (live) | Info site | ₱0 |
 | Hosting, auth, database, functions, storage | Phase 2+, provider open (see options) | Working site | see below |
 | PayMongo | PayMongo (PH) | Online payments | No monthly fee; per payment |
 | Album storage | MMS Google Drive folder ([media](media.md)) | Full climb albums, linked | ₱0 (15 GB free) |
-| Domain `metropolitanms.org` | **Namecheap** now → Cloudflare Registrar (transfer allowed now; a registrant change locks it 60 days) | Site address | Namecheap renewal ≈ US$15–19/yr ≈ **₱73–92/mo**; Cloudflare ≈ US$11/yr ≈ **₱54/mo**. Expires 2027-01-05; MMS Namecheap account (push 2026-11-05), Cloudflare Registrar later ([deploy](../guides/deploy.md#custom-domain-metropolitanmsorg)). Namecheap renewal price: TODO |
+| Domain `metropolitanms.org` | **Namecheap** now → Cloudflare Registrar (transfer allowed now; a registrant change locks it 60 days) | Site address | Namecheap renewal US$18.98/yr ≈ **₱92/mo**; Cloudflare US$11.20/yr ≈ **₱54/mo** (list prices 2026-11-05). Expires 2027-01-05; MMS Namecheap account (push 2026-11-05), Cloudflare Registrar later ([deploy](../guides/deploy.md#domain-metropolitanmsorg)). |
 | Officer email | Google Workspace for Nonprofits | climbs@, treasurer@ | ₱0 if MMS qualifies |
 | GitHub | GitHub | Code + CI | ₱0 |
 
@@ -18,7 +18,7 @@ Checked **2026-10-29** at **₱58 = US$1**. Providers bill in USD, so peso amoun
 
 | Phase | Items | ₱/month |
 |-------|-------|---------|
-| Now (info site) | GitHub Pages / Cloudflare Pages + domain | **≈ ₱54–92** |
+| Now (info site) | Cloudflare Pages + domain | **≈ ₱54–92** |
 | Phase 2+ on option C | Free plan + domain | **≈ ₱54** |
 | **Hard cap** | [ADR 0001](../adr/0001-hosting.md) | **₱54–₱100** |
 
