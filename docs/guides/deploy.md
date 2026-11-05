@@ -20,7 +20,7 @@ npm run deploy:preview    # check → build → preview URL
 npm run deploy:prod       # check → build → production
 ```
 
-- Create the project once per account: `npx wrangler pages project create mms-official-site --production-branch main --force`. `--force` keeps it on classic Pages; without it wrangler delegates to Workers, rewrites `vite.config.ts`/`package.json`, adds `wrangler.jsonc`, and (4.151–4.157) crashes. Never pass `--force` again after. URL: `https://mms-official-site.pages.dev`.
+- Create the project once per account: `npx wrangler pages project create mms-official-site --production-branch main --force`. `--force` keeps it on classic Pages; without it wrangler delegates to Workers, rewrites `vite.config.ts`/`package.json`, adds `wrangler.jsonc`, and (4.151–4.157) crashes. Never pass `--force` again after. URL: `https://mms-official-site-1qd.pages.dev` (MMS account; `-1qd` suffix because the plain name was taken).
 - New `*.pages.dev` hostnames take a few minutes to get TLS; handshake errors right after first deploy are normal.
 - `scripts/deploy.mjs` clears `BASE_PATH` (base `/`). No top-level `404.html` → Pages serves `index.html` for deep links (SPA). `public/{assets,images}/404.html` make missing files there a real 404, not cached HTML.
 - Headers/cache: `public/_headers` (security headers, `/assets` 1 yr immutable, `/images` 1 week).
