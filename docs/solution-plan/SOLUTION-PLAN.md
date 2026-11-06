@@ -89,7 +89,7 @@ Every feature of [mms-open-climbs](https://github.com/Oweeboi011/mms-open-climbs
 | # | Phase | Done when |
 |---|---|---|
 | 0 | Decide (ADR 0005 accepted 2026-11-05) | laptop check (open item 6) |
-| 1 | Project: MMS billing + hard stop, Auth (email + Google, domain www), Firestore + Storage asia-southeast1, rules/indexes/functions here (emails off) | rules + functions tests pass on emulator |
+| 1 | Project: hard stop (interim Owee billing, open item 1), Auth (email + Google, domain www), Firestore + Storage asia-southeast1, rules/indexes/functions here (emails off). Rules + indexes ported (`src/backend/firebase`) | rules + functions tests pass on emulator |
 | 2 | Sync: first full copy | counts match; an existing user signs in |
 | 3 | Public read: schedule, event page | matches old site |
 | 4 | Accounts: log in, reset, My Details, My Registrations, notifications | existing users see their data |

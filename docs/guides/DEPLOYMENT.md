@@ -16,7 +16,7 @@ npm run deploy:prod       # check → build → perf → production → prod par
 - Headers/cache: `public/_headers` (security headers, `/assets` 1 yr immutable, `/images` 1 week).
 - Guards (`scripts/deploy.mjs`): check → build → bundle budget → deploy → prod parity (`main`).
 - CI/CD per branch: [below](#branches--environments).
-- Backend: `cd src/backend && npx firebase-tools@15 deploy --only functions` (project `mms-official-site-513809`).
+- Backend: `cd src/backend && npx firebase-tools@15 deploy --only functions` (project `mms-official-site-513809`). Rules + indexes: `--only firestore,storage` (`src/backend/firebase/`).
 - New account only: create the project once with `npx wrangler pages project create mms-official-site --production-branch main --force`. `--force` keeps it on classic Pages; without it wrangler delegates to Workers, rewrites `vite.config.ts`/`package.json`, adds `wrangler.jsonc`, and (4.151–4.157) crashes. Never pass `--force` again after. New `*.pages.dev` hostnames take a few minutes to get TLS.
 
 ## Branches & environments
