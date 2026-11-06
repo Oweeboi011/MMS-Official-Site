@@ -34,7 +34,7 @@ Generated `src/frontend/data/{credits,topMountains}.ts`: excluded from lint + du
 
 | Kind | Folder | Tool | Covers |
 |------|--------|------|--------|
-| Unit | `tests/unit` | vitest | sitemap, data invariants, helpers, backend budget logic |
+| Unit | `tests/unit` | vitest | sitemap, data invariants, helpers, backend budget logic; `tests/unit/functions` = Open Climbs functions (node env, mocked Firebase) |
 | Component | `tests/component` | vitest + Testing Library | ContentBlocks, Gallery, Nav |
 | Integration | `tests/integration` | vitest + Testing Library | every route, redirects, page flows |
 | Security rules | `tests/integration/rules.emulator.mjs` | Firebase emulators (Java), `npm run test:rules` | Firestore + Storage rules: money, roster, private files; Quality Gates only |
