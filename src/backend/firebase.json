@@ -1,4 +1,13 @@
 {
+  "firestore": {
+    "database": "openclimbs",
+    "location": "asia-southeast1",
+    "rules": "firebase/firestore.rules",
+    "indexes": "firebase/firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "firebase/storage.rules"
+  },
   "functions": [
     {
       "source": "functions",
@@ -6,5 +15,12 @@
       "runtime": "nodejs22",
       "ignore": ["node_modules", "*.local"]
     }
-  ]
+  ],
+  "emulators": {
+    "auth": { "port": 9099 },
+    "firestore": { "port": 8080 },
+    "functions": { "port": 5001 },
+    "storage": { "port": 9199 },
+    "ui": { "enabled": true, "port": 4000 }
+  }
 }

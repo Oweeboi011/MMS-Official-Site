@@ -34,7 +34,7 @@ New file → its folder above. Root only for files tools require there ([ADR 000
 ## Harness (minimum viable)
 
 - `npm run check` (~15 s): gitleaks, tsc, eslint, depcruise, knip, jscpd, image budget, vitest.
-- UI/routing change → `npm run test:e2e`. Bundle change → `npm run build && npm run test:perf`.
+- UI/routing change → `npm run test:e2e`. Bundle change → `npm run build && npm run test:perf`. Rules change → Quality Gates **Security Rules Tests** (local `npm run test:rules` needs Java).
 - Hooks: pre-commit = gitleaks + eslint staged; commit-msg = sign-off, subject ≤ 72, no AI co-author. Never `--no-verify`.
 - Tests at lowest level that catches the bug. Open Climbs parity todos: `tests/parity`.
 - Harness too slow (> ~30 s) → move step to Quality Gates, don't add tools.

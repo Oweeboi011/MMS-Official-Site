@@ -1,0 +1,456 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    // exists() first: get() on a missing doc yields null, and reading .data
+    // off it is an evaluation error that denies the whole rule — which would
+    // lock out a signed-in user whose users/ profile hasn't been created yet
+    // (the Google redirect path can land there) even where they're the owner.
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    function climbIsOpen(climbId) {
+      return get(/databases/$(database)/documents/climbs/$(climbId)).data.status == 'open';
+    }
+    // The roster lives in admin-only climbInternal/, not on the public climb
+    // doc: a public list of uids let anyone enumerate every registrant.
+    //
+    // Until scripts/backfill-climb-denorm.mjs has moved a climb's roster, the
+    // legacy list on the climb doc still counts, so registrants aren't locked
+    // out in between.
+    function isRegisteredFor(climbId) {
+      return isSignedIn() && (
+        (exists(/databases/$(database)/documents/climbInternal/$(climbId)) &&
+          request.auth.uid in
+            get(/databases/$(database)/documents/climbInternal/$(climbId)).data.get('registeredUserIds', [])) ||
+        request.auth.uid in
+          get(/databases/$(database)/documents/climbs/$(climbId)).data.get('registeredUserIds', [])
+      );
+    }
+
+    // Which fields an update actually touches.
+    function affected() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    // A member may *declare* a payment — "I sent ₱500, here's the receipt" —
+    // but never approve one. Verifying is the admin's call, and the
+    // verification record can only be cleared (which resubmitting does), not
+    // written, from the client.
+    //
+    // NOTE: rules cannot iterate arrays, so the per-payment `status` values
+    // inside `payments` are not validated here. The rolled-up paymentStatus
+    // is, which is what the balance math and the review queue key off.
+    function memberPaymentClaimIsHonest() {
+      return (!affected().hasAny(['paymentStatus']) ||
+              request.resource.data.paymentStatus in ['unpaid', 'submitted'])
+        && (!affected().hasAny(['verifiedAt']) ||
+              request.resource.data.verifiedAt == null)
+        && (!affected().hasAny(['verifiedBy']) ||
+              request.resource.data.verifiedBy == null);
+    }
+
+    match /users/{userId} {
+      allow read: if isAdmin() || isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.role == 'member' &&
+        !('canEmailMembers' in request.resource.data);
+      // Owners may maintain their own profile but never their own role —
+      // `create` pins it to 'member', and without this an update could hand
+      // the whole admin surface to anyone with a browser console.
+      // canEmailMembers (email every member) is never written by a client —
+      // any admin can mint admins, so an in-app grant could be self-served.
+      // The project owner sets it: functions/scripts/grant-email-members.mjs.
+      // createdAt is fixed for life: it orders the all-member email send.
+      allow update: if (isAdmin() && !affected().hasAny(['canEmailMembers', 'createdAt'])) ||
+        (isOwner(userId) && !affected().hasAny(['role', 'canEmailMembers', 'createdAt']));
+      allow delete: if isAdmin();
+    }
+
+    // A member's saved details, used to fill in their next registration. Kept
+    // apart from users/{uid}: it holds health and contact details, and only
+    // the member and admins may see it. The onRegistrationDetailsWritten
+    // trigger keeps it current; the member edits it on My Details.
+    function memberDetailsAreValid(d) {
+      return d.keys().hasOnly([
+          'mobile', 'dateOfBirth', 'address', 'medicalConditions', 'experienceLevel',
+          'memberType', 'ecName', 'ecMobile', 'ecRelationship', 'sourceClimbTitle', 'updatedAt'
+        ]) &&
+        (!('memberType' in d) || d.memberType in ['member', 'joiner']) &&
+        (!('experienceLevel' in d) || d.experienceLevel in ['beginner', 'intermediate', 'experienced']) &&
+        (!('medicalConditions' in d) || (d.medicalConditions is string && d.medicalConditions.size() <= 2000)) &&
+        (!('address' in d) || (d.address is string && d.address.size() <= 300)) &&
+        (!('mobile' in d) || (d.mobile is string && d.mobile.size() <= 40)) &&
+        (!('dateOfBirth' in d) || (d.dateOfBirth is string && d.dateOfBirth.size() <= 20)) &&
+        (!('ecName' in d) || (d.ecName is string && d.ecName.size() <= 120)) &&
+        (!('ecMobile' in d) || (d.ecMobile is string && d.ecMobile.size() <= 40)) &&
+        (!('ecRelationship' in d) || (d.ecRelationship is string && d.ecRelationship.size() <= 60)) &&
+        (!('sourceClimbTitle' in d) || (d.sourceClimbTitle is string && d.sourceClimbTitle.size() <= 200));
+    }
+
+    match /memberDetails/{userId} {
+      allow read: if isAdmin() || isOwner(userId);
+      allow create, update: if (isAdmin() || isOwner(userId)) &&
+        memberDetailsAreValid(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /climbs/{climbId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // A participant signs their own waiver — and only their own, only once,
+    // and only in the affirmative. Self-registration signs at create time,
+    // but an admin adding someone to a climb leaves the registration
+    // unsigned, and signing is the one thing that genuinely cannot be done
+    // on the participant's behalf. Without this the record could never be
+    // completed by the person it binds.
+    //
+    // Once signed it is immutable from the client: no un-signing, no
+    // re-signing under a different name, no back-dating. Corrections stay
+    // with admins.
+    // NOTE: `.get('waiverSigned', false)` rather than `.waiverSigned` — a
+    // registration created before the field existed, or one added by an admin
+    // that never set it, has no such key, and reading a missing key directly
+    // is an evaluation error that denies the whole rule. That would have
+    // blocked precisely the unsigned registrations this exists to serve.
+    function memberIsSigningOwnWaiver() {
+      return affected().hasOnly([
+          'waiverSigned', 'waiverSignedName', 'waiverSignedAt', 'updatedAt'
+        ])
+        && resource.data.get('waiverSigned', false) != true
+        && request.resource.data.waiverSigned == true
+        && request.resource.data.waiverSignedName is string
+        && request.resource.data.waiverSignedName.size() >= 3;
+    }
+
+    // Contact and medical details belong to the participant, and an admin
+    // registering someone on their behalf can only guess at them. The member
+    // corrects their own from My Climbs. Unlike the waiver these stay
+    // editable — a phone number changes, a condition develops — so there is
+    // no sign-once constraint, only a limit on which fields can move.
+    // An outreach donation pledge: cash to hand the leads on climb day and/or
+    // items to carry up. Null withdraws it. What was actually *received*
+    // (donationReceived) is recorded by admins only.
+    function pledgeIsValid(p) {
+      return p == null ||
+        (p is map &&
+          p.keys().hasOnly(['cashPledge', 'inKind', 'payWithFees', 'itemPledges']) &&
+          (!('itemPledges' in p) || (p.itemPledges is list && p.itemPledges.size() <= 50)) &&
+          p.get('payWithFees', false) is bool &&
+          (p.get('cashPledge', null) == null ||
+            (p.cashPledge is number && p.cashPledge > 0 && p.cashPledge <= 1000000)) &&
+          p.get('inKind', '') is string &&
+          p.get('inKind', '').size() <= 500);
+    }
+
+    // A member withdrawing from a climb: only to "cancelled", only from a
+    // live status, marked as their own doing. Reinstating is an admin's call.
+    // The status-change trigger then emails, frees the roster and counters.
+    function memberIsCancellingOwn() {
+      return affected().hasOnly([
+          'status', 'cancelledByMember', 'cancellationReason', 'cancelledAt', 'updatedAt'
+        ]) &&
+        resource.data.status in ['pending', 'confirmed', 'waitlisted'] &&
+        request.resource.data.status == 'cancelled' &&
+        request.resource.data.cancelledByMember == true &&
+        request.resource.data.cancellationReason is string &&
+        request.resource.data.cancellationReason.size() <= 500;
+    }
+
+    function memberIsUpdatingOwnPledge() {
+      return affected().hasOnly(['donation', 'updatedAt']) &&
+        pledgeIsValid(request.resource.data.donation);
+    }
+
+    function memberIsUpdatingOwnDetails() {
+      return affected().hasOnly([
+        'mobile', 'emergencyContact', 'medicalConditions', 'updatedAt'
+      ]);
+    }
+
+    // A member-submitted payment entry: an unreviewed claim and nothing more.
+    // Reviewer, split and admin-recording fields are admin territory.
+    function isMemberPaymentEntry(p) {
+      return p.keys().hasOnly(['amount', 'proofs', 'submittedAt', 'status', 'note']) &&
+        p.status == 'submitted' &&
+        p.amount is number && p.amount > 0;
+    }
+
+    // Rules cannot iterate arrays, so the payment history is protected by
+    // shape instead: a member may only append exactly one new, unreviewed
+    // entry and must leave every earlier entry byte-for-byte as it was.
+    // Without this a member could write `status: "verified"` into their own
+    // history, or raise the amount on a payment an admin already accepted.
+    //
+    // amountPaid is bounded by the same append: it can grow by at most the
+    // new entry's amount.
+    // The recorded total before this write. Unpaid registrations store null
+    // here, and arithmetic on null is an error that denies the whole rule.
+    function previousAmountPaid() {
+      return resource.data.get('amountPaid', 0) is number
+        ? resource.data.get('amountPaid', 0)
+        : 0;
+    }
+
+    function memberAppendsOnePayment() {
+      let before = resource.data.get('payments', []);
+      let after = request.resource.data.get('payments', []);
+      let n = before.size();
+      return after.size() == n + 1 &&
+        // Slicing an empty range is an error in rules, hence the n == 0 case.
+        (n == 0 || after[0:n] == before) &&
+        isMemberPaymentEntry(after[n]) &&
+        request.resource.data.get('amountPaid', 0) is number &&
+        request.resource.data.get('amountPaid', 0) <=
+          previousAmountPaid() + after[n].amount;
+    }
+
+    // Registrations from before the payment history existed have no
+    // `payments` array; the client folds the old single payment in as the
+    // first entry on its first new submission. That legacy entry must match
+    // what was already recorded.
+    function memberMigratesLegacyPayment() {
+      let after = request.resource.data.get('payments', []);
+      return resource.data.get('payments', []).size() == 0 &&
+        after.size() == 2 &&
+        after[0].keys().hasOnly(['amount', 'proofs', 'submittedAt', 'status']) &&
+        after[0].amount == previousAmountPaid() &&
+        // The legacy entry carries the registration's own verdict (see
+        // getPaymentEntries in src/utils/payments.js) — never a new one.
+        ((resource.data.get('paymentStatus', '') in ['submitted', 'verified', 'rejected'] &&
+            after[0].status == resource.data.paymentStatus) ||
+          (!(resource.data.get('paymentStatus', '') in ['submitted', 'verified', 'rejected']) &&
+            after[0].status == 'submitted')) &&
+        isMemberPaymentEntry(after[1]) &&
+        request.resource.data.get('amountPaid', 0) is number &&
+        request.resource.data.get('amountPaid', 0) <=
+          previousAmountPaid() + after[1].amount;
+    }
+
+    function memberPaymentHistoryIsHonest() {
+      return (!affected().hasAny(['payments', 'amountPaid'])) ||
+        memberAppendsOnePayment() ||
+        memberMigratesLegacyPayment();
+    }
+
+    // What a member may put on a registration they create for themselves.
+    // Status, verification and money fields start at their unreviewed
+    // values; anything else is an admin's to set.
+    function memberRegistrationIsHonest() {
+      let d = request.resource.data;
+      let payments = d.get('payments', []);
+      return d.get('status', 'pending') == 'pending' &&
+        d.get('paymentStatus', 'unpaid') in ['unpaid', 'submitted'] &&
+        d.get('verifiedAt', null) == null &&
+        d.get('verifiedBy', null) == null &&
+        !d.keys().hasAny([
+          'refunds', 'adminNotes', 'recordedBy', 'serviceGroups',
+          'donationReceived', 'noShow', 'noShowMarkedBy', 'noShowMarkedAt'
+        ]) &&
+        pledgeIsValid(d.get('donation', null)) &&
+        d.get('memberType', 'joiner') in ['member', 'joiner'] &&
+        // Confirmation emails go to this address, so it must be the
+        // account's own — otherwise the club's mail server sends to anyone.
+        d.email == request.auth.token.email &&
+        d.name is string && d.name.size() > 0 && d.name.size() <= 120 &&
+        (d.get('waiverSigned', false) != true ||
+          (d.waiverSignedName is string && d.waiverSignedName.size() >= 3)) &&
+        payments.size() <= 1 &&
+        (payments.size() == 0 ||
+          (isMemberPaymentEntry(payments[0]) && d.get('amountPaid', 0) == payments[0].amount)) &&
+        (payments.size() == 1 || d.get('amountPaid', null) in [null, 0]);
+    }
+
+    // A member's document fields hold files they uploaded. Only an admin may
+    // record one as received without a file ({ receivedOffline: true, … }).
+    function memberUploadIsAFile(field) {
+      return !(field in affected()) ||
+        request.resource.data[field] == null ||
+        !('receivedOffline' in request.resource.data[field]);
+    }
+    function memberUploadsAreFiles() {
+      return memberUploadIsAFile('registrationFormUpload') &&
+        memberUploadIsAFile('medicalCertUpload') &&
+        memberUploadIsAFile('permitUpload') &&
+        memberUploadIsAFile('waiverDocUpload');
+    }
+
+    match /registrations/{regId} {
+      allow read: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
+      allow create: if isAdmin() ||
+        (isSignedIn() &&
+          isOwner(request.resource.data.userId) &&
+          climbIsOpen(request.resource.data.climbId) &&
+          memberRegistrationIsHonest());
+      // Members do three things to their own registration: submit a payment,
+      // upload the documents a climb requires, and sign the waiver once.
+      // Everything else — status, admin notes, an already-signed waiver — is
+      // admin territory.
+      // Owner branch first so the common member write never pays for the
+      // users/ lookup isAdmin() needs.
+      allow update: if (isOwner(resource.data.userId) &&
+          affected().hasOnly([
+            'paymentProofs', 'payments', 'amountPaid', 'paymentStatus',
+            'paymentSubmittedAt', 'verifiedAt', 'verifiedBy', 'feeBreakdown',
+            'registrationFormUpload', 'medicalCertUpload', 'permitUpload',
+            'waiverDocUpload', 'updatedAt'
+          ]) &&
+          memberPaymentClaimIsHonest() &&
+          memberPaymentHistoryIsHonest() &&
+          memberUploadsAreFiles()) ||
+        (isOwner(resource.data.userId) && memberIsSigningOwnWaiver()) ||
+        (isOwner(resource.data.userId) && memberIsUpdatingOwnDetails()) ||
+        (isOwner(resource.data.userId) && memberIsUpdatingOwnPledge()) ||
+        (isOwner(resource.data.userId) && memberIsCancellingOwn()) ||
+        isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Analytics writes stay open to signed-out visitors — a guest browsing
+    // the schedule is exactly what this measures, so requiring auth would
+    // blind it. "Open" still means shaped: an unvalidated `create: if true`
+    // lets anyone write documents of any size and any field into the
+    // collection, which is a billing problem before it is a data one.
+    // App Check is the real answer to raw volume; this bounds each write.
+    function analyticsIdentityIsHonest() {
+      return request.resource.data.userId == null ||
+        (request.auth != null && request.resource.data.userId == request.auth.uid);
+    }
+    // `expireAt` drives the Firestore TTL policy that deletes old analytics
+    // and error logs. Optional, but when present it must be a real date no
+    // more than ~a year out, so a client can't pin its rows forever.
+    function expireAtIsBounded() {
+      return !('expireAt' in request.resource.data) ||
+        (request.resource.data.expireAt is timestamp &&
+          request.resource.data.expireAt < request.time + duration.value(400, 'd'));
+    }
+
+    match /pageViews/{viewId} {
+      allow create: if request.resource.data.keys().hasOnly([
+          'path', 'climbId', 'userId', 'userRole', 'sessionId', 'timestamp',
+          'expireAt'
+        ]) &&
+        expireAtIsBounded() &&
+        request.resource.data.path is string &&
+        request.resource.data.path.size() <= 300 &&
+        request.resource.data.userRole in ['guest', 'member', 'admin'] &&
+        request.resource.data.sessionId is string &&
+        request.resource.data.sessionId.size() <= 100 &&
+        // serverTimestamp() only — a client cannot backdate or forward-date
+        // its own traffic and skew the admin analytics.
+        request.resource.data.timestamp == request.time &&
+        analyticsIdentityIsHonest();
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Same reasoning as pageViews: a client-side error is worth capturing
+    // even from a signed-out visitor, but the shape is pinned so the
+    // collection cannot be used as free storage. Cloud Functions write here
+    // too, via the Admin SDK, which bypasses these rules.
+    match /failedRequests/{id} {
+      allow create: if request.resource.data.keys().hasOnly([
+          'type', 'source', 'message', 'path', 'userId', 'userRole',
+          'climbId', 'registrationId', 'createdAt', 'expireAt'
+        ]) &&
+        expireAtIsBounded() &&
+        // Keep in step with the writers in src/utils/logFailedRequest.js
+        // callers and DATA.md — a type missing from this list is rejected
+        // silently, which loses exactly the diagnostic someone needed.
+        request.resource.data.type in [
+          'email', 'upload', 'firestore', 'client', 'payment'
+        ] &&
+        request.resource.data.message is string &&
+        request.resource.data.message.size() <= 500 &&
+        request.resource.data.source is string &&
+        request.resource.data.source.size() <= 200 &&
+        request.resource.data.createdAt == request.time &&
+        analyticsIdentityIsHonest();
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /releaseNotes/{noteId} {
+      allow read: if isSignedIn() && (resource.data.status == 'published' || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Email send jobs: queued by the sendReleaseNoteEmail callable, worked by
+    // a trigger (both Admin SDK). Admins watch progress; nobody writes.
+    match /releaseNoteEmailJobs/{jobId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /auditLog/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    match /climbInternal/{climbId} {
+      // Registrant uids (maintained by the registration triggers) and officer
+      // email addresses. Admin-only: neither belongs on the public climb doc.
+      allow read, write: if isAdmin();
+    }
+
+    match /climbPrivate/{climbId} {
+      // Pre-climb meeting details and resource links — genuinely restricted
+      // to admins and actual registrants (climbs is publicly readable, so
+      // this data must live in its own doc rather than on the climb itself).
+      allow read: if isAdmin() || isRegisteredFor(climbId);
+      allow write: if isAdmin();
+    }
+
+    match /climbExpenses/{climbId} {
+      // Cost line items (permits, guide fees, etc.) an admin logs against a
+      // climb, tallied against verified collections for a net-funds figure.
+      // Admin-only both ways — unlike climbPrivate, registrants never read
+      // this: it's the club's internal cost breakdown, not something a
+      // registrant's fee/outstanding view needs to disclose.
+      allow read, write: if isAdmin();
+    }
+
+    function feedbackTextIsBounded(d) {
+      return d.keys().hasOnly([
+          'climbId', 'climbTitle', 'userId', 'name', 'rating', 'comments', 'createdAt'
+        ]) &&
+        d.get('comments', '') is string && d.get('comments', '').size() <= 2000 &&
+        d.get('name', '') is string && d.get('name', '').size() <= 120 &&
+        d.get('climbTitle', '') is string && d.get('climbTitle', '').size() <= 200;
+    }
+
+    match /feedback/{feedbackId} {
+      // Doc ID is deterministic (`${climbId}_${userId}`, enforced client-side)
+      // so a duplicate submission hits this same create rule as an update,
+      // which is denied below — one feedback entry per member per climb.
+      // Only people who were on the climb, and bounded in size.
+      allow create: if isSignedIn() &&
+        isOwner(request.resource.data.userId) &&
+        request.resource.data.climbId is string &&
+        feedbackId == request.resource.data.climbId + '_' + request.auth.uid &&
+        isRegisteredFor(request.resource.data.climbId) &&
+        request.resource.data.rating is int &&
+        request.resource.data.rating >= 1 && request.resource.data.rating <= 5 &&
+        feedbackTextIsBounded(request.resource.data);
+      allow read: if isAdmin() || isOwner(resource.data.userId);
+      allow update, delete: if false;
+    }
+
+    match /notifications/{notifId} {
+      allow read: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
+      // Only the read flag may be toggled by the owner; everything else is
+      // written server-side (Admin SDK bypasses rules entirely).
+      allow update: if isSignedIn() && isOwner(resource.data.userId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(["read"]);
+      allow create, delete: if false;
+    }
+  }
+}
