@@ -1,13 +1,21 @@
 name: Setup Toolchain
-description: Node + npm ci + pinned gitleaks (checksum verified)
+description: Node + npm ci (site + functions) + pinned gitleaks (checksum verified)
 runs:
   using: composite
   steps:
     - name: Setup Node.js
       uses: actions/setup-node@v4
-      with: { node-version: 24, cache: npm }
+      with:
+        node-version: 24
+        cache: npm
+        cache-dependency-path: |
+          package-lock.json
+          src/backend/functions/package-lock.json
     - name: Install Dependencies
       run: npm ci
+      shell: bash
+    - name: Install Functions Dependencies (tests mock these)
+      run: npm ci --prefix src/backend/functions
       shell: bash
     - name: Install gitleaks (pinned, checksum verified)
       shell: bash

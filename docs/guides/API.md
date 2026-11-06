@@ -10,7 +10,20 @@ Backend endpoints and external APIs. Code: `src/backend/functions/src`.
 
 Needs Project Billing Manager on the compute service account ([open items](../solution-plan/SOLUTION-PLAN.md#open-items)). After a stop: Firebase console → Usage and billing → link billing again.
 
-Planned (migration phases 1–6): sync (scheduled, old → new), registration triggers (counts, waitlist, emails), PayMongo checkout + webhook.
+### Open Climbs (ported from mms-open-climbs, phase 1; not deployed yet)
+
+Firestore database `openclimbs`. Emails only when `EMAILS_ENABLED=true` (off until the switch). Tests: `tests/unit/functions`.
+
+| Group | Functions | Code |
+|-------|-----------|------|
+| Registration triggers | `onRegistrationCreated`, `onRegistrationUpdated`, `onRegistrationDeleted`, `onRegistrationDetailsWritten` | `triggers/registrations.js`, `triggers/memberDetails.js` |
+| Climb + admin triggers | `onClimbUpdated`, `syncAdminClaim`, `onReleaseNoteEmailJobCreated` | `triggers/` |
+| Scheduled | `sendReminderNotifications` (payment, paperwork, no-show) | `scheduled/reminders.js` |
+| Callables (admin) | `ensureAdminClaim`, `createUser`, `updateUserProfile`, `deleteUserAccount`, release notes ×4, insights ×4 | `callables/` |
+
+Secrets (Secret Manager, set before deploy): `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `GITHUB_TOKEN`. Env: `APP_URL`, `BILLING_EXPORT_TABLE`, `EMAILS_ENABLED`. Not ported: `ogPrerender`, `cspReport` (Firebase Hosting rewrites; open item 18).
+
+Planned (phases 2–6): sync (scheduled, old → new), PayMongo checkout + webhook.
 
 ## External APIs
 
@@ -19,4 +32,5 @@ Planned (migration phases 1–6): sync (scheduled, old → new), registration tr
 | Wikimedia Commons | `tools/fetch-images.mjs` (dev) | none |
 | Cloudflare Pages | `wrangler` via `scripts/deploy.mjs` | `wrangler login` / `CLOUDFLARE_API_TOKEN` |
 | Cloud Billing | `billingHardStop` | function service account |
-| PayMongo, Brevo | planned | keys in Secret Manager only |
+| Brevo | Open Climbs emails (`email/sendEmail.js`) | `BREVO_API_KEY` (Secret Manager) |
+| PayMongo | planned | keys in Secret Manager only |

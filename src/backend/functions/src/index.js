@@ -1,11 +1,9 @@
-// Cloud Functions for project mms-official-site-513809 (ADR 0005).
-import { setGlobalOptions } from 'firebase-functions/v2';
+// Cloud Functions for project mms-official-site-513809 (ADR 0005): billing hard stop + Open Climbs (ported).
+import './shared/admin.js';
 import { onMessagePublished } from 'firebase-functions/v2/pubsub';
 import { logger } from 'firebase-functions';
 import { CloudBillingClient } from '@google-cloud/billing';
 import { shouldDisableBilling } from './budget.js';
-
-setGlobalOptions({ region: 'asia-southeast1', maxInstances: 2, memory: '256MiB' });
 
 const billing = new CloudBillingClient();
 
@@ -36,3 +34,14 @@ export const billingHardStop = onMessagePublished('billing-budget', async (event
   await billing.updateProjectBillingInfo({ name, projectBillingInfo: { billingAccountName: '' } });
   logger.warn('Billing DISABLED: budget reached', { name, cost: notification.costAmount, budget: notification.budgetAmount });
 });
+
+// Open Climbs (ported from mms-open-climbs). Not ported: ogPrerender, cspReport (Firebase Hosting rewrites).
+export { onRegistrationCreated, onRegistrationUpdated, onRegistrationDeleted } from './triggers/registrations.js';
+export { onRegistrationDetailsWritten } from './triggers/memberDetails.js';
+export { onClimbUpdated } from './triggers/climbs.js';
+export { sendReminderNotifications } from './scheduled/reminders.js';
+export { syncAdminClaim } from './triggers/adminClaim.js';
+export { ensureAdminClaim, createUser, updateUserProfile, deleteUserAccount } from './callables/users.js';
+export { sendReleaseNoteEmail, previewReleaseNoteEmail, getReleaseNoteCommitOptions, generateReleaseNoteDraft } from './callables/releaseNotes.js';
+export { onReleaseNoteEmailJobCreated } from './triggers/releaseNoteEmailJobs.js';
+export { getEmailStats, getStorageUsage, getFunctionHealth, getBillingCost } from './callables/insights.js';
