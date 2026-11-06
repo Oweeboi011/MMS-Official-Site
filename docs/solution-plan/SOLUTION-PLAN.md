@@ -14,9 +14,9 @@ Single tracker. Claude reads this before every commit and updates it in the same
 
 | # | Item | Owner | Blocks |
 |---|------|-------|--------|
-| 1 | MMS Google Cloud billing account; move `mms-official-site-513809` to it; US$1.70 alerts-only budget → Pub/Sub `billing-budget` | MMS Gmail owner, Owee | Open Climbs phase 1 |
-| 2 | Grant **Project Billing Manager** to `729371585953-compute@developer.gserviceaccount.com` (hard stop can't unlink billing without it) | Owee | Phase 1 |
-| 3 | Merge PR #2 → tag + release v1.0.0 | Owee | — |
+| 1 | MMS Google Cloud billing account; move `mms-official-site-513809` to it, recreate budget there. Interim (2026-11-06): on Owee's "Owee Billing Main" with budget `mms-official-site hard stop` (US$1.70, this project only → `billing-budget`). MMS Gmail owner invite pending | MMS Gmail owner, Owee | Open Climbs phase 1 |
+| 2 | ~~Grant **Project Billing Manager** to `729371585953-compute@developer.gserviceaccount.com` (hard stop can't unlink billing without it)~~ (done 2026-11-06) | Owee | — |
+| 3 | ~~Merge PR #2, release v1.0.0~~ (done 2026-11-05) | Owee | — |
 | 4 | Accept Namecheap push (MMS account), auto-renew on (expires 2027-01-05); add Owee as Cloudflare Super Administrator | MMS Gmail owner | Domain safety |
 | 5 | Cloudflare API token (Pages:Edit) + account id → repo secrets for `continuous-delivery.yml` | MMS Cloudflare owner | Quality Gates deploy (local deploy works) |
 | 6 | Firebase console/CLI reachable from company laptops | Owee | Phase 1 |
@@ -25,10 +25,13 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 9 | `npm audit`: 11 moderate (minimatch via eslint 10, undici via wrangler deps); below the high gate. High undici fixed by wrangler 4.158.0 (2026-11-05) | upstream | — |
 | 10 | Open Climbs feature parity: 25 `it.todo` in `tests/parity/open-climbs.test.ts` | dev | Switch |
 | 11 | Content from MMS ([below](#content-needed-from-mms)); then set `previewNotice = ''` | officers | Remove preview banner |
-| 12 | Create `development` branch on GitHub; protect `development` + `main` (PR, Quality Gates required, no force push); `production` environment with reviewer | Owee | SDLC flow |
+| 12 | ~~SDLC setup~~ (done 2026-11-05): `development` default branch; `development` + `main` protected (PR, Quality Gates required, no force push, admins included); `production` environment needs Owee approval, protected branches only | Owee | — |
 | 13 | Leads: who is TCOM + notification recipients (by role); official FB page URL; is Viber a must (likely paid)? | leads | L2 |
 | 14 | Leads: real active-member count + recent climb photos with consent; ITI + expected expenses per upcoming climb; who approves reviews | leads, climb officers | L4, L5, L6 |
 | 15 | Officers confirm glossary wording (`src/frontend/data/glossary.ts`) and the new hero line | officers | — |
+| 16 | MMS Google Forms (MMS Gmail) for all surveys incl. joiner experience; replace `formUrl: '#'` in `content.ts` | officers | L6, L7 |
+| 17 | Officers confirm climb-finder rules + tips (`climbFinder` in `content.ts`) and rate climbs marked "Not yet rated" | climbs committee | L7 |
+| 18 | Ported Open Climbs functions over complexity limits (warn-only override in `eslint.config.js`): refactor `reminders`, `registrations`, `climbs`, `users`, `promoteFromWaitlist` when touched. Replace `ogPrerender` (social cards) + `cspReport` with Cloudflare equivalents | dev | Phase 3 |
 
 ## Leads input (2026-11-05)
 
@@ -40,9 +43,9 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | L4 | Active members + recent climb photos on home | stats + photo strip on home, real data only | waiting on item 14 |
 | L5 | Join a climb → details (ITI, expected expenses) → join per climb | per-climb detail page; Join → that climb on Open Climbs; later native ([phases 3, 5](#open-climbs-migration)) | waiting on item 14 |
 | L6 | Review/feedback for past climbs, moderated | Google Form → officers approve → quotes block; later in-app rating | waiting on item 14 |
-| L7 | Joiner experience survey; recommend a climb to first-timers | Google Form on Surveys page; rule-based pick (no experience → easy/moderate minor climbs) | next |
+| L7 | Joiner experience survey; recommend a climb to first-timers | "Joiner experience survey" on `/surveys` ("Form coming soon" until a real link); climb finder on `/activities/open-climbs`: rules by difficulty in `content.ts` (`climbFinder`) | built; waits on items 16, 17 |
 | L8 | Define BMCM, AMC, LNT, SART | tooltips (`GlossaryText`) + `/about/glossary` | **done**, wording to confirm (item 15) |
-| L9 | Not one long page on phone; summary home or search | each section has its own page (`/about` …); home shows 3 cards + "See all" | **done**; in-browser search next |
+| L9 | Not one long page on phone; summary home or search | each section has its own page (`/about` …); home shows 3 cards + "See all"; in-browser search `/search?q=` (`lib/search.ts`, `data/searchIndex.ts`), Search link in nav | **done** |
 
 ## Features
 
@@ -87,7 +90,7 @@ Every feature of [mms-open-climbs](https://github.com/Oweeboi011/mms-open-climbs
 | # | Phase | Done when |
 |---|---|---|
 | 0 | Decide (ADR 0005 accepted 2026-11-05) | laptop check (open item 6) |
-| 1 | Project: MMS billing + hard stop, Auth (email + Google, domain www), Firestore + Storage asia-southeast1, rules/indexes/functions here (emails off) | rules + functions tests pass on emulator |
+| 1 | Project: hard stop (interim Owee billing, open item 1), Auth (email + Google, domain www), Firestore + Storage asia-southeast1, rules/indexes/functions here (emails off). Rules + indexes ported (`src/backend/firebase`); functions ported (ESM, `asia-southeast1`, emails off, 180 tests) | rules + functions tests pass on emulator |
 | 2 | Sync: first full copy | counts match; an existing user signs in |
 | 3 | Public read: schedule, event page | matches old site |
 | 4 | Accounts: log in, reset, My Details, My Registrations, notifications | existing users see their data |

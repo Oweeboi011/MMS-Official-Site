@@ -11,7 +11,7 @@ For MMS officers and members: what the site does and how to get changes made. De
 | About · Explore · Activities · Training · Community · Media | subpages (history, mountains Top 100, BMC, Outreach, SART, albums, videos, surveys, glossary…) |
 | Banner | "Preview site": content is sample until officers confirm it |
 
-Old Google Sites links redirect to the matching new page.
+Old Google Sites links redirect to the matching new page. **Search** (top right) finds any page, climb, news item, or MMS term.
 
 ## Getting content changed
 

@@ -21,7 +21,7 @@ flowchart LR
   U[Usage] --> BA[MMS billing account] --> BU[Budget US$1.70/mo<br/>alerts only] -->|Pub/Sub billing-budget| F[billingHardStop] -->|cost ≥ budget| X[billing unlinked:<br/>Blaze services stop]
 ```
 
-- Billing account must be **MMS-owned** (treasurer billing admin, ≥ 2 officers). Today still on Owee's: [open items](../solution-plan/SOLUTION-PLAN.md#open-items).
+- Billing account must be **MMS-owned** (treasurer billing admin, ≥ 2 officers). Interim: Owee's account, same budget + hard stop wired ([open item 1](../solution-plan/SOLUTION-PLAN.md#open-items)).
 - Budget scoped to the project. Native GCP spend caps cover only some services; the function is the real stop.
 - Alerts alone don't stop spend. Treasurer checks the bill monthly.
 

@@ -7,7 +7,7 @@ flowchart LR
   C[git commit] -->|pre-commit ~2 s| H[gitleaks + eslint, staged]
   C -->|commit-msg| M[sign-off, ≤72 chars,<br/>no AI co-author]
   L[before push] -->|npm run check ~15 s| K[all blocking gates]
-  QG[Quality Gates: PR/push development, main] --> K --> A[audit] --> B[build + perf] --> E[e2e]
+  QG[Quality Gates: PR/push development, main] --> K --> A[audit] --> B[build + perf] --> E[e2e + security rules]
   D[deploy: development → preview,<br/>main → production] --> K --> B --> W[wrangler] --> P[prod parity]
 ```
 
@@ -34,9 +34,10 @@ Generated `src/frontend/data/{credits,topMountains}.ts`: excluded from lint + du
 
 | Kind | Folder | Tool | Covers |
 |------|--------|------|--------|
-| Unit | `tests/unit` | vitest | sitemap, data invariants, helpers, backend budget logic |
+| Unit | `tests/unit` | vitest | sitemap, data invariants, helpers, backend budget logic; `tests/unit/functions` = Open Climbs functions (node env, mocked Firebase) |
 | Component | `tests/component` | vitest + Testing Library | ContentBlocks, Gallery, Nav |
 | Integration | `tests/integration` | vitest + Testing Library | every route, redirects, page flows |
+| Security rules | `tests/integration/rules.emulator.mjs` | Firebase emulators (Java), `npm run test:rules` | Firestore + Storage rules: money, roster, private files; Quality Gates only |
 | Parity | `tests/parity`, `scripts/prod-parity.mjs` | vitest todos, node | Open Climbs feature gaps; live = local build |
 | E2E | `tests/e2e` | Playwright (Chromium) | smoke on the real build |
 | Performance | `tests/performance` | node | JS ≤ 120 KB gz, CSS ≤ 20 KB gz, images ≤ 1.2 MB / 15 MB |

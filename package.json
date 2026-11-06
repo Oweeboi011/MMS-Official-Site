@@ -1,7 +1,7 @@
 {
   "name": "mms-official-site",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -23,7 +23,8 @@
     "deploy:preview": "node scripts/deploy.mjs preview",
     "deploy:prod": "node scripts/deploy.mjs main",
     "prepare": "git config core.hooksPath .githooks",
-    "test:parity": "node scripts/prod-parity.mjs"
+    "test:parity": "node scripts/prod-parity.mjs",
+    "test:rules": "npx -y firebase-tools@15.35.0 emulators:exec --config src/backend/firebase.json --only firestore,storage --project demo-rules \"node tests/integration/rules.emulator.mjs\""
   },
   "dependencies": {
     "react": "^19.0.0",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@firebase/rules-unit-testing": "5.0.2",
     "@playwright/test": "^1.64.1",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
@@ -44,6 +46,7 @@
     "eslint": "^10.13.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-sonarjs": "^4.2.2",
+    "firebase": "12.19.0",
     "globals": "^17.13.0",
     "jscpd": "^5.4.2",
     "jsdom": "^30.1.2",
@@ -56,5 +59,8 @@
     "vite": "^7.0.0",
     "vitest": "^5.0.3",
     "wrangler": "4.158.0"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "1.14.7"
   }
 }
