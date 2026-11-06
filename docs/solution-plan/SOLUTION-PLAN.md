@@ -14,7 +14,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 
 | # | Item | Owner | Blocks |
 |---|------|-------|--------|
-| 1 | MMS Google Cloud billing account; move `mms-official-site-513809` to it; US$1.70 alerts-only budget → Pub/Sub `billing-budget` | MMS Gmail owner, Owee | Open Climbs phase 1 |
+| 1 | ~~MMS Google Cloud billing account; move `mms-official-site-513809` to it; US$1.70 alerts-only budget → Pub/Sub `billing-budget`~~ (done 2026-11-06) | MMS Gmail owner, Owee | — |
 | 2 | Grant **Project Billing Manager** to `729371585953-compute@developer.gserviceaccount.com` (hard stop can't unlink billing without it) | Owee | Phase 1 |
 | 3 | ~~Merge PR #2, release v1.0.0~~ (done 2026-11-05) | Owee | — |
 | 4 | Accept Namecheap push (MMS account), auto-renew on (expires 2027-01-05); add Owee as Cloudflare Super Administrator | MMS Gmail owner | Domain safety |
