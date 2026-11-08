@@ -40,6 +40,15 @@ flowchart LR
 - Real data only from MMS. All confirmed → `previewNotice = ''`.
 - UI changed → `node tools/screenshots.mjs` (live site; pass a URL for preview/local) to refresh `docs/images/screenshots` used by README + USER-GUIDE.
 
+## Sign-in + admin (local)
+
+1. `cp .env.example .env.local`, fill `VITE_FIREBASE_API_KEY` from `cd src/backend && npx firebase-tools@15 apps:sdkconfig WEB` (keep `# gitleaks:allow` on that line).
+2. Safe testing: `VITE_USE_EMULATORS=true` + `cd src/backend && npx firebase-tools@15 emulators:start --only auth,firestore` (Java). Prod: `false`.
+3. `npm run dev` → `/account/sign-in`. First sign-in creates `users/{uid}` as `member`.
+4. Make an admin: Firebase console → Firestore (`openclimbs`) → `users/{uid}` → `role` = `admin` (rules block self-promotion). Then `/admin`.
+
+Firebase code lives only in `src/frontend/services/` and loads on `/account/*` + `/admin` only (bundle budget: `initialJs` vs `lazyJs`).
+
 ## Backend changes
 
 - Functions: `src/backend/functions/src` (ESM). Tests: `tests/unit/functions` (vitest, node env, mocked Firebase). Root `npm run check` covers them.

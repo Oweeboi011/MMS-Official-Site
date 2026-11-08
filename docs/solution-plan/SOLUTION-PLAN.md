@@ -34,7 +34,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 18 | Ported Open Climbs functions over complexity limits (warn-only override in `eslint.config.js`): refactor `reminders`, `registrations`, `climbs`, `users`, `promoteFromWaitlist` when touched. Replace `ogPrerender` (social cards) + `cspReport` with Cloudflare equivalents | dev | Phase 3 |
 | 19 | ~~Phase 1 finish~~ (done 2026-11-08): Google sign-in on (support email Owee's Gmail for now, item 1). Brevo secrets are placeholders until Phase 4 (item 8); `GITHUB_TOKEN` is a fine-grained PAT: renew before its GitHub expiry | Owee | — |
 | 20 | Apply `storage-lifecycle.json` + `cors.json` to the bucket (`gcloud storage buckets update gs://mms-official-site-513809.firebasestorage.app --lifecycle-file=… --cors-file=…`; gcloud blocked on company network). Officers pick retention: file says 730 days, [SECURITY](../guides/SECURITY.md#privacy-ra-10173) says medical certs + receipts 90 days after the climb | Owee, officers | Phase 3 (uploads) |
-| 21 | Register Firebase web app (none yet: `apps:list` empty) + App Check; build `src/frontend/services/` (Firebase init, auth state, data reads); config via `VITE_*` | dev | Phase 3 |
+| 21 | Firebase web app **registered 2026-11-09** (`1:729371585953:web:3bc72ba88bd5b127fd2fe0`). **Built:** `src/frontend/services/` (Firebase lazy-loaded, sign-in email + Google, account state, CRUD), `/account/sign-in`, `/admin` editor for every site collection. Left: App Check; restrict the web API key to site domains (Google Cloud → Credentials); add preview hosts to Auth authorized domains; public pages read Firestore with `content.ts` fallback; `VITE_FIREBASE_*` as GitHub repo **Variables** (CD reads `vars.*`) | dev, Owee | Phase 3 |
 | 22 | **Decided 2026-11-08: all site data in Firestore.** Built: `announcements` (drafts hidden), `officers`, `surveys`, `siteSettings` (contact, socials, notices), `siteStats` (daily `refreshSiteStats`); rules + emulator tests, index. Left: deploy, seed from `content.ts` (needs item 21 or admin screens), UI reads them with `content.ts` as fallback ([gaps](#gaps-ui-vs-backend)) | dev | Phase 3 |
 | 23 | MMS-owned GCash / bank receiving account + its QR (not a personal wallet); who verifies receipts per climb ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)) | treasurer, officers | Phase 5 |
 | 24 | Site data collections ([audit](#gaps-ui-vs-backend)): `inquiries`, `reviews`, `faqs`, `glossary`, `media`, plus leadership (`officers` by body + past terms, `committees`, owner ask 2026-11-09) rules + tests built. Left: deploy, seed, UI (item 21), inquiry notification (item 13). Page bodies + mountains stay in code unless officers need to edit them | dev | Phase 3–6 |
@@ -48,6 +48,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 32 | **Privacy (RA 10173):** `/privacy` + `/help` pages (old app has both), consent text on registration + inquiry, retention per collection (inquiries, medical certs, receipts, `pageViews`, `failedRequests`, `auditLog`), data-export on request, DPO named | officers, dev | Phase 4 |
 | 33 | **Firestore free tier guard:** quota applies to the project's first database only ([Firebase pricing](https://firebase.google.com/docs/firestore/pricing)); `openclimbs` is the only one. Never delete it or add a second database | Owee | — |
 | 34 | **Admin scripts** not ported: first-admin bootstrap (`set-admin`), `grant-email-members` (the `users` rule comment points to it; path missing here), `purge-admin-pageviews`, emulator seed. Backfills (`backfill-climb-denorm`, `backfill-member-details`) only if synced data still needs them. Old `set-admin` uses the CLI token + REST: rewrite for `mms-official-site-513809`, never commit uids | dev | Phase 2 |
+| 35 | **Climb history per member** (owner ask 2026-11-09, planned): `refreshSiteStats` also writes private `memberStats/{uid}` (`climbCount`, `climbs` newest first, `lastClimbAt`; member + admins read, function-only write) from confirmed, non-no-show registrations on finished climbs; admin list sorted by climb count; member sees own log (replaces sample `passportStats`). Old-app history arrives with the sync (phase 2); pre-app climbs only if officers supply records | dev | Phase 4 |
 
 ## Leads input (2026-11-05)
 
@@ -250,6 +251,7 @@ Gates, tests, hooks, Quality Gates: [CODE-QUALITY](../guides/CODE-QUALITY.md). W
 | MMS photos/videos (replace Wikimedia) | Media, home |
 | Member stats · history after 2003 | Members, History |
 | Trail-class review (Top 100) · past-officer spellings | Mountains, Leadership |
+| **Past officers from way back** (Execom, TComm, BOT): name, role, term per year; entered in `/admin` → Leadership (`current` off) | Leadership |
 | Refund policy · privacy notice | Registration |
 
 ## Recommendations & enhancements

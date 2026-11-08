@@ -27,6 +27,10 @@ Secrets (Secret Manager, set before deploy): `BREVO_API_KEY`, `BREVO_FROM_EMAIL`
 
 Planned: sync (scheduled, old → new, phase 2). No payment gateway ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)).
 
+## Frontend → Firestore
+
+`src/frontend/services/siteData.ts`: list / save (merge; blanked fields deleted) / delete for the collections in `src/frontend/data/siteSchemas.ts`, which mirrors the rules. Sign-in: `services/auth.ts` (email/password, Google popup, reset). Roles come from `users/{uid}.role`; admins are set in the console.
+
 ## External APIs
 
 | API | Used by | Auth |
