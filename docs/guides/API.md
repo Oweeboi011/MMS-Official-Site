@@ -10,7 +10,7 @@ Backend endpoints and external APIs. Code: `src/backend/functions/src`.
 
 Needs Project Billing Manager on the compute service account ([open items](../solution-plan/SOLUTION-PLAN.md#open-items)). After a stop: Firebase console → Usage and billing → link billing again.
 
-### Open Climbs (ported from mms-open-climbs, phase 1; deployed 2026-11-08 except `getReleaseNoteCommitOptions`, `generateReleaseNoteDraft` until `GITHUB_TOKEN` has a value)
+### Open Climbs (ported from mms-open-climbs, phase 1; all deployed 2026-11-08)
 
 Firestore database `openclimbs`. Emails only when `EMAILS_ENABLED=true` (off until the switch). Tests: `tests/unit/functions`.
 
