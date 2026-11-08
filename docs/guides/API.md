@@ -10,7 +10,7 @@ Backend endpoints and external APIs. Code: `src/backend/functions/src`.
 
 Needs Project Billing Manager on the compute service account ([open items](../solution-plan/SOLUTION-PLAN.md#open-items)). After a stop: Firebase console → Usage and billing → link billing again.
 
-### Open Climbs (ported from mms-open-climbs, phase 1; not deployed yet)
+### Open Climbs (ported from mms-open-climbs, phase 1; functions not deployed yet)
 
 Firestore database `openclimbs`. Emails only when `EMAILS_ENABLED=true` (off until the switch). Tests: `tests/unit/functions`.
 
@@ -21,7 +21,7 @@ Firestore database `openclimbs`. Emails only when `EMAILS_ENABLED=true` (off unt
 | Scheduled | `sendReminderNotifications` (payment, paperwork, no-show) | `scheduled/reminders.js` |
 | Callables (admin) | `ensureAdminClaim`, `createUser`, `updateUserProfile`, `deleteUserAccount`, release notes ×4, insights ×4 | `callables/` |
 
-Secrets (Secret Manager, set before deploy): `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `GITHUB_TOKEN`. Env: `APP_URL`, `BILLING_EXPORT_TABLE`, `EMAILS_ENABLED`. Not ported: `ogPrerender`, `cspReport` (Firebase Hosting rewrites; open item 18).
+Secrets (Secret Manager, set before deploy): `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `GITHUB_TOKEN` (fine-grained, Contents read-only on `Oweeboi011/MMS-Official-Site`; release notes from `main` commits). Env: `APP_URL`, `BILLING_EXPORT_TABLE`, `EMAILS_ENABLED`. Not ported: `ogPrerender`, `cspReport` (Firebase Hosting rewrites; open item 18).
 
 Planned (phases 2–6): sync (scheduled, old → new), PayMongo checkout + webhook.
 

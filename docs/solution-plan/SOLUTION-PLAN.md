@@ -32,6 +32,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 16 | MMS Google Forms (MMS Gmail) for all surveys incl. joiner experience; replace `formUrl: '#'` in `content.ts` | officers | L6, L7 |
 | 17 | Officers confirm climb-finder rules + tips (`climbFinder` in `content.ts`) and rate climbs marked "Not yet rated" | climbs committee | L7 |
 | 18 | Ported Open Climbs functions over complexity limits (warn-only override in `eslint.config.js`): refactor `reminders`, `registrations`, `climbs`, `users`, `promoteFromWaitlist` when touched. Replace `ogPrerender` (social cards) + `cspReport` with Cloudflare equivalents | dev | Phase 3 |
+| 19 | Phase 1 finish: Google sign-in needs public name + support email (MMS Gmail must be a project member first; only Owee's Gmail offered); set functions secrets `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `GITHUB_TOKEN`, then `deploy --only functions` | Owee, MMS Gmail owner | Phase 1 |
 
 ## Leads input (2026-11-05)
 
@@ -90,7 +91,7 @@ Every feature of [mms-open-climbs](https://github.com/Oweeboi011/mms-open-climbs
 | # | Phase | Done when |
 |---|---|---|
 | 0 | Decide (ADR 0005 accepted 2026-11-05) | laptop check (open item 6) |
-| 1 | Project: hard stop (interim Owee billing, open item 1), Auth (email + Google, domain www), Firestore + Storage asia-southeast1, rules/indexes/functions here (emails off). Rules + indexes ported (`src/backend/firebase`); functions ported (ESM, `asia-southeast1`, emails off, 180 tests) | rules + functions tests pass on emulator |
+| 1 | Project: hard stop (interim Owee billing, open item 1), Auth (email + Google, domain www), Firestore asia-southeast1 + Storage us-east1 (no-cost bucket), rules/indexes/functions here (emails off). Live 2026-11-08: DB `openclimbs`, Firestore + Storage rules, indexes, Auth email/password, domain www. Left: Google sign-in, functions (open item 19) | rules + functions tests pass on emulator; functions deployed |
 | 2 | Sync: first full copy | counts match; an existing user signs in |
 | 3 | Public read: schedule, event page | matches old site |
 | 4 | Accounts: log in, reset, My Details, My Registrations, notifications | existing users see their data |

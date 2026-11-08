@@ -154,7 +154,7 @@ export { emailRecipients, renderReleaseNoteEmail, cursorOf, isAfter };
 
 // ── Release note draft generation from GitHub commit history ──────────────────
 const GITHUB_REPO_OWNER = "Oweeboi011";
-const GITHUB_REPO_NAME = "mms-open-climbs";
+const GITHUB_REPO_NAME = "MMS-Official-Site";
 const GITHUB_DEFAULT_BRANCH = "main";
 
 const RELEASE_NOTE_TYPE_LABELS = {
@@ -185,7 +185,7 @@ async function githubApi(path) {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/vnd.github+json",
-      "User-Agent": "mms-open-climbs-functions",
+      "User-Agent": "mms-official-site-functions",
     },
   });
   if (!res.ok) {
