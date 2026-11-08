@@ -42,12 +42,25 @@ Public read, admin write; replace the matching `content.ts` exports (kept as fal
 | `announcements` | `title` ≤ 200, `summary` ≤ 2000, `category` (Climbs, Training, Outreach, Club, SART), `publishedAt`, `published` (drafts admin-only), `updatedAt?` | `announcements` |
 | `officers` | `role`, `name` ≤ 120, `order` (int), `term?` ≤ 40, `updatedAt?` | `officers` |
 | `surveys` | `title`, `description`, `audience` (Members, Guests, Everyone), `status` (Open, Closed), `formUrl` (`https://…` or `#`), `closes?`, `updatedAt?` | `surveys` |
-| `siteSettings/site` | contact, socials, `previewNotice`, motto, heritage stats, `photoAlbumsUrl` | `contactName`, `contactPhone`, `membershipEmail`, `socials`, `previewNotice`, `stats` |
+| `siteSettings/site` | contact, socials, `previewNotice`, motto, home copy (hero meta, ticker, journey, join steps), heritage stats, `photoAlbumsUrl` | `contactName`, `contactPhone`, `membershipEmail`, `socials`, `previewNotice`, `motto`, `heroMeta`, `tickerItems`, `journey`, `joinSteps`, `stats`, `photoAlbumsUrl` |
 | `inquiries` | `name`, `email`, `interest` (membership, climb, other), `message` ≤ 2000, `phone?`, `createdAt` (server time); **guest create, admin-only read** | Google Form (L2) |
 | `reviews` | `climbTitle`, `name`, `rating` 1–5, `quote` ≤ 1000, `published`, `publishedAt`, `climbId?`, `feedbackId?`; drafts admin-only | new (L6), quoted from `feedback` with consent |
 | `faqs` | `q` ≤ 300, `a` ≤ 2000, `order` | `faqs` |
 | `glossary` | `term` ≤ 20, `name`, `about` ≤ 1000 | `glossary.ts` |
 | `media` | `kind` (video, photo, album), `title`, `url` (`https://` or `/images/`), `order`, `place?`, `poster?`, `credit?` | `videos`, `gallery`, album links |
 | `siteStats/public` | `members`, `participants`, `climbs`, `climbsCompleted`, `updatedAt`; written only by `refreshSiteStats` | live counts on home |
+
+### Every data export → where it lives (audit 2026-11-09)
+
+| Export | Store |
+|---|---|
+| `openClimbs` | `climbs` (old-app shape) |
+| `announcements`, `officers`, `surveys`, `faqs`, `glossary` | same-name collections |
+| `videos`, `gallery` | `media` |
+| `socials`, `contactName`, `contactPhone`, `membershipEmail`, `previewNotice`, `motto`, `heroMeta`, `tickerItems`, `journey`, `joinSteps`, `stats`, `photoAlbumsUrl` | `siteSettings/site` |
+| `passportStats` | derived per member from `registrations` (no collection) |
+| live counts | `siteStats/public` |
+| `mountains`, `topMountains`, `climbFinder`, `subpageContent`, program pages, `sitemap`, `legacyRedirects` | code (structured, reviewed; open item 24) |
+| `photoCredits`, `searchIndex` | generated from code |
 
 Personal data: [SECURITY](SECURITY.md#privacy-ra-10173).
