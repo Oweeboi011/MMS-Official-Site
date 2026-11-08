@@ -16,4 +16,10 @@ Problems already hit on this project.
 | First functions deploy: IAM binding error | retry once |
 | `parity FAIL` right after deploy | edge cache lag; re-run `npm run test:parity`; still failing → redeploy |
 | LF/CRLF warnings | `.editorconfig` = LF; hooks forced LF by `.gitattributes` |
+| Merged to `main` but site unchanged; CD green | CD skipped (no `CLOUDFLARE_API_TOKEN`): `npm run deploy:prod` |
+| `firebase deploy --only storage`: "Storage has not been set up" | console → Storage → Get started (once) |
+| Firestore deploy 403 / API not enabled | enable Cloud Firestore API in Google Cloud console, wait a minute |
+| `functions:secrets:set` via Claude `!`: "Secret Payload cannot be empty" | `!` can't prompt; run it in your own terminal |
+| Deploy fails: secret has no versions | `functions:secrets:get NAME` shows none → set it, then redeploy |
+| `gcloud` TLS `CERTIFICATE_VERIFY_FAILED` | network intercepts TLS; use the Firebase CLI or the console |
 | `npm audit` moderate (minimatch via eslint) | known, below the high gate ([open items](../solution-plan/SOLUTION-PLAN.md#open-items)) |

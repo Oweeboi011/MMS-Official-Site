@@ -13,7 +13,9 @@ Setup: [GETTING-STARTED](../GETTING-STARTED.md). Claude Code rules: `.claude/CLA
 | `npm run build && npm run test:perf` | build + bundle budget |
 | `npm run test:parity` | live site serves local `dist/` |
 | `npm run check:audit` | high+ vulnerabilities (site + backend) |
+| `npm run test:rules` | Firestore + Storage rules on emulators (needs Java) |
 | `npm run deploy:preview` / `deploy:prod` | [DEPLOYMENT](DEPLOYMENT.md) |
+| `cd src/backend && npx firebase-tools@15 deploy --only …` | backend ([DEPLOYMENT](DEPLOYMENT.md#backend-firebase)) |
 
 ## Workflow
 
@@ -36,6 +38,13 @@ flowchart LR
 - New subpage: add to `sitemap.ts`, then its blocks to `subpages.ts`.
 - Photos: add to `data/images.json` → `node tools/fetch-images.mjs`. Albums: Drive links ([media](../solution-plan/SOLUTION-PLAN.md#media)).
 - Real data only from MMS. All confirmed → `previewNotice = ''`.
+
+## Backend changes
+
+- Functions: `src/backend/functions/src` (ESM). Tests: `tests/unit/functions` (vitest, node env, mocked Firebase). Root `npm run check` covers them.
+- Rules: `src/backend/firebase/*.rules` → `npm run test:rules` locally, or let Quality Gates run **Security Rules Tests**.
+- New dependency: `npm i --prefix src/backend/functions -E <pkg>`.
+- Deploy after merge ([DEPLOYMENT](DEPLOYMENT.md#backend-firebase)). Emails stay off until the switch (`EMAILS_ENABLED`).
 
 ## Code style
 

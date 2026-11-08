@@ -10,7 +10,7 @@ Backend endpoints and external APIs. Code: `src/backend/functions/src`.
 
 Needs Project Billing Manager on the compute service account ([open items](../solution-plan/SOLUTION-PLAN.md#open-items)). After a stop: Firebase console → Usage and billing → link billing again.
 
-### Open Climbs (ported from mms-open-climbs, phase 1; functions not deployed yet)
+### Open Climbs (ported from mms-open-climbs, phase 1; all deployed 2026-11-08)
 
 Firestore database `openclimbs`. Emails only when `EMAILS_ENABLED=true` (off until the switch). Tests: `tests/unit/functions`.
 
@@ -23,7 +23,7 @@ Firestore database `openclimbs`. Emails only when `EMAILS_ENABLED=true` (off unt
 
 Secrets (Secret Manager, set before deploy): `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `GITHUB_TOKEN` (fine-grained, Contents read-only on `Oweeboi011/MMS-Official-Site`; release notes from `main` commits). Env: `APP_URL`, `BILLING_EXPORT_TABLE`, `EMAILS_ENABLED`. Not ported: `ogPrerender`, `cspReport` (Firebase Hosting rewrites; open item 18).
 
-Planned (phases 2–6): sync (scheduled, old → new), PayMongo checkout + webhook.
+Planned: sync (scheduled, old → new, phase 2) · `siteStats` refresh (open item 22). No payment gateway ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)).
 
 ## External APIs
 
@@ -33,4 +33,3 @@ Planned (phases 2–6): sync (scheduled, old → new), PayMongo checkout + webho
 | Cloudflare Pages | `wrangler` via `scripts/deploy.mjs` | `wrangler login` / `CLOUDFLARE_API_TOKEN` |
 | Cloud Billing | `billingHardStop` | function service account |
 | Brevo | Open Climbs emails (`email/sendEmail.js`) | `BREVO_API_KEY` (Secret Manager) |
-| PayMongo | planned | keys in Secret Manager only |

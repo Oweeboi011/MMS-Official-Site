@@ -22,6 +22,15 @@ Sample content is flagged by `previewNotice`. Real officers, fees, dates come fr
 
 `images.json`: Wikimedia photos (`slug`, `width`, `file`, `place`). `node tools/fetch-images.mjs` → `public/images/*.webp` + `credits.ts`.
 
-## Firestore (planned)
+## Firestore + Storage (Open Climbs)
 
-Same shapes as the old app: [mms-open-climbs DATA](https://github.com/Oweeboi011/mms-open-climbs/blob/main/docs/guides/DATA.md), copied here at migration phase 1. Personal data: [SECURITY](SECURITY.md#privacy-ra-10173).
+Database `openclimbs` (`asia-southeast1`) and the default Storage bucket (`us-east1`) exist since 2026-11-08 and are **empty** until the first sync (phase 2). Same shapes as the old app: [mms-open-climbs DATA](https://github.com/Oweeboi011/mms-open-climbs/blob/main/docs/guides/DATA.md).
+
+| File | Holds |
+|------|-------|
+| `src/backend/firebase/firestore.rules` | who reads/writes each collection (tests: `tests/integration/rules.emulator.mjs`) |
+| `src/backend/firebase/firestore.indexes.json` | composite indexes |
+| `src/backend/firebase/storage.rules` | private files: receipts, medical certs, documents |
+| `src/backend/firebase/storage-lifecycle.json`, `cors.json` | delete uploads after 730 days; allowed origins (www + localhost). **Not applied to the bucket yet** (open item 20) |
+
+Personal data: [SECURITY](SECURITY.md#privacy-ra-10173).
