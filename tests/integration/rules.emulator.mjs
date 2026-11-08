@@ -160,6 +160,45 @@ await no("member cannot read an email job", () => m1().doc("releaseNoteEmailJobs
 await no("admin cannot forge an email job", () => admin().collection("releaseNoteEmailJobs").add({ releaseNoteId: "rn1", status: "queued" }));
 await ok("admin deletes a release note", () => admin().doc("releaseNotes/rn-x").delete());
 
+console.log("Firestore: site content (announcements, officers, surveys, settings, stats)");
+await seed();
+await env.withSecurityRulesDisabled(async (c) => {
+  const db = c.firestore();
+  await db.doc("announcements/pub").set({ title: "T", summary: "S", category: "Club", publishedAt: ts, published: true });
+  await db.doc("announcements/draft").set({ title: "T", summary: "S", category: "Club", publishedAt: ts, published: false });
+  await db.doc("siteStats/public").set({ members: 1 });
+});
+const ann = { title: "BMC open", summary: "Lectures in November.", category: "Training", publishedAt: ts, published: true };
+await ok("guest reads a published announcement", () => anon().doc("announcements/pub").get());
+await no("guest cannot read a draft", () => anon().doc("announcements/draft").get());
+await ok("guest lists published announcements", () => anon().collection("announcements").where("published", "==", true).get());
+await no("guest cannot list all announcements", () => anon().collection("announcements").get());
+await ok("admin reads a draft", () => admin().doc("announcements/draft").get());
+await ok("admin creates an announcement", () => admin().collection("announcements").add(ann));
+await no("member cannot create an announcement", () => m1().collection("announcements").add(ann));
+await no("reject unknown category", () => admin().collection("announcements").add({ ...ann, category: "Party" }));
+await no("reject extra field", () => admin().collection("announcements").add({ ...ann, html: "<b>x</b>" }));
+await no("reject oversized summary", () => admin().collection("announcements").add({ ...ann, summary: "x".repeat(2001) }));
+await no("reject missing publishedAt", () => admin().collection("announcements").add({ title: "T", summary: "S", category: "Club", published: true }));
+const officer = { role: "President", name: "Juan Cruz", order: 1 };
+await ok("guest reads officers", () => anon().collection("officers").get());
+await ok("admin adds an officer with term", () => admin().collection("officers").add({ ...officer, term: "2026-2027" }));
+await no("member cannot add an officer", () => m1().collection("officers").add(officer));
+await no("reject non-integer order", () => admin().collection("officers").add({ ...officer, order: "1" }));
+const survey = { title: "Joiner survey", description: "D", audience: "Everyone", status: "Open", formUrl: "https://forms.gle/x" };
+await ok("admin adds a survey", () => admin().collection("surveys").add(survey));
+await ok("admin adds a survey without a form yet", () => admin().collection("surveys").add({ ...survey, formUrl: "#" }));
+await no("reject javascript: form link", () => admin().collection("surveys").add({ ...survey, formUrl: "javascript:alert(1)" }));
+// eslint-disable-next-line sonarjs/no-clear-text-protocols -- asserts the rule rejects http
+await no("reject plain http form link", () => admin().collection("surveys").add({ ...survey, formUrl: "http://forms.gle/x" }));
+await no("member cannot add a survey", () => m1().collection("surveys").add(survey));
+await ok("guest reads surveys", () => anon().collection("surveys").get());
+await ok("guest reads site settings", () => anon().doc("siteSettings/site").get());
+await ok("admin writes site settings", () => admin().doc("siteSettings/site").set({ previewNotice: "" }));
+await no("member cannot write site settings", () => m1().doc("siteSettings/site").set({ previewNotice: "" }));
+await ok("guest reads site stats", () => anon().doc("siteStats/public").get());
+await no("admin cannot forge site stats", () => admin().doc("siteStats/public").set({ members: 9999 }));
+
 console.log("Storage");
 const png = new Uint8Array([137, 80, 78, 71]);
 const sm1 = () => env.authenticatedContext("m1", { email: "m1@x.com" }).storage();

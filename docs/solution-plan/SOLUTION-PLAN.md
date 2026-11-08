@@ -35,7 +35,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 19 | ~~Phase 1 finish~~ (done 2026-11-08): Google sign-in on (support email Owee's Gmail for now, item 1). Brevo secrets are placeholders until Phase 4 (item 8); `GITHUB_TOKEN` is a fine-grained PAT: renew before its GitHub expiry | Owee | — |
 | 20 | Apply `storage-lifecycle.json` + `cors.json` to the bucket (`gcloud storage buckets update gs://mms-official-site-513809.firebasestorage.app --lifecycle-file=… --cors-file=…`; gcloud blocked on company network). Officers pick retention: file says 730 days, [SECURITY](../guides/SECURITY.md#privacy-ra-10173) says medical certs + receipts 90 days after the climb | Owee, officers | Phase 3 (uploads) |
 | 21 | Register Firebase web app (none yet: `apps:list` empty) + App Check; build `src/frontend/services/` (Firebase init, auth state, data reads); config via `VITE_*` | dev | Phase 3 |
-| 22 | **Decided 2026-11-08: all site data in Firestore.** New collections `announcements`, `officers`, `siteSettings` (contact, socials, notices), `siteStats` (function-computed): rules + rules tests + seed from `content.ts`, then UI reads them ([gaps](#gaps-ui-vs-backend)) | dev | Phase 3 |
+| 22 | **Decided 2026-11-08: all site data in Firestore.** Built: `announcements` (drafts hidden), `officers`, `surveys`, `siteSettings` (contact, socials, notices), `siteStats` (daily `refreshSiteStats`); rules + emulator tests, index. Left: deploy, seed from `content.ts` (needs item 21 or admin screens), UI reads them with `content.ts` as fallback ([gaps](#gaps-ui-vs-backend)) | dev | Phase 3 |
 | 23 | MMS-owned GCash / bank receiving account + its QR (not a personal wallet); who verifies receipts per climb ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)) | treasurer, officers | Phase 5 |
 
 ## Leads input (2026-11-05)
@@ -115,13 +115,13 @@ Checked 2026-11-08. The site reads nothing from Firebase yet; backend is live bu
 | Announcements / news | `announcements` | new `announcements` | item 22 |
 | Officers, contact person, socials, preview notice | `officers`, `contactName`, `contactPhone`, `socials`, `previewNotice` | new `officers`, `siteSettings` | item 22 |
 | Member stats (home, passport) | `stats`, `passportStats` | new `siteStats`, computed from `users`, `registrations` | item 22; scheduled function, not the browser |
-| Surveys, membership inquiry (L2) | Google Form links | form links in `siteSettings` | answers stay in Google Forms (₱0) |
+| Surveys, membership inquiry (L2) | Google Form links | new `surveys` (links only) | answers stay in Google Forms (₱0) |
 | Climb reviews (L6) | not built | `feedback` (ratings), no approval flow | phase 5 + approval field |
 | Mountains, glossary, climb finder, search | static data | not needed | stay static |
 
 Backend with no UI yet: `users`, `memberDetails`, `registrations`, `climbPrivate`, `climbInternal`, `climbExpenses`, `notifications`, `releaseNotes`, `feedback`, `pageViews`, `failedRequests`, `auditLog` → phases 3–6 (parity todos in `tests/parity`).
 
-Missing functions: sync old → new (phase 2, item 7) · `siteStats` refresh (item 22) · `ogPrerender`, `cspReport` replacements on Cloudflare (item 18). Missing services: Firebase web app + App Check (item 21) · Brevo (item 8) · MMS receiving account (item 23). No payment gateway ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)).
+Missing functions: sync old → new (phase 2, item 7) · `ogPrerender`, `cspReport` replacements on Cloudflare (item 18). Missing services: Firebase web app + App Check (item 21) · Brevo (item 8) · MMS receiving account (item 23). No payment gateway ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)).
 
 ## Payments
 

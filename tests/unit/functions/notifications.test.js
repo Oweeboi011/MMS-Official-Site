@@ -165,8 +165,9 @@ vi.mock("firebase-functions/v2/firestore", () => ({
 }));
 
 vi.mock("firebase-functions/v2/scheduler", () => ({
-  onSchedule: (_opts, fn) => {
-    scheduleHandler = fn;
+  // Two scheduled functions now: keep the reminders one.
+  onSchedule: (opts, fn) => {
+    if (opts.schedule === "every day 09:00") scheduleHandler = fn;
     return fn;
   },
 }));
