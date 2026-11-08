@@ -9,7 +9,7 @@ import { legacyRedirects, sectionPath, sitemap, subpagePath } from '../../src/fr
 describe('Home page', () => {
   it('renders the hero headline and official logo', () => {
     const { container } = renderAt('/');
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Looking fora new hobby?');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Your firstsummit starts here.');
     expect(container.querySelector('.brand-mark img')).toHaveAttribute('src', '/mms-logo.png');
   });
 
