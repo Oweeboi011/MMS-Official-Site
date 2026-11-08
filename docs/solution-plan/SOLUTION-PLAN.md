@@ -32,7 +32,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 16 | MMS Google Forms (MMS Gmail) for all surveys incl. joiner experience; replace `formUrl: '#'` in `content.ts` | officers | L6, L7 |
 | 17 | Officers confirm climb-finder rules + tips (`climbFinder` in `content.ts`) and rate climbs marked "Not yet rated" | climbs committee | L7 |
 | 18 | Ported Open Climbs functions over complexity limits (warn-only override in `eslint.config.js`): refactor `reminders`, `registrations`, `climbs`, `users`, `promoteFromWaitlist` when touched. Replace `ogPrerender` (social cards) + `cspReport` with Cloudflare equivalents | dev | Phase 3 |
-| 19 | Phase 1 finish: Google sign-in needs public name + support email (MMS Gmail must be a project member first; only Owee's Gmail offered). Brevo secrets are placeholders until Phase 4 (item 8); `GITHUB_TOKEN` expires 2027-11-08 | Owee, MMS Gmail owner | Phase 1 |
+| 19 | Phase 1 finish: Google sign-in needs public name + support email (MMS Gmail must be a project member first; only Owee's Gmail offered). Brevo secrets are placeholders until Phase 4 (item 8); `GITHUB_TOKEN` is a fine-grained PAT: renew before its GitHub expiry | Owee, MMS Gmail owner | Phase 1 |
 
 ## Leads input (2026-11-05)
 
