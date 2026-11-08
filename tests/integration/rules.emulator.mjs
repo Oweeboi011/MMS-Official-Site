@@ -195,6 +195,14 @@ await no("member cannot add a survey", () => m1().collection("surveys").add(surv
 await ok("guest reads surveys", () => anon().collection("surveys").get());
 await ok("guest reads site settings", () => anon().doc("siteSettings/site").get());
 await ok("admin writes site settings", () => admin().doc("siteSettings/site").set({ previewNotice: "" }));
+await ok("admin writes full site settings", () => admin().doc("siteSettings/site").set({ motto: "Once an MMS", socials: { facebook: "https://facebook.com/mms" }, tickerItems: ["Climb"], photoAlbumsUrl: "", updatedAt: FV.serverTimestamp() }));
+await no("reject javascript: social link", () => admin().doc("siteSettings/site").set({ socials: { facebook: "javascript:alert(1)" } }));
+await no("reject unknown social", () => admin().doc("siteSettings/site").set({ socials: { myspace: "https://x.com" } }));
+await no("reject ticker as text", () => admin().doc("siteSettings/site").set({ tickerItems: "Climb" }));
+await no("reject unknown settings field", () => admin().doc("siteSettings/site").set({ theme: "dark" }));
+await no("reject other settings doc", () => admin().doc("siteSettings/other").set({ motto: "x" }));
+await no("reject updatedAt as text", () => admin().collection("faqs").add({ q: "Q", a: "A", order: 1, updatedAt: "today" }));
+await no("reject survey closes as map", () => admin().collection("surveys").add({ ...survey, closes: { d: 1 } }));
 await no("member cannot write site settings", () => m1().doc("siteSettings/site").set({ previewNotice: "" }));
 await ok("guest reads site stats", () => anon().doc("siteStats/public").get());
 await no("admin cannot forge site stats", () => admin().doc("siteStats/public").set({ members: 9999 }));
@@ -207,7 +215,7 @@ await env.withSecurityRulesDisabled(async (c) => {
   await db.doc("reviews/pub").set({ climbTitle: "Pulag", name: "Ana", rating: 5, quote: "Great", published: true, publishedAt: ts });
   await db.doc("reviews/draft").set({ climbTitle: "Pulag", name: "Ben", rating: 4, quote: "Good", published: false, publishedAt: ts });
 });
-const inq = { name: "Ana", email: "ana@x.com", interest: "membership", message: "How do I join?", createdAt: FV.serverTimestamp() };
+const inq = { name: "Ana", email: "ana@x.com", interest: "membership", message: "How do I join?", consent: true, createdAt: FV.serverTimestamp() };
 await ok("guest sends an inquiry", () => anon().collection("inquiries").add(inq));
 await ok("guest sends an inquiry with phone", () => anon().collection("inquiries").add({ ...inq, phone: "0917 000 0000" }));
 await no("reject bad email", () => anon().collection("inquiries").add({ ...inq, email: "not-an-email" }));
@@ -215,6 +223,11 @@ await no("reject unknown interest", () => anon().collection("inquiries").add({ .
 await no("reject client-set createdAt", () => anon().collection("inquiries").add({ ...inq, createdAt: ts }));
 await no("reject oversized message", () => anon().collection("inquiries").add({ ...inq, message: "x".repeat(2001) }));
 await no("reject extra field", () => anon().collection("inquiries").add({ ...inq, status: "done" }));
+await no("reject inquiry without consent", () => anon().collection("inquiries").add({ ...inq, consent: false }));
+await no("reject empty message", () => anon().collection("inquiries").add({ ...inq, message: "" }));
+await no("reject empty name", () => anon().collection("inquiries").add({ ...inq, name: "" }));
+await no("guest cannot edit an inquiry", () => anon().doc("inquiries/i1").update({ message: "changed" }));
+await no("guest cannot delete an inquiry", () => anon().doc("inquiries/i1").delete());
 await no("guest cannot read inquiries", () => anon().doc("inquiries/i1").get());
 await no("member cannot read inquiries", () => m1().collection("inquiries").get());
 await ok("admin reads inquiries", () => admin().collection("inquiries").get());
@@ -238,6 +251,7 @@ await ok("admin adds a video", () => admin().collection("media").add(video));
 await ok("admin adds a site photo", () => admin().collection("media").add({ kind: "photo", title: "Summit", url: "/images/s.webp", order: 2 }));
 await no("reject javascript: media url", () => admin().collection("media").add({ ...video, url: "javascript:alert(1)" }));
 await no("reject unknown media kind", () => admin().collection("media").add({ ...video, kind: "audio" }));
+await no("reject javascript: poster", () => admin().collection("media").add({ ...video, poster: "javascript:alert(1)" }));
 await no("member cannot add media", () => m1().collection("media").add(video));
 
 console.log("Storage");

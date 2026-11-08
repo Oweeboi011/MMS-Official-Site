@@ -156,6 +156,7 @@ export { emailRecipients, renderReleaseNoteEmail, cursorOf, isAfter };
 const GITHUB_REPO_OWNER = "Oweeboi011";
 const GITHUB_REPO_NAME = "MMS-Official-Site";
 const GITHUB_DEFAULT_BRANCH = "main";
+const SOURCE_REPO = `${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}`;
 
 const RELEASE_NOTE_TYPE_LABELS = {
   feat: "New Features",
@@ -216,9 +217,10 @@ async function findLastSourceCommit() {
     .orderBy("createdAt", "desc")
     .limit(20)
     .get();
+  // Notes synced from the old app have no sourceRepo: their SHAs don't exist in this repo.
   for (const doc of snap.docs) {
-    const sourceCommit = doc.data().sourceCommit;
-    if (sourceCommit) return sourceCommit;
+    const { sourceCommit, sourceRepo } = doc.data();
+    if (sourceCommit && sourceRepo === SOURCE_REPO) return sourceCommit;
   }
   return null;
 }
@@ -314,7 +316,8 @@ export const generateReleaseNoteDraft = onCall(
       const commits = rawCommits.map(shapeCommit);
       const { body, dropped } = groupCommitsIntoChangelog(commits);
 
-      const untilCommit = commits[commits.length - 1] || null;
+      // compare is oldest→newest, the plain list newest→oldest.
+      const untilCommit = commits.find((c) => c.sha === until) || (since ? commits.at(-1) : commits[0]) || null;
       const dateSource = untilCommit?.date ? new Date(untilCommit.date) : new Date();
       const title = `What's New — ${dateSource.toLocaleDateString("en-PH", {
         year: "numeric",
@@ -326,6 +329,7 @@ export const generateReleaseNoteDraft = onCall(
         title,
         body,
         sourceCommit: until,
+        sourceRepo: SOURCE_REPO,
         commitCount: commits.length,
         droppedCount: dropped,
       };

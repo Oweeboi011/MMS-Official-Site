@@ -42,13 +42,13 @@ Public read, admin write; replace the matching `content.ts` exports (kept as fal
 | `announcements` | `title` ≤ 200, `summary` ≤ 2000, `category` (Climbs, Training, Outreach, Club, SART), `publishedAt`, `published` (drafts admin-only), `updatedAt?` | `announcements` |
 | `officers` | `role`, `name` ≤ 120, `order` (int), `term?` ≤ 40, `updatedAt?` | `officers` |
 | `surveys` | `title`, `description`, `audience` (Members, Guests, Everyone), `status` (Open, Closed), `formUrl` (`https://…` or `#`), `closes?`, `updatedAt?` | `surveys` |
-| `siteSettings/site` | contact, socials, `previewNotice`, motto, home copy (hero meta, ticker, journey, join steps), heritage stats, `photoAlbumsUrl` | `contactName`, `contactPhone`, `membershipEmail`, `socials`, `previewNotice`, `motto`, `heroMeta`, `tickerItems`, `journey`, `joinSteps`, `stats`, `photoAlbumsUrl` |
-| `inquiries` | `name`, `email`, `interest` (membership, climb, other), `message` ≤ 2000, `phone?`, `createdAt` (server time); **guest create, admin-only read** | Google Form (L2) |
+| `siteSettings/site` (only doc id `site`) | contact, `socials` map (facebook, instagram, youtube, tiktok → `https://` only), `previewNotice`, motto, home copy (hero meta, ticker, journey, join steps), heritage stats, `photoAlbumsUrl` | `contactName`, `contactPhone`, `membershipEmail`, `socials`, `previewNotice`, `motto`, `heroMeta`, `tickerItems`, `journey`, `joinSteps`, `stats`, `photoAlbumsUrl` |
+| `inquiries` | `name`, `email`, `interest` (membership, climb, other), `message` 1–2000, `consent: true` (privacy notice), `phone?`, `createdAt` (server time); **guest create, admin-only read**; spam guard = App Check (item 21) | Google Form (L2) |
 | `reviews` | `climbTitle`, `name`, `rating` 1–5, `quote` ≤ 1000, `published`, `publishedAt`, `climbId?`, `feedbackId?`; drafts admin-only | new (L6), quoted from `feedback` with consent |
 | `faqs` | `q` ≤ 300, `a` ≤ 2000, `order` | `faqs` |
 | `glossary` | `term` ≤ 20, `name`, `about` ≤ 1000 | `glossary.ts` |
 | `media` | `kind` (video, photo, album), `title`, `url` (`https://` or `/images/`), `order`, `place?`, `poster?`, `credit?` | `videos`, `gallery`, album links |
-| `siteStats/public` | `members`, `participants`, `climbs`, `climbsCompleted`, `updatedAt`; written only by `refreshSiteStats` | live counts on home |
+| `siteStats/public` | `accounts` (all sign-ups), `climbers` (distinct people on finished, non-cancelled climbs, no-shows out), `climbs` (non-cancelled), `climbsCompleted`, `updatedAt`; written only by `refreshSiteStats`. "Active members" waits on leads (item 14) | live counts on home |
 
 ### Every data export → where it lives (audit 2026-11-09)
 

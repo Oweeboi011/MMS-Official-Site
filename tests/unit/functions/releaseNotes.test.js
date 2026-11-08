@@ -443,7 +443,7 @@ describe("getReleaseNoteCommitOptions callable", () => {
 
   it("returns the last checkpoint and shaped commits from GitHub", async () => {
     usersStore["admin-1"] = { role: "admin" };
-    releaseNotesStore["rn1"] = { createdAt: 2, sourceCommit: "abc123" };
+    releaseNotesStore["rn1"] = { createdAt: 2, sourceCommit: "abc123", sourceRepo: "Oweeboi011/MMS-Official-Site" };
     releaseNotesStore["rn0"] = { createdAt: 1, sourceCommit: "old000" };
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -507,7 +507,7 @@ describe("generateReleaseNoteDraft callable", () => {
 
   it("returns an empty draft when since equals until", async () => {
     usersStore["admin-1"] = { role: "admin" };
-    releaseNotesStore["rn1"] = { createdAt: 1, sourceCommit: "same-sha" };
+    releaseNotesStore["rn1"] = { createdAt: 1, sourceCommit: "same-sha", sourceRepo: "Oweeboi011/MMS-Official-Site" };
 
     const result = await index.generateReleaseNoteDraft({
       auth: { uid: "admin-1" },
@@ -560,9 +560,35 @@ describe("generateReleaseNoteDraft callable", () => {
     expect(result.title).toMatch(/^What's New — /);
   });
 
+  it("ignores checkpoints from the old app's repo", async () => {
+    usersStore["admin-1"] = { role: "admin" };
+    releaseNotesStore["rn1"] = { createdAt: 1, sourceCommit: "old-repo-sha" };
+    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve([]) });
+
+    const result = await index.generateReleaseNoteDraft({ auth: { uid: "admin-1" }, data: { until: "new-sha" } });
+
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("/commits?sha=new-sha"), expect.anything());
+    expect(result.sourceRepo).toBe("Oweeboi011/MMS-Official-Site");
+  });
+
+  it("dates the title from the selected commit, not the oldest in the list", async () => {
+    usersStore["admin-1"] = { role: "admin" };
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve([
+        { sha: "newest", commit: { message: "fix: a", author: { date: "2026-03-10T00:00:00Z" } } },
+        { sha: "older", commit: { message: "fix: b", author: { date: "2026-01-05T00:00:00Z" } } },
+      ]),
+    });
+
+    const result = await index.generateReleaseNoteDraft({ auth: { uid: "admin-1" }, data: { until: "newest" } });
+
+    expect(result.title).toContain("March 10, 2026");
+  });
+
   it("compares since...until when a prior checkpoint exists", async () => {
     usersStore["admin-1"] = { role: "admin" };
-    releaseNotesStore["rn1"] = { createdAt: 1, sourceCommit: "old-sha" };
+    releaseNotesStore["rn1"] = { createdAt: 1, sourceCommit: "old-sha", sourceRepo: "Oweeboi011/MMS-Official-Site" };
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: () =>

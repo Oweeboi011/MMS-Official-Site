@@ -38,6 +38,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 22 | **Decided 2026-11-08: all site data in Firestore.** Built: `announcements` (drafts hidden), `officers`, `surveys`, `siteSettings` (contact, socials, notices), `siteStats` (daily `refreshSiteStats`); rules + emulator tests, index. Left: deploy, seed from `content.ts` (needs item 21 or admin screens), UI reads them with `content.ts` as fallback ([gaps](#gaps-ui-vs-backend)) | dev | Phase 3 |
 | 23 | MMS-owned GCash / bank receiving account + its QR (not a personal wallet); who verifies receipts per climb ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)) | treasurer, officers | Phase 5 |
 | 24 | Site data collections ([audit](#gaps-ui-vs-backend)): `inquiries`, `reviews`, `faqs`, `glossary`, `media` rules + tests built. Left: deploy, seed, UI (item 21), inquiry notification (item 13). Page bodies + mountains stay in code unless officers need to edit them | dev | Phase 3–6 |
+| 25 | Release-note drafts: this repo's commit subjects have no `type:` prefix, so docs/tooling commits land in "Improvements". Pick: conventional prefixes here, or filter by changed paths (`src/frontend`) | dev, Owee | Phase 6 |
 
 ## Leads input (2026-11-05)
 
