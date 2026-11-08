@@ -46,7 +46,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 |---|-----|------|--------|
 | L1 | Reuse Open Climbs capabilities | [migration](#open-climbs-migration); parity todos in `tests/parity` | planned |
 | L2 | Membership inquiry / climb joiner form; notify TCOM + ExeCom; Viber/text; or FB page chat | membership: MMS Google Form → email TCOM + ExeCom (₱0) · climb joiners: link to Open Climbs registration (no 2nd list) · "Message us" → FB Messenger link (₱0) · Viber/SMS out (paid, cost cap) | waiting on open item 13 |
-| L3 | Friendlier opener ("new hobby? join our hikes") | hero: "Looking for a new hobby?" + join copy | **done**, wording to confirm (item 15) |
+| L3 | Friendlier opener ("new hobby? join our hikes") | hero: "Your first summit starts here." + join copy (owner pick 2026-11-09, replaced "Looking for a new hobby?") | **done**, wording to confirm (item 15) |
 | L4 | Active members + recent climb photos on home | stats + photo strip on home, real data only | waiting on item 14 |
 | L5 | Join a climb → details (ITI, expected expenses) → join per climb | per-climb detail page; Join → that climb on Open Climbs; later native ([phases 3, 5](#open-climbs-migration)) | waiting on item 14 |
 | L6 | Review/feedback for past climbs, moderated | Google Form → officers approve → quotes block; later in-app rating | waiting on item 14 |
