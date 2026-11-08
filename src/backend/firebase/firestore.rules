@@ -448,15 +448,33 @@ service cloud.firestore {
     function shortText(d, k, max) {
       return d.get(k, '') is string && d.get(k, '').size() <= max;
     }
-    function siteDocIsBounded(d, keys) {
-      return d.keys().hasOnly(keys) && d.keys().hasAll(keys.removeAll(['updatedAt', 'closes', 'term']));
+    // Required + optional keys only; optional updatedAt must be a timestamp.
+    function hasFields(d, required, optional) {
+      return d.keys().hasAll(required) && d.keys().hasOnly(required.concat(optional)) &&
+        (!('updatedAt' in d) || d.updatedAt is timestamp);
+    }
+    function filledText(d, k, max) {
+      return d.get(k, '') is string && d.get(k, '').size() > 0 && d.get(k, '').size() <= max;
+    }
+    function httpsLink(d, k) {
+      return d.get(k, 'https://') is string && d.get(k, 'https://').size() <= 500 &&
+        d.get(k, 'https://').matches('^https://.*');
+    }
+    // Rules can't check list items: the UI renders them as text only.
+    function shortList(d, k) {
+      return !(k in d) || (d[k] is list && d[k].size() <= 20);
+    }
+    // https link or a site image under /images/.
+    function siteUrl(d, k) {
+      return d.get(k, 'https://') is string && d.get(k, 'https://').size() <= 500 &&
+        d.get(k, 'https://').matches('^(https://|/images/).*');
     }
 
     match /announcements/{id} {
       // Drafts stay hidden until published.
       allow read: if resource.data.published == true || isAdmin();
       allow create, update: if isAdmin() &&
-        siteDocIsBounded(request.resource.data, ['title', 'summary', 'category', 'publishedAt', 'published', 'updatedAt']) &&
+        hasFields(request.resource.data, ['title', 'summary', 'category', 'publishedAt', 'published'], ['updatedAt']) &&
         request.resource.data.category in ['Climbs', 'Training', 'Outreach', 'Club', 'SART'] &&
         request.resource.data.published is bool &&
         request.resource.data.publishedAt is timestamp &&
@@ -468,7 +486,7 @@ service cloud.firestore {
     match /officers/{id} {
       allow read: if true;
       allow create, update: if isAdmin() &&
-        siteDocIsBounded(request.resource.data, ['role', 'name', 'order', 'term', 'updatedAt']) &&
+        hasFields(request.resource.data, ['role', 'name', 'order'], ['term', 'updatedAt']) &&
         request.resource.data.order is int &&
         shortText(request.resource.data, 'role', 120) &&
         shortText(request.resource.data, 'name', 120) &&
@@ -479,21 +497,104 @@ service cloud.firestore {
     match /surveys/{id} {
       allow read: if true;
       allow create, update: if isAdmin() &&
-        siteDocIsBounded(request.resource.data, ['title', 'description', 'audience', 'status', 'formUrl', 'closes', 'updatedAt']) &&
+        hasFields(request.resource.data, ['title', 'description', 'audience', 'status', 'formUrl'], ['closes', 'updatedAt']) &&
         request.resource.data.audience in ['Members', 'Guests', 'Everyone'] &&
         request.resource.data.status in ['Open', 'Closed'] &&
         request.resource.data.formUrl is string &&
         request.resource.data.formUrl.matches('^(https://.*|#)$') &&
         request.resource.data.formUrl.size() <= 500 &&
         shortText(request.resource.data, 'title', 200) &&
-        shortText(request.resource.data, 'description', 2000);
+        shortText(request.resource.data, 'description', 2000) &&
+        shortText(request.resource.data, 'closes', 40);
+      allow delete: if isAdmin();
+    }
+
+    // ── Site data, open item 24 ─────────────────────────────────────────────
+    // Membership / climb inquiries (L2): anyone may send one (with privacy consent); only admins read.
+    // Spam: App Check on the client (open item 21); rules alone can't rate-limit.
+    match /inquiries/{id} {
+      allow create: if hasFields(request.resource.data, ['name', 'email', 'interest', 'message', 'consent', 'createdAt'], ['phone']) &&
+        request.resource.data.interest in ['membership', 'climb', 'other'] &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.email is string && request.resource.data.email.size() <= 200 &&
+        request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$') &&
+        request.resource.data.consent == true &&
+        filledText(request.resource.data, 'name', 120) &&
+        shortText(request.resource.data, 'phone', 40) &&
+        filledText(request.resource.data, 'message', 2000);
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Approved climb reviews (L6): admin publishes a quote from feedback/, with the member's consent.
+    match /reviews/{id} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update: if isAdmin() &&
+        hasFields(request.resource.data, ['climbTitle', 'name', 'rating', 'quote', 'published', 'publishedAt'], ['climbId', 'feedbackId', 'updatedAt']) &&
+        request.resource.data.rating is int &&
+        request.resource.data.rating >= 1 && request.resource.data.rating <= 5 &&
+        request.resource.data.published is bool &&
+        request.resource.data.publishedAt is timestamp &&
+        shortText(request.resource.data, 'climbTitle', 200) &&
+        shortText(request.resource.data, 'name', 120) &&
+        shortText(request.resource.data, 'quote', 1000);
+      allow delete: if isAdmin();
+    }
+
+    match /faqs/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin() &&
+        hasFields(request.resource.data, ['q', 'a', 'order'], ['updatedAt']) &&
+        request.resource.data.order is int &&
+        shortText(request.resource.data, 'q', 300) &&
+        shortText(request.resource.data, 'a', 2000);
+      allow delete: if isAdmin();
+    }
+
+    match /glossary/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin() &&
+        hasFields(request.resource.data, ['term', 'name', 'about'], ['updatedAt']) &&
+        shortText(request.resource.data, 'term', 20) &&
+        shortText(request.resource.data, 'name', 120) &&
+        shortText(request.resource.data, 'about', 1000);
+      allow delete: if isAdmin();
+    }
+
+    // Videos, gallery photos, album links: links only, never Drive files as media (SOLUTION-PLAN media).
+    match /media/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin() &&
+        hasFields(request.resource.data, ['kind', 'title', 'url', 'order'], ['place', 'poster', 'credit', 'updatedAt']) &&
+        request.resource.data.kind in ['video', 'photo', 'album'] &&
+        request.resource.data.order is int &&
+        siteUrl(request.resource.data, 'url') &&
+        siteUrl(request.resource.data, 'poster') &&
+        shortText(request.resource.data, 'title', 200) &&
+        shortText(request.resource.data, 'place', 200) &&
+        shortText(request.resource.data, 'credit', 300);
       allow delete: if isAdmin();
     }
 
     // One doc per concern (e.g. siteSettings/site): contact, socials, notices.
     match /siteSettings/{id} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update: if isAdmin() && id == 'site' &&
+        hasFields(request.resource.data, [], ['previewNotice', 'motto', 'membershipEmail', 'contactName', 'contactPhone',
+          'photoAlbumsUrl', 'socials', 'tickerItems', 'heroMeta', 'journey', 'joinSteps', 'stats', 'updatedAt']) &&
+        shortText(request.resource.data, 'previewNotice', 300) &&
+        shortText(request.resource.data, 'motto', 200) &&
+        shortText(request.resource.data, 'membershipEmail', 200) &&
+        shortText(request.resource.data, 'contactName', 120) &&
+        shortText(request.resource.data, 'contactPhone', 40) &&
+        (request.resource.data.get('photoAlbumsUrl', '') == '' || httpsLink(request.resource.data, 'photoAlbumsUrl')) &&
+        (!('socials' in request.resource.data) || (request.resource.data.socials is map &&
+          request.resource.data.socials.keys().hasOnly(['facebook', 'instagram', 'youtube', 'tiktok']) &&
+          httpsLink(request.resource.data.socials, 'facebook') && httpsLink(request.resource.data.socials, 'instagram') &&
+          httpsLink(request.resource.data.socials, 'youtube') && httpsLink(request.resource.data.socials, 'tiktok'))) &&
+        shortList(request.resource.data, 'tickerItems') && shortList(request.resource.data, 'heroMeta') &&
+        shortList(request.resource.data, 'journey') && shortList(request.resource.data, 'joinSteps') &&
+        shortList(request.resource.data, 'stats');
+      allow delete: if isAdmin();
     }
 
     // Written only by refreshSiteStats (Admin SDK).

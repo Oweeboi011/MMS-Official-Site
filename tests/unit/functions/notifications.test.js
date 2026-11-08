@@ -165,11 +165,7 @@ vi.mock("firebase-functions/v2/firestore", () => ({
 }));
 
 vi.mock("firebase-functions/v2/scheduler", () => ({
-  // Two scheduled functions now: keep the reminders one.
-  onSchedule: (opts, fn) => {
-    if (opts.schedule === "every day 09:00") scheduleHandler = fn;
-    return fn;
-  },
+  onSchedule: (_opts, fn) => fn,
 }));
 
 vi.mock("firebase-functions/v2/https", () => ({
@@ -208,6 +204,8 @@ beforeEach(() => {
 });
 
 const indexModule = await import("../../../src/backend/functions/src/index.js");
+// The scheduler mock returns the handler itself, so the export is the reminders handler.
+scheduleHandler = indexModule.sendReminderNotifications;
 
 describe("onRegistrationCreated", () => {
   it("does nothing when the climb no longer exists", async () => {
