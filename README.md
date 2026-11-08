@@ -30,7 +30,7 @@ flowchart LR
   F -.->|emails, off until switch| E[Brevo]
   F -->|release notes| GH[GitHub API]
   OLD[(Old app<br/>mms-open-climbs)] -.->|one-way sync, phase 2| D
-  P[PayMongo QR Ph] -.->|webhook| F
+  P[GCash / bank app] -.->|receipt upload| S
   BU[Budget US$1.70/mo] -->|Pub/Sub| H[billingHardStop] -->|unlink billing| X[Blaze stops]
 ```
 

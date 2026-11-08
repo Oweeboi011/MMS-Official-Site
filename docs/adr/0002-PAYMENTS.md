@@ -1,6 +1,6 @@
 # ADR 0002 — Payments: QR Ph via PayMongo, manual transfer as fallback
 
-- **Status:** Proposed
+- **Status:** Superseded by [ADR 0007](0007-PAYMENTS-MANUAL.md) (2026-11-08): no PayMongo.
 - **Date:** 2026-10-29
 
 ## Context

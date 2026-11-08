@@ -7,7 +7,7 @@ What we pay and who owns it. Hard cap **₱54–₱100/month** ([ADR 0001](../ad
 | Hosting, CDN, TLS, DNS | Cloudflare free (MMS) | ₱0 |
 | Auth, DB, functions, storage | Firebase Blaze `mms-official-site-513809` | ≈ ₱0 (free quota) |
 | Domain `metropolitanms.org` | Namecheap (MMS; push pending) | ₱92 (US$18.98/yr); Cloudflare Registrar ₱54 later |
-| Payments | PayMongo (planned) | per payment only |
+| Payments | GCash / QR Ph transfer to MMS account, receipt upload ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)) | ₱0 |
 | Albums | MMS Google Drive | ₱0 |
 | Officer email | Workspace for Nonprofits | ₱0 if approved |
 | Code + CI/CD | GitHub, public repo | ₱0 |
@@ -25,9 +25,9 @@ flowchart LR
 - Budget scoped to the project. Native GCP spend caps cover only some services; the function is the real stop.
 - Alerts alone don't stop spend. Treasurer checks the bill monthly.
 
-## Per-payment fees (PayMongo, +12% VAT on fee)
+## Payments
 
-On ₱3,000: QR Ph 1.34% **₱45** · online banking 0.71%/₱13.39 ₱24 · Maya 1.79% ₱60 · GCash 2.23% ₱75 · card 3.125% + ₱13.39 ₱120 · manual receipt ₱0. Payouts → MMS bank account.
+No gateway ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)): participants transfer to the MMS account by QR, upload the receipt, officers verify. ₱0 to MMS; any transfer fee is the sender's bank/wallet fee. PayMongo (ADR 0002, superseded) would have cost 1.34% + VAT per QR Ph payment (≈ ₱45 on ₱3,000).
 
 ## Stay in free quota
 

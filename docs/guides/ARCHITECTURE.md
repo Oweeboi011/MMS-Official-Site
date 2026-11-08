@@ -18,7 +18,7 @@ flowchart LR
   F -->|commits for release notes| GH[GitHub API]
   OLD[(mms-open-climbs)] -.->|sync, phase 2| D
   BU[Budget US$1.70] -->|Pub/Sub billing-budget| H[billingHardStop]
-  P[PayMongo] -.->|webhook| F
+  P[Participant GCash / bank app] -.->|receipt upload| S
 ```
 
 | Part | Tech | Where |
