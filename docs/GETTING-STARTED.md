@@ -1,6 +1,6 @@
 # Getting started
 
-MMS official site: https://www.metropolitanms.org/. New here: [OVERVIEW](guides/OVERVIEW.md) → [DEVELOPER-GUIDE](guides/DEVELOPER-GUIDE.md). Officers: [USER-GUIDE](guides/USER-GUIDE.md).
+MMS official site: https://www.metropolitanms.org/. Big picture + diagrams: [README](../README.md). New here: [OVERVIEW](guides/OVERVIEW.md) → [DEVELOPER-GUIDE](guides/DEVELOPER-GUIDE.md). Officers: [USER-GUIDE](guides/USER-GUIDE.md).
 
 ```sh
 winget install --id Gitleaks.Gitleaks -e   # once (macOS: brew install gitleaks)

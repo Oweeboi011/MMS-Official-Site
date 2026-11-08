@@ -14,7 +14,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 
 | # | Item | Owner | Blocks |
 |---|------|-------|--------|
-| 1 | MMS Google Cloud billing account; move `mms-official-site-513809` to it, recreate budget there. Interim (2026-11-06): on Owee's "Owee Billing Main" with budget `mms-official-site hard stop` (US$1.70, this project only → `billing-budget`). MMS Gmail owner invite pending | MMS Gmail owner, Owee | Open Climbs phase 1 |
+| 1 | MMS Google Cloud billing account; move `mms-official-site-513809` to it, recreate budget there. Interim (2026-11-06): on Owee's "Owee Billing Main" with budget `mms-official-site hard stop` (US$1.70, this project only → `billing-budget`). MMS Gmail owner invite pending; once a member, switch Auth Google support email to it | MMS Gmail owner, Owee | Open Climbs phase 1 |
 | 2 | ~~Grant **Project Billing Manager** to `729371585953-compute@developer.gserviceaccount.com` (hard stop can't unlink billing without it)~~ (done 2026-11-06) | Owee | — |
 | 3 | ~~Merge PR #2, release v1.0.0~~ (done 2026-11-05) | Owee | — |
 | 4 | Accept Namecheap push (MMS account), auto-renew on (expires 2027-01-05); add Owee as Cloudflare Super Administrator | MMS Gmail owner | Domain safety |
@@ -32,7 +32,8 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 16 | MMS Google Forms (MMS Gmail) for all surveys incl. joiner experience; replace `formUrl: '#'` in `content.ts` | officers | L6, L7 |
 | 17 | Officers confirm climb-finder rules + tips (`climbFinder` in `content.ts`) and rate climbs marked "Not yet rated" | climbs committee | L7 |
 | 18 | Ported Open Climbs functions over complexity limits (warn-only override in `eslint.config.js`): refactor `reminders`, `registrations`, `climbs`, `users`, `promoteFromWaitlist` when touched. Replace `ogPrerender` (social cards) + `cspReport` with Cloudflare equivalents | dev | Phase 3 |
-| 19 | Phase 1 finish: Google sign-in needs public name + support email (MMS Gmail must be a project member first; only Owee's Gmail offered). Brevo secrets are placeholders until Phase 4 (item 8); `GITHUB_TOKEN` is a fine-grained PAT: renew before its GitHub expiry | Owee, MMS Gmail owner | Phase 1 |
+| 19 | ~~Phase 1 finish~~ (done 2026-11-08): Google sign-in on (support email Owee's Gmail for now, item 1). Brevo secrets are placeholders until Phase 4 (item 8); `GITHUB_TOKEN` is a fine-grained PAT: renew before its GitHub expiry | Owee | — |
+| 20 | Apply `storage-lifecycle.json` + `cors.json` to the bucket (`gcloud storage buckets update gs://mms-official-site-513809.firebasestorage.app --lifecycle-file=… --cors-file=…`; gcloud blocked on company network). Officers pick retention: file says 730 days, [SECURITY](../guides/SECURITY.md#privacy-ra-10173) says medical certs + receipts 90 days after the climb | Owee, officers | Phase 3 (uploads) |
 
 ## Leads input (2026-11-05)
 
@@ -91,7 +92,7 @@ Every feature of [mms-open-climbs](https://github.com/Oweeboi011/mms-open-climbs
 | # | Phase | Done when |
 |---|---|---|
 | 0 | Decide (ADR 0005 accepted 2026-11-05) | laptop check (open item 6) |
-| 1 | Project: hard stop (interim Owee billing, open item 1), Auth (email + Google, domain www), Firestore asia-southeast1 + Storage us-east1 (no-cost bucket), rules/indexes/functions here (emails off). Live 2026-11-08: DB `openclimbs`, Firestore + Storage rules, indexes, Auth email/password, domain www, all 21 functions (emails off). Left: Google sign-in (open item 19) | rules + functions tests pass on emulator; functions deployed |
+| 1 | Project: hard stop (interim Owee billing, open item 1), Auth (email + Google, domain www), Firestore asia-southeast1 + Storage us-east1 (no-cost bucket), rules/indexes/functions here (emails off). Live 2026-11-08: DB `openclimbs`, Firestore + Storage rules, indexes, Auth email/password + Google, domain www, all 21 functions (emails off). **Done**; billing move still open (item 1) | rules + functions tests pass on emulator; functions deployed |
 | 2 | Sync: first full copy | counts match; an existing user signs in |
 | 3 | Public read: schedule, event page | matches old site |
 | 4 | Accounts: log in, reset, My Details, My Registrations, notifications | existing users see their data |
