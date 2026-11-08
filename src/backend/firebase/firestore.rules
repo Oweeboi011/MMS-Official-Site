@@ -444,6 +444,64 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ── Site content (open item 22): public read, admin write ──────────────
+    function shortText(d, k, max) {
+      return d.get(k, '') is string && d.get(k, '').size() <= max;
+    }
+    function siteDocIsBounded(d, keys) {
+      return d.keys().hasOnly(keys) && d.keys().hasAll(keys.removeAll(['updatedAt', 'closes', 'term']));
+    }
+
+    match /announcements/{id} {
+      // Drafts stay hidden until published.
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update: if isAdmin() &&
+        siteDocIsBounded(request.resource.data, ['title', 'summary', 'category', 'publishedAt', 'published', 'updatedAt']) &&
+        request.resource.data.category in ['Climbs', 'Training', 'Outreach', 'Club', 'SART'] &&
+        request.resource.data.published is bool &&
+        request.resource.data.publishedAt is timestamp &&
+        shortText(request.resource.data, 'title', 200) &&
+        shortText(request.resource.data, 'summary', 2000);
+      allow delete: if isAdmin();
+    }
+
+    match /officers/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin() &&
+        siteDocIsBounded(request.resource.data, ['role', 'name', 'order', 'term', 'updatedAt']) &&
+        request.resource.data.order is int &&
+        shortText(request.resource.data, 'role', 120) &&
+        shortText(request.resource.data, 'name', 120) &&
+        shortText(request.resource.data, 'term', 40);
+      allow delete: if isAdmin();
+    }
+
+    match /surveys/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin() &&
+        siteDocIsBounded(request.resource.data, ['title', 'description', 'audience', 'status', 'formUrl', 'closes', 'updatedAt']) &&
+        request.resource.data.audience in ['Members', 'Guests', 'Everyone'] &&
+        request.resource.data.status in ['Open', 'Closed'] &&
+        request.resource.data.formUrl is string &&
+        request.resource.data.formUrl.matches('^(https://.*|#)$') &&
+        request.resource.data.formUrl.size() <= 500 &&
+        shortText(request.resource.data, 'title', 200) &&
+        shortText(request.resource.data, 'description', 2000);
+      allow delete: if isAdmin();
+    }
+
+    // One doc per concern (e.g. siteSettings/site): contact, socials, notices.
+    match /siteSettings/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Written only by refreshSiteStats (Admin SDK).
+    match /siteStats/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     match /notifications/{notifId} {
       allow read: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
       // Only the read flag may be toggled by the owner; everything else is

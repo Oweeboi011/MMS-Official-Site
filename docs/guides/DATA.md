@@ -33,4 +33,16 @@ Database `openclimbs` (`asia-southeast1`) and the default Storage bucket (`us-ea
 | `src/backend/firebase/storage.rules` | private files: receipts, medical certs, documents |
 | `src/backend/firebase/storage-lifecycle.json`, `cors.json` | delete uploads after 730 days; allowed origins (www + localhost). **Not applied to the bucket yet** (open item 20) |
 
+### Site content collections (open item 22)
+
+Public read, admin write; replace the matching `content.ts` exports (kept as fallback).
+
+| Collection | Fields | Replaces |
+|---|---|---|
+| `announcements` | `title` ≤ 200, `summary` ≤ 2000, `category` (Climbs, Training, Outreach, Club, SART), `publishedAt`, `published` (drafts admin-only), `updatedAt?` | `announcements` |
+| `officers` | `role`, `name` ≤ 120, `order` (int), `term?` ≤ 40, `updatedAt?` | `officers` |
+| `surveys` | `title`, `description`, `audience` (Members, Guests, Everyone), `status` (Open, Closed), `formUrl` (`https://…` or `#`), `closes?`, `updatedAt?` | `surveys` |
+| `siteSettings/site` | contact, socials, `previewNotice`, motto, heritage stats, `photoAlbumsUrl` | `contactName`, `contactPhone`, `membershipEmail`, `socials`, `previewNotice`, `stats` |
+| `siteStats/public` | `members`, `participants`, `climbs`, `climbsCompleted`, `updatedAt`; written only by `refreshSiteStats` | live counts on home |
+
 Personal data: [SECURITY](SECURITY.md#privacy-ra-10173).

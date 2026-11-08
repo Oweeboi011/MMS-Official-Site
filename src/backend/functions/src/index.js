@@ -40,6 +40,7 @@ export { onRegistrationCreated, onRegistrationUpdated, onRegistrationDeleted } f
 export { onRegistrationDetailsWritten } from './triggers/memberDetails.js';
 export { onClimbUpdated } from './triggers/climbs.js';
 export { sendReminderNotifications } from './scheduled/reminders.js';
+export { refreshSiteStats } from './scheduled/siteStats.js';
 export { syncAdminClaim } from './triggers/adminClaim.js';
 export { ensureAdminClaim, createUser, updateUserProfile, deleteUserAccount } from './callables/users.js';
 export { sendReleaseNoteEmail, previewReleaseNoteEmail, getReleaseNoteCommitOptions, generateReleaseNoteDraft } from './callables/releaseNotes.js';

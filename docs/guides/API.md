@@ -18,12 +18,12 @@ Firestore database `openclimbs`. Emails only when `EMAILS_ENABLED=true` (off unt
 |-------|-----------|------|
 | Registration triggers | `onRegistrationCreated`, `onRegistrationUpdated`, `onRegistrationDeleted`, `onRegistrationDetailsWritten` | `triggers/registrations.js`, `triggers/memberDetails.js` |
 | Climb + admin triggers | `onClimbUpdated`, `syncAdminClaim`, `onReleaseNoteEmailJobCreated` | `triggers/` |
-| Scheduled | `sendReminderNotifications` (payment, paperwork, no-show) | `scheduled/reminders.js` |
+| Scheduled | `sendReminderNotifications` (payment, paperwork, no-show) · `refreshSiteStats` (daily 03:00 Manila → `siteStats/public`: members, confirmed participants, climbs, completed) | `scheduled/` |
 | Callables (admin) | `ensureAdminClaim`, `createUser`, `updateUserProfile`, `deleteUserAccount`, release notes ×4, insights ×4 | `callables/` |
 
 Secrets (Secret Manager, set before deploy): `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `GITHUB_TOKEN` (fine-grained, Contents read-only on `Oweeboi011/MMS-Official-Site`; release notes from `main` commits). Env: `APP_URL`, `BILLING_EXPORT_TABLE`, `EMAILS_ENABLED`. Not ported: `ogPrerender`, `cspReport` (Firebase Hosting rewrites; open item 18).
 
-Planned: sync (scheduled, old → new, phase 2) · `siteStats` refresh (open item 22). No payment gateway ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)).
+Planned: sync (scheduled, old → new, phase 2). No payment gateway ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)).
 
 ## External APIs
 
