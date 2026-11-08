@@ -43,6 +43,11 @@ Public read, admin write; replace the matching `content.ts` exports (kept as fal
 | `officers` | `role`, `name` ≤ 120, `order` (int), `term?` ≤ 40, `updatedAt?` | `officers` |
 | `surveys` | `title`, `description`, `audience` (Members, Guests, Everyone), `status` (Open, Closed), `formUrl` (`https://…` or `#`), `closes?`, `updatedAt?` | `surveys` |
 | `siteSettings/site` | contact, socials, `previewNotice`, motto, heritage stats, `photoAlbumsUrl` | `contactName`, `contactPhone`, `membershipEmail`, `socials`, `previewNotice`, `stats` |
+| `inquiries` | `name`, `email`, `interest` (membership, climb, other), `message` ≤ 2000, `phone?`, `createdAt` (server time); **guest create, admin-only read** | Google Form (L2) |
+| `reviews` | `climbTitle`, `name`, `rating` 1–5, `quote` ≤ 1000, `published`, `publishedAt`, `climbId?`, `feedbackId?`; drafts admin-only | new (L6), quoted from `feedback` with consent |
+| `faqs` | `q` ≤ 300, `a` ≤ 2000, `order` | `faqs` |
+| `glossary` | `term` ≤ 20, `name`, `about` ≤ 1000 | `glossary.ts` |
+| `media` | `kind` (video, photo, album), `title`, `url` (`https://` or `/images/`), `order`, `place?`, `poster?`, `credit?` | `videos`, `gallery`, album links |
 | `siteStats/public` | `members`, `participants`, `climbs`, `climbsCompleted`, `updatedAt`; written only by `refreshSiteStats` | live counts on home |
 
 Personal data: [SECURITY](SECURITY.md#privacy-ra-10173).

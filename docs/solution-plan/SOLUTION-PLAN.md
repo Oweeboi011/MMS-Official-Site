@@ -37,7 +37,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 21 | Register Firebase web app (none yet: `apps:list` empty) + App Check; build `src/frontend/services/` (Firebase init, auth state, data reads); config via `VITE_*` | dev | Phase 3 |
 | 22 | **Decided 2026-11-08: all site data in Firestore.** Built: `announcements` (drafts hidden), `officers`, `surveys`, `siteSettings` (contact, socials, notices), `siteStats` (daily `refreshSiteStats`); rules + emulator tests, index. Left: deploy, seed from `content.ts` (needs item 21 or admin screens), UI reads them with `content.ts` as fallback ([gaps](#gaps-ui-vs-backend)) | dev | Phase 3 |
 | 23 | MMS-owned GCash / bank receiving account + its QR (not a personal wallet); who verifies receipts per climb ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)) | treasurer, officers | Phase 5 |
-| 24 | Decide + build the not-yet-modeled data ([audit](#gaps-ui-vs-backend)): `inquiries`, `reviews`, `faqs`, `glossary`, `media`; page bodies + mountains stay in code unless officers need to edit them | officers, dev | Phase 3–6 |
+| 24 | Site data collections ([audit](#gaps-ui-vs-backend)): `inquiries`, `reviews`, `faqs`, `glossary`, `media` rules + tests built. Left: deploy, seed, UI (item 21), inquiry notification (item 13). Page bodies + mountains stay in code unless officers need to edit them | dev | Phase 3–6 |
 
 ## Leads input (2026-11-05)
 
@@ -120,13 +120,13 @@ Checked 2026-11-08. The site reads nothing from Firebase yet; backend is live bu
 | Climb reviews (L6) | not built | `feedback` (ratings), no approval flow | phase 5 + approval field |
 | Mountains, glossary, climb finder, search | static data | not needed | stay static |
 
-**Data audit (2026-11-09).** Old-app parity complete: all 14 Firestore collections the old app uses (`users`, `climbs`, `climbPrivate`, `climbInternal`, `climbExpenses`, `registrations`, `memberDetails`, `notifications`, `feedback`, `pageViews`, `failedRequests`, `auditLog`, `releaseNotes`, `releaseNoteEmailJobs`) and all Storage paths have rules here. Donations live on `climbs.donationDrive` + registrations, refunds on registrations (no own collection). Not yet modeled for this site (open item 24):
+**Data audit (2026-11-09).** Old-app parity complete: all 14 Firestore collections the old app uses (`users`, `climbs`, `climbPrivate`, `climbInternal`, `climbExpenses`, `registrations`, `memberDetails`, `notifications`, `feedback`, `pageViews`, `failedRequests`, `auditLog`, `releaseNotes`, `releaseNoteEmailJobs`) and all Storage paths have rules here. Donations live on `climbs.donationDrive` + registrations, refunds on registrations (no own collection). Site data added for this site (open item 24, rules + emulator tests built 2026-11-09):
 
-| Data | Today | Proposed |
+| Data | Today | Collection |
 |---|---|---|
-| Membership inquiries (L2) | Google Form | `inquiries`: guest create (bounded, rate-limited by App Check), admin read; notify TCOM + ExeCom when emails on |
+| Membership inquiries (L2) | Google Form | `inquiries`: guest create (bounded; App Check, item 21), admin read. Notify TCOM + ExeCom once recipients known (item 13) and emails on |
 | Approved climb reviews (L6) | not built; `feedback` is immutable, private | `reviews`: admin publishes a quote from `feedback` (name consent), public read |
-| FAQs, glossary, videos, gallery, join steps | static `content.ts`, `glossary.ts` | `faqs`, `glossary`, `media`: officers edit often |
+| FAQs, glossary, videos, gallery, join steps | static `content.ts`, `glossary.ts` | `faqs`, `glossary`, `media` |
 | Page bodies (`subpages.ts`, `pages.ts`), mountains (`topMountains.ts`), climb-finder rules | static, generated or structured | keep in code (reviewed, versioned, large); revisit with admin editor |
 | Survey answers | Google Forms | stay in Forms (₱0, officers own them) |
 

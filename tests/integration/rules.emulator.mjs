@@ -199,6 +199,47 @@ await no("member cannot write site settings", () => m1().doc("siteSettings/site"
 await ok("guest reads site stats", () => anon().doc("siteStats/public").get());
 await no("admin cannot forge site stats", () => admin().doc("siteStats/public").set({ members: 9999 }));
 
+console.log("Firestore: inquiries, reviews, faqs, glossary, media");
+await seed();
+await env.withSecurityRulesDisabled(async (c) => {
+  const db = c.firestore();
+  await db.doc("inquiries/i1").set({ name: "Ana", email: "ana@x.com", interest: "membership", message: "Hi", createdAt: ts });
+  await db.doc("reviews/pub").set({ climbTitle: "Pulag", name: "Ana", rating: 5, quote: "Great", published: true, publishedAt: ts });
+  await db.doc("reviews/draft").set({ climbTitle: "Pulag", name: "Ben", rating: 4, quote: "Good", published: false, publishedAt: ts });
+});
+const inq = { name: "Ana", email: "ana@x.com", interest: "membership", message: "How do I join?", createdAt: FV.serverTimestamp() };
+await ok("guest sends an inquiry", () => anon().collection("inquiries").add(inq));
+await ok("guest sends an inquiry with phone", () => anon().collection("inquiries").add({ ...inq, phone: "0917 000 0000" }));
+await no("reject bad email", () => anon().collection("inquiries").add({ ...inq, email: "not-an-email" }));
+await no("reject unknown interest", () => anon().collection("inquiries").add({ ...inq, interest: "sales" }));
+await no("reject client-set createdAt", () => anon().collection("inquiries").add({ ...inq, createdAt: ts }));
+await no("reject oversized message", () => anon().collection("inquiries").add({ ...inq, message: "x".repeat(2001) }));
+await no("reject extra field", () => anon().collection("inquiries").add({ ...inq, status: "done" }));
+await no("guest cannot read inquiries", () => anon().doc("inquiries/i1").get());
+await no("member cannot read inquiries", () => m1().collection("inquiries").get());
+await ok("admin reads inquiries", () => admin().collection("inquiries").get());
+const review = { climbTitle: "Pulag", name: "Ana", rating: 5, quote: "Best sunrise.", published: true, publishedAt: ts, feedbackId: "c1_m1" };
+await ok("guest reads a published review", () => anon().doc("reviews/pub").get());
+await no("guest cannot read a draft review", () => anon().doc("reviews/draft").get());
+await ok("guest lists published reviews", () => anon().collection("reviews").where("published", "==", true).get());
+await ok("admin publishes a review", () => admin().collection("reviews").add(review));
+await no("member cannot publish a review", () => m1().collection("reviews").add(review));
+await no("reject rating 6", () => admin().collection("reviews").add({ ...review, rating: 6 }));
+await ok("guest reads faqs", () => anon().collection("faqs").get());
+await ok("admin adds a faq", () => admin().collection("faqs").add({ q: "Do I need experience?", a: "No.", order: 1 }));
+await no("member cannot add a faq", () => m1().collection("faqs").add({ q: "Q", a: "A", order: 1 }));
+await no("reject faq without order", () => admin().collection("faqs").add({ q: "Q", a: "A" }));
+await ok("guest reads glossary", () => anon().collection("glossary").get());
+await ok("admin adds a term", () => admin().collection("glossary").add({ term: "LNT", name: "Leave No Trace", about: "Outdoor ethics." }));
+await no("member cannot add a term", () => m1().collection("glossary").add({ term: "X", name: "X", about: "X" }));
+const video = { kind: "video", title: "Pinatubo", url: "https://upload.wikimedia.org/v.webm", order: 1, poster: "/images/p.webp" };
+await ok("guest reads media", () => anon().collection("media").get());
+await ok("admin adds a video", () => admin().collection("media").add(video));
+await ok("admin adds a site photo", () => admin().collection("media").add({ kind: "photo", title: "Summit", url: "/images/s.webp", order: 2 }));
+await no("reject javascript: media url", () => admin().collection("media").add({ ...video, url: "javascript:alert(1)" }));
+await no("reject unknown media kind", () => admin().collection("media").add({ ...video, kind: "audio" }));
+await no("member cannot add media", () => m1().collection("media").add(video));
+
 console.log("Storage");
 const png = new Uint8Array([137, 80, 78, 71]);
 const sm1 = () => env.authenticatedContext("m1", { email: "m1@x.com" }).storage();
