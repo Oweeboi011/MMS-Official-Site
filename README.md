@@ -105,6 +105,7 @@ docs/           guides (what) · solution-plan (how) · adr (why)
 | Developers | [DEVELOPER-GUIDE](docs/guides/DEVELOPER-GUIDE.md) · [CODE-QUALITY](docs/guides/CODE-QUALITY.md) · [TROUBLESHOOTING](docs/guides/TROUBLESHOOTING.md) |
 | Run it | [DEPLOYMENT](docs/guides/DEPLOYMENT.md) · [BILLING](docs/guides/BILLING.md) · [SECURITY](docs/guides/SECURITY.md) |
 | Plan + open items | [SOLUTION-PLAN](docs/solution-plan/SOLUTION-PLAN.md) |
+| Gaps, roadmap, risks | [Gaps](docs/solution-plan/SOLUTION-PLAN.md#gaps-ui-vs-backend) · [Recommendations](docs/solution-plan/SOLUTION-PLAN.md#recommendations--enhancements) · [Risks](docs/solution-plan/SOLUTION-PLAN.md#risks--challenges) |
 | Why | [ADRs](docs/adr/) |
 
 Contributor rules (humans and Claude Code): [.claude/CLAUDE.md](.claude/CLAUDE.md).

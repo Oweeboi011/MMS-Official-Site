@@ -2,7 +2,7 @@
 
 How we deliver the MMS site and what it must do. Why: [ADRs](../adr/). What it is / how to run: [guides](../guides/).
 
-**Contents:** [Goal](#goal) · [Open items](#open-items) · [Leads input](#leads-input-2026-11-05) · [Features](#features) · [Architecture](#architecture) · [Open Climbs migration](#open-climbs-migration) · [Payments](#payments) · [Media](#media) · [Hosting & billing](#hosting--billing) · [Quality harness](#quality-harness) · [Content needed](#content-needed-from-mms)
+**Contents:** [Goal](#goal) · [Open items](#open-items) · [Leads input](#leads-input-2026-11-05) · [Features](#features) · [Architecture](#architecture) · [Open Climbs migration](#open-climbs-migration) · [Gaps](#gaps-ui-vs-backend) · [Payments](#payments) · [Media](#media) · [Hosting & billing](#hosting--billing) · [Quality harness](#quality-harness) · [Content needed](#content-needed-from-mms) · [Recommendations](#recommendations--enhancements) · [Risks](#risks--challenges)
 
 ## Goal
 
@@ -34,6 +34,8 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 18 | Ported Open Climbs functions over complexity limits (warn-only override in `eslint.config.js`): refactor `reminders`, `registrations`, `climbs`, `users`, `promoteFromWaitlist` when touched. Replace `ogPrerender` (social cards) + `cspReport` with Cloudflare equivalents | dev | Phase 3 |
 | 19 | ~~Phase 1 finish~~ (done 2026-11-08): Google sign-in on (support email Owee's Gmail for now, item 1). Brevo secrets are placeholders until Phase 4 (item 8); `GITHUB_TOKEN` is a fine-grained PAT: renew before its GitHub expiry | Owee | — |
 | 20 | Apply `storage-lifecycle.json` + `cors.json` to the bucket (`gcloud storage buckets update gs://mms-official-site-513809.firebasestorage.app --lifecycle-file=… --cors-file=…`; gcloud blocked on company network). Officers pick retention: file says 730 days, [SECURITY](../guides/SECURITY.md#privacy-ra-10173) says medical certs + receipts 90 days after the climb | Owee, officers | Phase 3 (uploads) |
+| 21 | Register Firebase web app (none yet: `apps:list` empty) + App Check; build `src/frontend/services/` (Firebase init, auth state, data reads); config via `VITE_*` | dev | Phase 3 |
+| 22 | Decide per item: stay static (Owee edits, ₱0) or move to Firestore (officers edit): announcements, officers + contact, member stats ([gaps](#gaps-ui-vs-backend)) | officers, Owee | Phase 3 |
 
 ## Leads input (2026-11-05)
 
@@ -102,6 +104,24 @@ Every feature of [mms-open-climbs](https://github.com/Oweeboi011/mms-open-climbs
 
 Port rules: port, don't redesign (same Firestore shapes) · JSX → TSX per file · tests move with code · old docs: copy what applies, delete rest.
 
+## Gaps: UI vs backend
+
+Checked 2026-11-08. The site reads nothing from Firebase yet; backend is live but empty.
+
+| Shown in UI | Source today | Backend | Plan |
+|---|---|---|---|
+| Open climbs list | `openClimbs` in `content.ts` | `climbs` (empty until sync) | phase 3: read `climbs` |
+| Announcements / news | `announcements` | none (old app: per-climb only) | item 22 |
+| Officers, contact person | `officers`, `contactName`, `contactPhone` | none | item 22 |
+| Member stats (home, passport) | `stats`, `passportStats` | derivable from `users`, `registrations` | item 22; count in a function, not the browser |
+| Surveys, membership inquiry (L2) | Google Form links | none | stay Google Forms (₱0) |
+| Climb reviews (L6) | not built | `feedback` (ratings), no approval flow | phase 5 + approval field |
+| Mountains, glossary, climb finder, search | static data | not needed | stay static |
+
+Backend with no UI yet: `users`, `memberDetails`, `registrations`, `climbPrivate`, `climbInternal`, `climbExpenses`, `notifications`, `releaseNotes`, `feedback`, `pageViews`, `failedRequests`, `auditLog` → phases 3–6 (parity todos in `tests/parity`).
+
+Missing functions: sync old → new (phase 2, item 7) · PayMongo checkout + webhook · `ogPrerender`, `cspReport` replacements on Cloudflare (item 18). Missing services: Firebase web app + App Check (item 21) · Brevo (item 8) · PayMongo account + KYC.
+
 ## Payments
 
 Goal: every fee collected **before the climb**, no officer advancing money. Why QR Ph: [ADR 0002](../adr/0002-PAYMENTS.md).
@@ -169,3 +189,46 @@ Gates, tests, hooks, Quality Gates: [CODE-QUALITY](../guides/CODE-QUALITY.md). W
 | Member stats · history after 2003 | Members, History |
 | Trail-class review (Top 100) · past-officer spellings | Mountains, Leadership |
 | Refund policy · privacy notice | Registration |
+
+## Recommendations & enhancements
+
+Ordered by value for cost. All within the cost cap unless marked.
+
+| # | Recommendation | Why | When |
+|---|---|---|---|
+| R1 | Services layer + auth state first (item 21), behind `VITE_WRITES_ENABLED=false` | every later phase needs it; read-only keeps sync safe | phase 3 |
+| R2 | Read climbs from Firestore; keep a static fallback if Firestore fails | one source of truth; site stays up | phase 3 |
+| R3 | Firestore `onSnapshot` only on officer screens; public pages use one-time reads + cache | stays in free read quota | phase 3+ |
+| R4 | Officer-editable announcements + officers (item 22) via a small admin form | ends "send it to Owee" bottleneck | phase 6 |
+| R5 | Stats computed by a scheduled function into one doc | 1 read per visit instead of counting | phase 6 |
+| R6 | Apply Storage lifecycle + CORS; retention set by officers (item 20) | privacy (RA 10173), storage cost | before uploads |
+| R7 | App Check (reCAPTCHA Enterprise free tier) on Firestore, Storage, callables | blocks scripted abuse that could trip the hard stop | phase 3 |
+| R8 | Uptime check (free: Cloudflare health check or GitHub Actions cron hitting www + one callable) | hard stop or expiry is silent today | soon |
+| R9 | Dependabot / Renovate (free) for both `package.json`s | ports pin exact versions; audit only catches high+ | soon |
+| R10 | Refactor the complex ported functions when touched (item 18) | warn-only override hides real complexity | ongoing |
+| R11 | Climb log / passport from real registrations | member value (Features P2–3) | after switch |
+| R12 | PWA offline climb-day sheet for officers | trailheads have no signal | after switch |
+| R13 | Tagalog copy for key pages | reach | officers decide |
+
+Not recommended: SMS / Viber notifications (paid, cost cap) · native app (out of scope) · a CMS service (paid or another account to own).
+
+## Risks & challenges
+
+| Risk | Impact | Likelihood | Mitigation |
+|---|---|---|---|
+| Single maintainer (Owee): accounts, deploys, secrets | site stalls if unavailable | high | 2-owner rule on every account; docs + runbooks here; MMS Gmail owner on Firebase (item 1) |
+| Billing on Owee's account (item 1) | personal liability on a personal card | high until moved | move to MMS billing account; budget + hard stop wired |
+| Hard stop fires (abuse, bug, loop) | all Firebase features down until relinked | low | App Check (R7), max 5 instances, uptime check (R8); relink steps in [API](../guides/API.md) |
+| Password-hash migration fails | users can't sign in, must reset | medium | test with one account in phase 2; fallback = password reset email |
+| Two systems during sync (old + new) | double emails, writes lost on new site | medium | emails + writes off until switch; one-way sync; switch checklist |
+| Storage in `us-east1`, Firestore in `asia-southeast1` | slower uploads/downloads for PH users; cross-region egress | certain, small | files are small; free tier; region fixed once created |
+| Retention mismatch (730 d file vs 90 d policy) | holds medical data longer than promised | high until fixed | item 20 before uploads open |
+| Free tiers change (Firebase, Cloudflare, Brevo) | surprise cost | low | budget alerts + hard stop; BILLING re-checked yearly |
+| Company laptops block Firebase / Cloudflare consoles (item 6) | can't operate from work | medium | CLI works; personal device fallback |
+| Network TLS interception breaks `gcloud` | can't apply bucket settings | certain on company network | console or another network (item 20) |
+| CD prod deploy skipped without Cloudflare token (item 5) | merged code not live, silently | high until fixed | `npm run deploy:prod` after merge; add token |
+| Content never confirmed by officers (items 11, 13–17) | preview banner stays; sample data public | medium | content list with owners; banner says "sample" |
+| Domain expiry 2027-01-05, auto-renew off (item 4) | site goes dark | medium | accept Namecheap push, auto-renew on |
+| Secrets typed into shells/chat | leak | medium (happened once, prefix only) | prompt-only secret entry; fine-grained, expiring tokens; rotate on doubt |
+| PayMongo KYC / refunds / disputes | payments delayed; officer workload | medium | manual receipt path stays; refund policy approved first |
+| Privacy (RA 10173): medical certs, IDs | legal + trust | medium | private bucket, rules tests, retention, DPO, consent at registration |
