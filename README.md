@@ -15,6 +15,14 @@ Details live in [`docs/`](docs/GETTING-STARTED.md). This page is the map.
 | Open Climbs migration | Phase 1 of 7 done; next: sync users + data from the old app ([plan](docs/solution-plan/SOLUTION-PLAN.md#open-climbs-migration)) |
 | Open items | [SOLUTION-PLAN → Open items](docs/solution-plan/SOLUTION-PLAN.md#open-items) (single tracker) |
 
+## Screenshots
+
+Live site, 2026-11-09 (sample content until officers confirm it). All pages: [USER-GUIDE](docs/guides/USER-GUIDE.md#whats-on-the-site).
+
+| Home | Open Climbs | Phone |
+|---|---|---|
+| ![Home page](docs/images/screenshots/home-desktop.jpg) | ![Open Climbs page](docs/images/screenshots/open-climbs-desktop.jpg) | ![Home on a phone](docs/images/screenshots/home-mobile.jpg) |
+
 ## System
 
 Solid = live. Dashed = planned.

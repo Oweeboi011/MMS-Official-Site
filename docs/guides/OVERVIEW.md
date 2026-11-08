@@ -16,7 +16,7 @@ src/frontend/     React SPA: lib/ data/ components/ pages/ App.tsx
 src/backend/      firebase.json, .firebaserc, firebase/ (rules, indexes, CORS), functions/ (own package.json)
 tests/            unit/ component/ integration/ parity/ (vitest) · e2e/ (playwright) · performance/
 scripts/          delivery: deploy.mjs, prod-parity.mjs
-tools/            dev utilities: secrets.mjs (gitleaks), fetch-images.mjs
+tools/            dev utilities: secrets.mjs (gitleaks), fetch-images.mjs, screenshots.mjs
 data/             tool inputs (images.json)
 public/           static files; _headers = Cloudflare headers + cache
 .config/          tool configs: playwright, dependency-cruiser, knip, jscpd, gitleaks, lint-staged

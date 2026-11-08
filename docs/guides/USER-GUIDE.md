@@ -11,6 +11,25 @@ For MMS officers and members: what the site does and how to get changes made. De
 | About · Explore · Activities · Training · Community · Media | subpages (history, mountains Top 100, BMC, Outreach, SART, albums, videos, surveys, glossary…) |
 | Banner | "Preview site": content is sample until officers confirm it |
 
+### Screenshots
+
+Live site, 2026-11-09. Refresh: `node tools/screenshots.mjs` ([DEVELOPER-GUIDE](DEVELOPER-GUIDE.md#editing-content)).
+
+| Page | Desktop |
+|---|---|
+| Home (`/`) | ![Home](../images/screenshots/home-desktop.jpg) |
+| Section, e.g. About (`/about`) | ![About section](../images/screenshots/about-desktop.jpg) |
+| Open Climbs + climb finder (`/activities/open-climbs`) | ![Open Climbs](../images/screenshots/open-climbs-desktop.jpg) |
+| Mountains, Top 100 (`/explore/mountains`) | ![Mountains](../images/screenshots/mountains-desktop.jpg) |
+| Glossary (`/about/glossary`) | ![Glossary](../images/screenshots/glossary-desktop.jpg) |
+| News (`/media/news`) | ![News](../images/screenshots/news-desktop.jpg) |
+| Surveys (`/surveys`) | ![Surveys](../images/screenshots/surveys-desktop.jpg) |
+| Search (`/search?q=pulag`) | ![Search results](../images/screenshots/search-desktop.jpg) |
+
+| Phone: home | Phone: About |
+|---|---|
+| ![Home on phone](../images/screenshots/home-mobile.jpg) | ![About on phone](../images/screenshots/about-mobile.jpg) |
+
 Old Google Sites links redirect to the matching new page. **Search** (top right) finds any page, climb, news item, or MMS term.
 
 ## Getting content changed

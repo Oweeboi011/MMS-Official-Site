@@ -38,6 +38,7 @@ flowchart LR
 - New subpage: add to `sitemap.ts`, then its blocks to `subpages.ts`.
 - Photos: add to `data/images.json` → `node tools/fetch-images.mjs`. Albums: Drive links ([media](../solution-plan/SOLUTION-PLAN.md#media)).
 - Real data only from MMS. All confirmed → `previewNotice = ''`.
+- UI changed → `node tools/screenshots.mjs` (live site; pass a URL for preview/local) to refresh `docs/images/screenshots` used by README + USER-GUIDE.
 
 ## Backend changes
 
