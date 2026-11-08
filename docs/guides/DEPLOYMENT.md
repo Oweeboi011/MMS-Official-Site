@@ -45,7 +45,7 @@ Project `mms-official-site-513809`. Run from `src/backend` (`firebase.json` ther
 ```sh
 cd src/backend
 npx firebase-tools@15 deploy --only firestore,storage   # rules + indexes (src/backend/firebase)
-npx firebase-tools@15 deploy --only functions           # all functions
+npx firebase-tools@15 deploy --only functions           # all functions (after firestore: new queries need their indexes built first)
 npx firebase-tools@15 deploy --only functions:<name>    # one function
 ```
 

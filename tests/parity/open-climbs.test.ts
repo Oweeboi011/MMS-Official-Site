@@ -34,3 +34,22 @@ describe('Open Climbs parity: admin', () => {
   it.todo('app insights dashboards');
   it.todo('release notes publish + tracked member email send');
 });
+
+describe('Open Climbs parity: found in plan review 2026-11-09', () => {
+  it.todo('weather forecast per climb (Open-Meteo) + PAGASA / Windy links');
+  it.todo('trail map embeds (AllTrails, Komoot, Google Maps)');
+  it.todo('packing list + Leave No Trace ethics on the climb page');
+  it.todo('registrant-only section: participants, resources, pre-climb meetings, officer contacts');
+  it.todo('admin audit log of sensitive actions');
+  it.todo('help and privacy pages');
+  it.todo('installable app: web manifest + icons');
+  it.todo('accessibility checks (axe) on key pages');
+  it.todo('verify-email banner after sign-up');
+  it.todo('edit registration details after submitting');
+  it.todo('view an uploaded receipt (receipt modal)');
+  it.todo('beginner mountaineering guide + registration and cancellation policy text');
+  it.todo('admin climb setup checklist (completeness before opening)');
+  it.todo('compress images in the browser before upload');
+  it.todo('member and admin help guides (old USER_MANUAL)');
+  it.todo('render release notes and announcements with lightweight markdown');
+});

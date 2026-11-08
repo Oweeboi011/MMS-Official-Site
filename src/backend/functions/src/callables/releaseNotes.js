@@ -191,10 +191,9 @@ async function githubApi(path) {
   });
   if (!res.ok) {
     const body = await res.text();
-    throw new HttpsError(
-      "internal",
-      `GitHub API error ${res.status}: ${body.slice(0, 300)}`,
-    );
+    const err = new HttpsError("internal", `GitHub API error ${res.status}: ${body.slice(0, 300)}`);
+    err.status = res.status;
+    throw err;
   }
   return res.json();
 }
@@ -209,20 +208,61 @@ function shapeCommit(raw) {
   };
 }
 
-// Most recent release note that recorded the commit it was generated up to —
-// this is the checkpoint the next draft should start from.
-async function findLastSourceCommit() {
+const COMPARE_PAGE = 100;
+const COMPARE_MAX_PAGES = 10;
+const SHA = /^[0-9a-f]{7,40}$/i;
+
+// Last published note's commit for this repo; notes without this sourceRepo (old app, drafts) never count.
+async function lastCheckpoint() {
   const snap = await db
     .collection("releaseNotes")
+    .where("status", "==", "published")
+    .where("sourceRepo", "==", SOURCE_REPO)
     .orderBy("createdAt", "desc")
     .limit(20)
     .get();
-  // Notes synced from the old app have no sourceRepo: their SHAs don't exist in this repo.
-  for (const doc of snap.docs) {
-    const { sourceCommit, sourceRepo } = doc.data();
-    if (sourceCommit && sourceRepo === SOURCE_REPO) return sourceCommit;
+  // Skip notes whose checkpoint isn't a sha (older code stored branch names).
+  return snap.docs.map((d) => d.data().sourceCommit).find((sha) => SHA.test(sha ?? "")) ?? null;
+}
+
+// Only main or a sha: checkpoints must sit on main, or later compares diverge.
+async function headCommit(until) {
+  if (until !== GITHUB_DEFAULT_BRANCH && !SHA.test(until ?? "")) {
+    throw new HttpsError("invalid-argument", `until must be "${GITHUB_DEFAULT_BRANCH}" or a commit sha.`);
   }
-  return null;
+  let head;
+  try {
+    head = shapeCommit(await githubApi(`/commits/${until}`));
+  } catch (err) {
+    if (err.status === 404 || err.status === 422) {
+      throw new HttpsError("invalid-argument", `Unknown commit ${until} (or GITHUB_TOKEN can't read the repo).`);
+    }
+    throw err;
+  }
+  if (until !== GITHUB_DEFAULT_BRANCH) {
+    const onMain = await githubApi(`/compare/${head.sha}...${GITHUB_DEFAULT_BRANCH}?per_page=1`);
+    if (onMain.status !== "ahead" && onMain.status !== "identical") {
+      throw new HttpsError("failed-precondition", `Commit ${head.shortSha} is not on ${GITHUB_DEFAULT_BRANCH}.`);
+    }
+  }
+  return head;
+}
+
+// All commits since..head, paged so nothing past GitHub's 250-per-response cap is lost.
+async function commitsSince(since, head) {
+  const commits = [];
+  for (let page = 1; page <= COMPARE_MAX_PAGES; page++) {
+    const res = await githubApi(`/compare/${since}...${head}?per_page=${COMPARE_PAGE}&page=${page}`);
+    if (page === 1 && res.status === "behind") {
+      throw new HttpsError("failed-precondition", "Pick a commit after the last published release note.");
+    }
+    if (page === 1 && res.status === "diverged") {
+      throw new HttpsError("failed-precondition", `The last published note's commit ${since.slice(0, 7)} is no longer on main (rewritten history): unpublish that note, then draft again.`);
+    }
+    commits.push(...(res.commits || []));
+    if (commits.length >= (res.total_commits ?? commits.length) || !(res.commits || []).length) return commits;
+  }
+  throw new HttpsError("failed-precondition", `More than ${COMPARE_PAGE * COMPARE_MAX_PAGES} commits since the last note.`);
 }
 
 function groupCommitsIntoChangelog(commits) {
@@ -272,10 +312,10 @@ export const getReleaseNoteCommitOptions = onCall(
     try {
       await requireAdmin(request.auth?.uid);
 
-      const since = await findLastSourceCommit();
-      const raw = await githubApi(
-        `/commits?sha=${GITHUB_DEFAULT_BRANCH}&per_page=30`,
-      );
+      const [since, raw] = await Promise.all([
+        lastCheckpoint(),
+        githubApi(`/commits?sha=${GITHUB_DEFAULT_BRANCH}&per_page=30`),
+      ]);
       const commits = raw.map(shapeCommit);
 
       return { since, commits };
@@ -293,33 +333,26 @@ export const generateReleaseNoteDraft = onCall(
     try {
       await requireAdmin(request.auth?.uid);
 
-      const { until } = request.data;
-      if (!until) {
-        throw new HttpsError("invalid-argument", "until (a commit sha) is required.");
-      }
-
-      const since = await findLastSourceCommit();
-
+      const [head, since] = await Promise.all([headCommit(request.data?.until), lastCheckpoint()]);
       let rawCommits;
-      if (since) {
-        if (since === until) {
-          rawCommits = [];
-        } else {
-          const compare = await githubApi(`/compare/${since}...${until}`);
-          rawCommits = compare.commits || [];
-        }
+      let truncated = false;
+      if (since === head.sha) {
+        rawCommits = [];
+      } else if (since) {
+        rawCommits = await commitsSince(since, head.sha);
       } else {
-        const list = await githubApi(`/commits?sha=${until}&per_page=50`);
-        rawCommits = list;
+        // First note for this repo: newest 50 commits only; `truncated` tells the admin form.
+        const list = await githubApi(`/commits?sha=${head.sha}&per_page=51`);
+        truncated = list.length > 50;
+        rawCommits = list.slice(0, 50);
       }
 
       const commits = rawCommits.map(shapeCommit);
       const { body, dropped } = groupCommitsIntoChangelog(commits);
 
-      // compare is oldest→newest, the plain list newest→oldest.
-      const untilCommit = commits.find((c) => c.sha === until) || (since ? commits.at(-1) : commits[0]) || null;
-      const dateSource = untilCommit?.date ? new Date(untilCommit.date) : new Date();
+      const dateSource = head.date ? new Date(head.date) : new Date();
       const title = `What's New — ${dateSource.toLocaleDateString("en-PH", {
+        timeZone: "Asia/Manila",
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -328,8 +361,9 @@ export const generateReleaseNoteDraft = onCall(
       return {
         title,
         body,
-        sourceCommit: until,
+        sourceCommit: head.sha,
         sourceRepo: SOURCE_REPO,
+        truncated,
         commitCount: commits.length,
         droppedCount: dropped,
       };

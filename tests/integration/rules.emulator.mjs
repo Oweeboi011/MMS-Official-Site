@@ -159,6 +159,14 @@ await ok("admin reads an email job", () => admin().doc("releaseNoteEmailJobs/j1"
 await no("member cannot read an email job", () => m1().doc("releaseNoteEmailJobs/j1").get());
 await no("admin cannot forge an email job", () => admin().collection("releaseNoteEmailJobs").add({ releaseNoteId: "rn1", status: "queued" }));
 await ok("admin deletes a release note", () => admin().doc("releaseNotes/rn-x").delete());
+await ok("admin saves a note with its checkpoint repo", () => admin().collection("releaseNotes").add({ status: "published", sourceCommit: "abc1234", sourceRepo: "Oweeboi011/MMS-Official-Site" }));
+await no("reject a checkpoint without its repo", () => admin().collection("releaseNotes").add({ status: "published", sourceCommit: "abc1234" }));
+await env.withSecurityRulesDisabled((c) => c.firestore().doc("releaseNotes/legacy").set({ status: "draft", sourceCommit: "abc1234", title: "Old" }));
+await ok("admin edits a legacy note without touching its checkpoint", () => admin().doc("releaseNotes/legacy").update({ title: "Fixed", status: "published" }));
+await no("reject changing a checkpoint without its repo", () => admin().doc("releaseNotes/legacy").update({ sourceCommit: "def5678" }));
+await ok("admin clears a bad checkpoint", () => admin().doc("releaseNotes/legacy").update({ sourceCommit: FV.delete() }));
+await no("reject a branch name as checkpoint", () => admin().collection("releaseNotes").add({ status: "published", sourceCommit: "main", sourceRepo: "Oweeboi011/MMS-Official-Site" }));
+await no("reject an empty checkpoint repo", () => admin().collection("releaseNotes").add({ status: "published", sourceCommit: "abc1234", sourceRepo: "" }));
 
 console.log("Firestore: site content (announcements, officers, surveys, settings, stats)");
 await seed();
@@ -166,7 +174,7 @@ await env.withSecurityRulesDisabled(async (c) => {
   const db = c.firestore();
   await db.doc("announcements/pub").set({ title: "T", summary: "S", category: "Club", publishedAt: ts, published: true });
   await db.doc("announcements/draft").set({ title: "T", summary: "S", category: "Club", publishedAt: ts, published: false });
-  await db.doc("siteStats/public").set({ members: 1 });
+  await db.doc("siteStats/public").set({ accounts: 1, climbers: 0, climbs: 0, climbsCompleted: 0 });
 });
 const ann = { title: "BMC open", summary: "Lectures in November.", category: "Training", publishedAt: ts, published: true };
 await ok("guest reads a published announcement", () => anon().doc("announcements/pub").get());
@@ -180,11 +188,21 @@ await no("reject unknown category", () => admin().collection("announcements").ad
 await no("reject extra field", () => admin().collection("announcements").add({ ...ann, html: "<b>x</b>" }));
 await no("reject oversized summary", () => admin().collection("announcements").add({ ...ann, summary: "x".repeat(2001) }));
 await no("reject missing publishedAt", () => admin().collection("announcements").add({ title: "T", summary: "S", category: "Club", published: true }));
-const officer = { role: "President", name: "Juan Cruz", order: 1 };
+const officer = { body: "execom", role: "President", name: "Juan Cruz", order: 1, current: true };
 await ok("guest reads officers", () => anon().collection("officers").get());
 await ok("admin adds an officer with term", () => admin().collection("officers").add({ ...officer, term: "2026-2027" }));
 await no("member cannot add an officer", () => m1().collection("officers").add(officer));
 await no("reject non-integer order", () => admin().collection("officers").add({ ...officer, order: "1" }));
+await ok("admin adds a past president", () => admin().collection("officers").add({ ...officer, current: false, term: "2024-2026" }));
+await no("reject unknown leadership body", () => admin().collection("officers").add({ ...officer, body: "fanclub" }));
+await no("reject past officer without a term", () => admin().collection("officers").add({ ...officer, current: false }));
+await no("reject officer without current flag", () => admin().collection("officers").add({ body: "bot", role: "Trustee", name: "A", order: 1 }));
+const committee = { tag: "Climbs", title: "Climbs Committee", headTitle: "Head", headName: "Mikee Santos", description: "Plans the calendar.", order: 1 };
+await ok("guest reads committees", () => anon().collection("committees").get());
+await ok("admin adds a committee", () => admin().collection("committees").add(committee));
+await ok("admin adds a committee with no head yet", () => admin().collection("committees").add({ ...committee, headName: "" }));
+await no("member cannot add a committee", () => m1().collection("committees").add(committee));
+await no("reject blank committee title", () => admin().collection("committees").add({ ...committee, title: " " }));
 const survey = { title: "Joiner survey", description: "D", audience: "Everyone", status: "Open", formUrl: "https://forms.gle/x" };
 await ok("admin adds a survey", () => admin().collection("surveys").add(survey));
 await ok("admin adds a survey without a form yet", () => admin().collection("surveys").add({ ...survey, formUrl: "#" }));
@@ -205,13 +223,15 @@ await no("reject updatedAt as text", () => admin().collection("faqs").add({ q: "
 await no("reject survey closes as map", () => admin().collection("surveys").add({ ...survey, closes: { d: 1 } }));
 await no("member cannot write site settings", () => m1().doc("siteSettings/site").set({ previewNotice: "" }));
 await ok("guest reads site stats", () => anon().doc("siteStats/public").get());
-await no("admin cannot forge site stats", () => admin().doc("siteStats/public").set({ members: 9999 }));
+await no("admin cannot forge site stats", () => admin().doc("siteStats/public").set({ accounts: 9999 }));
+await no("admin cannot update site stats", () => admin().doc("siteStats/public").update({ accounts: 9999 }));
+await no("admin cannot delete site stats", () => admin().doc("siteStats/public").delete());
 
 console.log("Firestore: inquiries, reviews, faqs, glossary, media");
 await seed();
 await env.withSecurityRulesDisabled(async (c) => {
   const db = c.firestore();
-  await db.doc("inquiries/i1").set({ name: "Ana", email: "ana@x.com", interest: "membership", message: "Hi", createdAt: ts });
+  await db.doc("inquiries/i1").set({ name: "Ana", email: "ana@x.com", interest: "membership", message: "Hi", consent: true, createdAt: ts });
   await db.doc("reviews/pub").set({ climbTitle: "Pulag", name: "Ana", rating: 5, quote: "Great", published: true, publishedAt: ts });
   await db.doc("reviews/draft").set({ climbTitle: "Pulag", name: "Ben", rating: 4, quote: "Good", published: false, publishedAt: ts });
 });
@@ -226,6 +246,7 @@ await no("reject extra field", () => anon().collection("inquiries").add({ ...inq
 await no("reject inquiry without consent", () => anon().collection("inquiries").add({ ...inq, consent: false }));
 await no("reject empty message", () => anon().collection("inquiries").add({ ...inq, message: "" }));
 await no("reject empty name", () => anon().collection("inquiries").add({ ...inq, name: "" }));
+await no("reject blank message", () => anon().collection("inquiries").add({ ...inq, message: "   " }));
 await no("guest cannot edit an inquiry", () => anon().doc("inquiries/i1").update({ message: "changed" }));
 await no("guest cannot delete an inquiry", () => anon().doc("inquiries/i1").delete());
 await no("guest cannot read inquiries", () => anon().doc("inquiries/i1").get());
@@ -250,6 +271,9 @@ await ok("guest reads media", () => anon().collection("media").get());
 await ok("admin adds a video", () => admin().collection("media").add(video));
 await ok("admin adds a site photo", () => admin().collection("media").add({ kind: "photo", title: "Summit", url: "/images/s.webp", order: 2 }));
 await no("reject javascript: media url", () => admin().collection("media").add({ ...video, url: "javascript:alert(1)" }));
+await no("reject image path with ..", () => admin().collection("media").add({ ...video, url: "/images/../admin" }));
+await no("reject blank faq answer", () => admin().collection("faqs").add({ q: "Q", a: "   ", order: 1 }));
+await no("reject blank announcement title", () => admin().collection("announcements").add({ ...ann, title: " " }));
 await no("reject unknown media kind", () => admin().collection("media").add({ ...video, kind: "audio" }));
 await no("reject javascript: poster", () => admin().collection("media").add({ ...video, poster: "javascript:alert(1)" }));
 await no("member cannot add media", () => m1().collection("media").add(video));

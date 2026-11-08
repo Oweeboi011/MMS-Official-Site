@@ -35,14 +35,15 @@ Database `openclimbs` (`asia-southeast1`) and the default Storage bucket (`us-ea
 
 ### Site content collections (open item 22)
 
-Public read, admin write; replace the matching `content.ts` exports (kept as fallback).
+Public read, admin write; replace the matching `content.ts` exports (kept as fallback). Required text must be non-blank; site image paths must be flat `/images/<name>.<webp|jpg|jpeg|png|svg>`.
 
 | Collection | Fields | Replaces |
 |---|---|---|
 | `announcements` | `title` ≤ 200, `summary` ≤ 2000, `category` (Climbs, Training, Outreach, Club, SART), `publishedAt`, `published` (drafts admin-only), `updatedAt?` | `announcements` |
-| `officers` | `role`, `name` ≤ 120, `order` (int), `term?` ≤ 40, `updatedAt?` | `officers` |
+| `officers` | `body` (execom, tcomm, bot), `role`, `name` ≤ 120, `order` (int), `current` (false = past, e.g. past presidents), `term?` ≤ 40, `updatedAt?` | `officers`, Leadership page (`/about/leadership` blocks in `subpages.ts`) |
+| `committees` | `tag`, `title`, `headTitle` (Head, Commander…), `headName` (blank until named), `description` ≤ 1000, `order` | Committees page (`/about/committees`) |
 | `surveys` | `title`, `description`, `audience` (Members, Guests, Everyone), `status` (Open, Closed), `formUrl` (`https://…` or `#`), `closes?`, `updatedAt?` | `surveys` |
-| `siteSettings/site` (only doc id `site`) | contact, `socials` map (facebook, instagram, youtube, tiktok → `https://` only), `previewNotice`, motto, home copy (hero meta, ticker, journey, join steps), heritage stats, `photoAlbumsUrl` | `contactName`, `contactPhone`, `membershipEmail`, `socials`, `previewNotice`, `motto`, `heroMeta`, `tickerItems`, `journey`, `joinSteps`, `stats`, `photoAlbumsUrl` |
+| `siteSettings/site` (only doc id `site`) | contact, `socials` map (facebook, instagram, youtube, tiktok → `https://` only; `content.ts` and `Footer` use `NavLink[]`: the services layer (item 21, not built) must convert), `previewNotice`, motto, home copy (hero meta, ticker, journey, join steps), heritage stats, `photoAlbumsUrl` | `contactName`, `contactPhone`, `membershipEmail`, `socials`, `previewNotice`, `motto`, `heroMeta`, `tickerItems`, `journey`, `joinSteps`, `stats`, `photoAlbumsUrl` |
 | `inquiries` | `name`, `email`, `interest` (membership, climb, other), `message` 1–2000, `consent: true` (privacy notice), `phone?`, `createdAt` (server time); **guest create, admin-only read**; spam guard = App Check (item 21) | Google Form (L2) |
 | `reviews` | `climbTitle`, `name`, `rating` 1–5, `quote` ≤ 1000, `published`, `publishedAt`, `climbId?`, `feedbackId?`; drafts admin-only | new (L6), quoted from `feedback` with consent |
 | `faqs` | `q` ≤ 300, `a` ≤ 2000, `order` | `faqs` |
@@ -56,6 +57,7 @@ Public read, admin write; replace the matching `content.ts` exports (kept as fal
 |---|---|
 | `openClimbs` | `climbs` (old-app shape) |
 | `announcements`, `officers`, `surveys`, `faqs`, `glossary` | same-name collections |
+| `/about/leadership` (Execom, TComm, BOT, past presidents), `/about/committees` blocks | `officers`, `committees` (admins update them; page text stays in code) |
 | `videos`, `gallery` | `media` |
 | `socials`, `contactName`, `contactPhone`, `membershipEmail`, `previewNotice`, `motto`, `heroMeta`, `tickerItems`, `journey`, `joinSteps`, `stats`, `photoAlbumsUrl` | `siteSettings/site` |
 | `passportStats` | derived per member from `registrations` (no collection) |
