@@ -79,6 +79,7 @@ function Schedule({ year, thisYear }: { year: number | null; thisYear: number })
   }
   return (
     <>
+      <p className="event-guide">New to mountaineering? <Link to="/activities/open-climbs/guide">Read the beginner guide</Link>: ratings, what to bring, what to expect.</p>
       <ClimbList climbs={upcoming} empty="No upcoming climbs posted yet. Check back soon." />
       <div className="event-cta"><Link className="btn btn-primary" to="/#join">Ask to join a climb <span aria-hidden="true">→</span></Link></div>
       {completed.length > 0 && (

@@ -38,6 +38,7 @@ const MyClimbsPage = lazy(() => import('./pages/MyClimbsPage'));
 const WaiverPrintPage = lazy(() => import('./pages/WaiverPrintPage'));
 const AdminClimbPage = lazy(() => import('./pages/AdminClimbPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const GuidePage = lazy(() => import('./pages/GuidePage'));
 const AdminRegistrationsPage = lazy(() => import('./pages/AdminRegistrationsPage'));
 const loading = <main className="section"><div className="shell"><p>Loading…</p></div></main>;
 
@@ -88,6 +89,7 @@ export default function App() {
         <Route path="/surveys" element={<SurveysPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/credits" element={<CreditsPage />} />
+        <Route path="/activities/open-climbs/guide" element={<RouteErrorBoundary key="guide"><Suspense fallback={loading}><GuidePage /></Suspense></RouteErrorBoundary>} />
         <Route path="/privacy" element={<RouteErrorBoundary key="privacy"><Suspense fallback={loading}><PrivacyPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/sign-in" element={<RouteErrorBoundary key="sign-in"><Suspense fallback={loading}><SignInPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/climbs/:id/register" element={<RouteErrorBoundary key="register"><Suspense fallback={loading}><RegisterPage /></Suspense></RouteErrorBoundary>} />
