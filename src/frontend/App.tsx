@@ -120,6 +120,9 @@ export default function App() {
         <Route path="/account/whats-new" element={<RouteErrorBoundary key="whats-new"><Suspense fallback={loading}><WhatsNewPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/help" element={<RouteErrorBoundary key="help"><Suspense fallback={loading}><HelpPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/privacy" element={<RouteErrorBoundary key="privacy"><Suspense fallback={loading}><PrivacyPage /></Suspense></RouteErrorBoundary>} />
+        {/* Old Open Climbs app paths: the functions' account emails still link here. */}
+        <Route path="/login" element={<Navigate to="/account/sign-in" replace />} />
+        <Route path="/my-registrations" element={<Navigate to="/account/climbs" replace />} />
         <Route path="/account/sign-in" element={<RouteErrorBoundary key="sign-in"><Suspense fallback={loading}><SignInPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/climbs/:id/register" element={<RouteErrorBoundary key="register"><Suspense fallback={loading}><RegisterPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/climbs/:id" element={<RouteErrorBoundary key="climb"><Suspense fallback={loading}><ClimbPage /></Suspense></RouteErrorBoundary>} />
