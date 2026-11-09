@@ -48,3 +48,14 @@ export function logPageView(path: string) {
 export function logClientError(source: string, message: string) {
   create('failedRequests', { type: s('client'), source: s(source.slice(0, 200)), message: s(message), path: s(location.pathname.slice(0, 300)), userId: { nullValue: null }, userRole: s('guest') }, 'createdAt');
 }
+
+// #57: CSP is enforced; each distinct blocked resource goes to the error log once per page load (replaces cspReport).
+export function watchCsp() {
+  const seen = new Set<string>();
+  document.addEventListener('securitypolicyviolation', (e) => {
+    const key = `${e.effectiveDirective} ${e.blockedURI}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    logClientError('csp', key);
+  });
+}
