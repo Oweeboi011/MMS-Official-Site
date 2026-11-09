@@ -46,7 +46,11 @@ export function watchAccount(onChange: (account: Account | null) => void, onErro
     setSignedInHint(Boolean(user));
     if (!user) return onChange(null);
     roleOf(user)
-      .then((role) => { if (call === latest) onChange({ uid: user.uid, email: user.email ?? '', role, emailVerified: user.emailVerified }); })
+      .then((role) => {
+        if (call !== latest) return;
+        setSignedInHint(true, role);
+        onChange({ uid: user.uid, email: user.email ?? '', role, emailVerified: user.emailVerified });
+      })
       .catch((e: Error) => { if (call === latest) onError(e); });
   });
 }

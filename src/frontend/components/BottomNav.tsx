@@ -1,11 +1,12 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { sectionPath, sitemap, subpagePath } from '../data/sitemap';
-import { readSignedInHint, subscribeSignedInHint } from '../lib/signedInHint';
+import { readAdminHint, readSignedInHint, subscribeSignedInHint } from '../lib/signedInHint';
 
 export default function BottomNav() {
   const [open, setOpen] = useState(false);
   const signedIn = useSyncExternalStore(subscribeSignedInHint, readSignedInHint, () => false);
+  const isAdmin = useSyncExternalStore(subscribeSignedInHint, readAdminHint, () => false);
   const { pathname, hash } = useLocation();
   const [route, setRoute] = useState(pathname + hash);
   const current = (match: boolean) => (match && !open ? 'page' : undefined);
@@ -29,6 +30,7 @@ export default function BottomNav() {
           <div className="menu-group">
             <Link className="menu-heading" to="/" onClick={() => setOpen(false)}>Home</Link>
           </div>
+          {isAdmin && <div className="menu-group"><Link className="menu-heading" to="/admin" onClick={() => setOpen(false)}>Admin</Link></div>}
           <div className="menu-group">
             <Link className="menu-heading" to={signedIn ? '/account/climbs' : '/account/sign-in'} onClick={() => setOpen(false)}>{signedIn ? 'My account' : 'Sign in'}</Link>
           </div>

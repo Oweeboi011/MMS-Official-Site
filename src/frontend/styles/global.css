@@ -205,8 +205,21 @@ button { font: inherit; }
 .consent-check { display: flex; gap: 10px; align-items: flex-start; }
 .consent-check input { margin-top: 4px; }
 .my-climbs { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
-.my-climb { padding: 20px; border: 1px solid var(--line); border-radius: 18px; }
-.my-climb h2 { margin: 0 0 4px; font-size: 1.2rem; }
+.my-climb { --accent: var(--navy); position: relative; padding: 22px 24px 22px 28px; border: 1px solid var(--line); border-radius: 22px; background: #fff; box-shadow: 0 10px 30px rgba(16,26,36,.08); overflow: hidden; }
+.my-climb::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 6px; background: var(--accent); }
+.my-climb--confirmed { --accent: var(--green, #2f7d4f); }
+.my-climb--pending { --accent: var(--gold); }
+.my-climb--cancelled { --accent: var(--red); }
+.my-climb h2 { margin: 0 0 8px; font-size: 1.35rem; line-height: 1.2; letter-spacing: -.01em; }
+.my-climb h2 a { color: var(--navy); text-decoration: none; }
+.my-climb h2 a:hover { text-decoration: underline; }
+.my-climb-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 14px; }
+.my-climb-date { color: var(--muted); font-weight: 700; font-size: .92rem; }
+.my-climb-chip { padding: 4px 11px; border-radius: 999px; background: var(--accent); color: #fff; font-size: .72rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.my-climb--pending .my-climb-chip { color: #171913; }
+.my-climb-chip.is-payment { background: var(--paper); color: var(--muted); border: 1px solid var(--line); }
+.my-climb-money { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: baseline; margin: 0 0 12px; padding: 12px 16px; border-radius: 14px; background: var(--paper); color: var(--muted); font-size: .95rem; }
+.my-climb-money strong { margin-left: auto; color: var(--navy); font-size: 1.1rem; }
 .cancel-box { display: grid; gap: 8px; margin-top: 12px; padding: 14px; border-radius: 14px; background: rgba(169, 46, 42, .06); }
 .pay-form, .doc-uploads { display: grid; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
 .pay-form h3, .doc-uploads h3 { margin: 0; font-size: 1rem; }
@@ -554,6 +567,14 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .waiver-print h4 { margin: 14px 0 4px; }
 .waiver-signature { margin-top: 28px; padding-top: 12px; border-top: 1px solid var(--ink); }
 
+/* Admin home */
+.admin-jump { margin: 0 0 24px; font-weight: 700; }
+#open-climbs, #site-content, #people, #health { margin-top: 40px; scroll-margin-top: 90px; }
+.admin-tiles { list-style: none; margin: 20px 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.admin-tiles a { display: block; height: 100%; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: #fff; text-decoration: none; color: inherit; }
+.admin-tiles a:hover, .admin-tiles a:focus-visible { border-color: var(--navy); }
+.admin-tiles strong { display: block; color: var(--navy); }
+.admin-tiles span { display: block; margin-top: 4px; font-size: .88rem; color: var(--muted); }
 /* Climb page: profile facts are reference data, not hero numbers. */
 .climb-profile .stats { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 18px; }
 .climb-profile .stat { min-height: 0; padding: 14px 16px; border-radius: 14px; }
