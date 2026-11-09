@@ -1,7 +1,9 @@
-import { gallery, photoAlbumsUrl } from '../data/content';
+import { gallery } from '../data/content';
 import { asset } from '../lib/asset';
+import { useSiteSettings } from '../services/useSiteData';
 
 export default function Gallery() {
+  const { photoAlbumsUrl } = useSiteSettings();
   return (
     <section className="section" id="gallery">
       <div className="shell">

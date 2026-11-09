@@ -1,6 +1,7 @@
-import { officers } from '../data/content';
+import { useExecom } from '../services/useSiteData';
 
 export default function About() {
+  const officers = useExecom();
   return (
     <section className="section about" id="about">
       <div className="shell">
@@ -20,11 +21,13 @@ export default function About() {
             </p>
           </div>
         </div>
-        <div className="officers">
-          {officers.map((o) => (
-            <div className="officer" key={o.role}><span>{o.role}</span><strong>{o.name}</strong></div>
-          ))}
-        </div>
+        {officers.length > 0 && (
+          <div className="officers">
+            {officers.map((o) => (
+              <div className="officer" key={o.role + o.name}><span>{o.role}</span><strong>{o.name}</strong></div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

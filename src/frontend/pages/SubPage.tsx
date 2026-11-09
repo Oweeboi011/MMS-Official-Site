@@ -4,6 +4,7 @@ import PageHero from '../components/PageHero';
 import RelatedPages from '../components/RelatedPages';
 import { subpagePath, type SiteSection, type SiteSubpage } from '../data/sitemap';
 import { subpageContent } from '../data/subpages';
+import { useLeadershipBlocks } from '../services/useSiteData';
 
 interface Props {
   section: SiteSection;
@@ -13,7 +14,8 @@ interface Props {
 }
 
 export default function SubPage({ section, page, children }: Props) {
-  const blocks = subpageContent[subpagePath(section, page)];
+  const path = subpagePath(section, page);
+  const blocks = useLeadershipBlocks(path, subpageContent[path]);
   return (
     <>
       <PageHero eyebrow={section.label} title={page.label} intro={page.summary} image={page.image ?? section.image} />

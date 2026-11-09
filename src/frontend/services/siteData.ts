@@ -1,6 +1,7 @@
 import { Timestamp, addDoc, collection, deleteDoc, deleteField, doc, getDocs, limit, query, serverTimestamp, setDoc } from 'firebase/firestore/lite';
 import { fromForm, type CollectionSpec, type FormValues } from '../data/siteSchemas';
 import { firebase } from './firebase';
+import { forgetPublicData } from './publicData';
 
 export interface Row {
   id: string;
@@ -26,9 +27,13 @@ export async function saveRow(spec: CollectionSpec, id: string | null, values: F
     else if (fields[head] && typeof fields[head] === 'object') delete (fields[head] as Record<string, unknown>)[tail];
   }
   const data = { ...fields, updatedAt: serverTimestamp() };
-  if (!docId) return (await addDoc(collection(db, spec.id), data)).id;
-  await setDoc(doc(db, spec.id, docId), data, { merge: true });
-  return docId;
+  const saved = docId ?? (await addDoc(collection(db, spec.id), data)).id;
+  if (docId) await setDoc(doc(db, spec.id, docId), data, { merge: true });
+  forgetPublicData();
+  return saved;
 }
 
-export const removeRow = (spec: CollectionSpec, id: string) => deleteDoc(doc(firebase().db, spec.id, id));
+export async function removeRow(spec: CollectionSpec, id: string): Promise<void> {
+  await deleteDoc(doc(firebase().db, spec.id, id));
+  forgetPublicData();
+}
