@@ -3,8 +3,8 @@
 // Needs your Google login to have read access on the old project and write on this one:
 //   gcloud auth application-default login
 //   node tools/admin/copy-old-climbs.mjs [--from mms-open-climbs] [--project <id>] [--apply] [--overwrite]
-import { describe, planCopy } from './copyPlan.mjs';
-import { args, connect, connectNamed, main } from './firebaseAdmin.mjs';
+import { describe, normalizeDates, planCopy } from './copyPlan.mjs';
+import { Timestamp, args, connect, connectNamed, main } from './firebaseAdmin.mjs';
 
 const BATCH = 400;
 
@@ -18,7 +18,7 @@ await main(async () => {
 
   const target = connect(project).db;
   const old = connectNamed('old', from);
-  const source = (await old.collection('climbs').get()).docs.map((d) => ({ id: d.id, data: d.data() }));
+  const source = (await old.collection('climbs').get()).docs.map((d) => ({ id: d.id, data: normalizeDates(d.data(), (date) => Timestamp.fromDate(date)) }));
   const existing = new Set((await target.collection('climbs').select().get()).docs.map((d) => d.id));
   const plan = planCopy(source, existing, overwrite);
 
