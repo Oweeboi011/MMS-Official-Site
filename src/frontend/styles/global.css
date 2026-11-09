@@ -478,6 +478,13 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .editor-list ul { display: grid; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
 .editor-form { display: grid; gap: 14px; max-width: 640px; }
 .editor-field { display: grid; gap: 6px; }
+.records { display: grid; gap: 8px; overflow-x: auto; }
+.records table { border-collapse: collapse; min-width: 100%; }
+.records th { text-align: left; font-size: .78rem; padding: 0 6px 4px 0; }
+.records td { padding: 0 6px 6px 0; vertical-align: middle; }
+.records td input[type="text"], .records td select { width: 100%; min-width: 90px; }
+.records-actions { white-space: nowrap; }
+.records > .chip { justify-self: start; }
 .editor-bool { grid-template-columns: auto 1fr; align-items: center; }
 .editor-bool label { order: 2; font-weight: 700; }
 .editor-actions { display: flex; gap: 12px; }

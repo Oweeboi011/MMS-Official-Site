@@ -27,6 +27,8 @@ function profile(climb: ClimbDetail): ContentBlock[] {
   return [
     ...(climb.stats.length ? [{ type: 'stats' as const, items: climb.stats }] : []),
     ...(about ? [{ type: 'text' as const, eyebrow: 'About the climb', paragraphs: about.split(/\n{2,}/) }] : []),
+    ...(climb.fees.length && active(climb) ? [{ type: 'table' as const, eyebrow: 'Fees', title: 'What it costs.', columns: ['Fee', 'Amount', 'Who pays'], rows: climb.fees }] : []),
+    ...(climb.officers.length ? [{ type: 'people' as const, eyebrow: 'Climb officers', title: 'Your team leaders.', items: climb.officers }] : []),
   ];
 }
 

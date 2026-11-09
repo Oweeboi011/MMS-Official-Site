@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { lockedKeys, toForm, validate, type CollectionSpec, type Field, type FormValues } from '../data/siteSchemas';
 import { MAX_ROWS, removeRow, saveRow, type Row } from '../services/siteData';
+import RecordsInput from './RecordsInput';
 import { useCollectionRows } from './useCollectionRows';
 
 const NEW = '__new__';
@@ -13,29 +14,37 @@ const failure = (action: 'saved' | 'deleted', e: unknown) => {
     : 'Not deleted: the database refused. Check that you are still an admin.';
 };
 
-function FieldInput({ field, value, readOnly, locked, onChange }: { field: Field; value: string | boolean; readOnly: boolean; locked: boolean; onChange: (v: string | boolean) => void }) {
+interface InputProps { field: Field; value: string | boolean; disabled: boolean; onChange: (v: string | boolean) => void }
+
+function Control({ field, value, disabled, onChange }: InputProps) {
   const id = `field-${field.key}`;
-  const common = { id, disabled: readOnly || locked };
-  let input;
-  if (field.kind === 'bool') {
-    input = <input {...common} type="checkbox" checked={value === true} onChange={(e) => onChange(e.target.checked)} />;
-  } else if (field.kind === 'select') {
-    input = (
-      <select {...common} value={String(value)} onChange={(e) => onChange(e.target.value)}>
-        <option value="">Choose…</option>
-        {field.options?.map((o) => <option key={o} value={o}>{o}</option>)}
-      </select>
-    );
-  } else if (field.kind === 'longText' || field.kind === 'lines') {
-    input = <textarea {...common} rows={field.kind === 'lines' ? 6 : 4} maxLength={field.max} value={String(value)} onChange={(e) => onChange(e.target.value)} />;
-  } else {
-    const type = { int: 'number', date: 'date', link: 'text', text: 'text' }[field.kind];
-    input = <input {...common} type={type} maxLength={field.max} value={String(value)} onChange={(e) => onChange(e.target.value)} />;
+  const text = String(value);
+  const onText = (e: { target: { value: string } }) => onChange(e.target.value);
+  switch (field.kind) {
+    case 'bool':
+      return <input id={id} disabled={disabled} type="checkbox" checked={value === true} onChange={(e) => onChange(e.target.checked)} />;
+    case 'select':
+      return (
+        <select id={id} disabled={disabled} value={text} onChange={onText}>
+          <option value="">Choose…</option>
+          {field.options?.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+      );
+    case 'records':
+      return <RecordsInput id={id} label={field.label} columns={field.columns ?? []} value={text} disabled={disabled} onChange={onChange} />;
+    case 'longText':
+    case 'lines':
+      return <textarea id={id} disabled={disabled} rows={field.kind === 'lines' ? 6 : 4} maxLength={field.max} value={text} onChange={onText} />;
+    default:
+      return <input id={id} disabled={disabled} type={{ int: 'number', date: 'date' }[field.kind as string] ?? 'text'} maxLength={field.max} value={text} onChange={onText} />;
   }
+}
+
+function FieldInput({ field, value, readOnly, locked, onChange }: { field: Field; value: string | boolean; readOnly: boolean; locked: boolean; onChange: (v: string | boolean) => void }) {
   return (
     <div className={`editor-field editor-${field.kind}`}>
-      <label htmlFor={id}>{field.label}{field.required ? ' *' : ''}</label>
-      {input}
+      <label htmlFor={`field-${field.key}`}>{field.label}{field.required ? ' *' : ''}</label>
+      <Control field={field} value={value} disabled={readOnly || locked} onChange={onChange} />
       {field.hint && <small>{field.hint}</small>}
       {locked && <small>Stored in another format: kept as is (edit in the Firebase console).</small>}
     </div>

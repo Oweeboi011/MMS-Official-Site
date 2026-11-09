@@ -1,5 +1,31 @@
 // Admin editor for `climbs` (old Open Climbs shape, read by data/climbs.ts). Rules: admins write, anyone reads.
+import { flatCodec, groupedCodec, type Column } from './records';
 import type { CollectionSpec, Doc, FormValues } from './siteSchemas';
+
+// Old app's shapes: fees[{label, amount, note, optional, isGuestFee}], officers[{role, name}], itinerary[{day, entries[{time, activity}]}].
+const feeColumns: Column[] = [
+  { key: 'label', label: 'Fee', required: true, max: 80 },
+  { key: 'amount', label: 'Amount (₱ or TBA)', required: true, max: 20 },
+  { key: 'note', label: 'Note', max: 200 },
+  { key: 'optional', label: 'Optional', kind: 'bool' },
+  { key: 'isGuestFee', label: 'Guest fee', kind: 'bool' },
+];
+const OFFICER_ROLES = ['Senior Team Leader', 'Team Leader', 'Assistant Team Leader', 'Scribe'] as const;
+const officerColumns: Column[] = [
+  { key: 'role', label: 'Role', kind: 'select', required: true, options: OFFICER_ROLES },
+  { key: 'name', label: 'Name', required: true, max: 120 },
+];
+const itineraryColumns: Column[] = [
+  { key: 'day', label: 'Day', required: true, max: 40 },
+  { key: 'time', label: 'Time', max: 20 },
+  { key: 'activity', label: 'Activity', required: true, max: 200 },
+];
+const routeColumns: Column[] = [
+  { key: 'label', label: 'Route name', max: 60 },
+  { key: 'allTrailsUrl', label: 'AllTrails link', kind: 'link', max: 500 },
+  { key: 'komootUrl', label: 'Komoot link', kind: 'link', max: 500 },
+  { key: 'googleMapsUrl', label: 'Google Maps link', kind: 'link', max: 500 },
+];
 
 const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit' });
 const dayOf = (v: unknown) => {
@@ -42,8 +68,12 @@ export const climbsSpec: CollectionSpec = {
     { key: 'waterSourceNote', label: 'Water source note', kind: 'longText', max: 500 },
     { key: 'thingsToBring', label: 'Things to bring (one per line; blank = default list)', kind: 'lines', max: 120 },
     { key: 'trailImages', label: 'Photo links (one https:// link per line)', kind: 'lines', linesAreLinks: true, max: 500 },
-    { key: 'googleMapsUrl', label: 'Google Maps link', kind: 'link' },
-    { key: 'allTrailsUrl', label: 'AllTrails link', kind: 'link' },
-    { key: 'komootUrl', label: 'Komoot link', kind: 'link', hint: 'Several routes or the itinerary: Firebase console for now.' },
+    { key: 'fees', label: 'Fees', kind: 'records', columns: feeColumns, codec: flatCodec(feeColumns), hint: 'Amount in pesos, or TBA. Guest fee: charged to guests only, never members.' },
+    { key: 'officers', label: 'Climb officers (shown on the climb page)', kind: 'records', columns: officerColumns, codec: flatCodec(officerColumns) },
+    { key: 'itinerary', label: 'Itinerary', kind: 'records', columns: itineraryColumns, codec: groupedCodec('day', 'entries', itineraryColumns), hint: 'One row per activity; rows with the same day name in a row form that day.' },
+    { key: 'trailMaps', label: 'Trail routes (maps)', kind: 'records', columns: routeColumns, codec: flatCodec(routeColumns), hint: 'One row per route; the first is shown first. Replaces the single links below.' },
+    { key: 'googleMapsUrl', label: 'Google Maps link (single route, older climbs)', kind: 'link' },
+    { key: 'allTrailsUrl', label: 'AllTrails link (single route)', kind: 'link' },
+    { key: 'komootUrl', label: 'Komoot link (single route)', kind: 'link' },
   ],
 };

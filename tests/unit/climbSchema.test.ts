@@ -34,3 +34,18 @@ describe('climbs editor', () => {
     expect(climbsSpec.rowLabel?.({ title: 'Mt. Apo', status: 'draft', startDate: { toDate: () => new Date('2026-04-12T16:00:00Z') } })).toBe('2026-04-13 · Mt. Apo · draft');
   });
 });
+
+describe('climbs editor lists', () => {
+  const field = (key: string) => climbsSpec.fields.find((f) => f.key === key)!;
+  it('round-trips fees with their flags', () => {
+    const fees = [{ label: 'Guest Fee', amount: '450', note: '', optional: true, isGuestFee: true }];
+    const form = toForm(climbsSpec, { fees });
+    expect(fromForm(climbsSpec, { ...base, fees: form.fees }, stamp).fees).toEqual(fees);
+    expect(field('fees').kind).toBe('records');
+  });
+
+  it('flags a fee row without an amount', () => {
+    const fees = JSON.stringify([{ label: 'Guide Fee', amount: '', note: '', optional: false, isGuestFee: false }]);
+    expect(validate(climbsSpec, { ...base, fees })).toBe('Fees, row 1, Amount (₱ or TBA) is required.');
+  });
+});
