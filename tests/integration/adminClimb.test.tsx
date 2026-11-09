@@ -2,41 +2,80 @@ import { fireEvent, screen } from '@testing-library/react';
 import { renderAt } from '../helpers';
 import { toAdminReg } from '../../src/frontend/data/adminRegistrations';
 
-const svc = vi.hoisted(() => ({ role: 'admin', reviews: [] as unknown[][], statuses: [] as string[][] }));
+const svc = vi.hoisted(() => ({ role: 'admin', reviews: [] as unknown[][], statuses: [] as string[][], notes: [] as string[][], walkIns: [] as unknown[][] }));
+const ana = () => toAdminReg('r1', { name: 'Ana Cruz', email: 'ana@x.com', status: 'pending', memberType: 'joiner', climbId: 'c1', climbTitle: 'Mt. Pulag',
+  payments: [{ amount: 800, status: 'submitted', proofs: [{ url: 'https://x/r.jpg', fileName: 'r.jpg' }] }], amountPaid: 800,
+  feeBreakdown: [{ label: 'Guide', amount: '1500', selected: true }] });
+const ben = () => toAdminReg('r2', { name: 'Ben Reyes', email: 'ben@x.com', status: 'confirmed', climbId: 'c2', climbTitle: 'Mt. Apo' });
 vi.mock('../../src/frontend/services/useAccount', () => ({ useAccount: () => ({ status: 'signedIn', account: { uid: 'a1', email: 'tl@x.com', role: svc.role } }) }));
 vi.mock('../../src/frontend/services/adminRegistrations', () => ({
-  climbRegistrations: async () => [toAdminReg('r1', { name: 'Ana Cruz', email: 'ana@x.com', status: 'pending', memberType: 'joiner',
-    payments: [{ amount: 800, status: 'submitted', proofs: [{ url: 'https://x/r.jpg', fileName: 'r.jpg' }] }], amountPaid: 800,
-    feeBreakdown: [{ label: 'Guide', amount: '1500', selected: true }] })],
+  climbRegistrations: async () => [ana()],
+  recentRegistrations: async () => [ana(), ben()],
   reviewRegistrationPayment: async (reg: { id: string }, index: number, status: string) => { svc.reviews.push([reg.id, index, status]); },
   setRegistrationStatus: async (id: string, status: string) => { svc.statuses.push([id, status]); },
+  setAdminNotes: async (id: string, notes: string) => { svc.notes.push([id, notes]); },
+  addWalkIn: async (...args: unknown[]) => { svc.walkIns.push(args); },
 }));
 vi.mock('../../src/frontend/services/publicData', () => ({
   publicReadsEnabled: true,
-  climbLoader: async (id: string) => ({ id, title: 'Mt. Pulag', status: 'open', startDate: new Date(Date.now() + 864e6) }),
+  climbLoader: async (id: string) => ({ id, title: 'Mt. Pulag', status: 'open', location: 'Benguet', startDate: new Date(Date.now() + 864e6) }),
   climbsLoader: () => async () => null, announcementsLoader: () => async () => null, loadSettings: async () => null,
   loadSurveys: async () => null, loadOfficers: async () => null, loadCurrentOfficers: async () => null,
 }));
 
-describe('admin: one climb’s registrations', () => {
-  beforeEach(() => Object.assign(svc, { role: 'admin', reviews: [], statuses: [] }));
+const wait = { timeout: 5000 };
 
-  it('lists registrants, verifies a payment, changes status, offers the CSV', async () => {
+describe('admin: registrations', () => {
+  beforeEach(() => Object.assign(svc, { role: 'admin', reviews: [], statuses: [], notes: [], walkIns: [] }));
+
+  it('lists a climb’s registrants, verifies a payment, changes status, saves notes', async () => {
     renderAt('/admin/climbs/c1');
-    expect(await screen.findByText('Ana Cruz', {}, { timeout: 5000 })).toBeInTheDocument();
+    expect(await screen.findByText('Ana Cruz', {}, wait)).toBeInTheDocument();
     expect(screen.getByText(/1 payment\(s\) to review/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'receipt 1' })).toHaveAttribute('href', 'https://x/r.jpg');
     fireEvent.click(screen.getByRole('button', { name: 'Verify' }));
     await vi.waitFor(() => expect(svc.reviews).toEqual([['r1', 0, 'verified']]));
+    await vi.waitFor(() => expect(screen.getByLabelText('Status for Ana Cruz')).toBeEnabled());
     fireEvent.change(screen.getByLabelText('Status for Ana Cruz'), { target: { value: 'confirmed' } });
     await vi.waitFor(() => expect(svc.statuses).toEqual([['r1', 'confirmed']]));
+    await vi.waitFor(() => expect(screen.getByLabelText('Status for Ana Cruz')).toBeEnabled()); // reload done
+    fireEvent.change(screen.getByLabelText('Notes on Ana Cruz'), { target: { value: 'Paid cash balance' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save notes' }));
+    await vi.waitFor(() => expect(svc.notes).toEqual([['r1', 'Paid cash balance']]));
     expect(screen.getByRole('button', { name: /Download CSV/ })).toBeEnabled();
+  });
+
+  it('adds a walk-in with cash received', async () => {
+    renderAt('/admin/climbs/c1');
+    fireEvent.click(await screen.findByRole('button', { name: 'Add walk-in' }, wait));
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('Enter the participant’s name.');
+    fireEvent.change(screen.getByLabelText('Name *'), { target: { value: 'Carlo' } });
+    fireEvent.change(screen.getByLabelText('Cash received (₱, optional)'), { target: { value: '1500' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+    await vi.waitFor(() => expect(svc.walkIns).toHaveLength(1));
+    const [climb, walkIn, recorder] = svc.walkIns[0] as [{ id: string; title: string }, { name: string; cash: string }, string];
+    expect(climb).toMatchObject({ id: 'c1', title: 'Mt. Pulag' });
+    expect(walkIn).toMatchObject({ name: 'Carlo', cash: '1500' });
+    expect(recorder).toBe('tl@x.com');
+  });
+
+  it('searches and filters all registrations', async () => {
+    renderAt('/admin/registrations');
+    expect(await screen.findByText('Ben Reyes', {}, wait)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Search name, email, mobile or climb'), { target: { value: 'pulag' } });
+    expect(screen.queryByText('Ben Reyes')).not.toBeInTheDocument();
+    expect(screen.getByText('Ana Cruz')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Search name, email, mobile or climb'), { target: { value: '' } });
+    fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'confirmed' } });
+    expect(screen.queryByText('Ana Cruz')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Download CSV (1)' })).toBeEnabled();
   });
 
   it('shows nothing to non-admins', async () => {
     svc.role = 'member';
     renderAt('/admin/climbs/c1');
-    expect(await screen.findByText(/Admins only/, {}, { timeout: 5000 })).toBeInTheDocument();
+    expect(await screen.findByText(/Admins only/, {}, wait)).toBeInTheDocument();
     expect(screen.queryByText('Ana Cruz')).not.toBeInTheDocument();
   });
 });

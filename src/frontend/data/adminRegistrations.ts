@@ -10,6 +10,7 @@ export interface AdminReg extends MyClimb {
   email: string;
   mobile: string;
   memberType: string;
+  notes: string;
   payments: PaymentEntry[];
   raw: Doc;
 }
@@ -30,7 +31,7 @@ function entriesOf(d: Doc): PaymentEntry[] {
 }
 
 export function toAdminReg(id: string, d: Doc): AdminReg {
-  return { ...toMyClimb(id, d), name: str(d.name), email: str(d.email), mobile: str(d.mobile), memberType: str(d.memberType) === 'member' ? 'Member' : 'Guest', payments: entriesOf(d), raw: d };
+  return { ...toMyClimb(id, d), name: str(d.name), email: str(d.email), mobile: str(d.mobile), memberType: str(d.memberType) === 'member' ? 'Member' : 'Guest', notes: str(d.adminNotes), payments: entriesOf(d), raw: d };
 }
 
 export function derivePaymentStatus(entries: { status: EntryStatus }[]): string {
@@ -88,4 +89,34 @@ export function toCsv(regs: AdminReg[]): string {
     ];
   });
   return [CSV_HEADERS, ...rows].map((row) => row.map(cell).join(',')).join('\r\n');
+}
+
+export interface WalkIn { name: string; mobile: string; email: string; memberType: 'member' | 'joiner'; status: 'confirmed' | 'pending' | 'waitlisted'; cash: string; notes: string }
+export const emptyWalkIn = (): WalkIn => ({ name: '', mobile: '', email: '', memberType: 'joiner', status: 'confirmed', cash: '', notes: '' });
+
+export function walkInProblem(w: WalkIn): string | null {
+  if (!w.name.trim()) return 'Enter the participant’s name.';
+  if (w.cash.trim() && amountOf(w.cash) <= 0) return 'Cash received: a peso amount, or leave blank.';
+  return null;
+}
+
+// Someone added by an officer (no account): old app AddJoinerModal shape. Cash handed over is recorded as verified.
+export function walkInDoc(climb: { id: string; title: string; dateLabel: string; location: string }, w: WalkIn, recorder: string, now: unknown, stamp: unknown) {
+  const cash = amountOf(w.cash);
+  const payments = cash > 0 ? [{ amount: cash, proofs: [], submittedAt: stamp, status: 'verified', recordedBy: recorder, note: 'Cash, recorded by an officer' }] : [];
+  return {
+    climbId: climb.id, climbTitle: climb.title, climbDate: climb.dateLabel, climbLocation: climb.location,
+    userId: null, name: w.name.trim(), email: w.email.trim(), mobile: w.mobile.trim(), memberType: w.memberType,
+    emergencyContact: { name: '', mobile: '', relationship: '' }, medicalConditions: '', experienceLevel: 'beginner',
+    waiverSigned: false, status: w.status, paymentStatus: cash > 0 ? 'verified' : 'unpaid', amountPaid: cash > 0 ? cash : null,
+    paymentProofs: [], payments, adminNotes: w.notes.trim() || 'Added by an officer (walk-in), not self-registered.',
+    addedByAdmin: true, createdAt: now, updatedAt: now, ...(w.status === 'confirmed' ? { confirmedAt: now } : {}),
+  };
+}
+
+// All-registrations search: name, email, mobile or climb.
+export function matches(reg: AdminReg, text: string, status: string): boolean {
+  const q = text.trim().toLowerCase();
+  const hay = [reg.name, reg.email, reg.mobile, reg.title].join(' ').toLowerCase();
+  return (!q || hay.includes(q)) && (!status || reg.status === status);
 }
