@@ -26,8 +26,8 @@ function FieldInput({ field, value, readOnly, locked, onChange }: { field: Field
         {field.options?.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>
     );
-  } else if (field.kind === 'longText') {
-    input = <textarea {...common} rows={4} maxLength={field.max} value={String(value)} onChange={(e) => onChange(e.target.value)} />;
+  } else if (field.kind === 'longText' || field.kind === 'lines') {
+    input = <textarea {...common} rows={field.kind === 'lines' ? 6 : 4} maxLength={field.max} value={String(value)} onChange={(e) => onChange(e.target.value)} />;
   } else {
     const type = { int: 'number', date: 'date', link: 'text', text: 'text' }[field.kind];
     input = <input {...common} type={type} maxLength={field.max} value={String(value)} onChange={(e) => onChange(e.target.value)} />;
@@ -36,6 +36,7 @@ function FieldInput({ field, value, readOnly, locked, onChange }: { field: Field
     <div className={`editor-field editor-${field.kind}`}>
       <label htmlFor={id}>{field.label}{field.required ? ' *' : ''}</label>
       {input}
+      {field.hint && <small>{field.hint}</small>}
       {locked && <small>Stored in another format: kept as is (edit in the Firebase console).</small>}
     </div>
   );
@@ -49,7 +50,7 @@ function RowList({ spec, rows, selected, busy, onPick }: { spec: CollectionSpec;
         {rows.map((r) => (
           <li key={r.id}>
             <button type="button" className={`link-button${r.id === selected ? ' is-active' : ''}`} disabled={busy} onClick={() => onPick(r.id)}>
-              {String(r.data[spec.titleField] ?? r.id)}
+              {spec.rowLabel ? spec.rowLabel(r.data) : String(r.data[spec.titleField] ?? r.id)}
             </button>
           </li>
         ))}

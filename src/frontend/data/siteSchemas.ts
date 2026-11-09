@@ -1,5 +1,5 @@
 // Admin editor fields per site collection. Mirrors src/backend/firebase/firestore.rules (rules are the real check).
-type FieldKind = 'text' | 'longText' | 'int' | 'bool' | 'select' | 'date' | 'link';
+type FieldKind = 'text' | 'longText' | 'lines' | 'int' | 'bool' | 'select' | 'date' | 'link';
 
 export interface Field {
   key: string; // dotted keys (socials.facebook) are nested maps in Firestore
@@ -12,6 +12,8 @@ export interface Field {
   keepEmpty?: boolean; // rules need the key even when blank
   range?: readonly [number, number]; // int bounds
   defaultOn?: boolean; // bool shown ticked on new docs
+  linesAreLinks?: boolean; // lines: each must be https://
+  hint?: string;
 }
 
 export interface CollectionSpec {
@@ -22,6 +24,8 @@ export interface CollectionSpec {
   singleton?: string; // fixed doc id (siteSettings/site)
   readOnly?: boolean; // admins read and delete only (inquiries)
   check?: (values: FormValues) => string | null; // cross-field rules
+  orderBy?: { field: string; desc?: boolean }; // list order (default: unordered)
+  rowLabel?: (doc: Doc) => string; // list label (default: titleField)
 }
 
 const order: Field = { key: 'order', label: 'Order', kind: 'int', required: true };
@@ -140,16 +144,19 @@ export const siteCollections: CollectionSpec[] = [
 ];
 
 export type FormValues = Record<string, string | boolean>;
-type Doc = Record<string, unknown>;
+type RawValue = FormValues[string] | undefined;
+export type Doc = Record<string, unknown>;
 
 const getPath = (doc: Doc, key: string): unknown =>
   key.split('.').reduce<unknown>((v, k) => (v && typeof v === 'object' ? (v as Doc)[k] : undefined), doc);
 
 // Dates are calendar days in Manila (saved as Manila midnight).
 const manilaDay = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit' });
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
 const asDateInput = (v: unknown): string => {
   const d = v && typeof v === 'object' && 'toDate' in v ? (v as { toDate: () => Date }).toDate() : null;
-  return d ? manilaDay.format(d) : '';
+  if (d) return manilaDay.format(d);
+  return typeof v === 'string' && ISO_DAY.test(v) ? v : ''; // legacy text date: saving stores a Timestamp
 };
 
 // Fields whose stored value isn't what the form edits (a map, list or timestamp in a text field).
@@ -158,7 +165,8 @@ export function lockedKeys(spec: CollectionSpec, doc: Doc = {}): string[] {
     .filter((f) => {
       const v = getPath(doc, f.key);
       if (v === undefined || v === null) return false;
-      if (f.kind === 'date') return !(typeof v === 'object' && 'toDate' in v);
+      if (f.kind === 'date') return !(typeof v === 'object' && 'toDate' in v) && !(typeof v === 'string' && ISO_DAY.test(v));
+      if (f.kind === 'lines') return !(Array.isArray(v) && v.every((x) => typeof x === 'string'));
       return f.kind === 'bool' ? typeof v !== 'boolean' : typeof v === 'object';
     })
     .map((f) => f.key);
@@ -170,6 +178,7 @@ export function toForm(spec: CollectionSpec, doc: Doc = {}): FormValues {
     const v = getPath(doc, f.key);
     if (f.kind === 'bool') return [f.key, v === true || (v === undefined && f.defaultOn === true)];
     if (f.kind === 'date') return [f.key, asDateInput(v)];
+    if (f.kind === 'lines') return [f.key, Array.isArray(v) ? v.join('\n') : ''];
     return [f.key, v === undefined || v === null || typeof v === 'object' ? '' : String(v)];
   }));
 }
@@ -188,14 +197,17 @@ export function fromForm(spec: CollectionSpec, values: FormValues, toTimestamp: 
   return doc;
 }
 
-function convert(f: Field, raw: string | boolean | undefined, toTimestamp: (d: Date) => unknown): unknown {
+function convert(f: Field, raw: RawValue, toTimestamp: (d: Date) => unknown): unknown {
   if (f.kind === 'bool') return raw === true;
+  if (f.kind === 'lines') return lines(raw).length ? lines(raw) : undefined;
   const text = typeof raw === 'string' ? raw.trim() : '';
   if (!text) return f.required || f.keepEmpty ? text : undefined;
   if (f.kind === 'int') return Number.parseInt(text, 10);
   if (f.kind === 'date') return toTimestamp(new Date(`${text}T00:00:00+08:00`));
   return text;
 }
+
+const lines = (raw: RawValue) => (typeof raw === 'string' ? raw.split('\n').map((l) => l.trim()).filter(Boolean) : []);
 
 const SITE_IMAGE = /^\/images\/[\w-]+\.(webp|jpg|jpeg|png|svg)$/;
 const linkOk = (f: Field, text: string) =>
@@ -212,7 +224,15 @@ function formatProblem(f: Field, text: string): string | null {
   return null;
 }
 
-function fieldProblem(f: Field, raw: string | boolean | undefined): string | null {
+function linesProblem(f: Field, raw: RawValue): string | null {
+  const items = lines(raw);
+  if (!items.length) return f.required ? `${f.label} is required.` : null;
+  if (f.max && items.some((l) => l.length > f.max!)) return `${f.label}: each line at most ${f.max} characters.`;
+  return f.linesAreLinks && items.some((l) => !/^https:\/\/\S+$/.test(l)) ? `${f.label}: every line must start with https://.` : null;
+}
+
+function fieldProblem(f: Field, raw: RawValue): string | null {
+  if (f.kind === 'lines') return linesProblem(f, raw);
   const text = typeof raw === 'string' ? raw.trim() : '';
   if (!text) return f.required && f.kind !== 'bool' ? `${f.label} is required.` : null;
   const max = f.max ?? (f.kind === 'link' ? 500 : undefined); // rules cap links at 500

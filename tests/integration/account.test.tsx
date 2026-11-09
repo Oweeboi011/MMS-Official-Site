@@ -36,8 +36,9 @@ describe('sign-in and admin pages', () => {
   it('an admin sees every collection and its rows', async () => {
     state = { status: 'signedIn', account: { uid: 'a1', email: 'a@x.com', role: 'admin' } };
     renderAt('/admin');
-    expect(await screen.findByRole('button', { name: 'Leadership' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Climbs' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Leadership' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Committees' })).toBeInTheDocument();
-    expect(await screen.findByRole('button', { name: 'BMC open' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /BMC open/ })).toBeInTheDocument(); // climbs tab: date · title · status
   });
 });

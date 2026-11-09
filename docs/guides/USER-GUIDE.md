@@ -52,6 +52,8 @@ Upload to the MMS Google Drive `Albums/YYYY-MM climb` folder, remove photos of a
 
 The schedule on `/activities/open-climbs` lists upcoming climbs, climbs completed this year, and any past year (**Past years** picker). Each live climb has its own page, `/climbs/<id>`: dates, stats, photos (tap for full screen), weather forecast from 16 days before (plus PAGASA / Windy links), trail maps (AllTrails, Komoot or Google Maps; tabs for alternate routes), water-source note, day-by-day itinerary, packing list, Leave No Trace, and **Share this climb** (phone: Share… for Messenger, Viber and others, plus Instagram story; any device: Facebook, Copy link). Climbs come from the Open Climbs database; until officers load them the schedule shows samples.
 
+**Adding or editing a climb (admins):** sign in, open `/admin` → **Climbs** (newest first, labelled date · name · status). Start as **draft** (hidden), fill name, location, type, start date and what you know (difficulty as N/9, trail class 1–6, distances, packing list one item per line, photo links one per line, map links), then set **open**. Mark **completed** after the climb, **cancelled** if called off (hidden from lists, its link explains), or pick **postponed**. Past years: enter them the same way with their real dates. Changes show on the public pages right away. Several routes per mountain and the itinerary: Firebase console for now. Edit on www.metropolitanms.org: the preview site is read-only.
+
 ### Coming
 
 
