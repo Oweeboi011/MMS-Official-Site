@@ -1,5 +1,5 @@
 // Member side of `registrations` (rules: own docs only; create while the climb is open).
-import { addDoc, collection, doc, getDocs, limit, query, serverTimestamp, updateDoc, where } from 'firebase/firestore/lite';
+import { addDoc, collection, doc, getDoc, getDocs, limit, query, serverTimestamp, updateDoc, where } from 'firebase/firestore/lite';
 import { newestFirst, toMyClimb, type MyClimb } from '../data/myClimbs';
 import { buildRegistrationDoc, type ClimbRef, type FeeItem, type RegistrationForm } from '../data/registration';
 import { firebase } from './firebase';
@@ -16,6 +16,12 @@ export async function register(climb: ClimbRef, user: { uid: string; email: stri
   if (!writesEnabled) throw new Error(readOnlyMessage);
   const ref = await addDoc(collection(firebase().db, 'registrations'), buildRegistrationDoc(climb, user, form, fees, serverTimestamp()));
   return ref.id;
+}
+
+// One of your own registrations (rules: owner or admin reads); null when missing.
+export async function myRegistration(id: string): Promise<MyClimb | null> {
+  const snap = await getDoc(doc(firebase().db, 'registrations', id));
+  return snap.exists() ? toMyClimb(snap.id, snap.data()) : null;
 }
 
 export async function myRegistrations(uid: string): Promise<MyClimb[]> {

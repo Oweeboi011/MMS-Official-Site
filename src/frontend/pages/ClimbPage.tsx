@@ -20,7 +20,8 @@ function notice(climb: ClimbDetail): string {
   if (climb.cancelled) return 'This climb was cancelled.';
   if (climb.postponed) return 'This climb is postponed. New dates will be posted here.';
   if (climb.over) return 'This climb is completed.';
-  return climb.status === 'Closed' ? 'Registration for this climb is closed.' : '';
+  if (climb.status === 'Closed') return 'Registration for this climb is closed.';
+  return climb.slotsLeft === 0 ? 'This climb is full. New registrations join the waitlist and move up if a slot opens.' : '';
 }
 
 function profile(climb: ClimbDetail): ContentBlock[] {

@@ -41,17 +41,35 @@ function Cancel({ row, onDone }: { row: MyClimb; onDone: () => void }) {
   );
 }
 
+function Money({ row, balance }: { row: MyClimb; balance: number }) {
+  const tba = row.tba ? ' + TBA' : '';
+  return <p>Total {peso(row.total)}{tba} · Paid {peso(row.paid)} · <strong>Balance {peso(balance)}{tba}</strong></p>;
+}
+
+// #169 sent receipts + #141 printable waiver.
+function Records({ row }: { row: MyClimb }) {
+  if (!row.receipts.length && !row.waiver) return null;
+  return (
+    <p className="climb-links">
+      {row.receipts.map((r, i) => <a key={r.url} href={r.url} target="_blank" rel="noopener noreferrer">Receipt {i + 1}: {r.fileName}</a>)}
+      {row.waiver && <Link to={`/account/climbs/${row.id}/waiver`}>Signed waiver (print)</Link>}
+    </p>
+  );
+}
+
 function Card({ row, uid, onChange }: { row: MyClimb; uid: string; onChange: () => void }) {
   const climb = useClimb(row.climbId);
   const balance = Math.max(row.total - row.paid, 0);
-  const live = ['pending', 'confirmed', 'waitlisted'].includes(row.status);
+  const live = Boolean(climb) && ['pending', 'confirmed', 'waitlisted'].includes(row.status);
+  const owes = balance > 0 || row.tba;
   return (
     <li className="my-climb">
       <h2><Link to={`/climbs/${row.climbId}`}>{row.title}</Link></h2>
       <p className="climb-muted">{[row.date, row.statusLabel, row.paymentLabel].filter(Boolean).join(' · ')}</p>
-      <p>Total {peso(row.total)}{row.tba ? ' + TBA' : ''} · Paid {peso(row.paid)} · <strong>Balance {peso(balance)}{row.tba ? ' + TBA' : ''}</strong></p>
-      {climb && live && <DocUploads row={row} climb={climb} uid={uid} onDone={onChange} />}
-      {climb && live && (balance > 0 || row.tba) && <PayForm row={row} climb={climb} uid={uid} onDone={onChange} />}
+      <Money row={row} balance={balance} />
+      <Records row={row} />
+      {live && climb && <DocUploads row={row} climb={climb} uid={uid} onDone={onChange} />}
+      {live && climb && owes && <PayForm row={row} climb={climb} uid={uid} onDone={onChange} />}
       {climb && canCancel(row, climb.over) && <Cancel row={row} onDone={onChange} />}
     </li>
   );

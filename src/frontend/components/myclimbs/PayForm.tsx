@@ -38,7 +38,7 @@ export default function PayForm({ row, climb, uid, onDone }: Props) {
       ) : <p className="climb-muted">Payment details for this climb aren’t posted yet. The climb officers will share them.</p>}
       <label htmlFor={`amt-${row.id}`}>Amount paid (₱)</label>
       <input id={`amt-${row.id}`} inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
-      <label htmlFor={`rcpt-${row.id}`}>Receipt (photo or PDF, under 10 MB)</label>
+      <label htmlFor={`rcpt-${row.id}`}>Receipt (photo or PDF)</label>
       <input id={`rcpt-${row.id}`} type="file" accept={RECEIPT_TYPES} multiple onChange={(e) => setFiles(Array.from(e.target.files ?? []))} />
       <label htmlFor={`note-${row.id}`}>Note (optional)</label>
       <input id={`note-${row.id}`} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />

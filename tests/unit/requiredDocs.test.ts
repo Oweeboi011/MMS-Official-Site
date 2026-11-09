@@ -9,7 +9,8 @@ describe('payments and documents', () => {
     expect(uploadProblem(file('r.pdf', 'application/pdf'), 'receipt')).toBeNull();
     expect(uploadProblem(file('r.docx', ''), 'receipt')).toMatch(/photo or PDF/);
     expect(uploadProblem(file('form.docx', ''), 'document')).toBeNull();
-    expect(uploadProblem(file('big.jpg', 'image/jpeg', 10 * 1024 * 1024), 'receipt')).toMatch(/10 MB/);
+    expect(uploadProblem(file('big.pdf', 'application/pdf', 10 * 1024 * 1024), 'receipt')).toMatch(/10 MB/);
+    expect(uploadProblem(file('phone.jpg', 'image/jpeg', 12 * 1024 * 1024), 'receipt')).toBeNull(); // shrunk before upload
   });
 
   it('reads peso amounts', () => {

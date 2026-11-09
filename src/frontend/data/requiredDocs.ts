@@ -20,8 +20,11 @@ const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // storage.rules underLimit()
 export const RECEIPT_TYPES = 'image/*,application/pdf';
 export const DOC_TYPES = 'image/*,application/pdf,.doc,.docx';
 
+const MAX_PHOTO_BYTES = 30 * 1024 * 1024; // photos are shrunk before upload (lib/compressImage)
+
 export function uploadProblem(file: File, accept: 'receipt' | 'document'): string | null {
-  if (file.size >= MAX_UPLOAD_BYTES) return 'That file is 10 MB or more. Use a smaller photo or PDF.';
+  const photo = /^image\/(jpeg|png|webp)$/.test(file.type);
+  if (file.size >= (photo ? MAX_PHOTO_BYTES : MAX_UPLOAD_BYTES)) return `That file is ${photo ? 30 : 10} MB or more. Use a smaller file.`;
   const word = /\.(docx?)$/i.test(file.name);
   const ok = file.type.startsWith('image/') || file.type === 'application/pdf' || (accept === 'document' && word);
   if (ok) return null;
