@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import CollectionEditor from '../components/CollectionEditor';
 import PageHero from '../components/PageHero';
 import { siteCollections } from '../data/siteSchemas';
+import { readOnlyMessage, writesEnabled } from '../services/firebaseEnv';
 import { useAccount } from '../services/useAccount';
 
 function Editors() {
@@ -10,6 +11,7 @@ function Editors() {
   const [busy, setBusy] = useState(false); // switching tabs mid-save would drop the result
   return (
     <>
+      {!writesEnabled && <p className="preview-banner" role="note">{readOnlyMessage}</p>}
       <nav className="admin-tabs" aria-label="Collections">
         {siteCollections.map((c) => (
           <button key={c.id} type="button" className={`chip${c.id === active.id ? ' is-active' : ''}`} disabled={busy} onClick={() => setActive(c)}>{c.label}</button>
