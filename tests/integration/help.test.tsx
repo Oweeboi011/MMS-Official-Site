@@ -11,4 +11,10 @@ describe('help page', () => {
     expect(screen.getByText(/Registering and paying on this site open soon/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'help' })).toHaveAttribute('href', '/help');
   });
+
+  it('has an officer guide', async () => {
+    renderAt('/admin/help');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Officer guide' }, { timeout: 5000 })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Running registrations' })).toBeInTheDocument();
+  });
 });
