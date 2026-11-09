@@ -60,6 +60,7 @@ Owner-only scripts (`tools/admin`, firebase-admin from `src/backend/functions`; 
 | `grant-email-members.mjs <uid\|email> [--revoke]` | `canEmailMembers` (rules refuse it from every client) |
 | `purge-admin-pageviews.mjs` | one-off: drop page views logged on `/admin` + `/account` before the client skipped them |
 | `seed-emulator.mjs` | emulator only |
+| `copy-old-climbs.mjs [--from mms-open-climbs] [--apply] [--overwrite]` | copies the old app's `climbs` here with the same ids; dry run by default, existing climbs kept unless `--overwrite`. Needs your Google login on both projects. Interim until the scheduled sync (plan item 7); registrations are not copied |
 
 Old backfills (`backfill-climb-denorm`, `backfill-member-details`) not ported: synced data already carries those fields; port only if a gap shows up.
 
