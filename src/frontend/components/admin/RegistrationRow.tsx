@@ -35,7 +35,7 @@ function Notes({ reg, run, busy }: RowProps) {
     <div className="admin-notes">
       <label className="sr-only" htmlFor={`notes-${reg.id}`}>Notes on {reg.name}</label>
       <textarea id={`notes-${reg.id}`} rows={2} maxLength={2000} placeholder="Officer notes" value={text} onChange={(e) => setText(e.target.value)} />
-      {text !== reg.notes && <button type="button" className="chip" disabled={busy} onClick={() => run(() => setAdminNotes(reg.id, text))}>Save notes</button>}
+      {text !== reg.notes && <button type="button" className="chip" disabled={busy} onClick={() => run(() => setAdminNotes(reg.id, text, `${reg.name} · ${reg.title}`))}>Save notes</button>}
     </div>
   );
 }
@@ -52,7 +52,7 @@ export default function RegistrationRow(props: RowProps) {
       </td>
       <td>
         <label className="sr-only" htmlFor={`st-${reg.id}`}>Status for {reg.name}</label>
-        <select id={`st-${reg.id}`} value={reg.status} disabled={busy} onChange={(e) => run(() => setRegistrationStatus(reg.id, e.target.value))}>
+        <select id={`st-${reg.id}`} value={reg.status} disabled={busy} onChange={(e) => run(() => setRegistrationStatus(reg.id, e.target.value, `${reg.name} · ${reg.title}`))}>
           {REG_STATUSES.map((s) => <option key={s}>{s}</option>)}
         </select>
       </td>
