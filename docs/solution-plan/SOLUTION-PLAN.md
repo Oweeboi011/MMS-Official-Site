@@ -41,7 +41,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 23 | [#50](https://github.com/Oweeboi011/MMS-Official-Site/issues/50) MMS-owned GCash / bank receiving account + its QR (not a personal wallet); who verifies receipts per climb ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)) | treasurer, officers | Phase 5 |
 | 24 | [#51](https://github.com/Oweeboi011/MMS-Official-Site/issues/51) Site data collections ([audit](#gaps-ui-vs-backend)): `inquiries`, `reviews`, `faqs`, `glossary`, `media`, plus leadership (`officers` by body + past terms, `committees`, owner ask 2026-11-09) rules + tests built, deployed 2026-11-09. Left: seed, UI (item 21), inquiry notification (item 13). Page bodies + mountains stay in code unless officers need to edit them | dev | Phase 3–6 |
 | 25 | [#52](https://github.com/Oweeboi011/MMS-Official-Site/issues/52) Release-note drafts: this repo's commit subjects have no `type:` prefix, so docs/tooling commits land in "Improvements". Pick: conventional prefixes here, or filter by changed paths (`src/frontend`) | dev, Owee | Phase 6 |
-| 26 | [#53](https://github.com/Oweeboi011/MMS-Official-Site/issues/53) **URL plan** before phase 3: ADR 0005 says `/open-climbs/*`, but `/open-climbs` already 301s to the info page `/activities/open-climbs` (`legacyRedirects`). Pick app routes (proposal: `/climbs/:id`, `/register/:id`, `/account/*`, `/admin/*`) + old-app redirects (`mms-open-climbs.web.app/event/:id` → new) at the switch | dev, Owee | Phase 3 |
+| 26 | [#53](https://github.com/Oweeboi011/MMS-Official-Site/issues/53) ~~**URL plan**~~ (decided 2026-11-09, [ADR 0008](../adr/0008-CLIMB-URLS.md)): schedule `/activities/open-climbs` (`?year=` for past years), `/climbs/:id`, `/climbs/:id/register`, `/account/climbs`, `/admin/climbs`; old `event/:id` → `/climbs/:id` at the switch | dev, Owee | — |
 | 27 | [#54](https://github.com/Oweeboi011/MMS-Official-Site/issues/54) **Environments:** local + CI = emulators only; preview site = prod Firebase with writes off (`VITE_WRITES_ENABLED=false`) until the switch; never test data in prod. Document in DEPLOYMENT | dev | Phase 3 |
 | 28 | [#55](https://github.com/Oweeboi011/MMS-Official-Site/issues/55) **Backups** before real data (phase 2): Firestore scheduled backups or weekly export to a bucket; check cost against the cap first; restore drill once | Owee | Phase 2 |
 | 29 | [#56](https://github.com/Oweeboi011/MMS-Official-Site/issues/56) ~~**Bundle budget vs Firebase SDK**~~ (done 2026-11-09: Firebase lazy-loaded on `/account`, `/admin`; budgets initialJs 120 / lazyJs 150 KB gz) | dev | — |
@@ -95,7 +95,7 @@ As built + target: [ARCHITECTURE](../guides/ARCHITECTURE.md) (system, layers, ro
 
 ## Open Climbs migration
 
-Every feature of [mms-open-climbs](https://github.com/Oweeboi011/mms-open-climbs) at `www.metropolitanms.org/open-climbs/*`, on new Firebase project `mms-official-site-513809` (owners: MMS Gmail primary + Owee). Same users, nobody re-registers. No shared resources; old site stays until retired (2027). Why: [ADR 0005](../adr/0005-OPEN-CLIMBS-FIREBASE.md).
+Every feature of [mms-open-climbs](https://github.com/Oweeboi011/mms-open-climbs) at `www.metropolitanms.org` ([URLs](../adr/0008-CLIMB-URLS.md)), on new Firebase project `mms-official-site-513809` (owners: MMS Gmail primary + Owee). Same users, nobody re-registers. No shared resources; old site stays until retired (2027). Why: [ADR 0005](../adr/0005-OPEN-CLIMBS-FIREBASE.md).
 
 | Layer | Old `mms-open-climbs` | New |
 |---|---|---|
