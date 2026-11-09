@@ -1,11 +1,13 @@
 // `climbs` docs (old Open Climbs shape) → schedule rows. Rules: docs/guides/CONTEXT.md#climbs.
 import type { Doc } from '../lib/firestoreRest';
 import { fromManilaDay, manilaDay, manilaYear } from '../lib/manila';
+import type { Coords } from '../lib/trailEmbeds';
 import type { Difficulty, OpenClimb, Stat } from './content';
 
 export interface ScheduleClimb extends OpenClimb {
   id?: string;
   start?: Date;
+  end?: Date;
   over: boolean;
   postponed?: boolean;
   rating?: string; // Philippine scale, e.g. "4/9"
@@ -54,6 +56,7 @@ function mapClimb(d: Doc, now: Date): ScheduleClimb {
   return {
     id: str(d.id) || undefined,
     start,
+    end,
     over: isOver(d, end ?? start, now),
     postponed: str(d.cancellationStatus) === 'postponed',
     title: str(d.title),
@@ -82,6 +85,30 @@ export interface ClimbDetail extends ScheduleClimb {
   description: string;
   stats: Stat[];
   thingsToBring: string[]; // empty → default packing list
+  features: string;
+  waterNote: string;
+  trailMaps: TrailMap[];
+  photos: string[]; // https only
+  coords: Coords | null;
+}
+
+export interface TrailMap { label: string; googleMapsUrl: string; allTrailsUrl: string; komootUrl: string }
+
+const strings = (v: unknown) => (Array.isArray(v) ? v.filter((t): t is string => typeof t === 'string' && t !== '') : []);
+const record = (v: unknown) => (v && typeof v === 'object' ? (v as Doc) : {});
+
+// trailMaps[] (current) or the legacy single googleMapsUrl / allTrailsUrl / komootUrl fields.
+function trailMapsOf(d: Doc): TrailMap[] {
+  const raw = Array.isArray(d.trailMaps) && d.trailMaps.length ? d.trailMaps.map(record) : [d];
+  return raw
+    .map((t) => ({ label: str(t.label), googleMapsUrl: str(t.googleMapsUrl), allTrailsUrl: str(t.allTrailsUrl), komootUrl: str(t.komootUrl) }))
+    .filter((t) => t.googleMapsUrl || t.allTrailsUrl || t.komootUrl);
+}
+
+function coordsOf(d: Doc): Coords | null {
+  const lat = Number(d.mapLat);
+  const lng = Number(d.mapLng);
+  return d.mapLat && d.mapLng && Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
 }
 
 // Old app's packing list, used when a climb sets none.
@@ -92,7 +119,7 @@ export const defaultPacking = [
 ];
 
 const STAT_FIELDS: [string, string][] = [
-  ['difficulty', 'Difficulty'], ['trailClass', 'Trail class'], ['jumpOff', 'Jump-off'], ['distanceToSummit', 'Jump-off to peak'],
+  ['difficulty', 'Difficulty'], ['trailClass', 'Trail class'], ['jumpOff', 'Jump-off'], ['jumpOffElevation', 'Jump-off elevation (m)'], ['distanceToSummit', 'Jump-off to peak'],
   ['roundTripDistance', 'Round trip'], ['elevationGain', 'Elevation gain'], ['recommendedDays', 'Recommended'],
 ];
 const text = (v: unknown) => (typeof v === 'number' ? String(v) : str(v));
@@ -107,6 +134,11 @@ export function toClimbDetail(d: Doc, now: Date): ClimbDetail | null {
     cancelled: !isPublic(d),
     description: str(d.description),
     stats: climb.elevation ? [{ value: climb.elevation, label: 'Elevation' }, ...stats] : stats,
-    thingsToBring: Array.isArray(d.thingsToBring) ? d.thingsToBring.filter((t): t is string => typeof t === 'string' && t !== '') : [],
+    thingsToBring: strings(d.thingsToBring),
+    features: str(d.features),
+    waterNote: str(d.waterSourceNote),
+    trailMaps: trailMapsOf(d),
+    photos: strings(d.trailImages).filter((u) => u.startsWith('https://')),
+    coords: coordsOf(d),
   };
 }

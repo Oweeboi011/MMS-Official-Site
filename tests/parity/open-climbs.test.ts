@@ -9,8 +9,8 @@ describe('Open Climbs parity: auth + users', () => {
 
 describe('Open Climbs parity: member', () => {
   it.todo('schedule by season, card grid with elevation, difficulty, distance');
-  it.todo('mountain profile: elevation, jump-off, gain, itinerary, water, links');
-  it.todo('trail photo carousel + keyboard lightbox');
+  it.todo('mountain profile: itinerary for signed-in users (stats, jump-off, gain, water, links done on /climbs/:id)');
+  // trail photo carousel + keyboard lightbox: tests/integration/liveContent.test.tsx (climb page)
   it.todo('register: details, emergency contact, experience, medical; waitlist when full');
   it.todo('optional fees + fee breakdown before submit');
   it.todo('digital waiver (typed name) + printable signed waiver');
@@ -37,8 +37,8 @@ describe('Open Climbs parity: admin', () => {
 });
 
 describe('Open Climbs parity: found in plan review 2026-11-09', () => {
-  it.todo('weather forecast per climb (Open-Meteo) + PAGASA / Windy links');
-  it.todo('trail map embeds (AllTrails, Komoot, Google Maps)');
+  // weather forecast per climb (Open-Meteo) + PAGASA / Windy links: tests/integration/liveContent.test.tsx (climb page)
+  // trail map embeds (AllTrails, Komoot, Google Maps): tests/integration/liveContent.test.tsx (climb page)
   // packing list + Leave No Trace ethics on the climb page: tests/integration/liveContent.test.tsx (climb page)
   it.todo('registrant-only section: participants, resources, pre-climb meetings, officer contacts');
   it.todo('admin audit log of sensitive actions');

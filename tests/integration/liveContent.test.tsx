@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { renderAt } from '../helpers';
 import { previewNotice } from '../../src/frontend/data/content';
 
@@ -13,6 +13,10 @@ vi.mock('../../src/frontend/services/publicData', () => ({
   loadSurveys: async () => null,
   loadOfficers: async () => [{ body: 'execom', role: 'President', name: 'Live President', current: true, order: 1 }],
   loadCurrentOfficers: async () => [{ body: 'execom', role: 'President', name: 'Live President', current: true, order: 1 }],
+}));
+
+vi.mock('../../src/frontend/services/weather', () => ({
+  useForecast: () => ({ status: 'ready', message: '', coords: { lat: 16.6, lng: 120.9 }, days: [{ date: '2026-11-20', label: 'Fri, Nov 20 · Rain', max: 14, min: 6, rainChance: 80 }] }),
 }));
 
 describe('pages read site content from Firestore', () => {
@@ -95,6 +99,29 @@ describe('pages read site content from Firestore', () => {
       expect(within(share).getByRole('link', { name: 'Facebook' }).getAttribute('href')).toContain(encodeURIComponent('/climbs/pulag'));
       expect(within(share).getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /Ask to join this climb/ })).toBeInTheDocument();
+    });
+
+    it('shows weather, trail maps and photos with a keyboard lightbox', async () => {
+      live.climb = { id: 'p', title: 'Mt. Pulag', status: 'open', startDate: soon, location: 'Kabayan, Benguet',
+        trailMaps: [{ label: 'Akiki', allTrailsUrl: 'https://www.alltrails.com/trail/philippines/benguet/akiki', komootUrl: 'https://www.komoot.com/tour/123?share_token=abc' }, { label: 'Ambangeg', googleMapsUrl: 'https://www.google.com/maps/@16.58,120.89,13z' }],
+        // eslint-disable-next-line sonarjs/no-clear-text-protocols -- the http photo must be dropped
+        trailImages: ['https://img.example/1.jpg', 'https://img.example/2.jpg', 'http://insecure/3.jpg'], waterSourceNote: 'Boil first.' };
+      renderAt('/climbs/p');
+      expect(await screen.findByText('Fri, Nov 20 · Rain')).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Windy' }).getAttribute('href')).toContain('16.6,120.9');
+      expect(screen.getByTitle('Mt. Pulag trail map (AllTrails)')).toHaveAttribute('src', expect.stringContaining('alltrails.com/widget/trail/philippines/benguet/akiki'));
+      expect(screen.getByTitle('Mt. Pulag route (Komoot)')).toHaveAttribute('src', expect.stringContaining('/tour/123/embed?share_token=abc'));
+      fireEvent.click(screen.getByRole('button', { name: 'Ambangeg' }));
+      expect(screen.getByTitle('Mt. Pulag location map')).toHaveAttribute('src', expect.stringContaining('maps.google.com/maps?q=16.58%2C120.89'));
+      expect(screen.getByText(/Boil first\./)).toBeInTheDocument();
+      const thumbs = screen.getAllByRole('button', { name: /Open photo/ });
+      expect(thumbs).toHaveLength(2); // http photo dropped
+      fireEvent.click(thumbs[0]);
+      const box = screen.getByRole('dialog', { name: 'Mt. Pulag photo 1 of 2' });
+      fireEvent.keyDown(box, { key: 'ArrowRight' });
+      expect(screen.getByRole('dialog', { name: 'Mt. Pulag photo 2 of 2' })).toBeInTheDocument();
+      fireEvent.keyDown(box, { key: 'Escape' });
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
     it('explains a cancelled climb instead of hiding the shared link', async () => {
