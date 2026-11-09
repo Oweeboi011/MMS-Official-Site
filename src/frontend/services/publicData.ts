@@ -1,5 +1,6 @@
 // Public reads of site content (item 22): Firestore REST + API key, rules allow them signed out. Any failure → null → sample content.
-import { decodeFields, decodeQuery, runQueryBody, type Doc, type QueryOptions } from '../lib/firestoreRest';
+import { decodeFields, decodeQuery, runQueryBody, type Doc, type Filter, type QueryOptions } from '../lib/firestoreRest';
+import { manilaYearStart } from '../lib/manila';
 
 import { DATABASE_ID, FIRESTORE_EMULATOR, firebaseConfig, firebaseConfigured, useEmulators } from './firebaseEnv';
 
@@ -51,14 +52,25 @@ const announcementsLoaders = new Map<number, () => Promise<Doc[] | null | undefi
 export function announcementsLoader(limit: number) { // stable per limit, for useLoaded
   if (!announcementsLoaders.has(limit)) {
     announcementsLoaders.set(limit, () =>
-      once(`announcements:${limit}`, () => query('announcements', { where: { field: 'published', equals: true }, orderByDesc: 'publishedAt', limit })));
+      once(`announcements:${limit}`, () => query('announcements', { where: [{ field: 'published', op: 'EQUAL', value: true }], orderBy: { field: 'publishedAt', desc: true }, limit })));
   }
   return announcementsLoaders.get(limit)!;
 }
 export const loadSurveys = () => once('surveys', () => query('surveys', { limit: 50 }));
-export const loadCurrentOfficers = () => once('officers:current', () => query('officers', { where: { field: 'current', equals: true }, limit: 50 }));
+export const loadCurrentOfficers = () => once('officers:current', () => query('officers', { where: [{ field: 'current', op: 'EQUAL', value: true }], limit: 50 }));
 // Leadership lists every term; current officers sort first so the cap never drops them.
-export const loadOfficers = () => once('officers', () => query('officers', { orderByDesc: 'current', limit: 300 }));
+export const loadOfficers = () => once('officers', () => query('officers', { orderBy: { field: 'current', desc: true }, limit: 300 }));
+// Climbs by start date (needs `startDate` as a Timestamp). Current view: this Manila year onward. Archive: one year.
+const climbsLoaders = new Map<string, () => Promise<Doc[] | null | undefined>>();
+export function climbsLoader(fromYear: number, onlyThatYear: boolean) { // stable per key, for useLoaded
+  const key = `climbs:${fromYear}:${onlyThatYear}`;
+  if (!climbsLoaders.has(key)) {
+    const where: Filter[] = [{ field: 'startDate', op: 'GREATER_THAN_OR_EQUAL', value: manilaYearStart(fromYear) }];
+    if (onlyThatYear) where.push({ field: 'startDate', op: 'LESS_THAN', value: manilaYearStart(fromYear + 1) });
+    climbsLoaders.set(key, () => once(key, () => query('climbs', { where, orderBy: { field: 'startDate' }, limit: 200 })));
+  }
+  return climbsLoaders.get(key)!;
+}
 export const loadSettings = () =>
   once('settings', async () => {
     const doc = (await request('/siteSettings/site')) as { fields?: Parameters<typeof decodeFields>[0] } | null;

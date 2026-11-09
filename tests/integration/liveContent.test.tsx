@@ -3,11 +3,12 @@ import { renderAt } from '../helpers';
 import { previewNotice } from '../../src/frontend/data/content';
 
 // Firestore answers are injected; the REST client itself is covered in unit/liveContent.
-const live = vi.hoisted(() => ({ settings: null as Record<string, unknown> | null, announcements: null as Record<string, unknown>[] | null }));
+const live = vi.hoisted(() => ({ settings: null as Record<string, unknown> | null, announcements: null as Record<string, unknown>[] | null, climbs: null as Record<string, unknown>[] | null }));
 vi.mock('../../src/frontend/services/publicData', () => ({
   publicReadsEnabled: true,
   loadSettings: async () => live.settings,
   announcementsLoader: () => async () => live.announcements,
+  climbsLoader: () => async () => live.climbs,
   loadSurveys: async () => null,
   loadOfficers: async () => [{ body: 'execom', role: 'President', name: 'Live President', current: true, order: 1 }],
   loadCurrentOfficers: async () => [{ body: 'execom', role: 'President', name: 'Live President', current: true, order: 1 }],
@@ -17,6 +18,7 @@ describe('pages read site content from Firestore', () => {
   beforeEach(() => {
     live.settings = null;
     live.announcements = null;
+    live.climbs = null;
   });
 
   it('keeps sample content while Firestore has nothing', async () => {
@@ -47,5 +49,32 @@ describe('pages read site content from Firestore', () => {
     renderAt('/');
     expect(screen.queryByText(previewNotice)).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'membership@example.com' })).not.toBeInTheDocument();
+  });
+
+  describe('open climbs', () => {
+    const year = new Date().getFullYear();
+    const at = (days: number) => new Date(Date.now() + days * 86400_000);
+
+    it('lists upcoming climbs and this year’s completed ones, hides drafts and cancelled', async () => {
+      live.climbs = [
+        { id: 'a', title: 'Live Upcoming', status: 'open', type: 'major', startDate: at(10), difficulty: '4/9' },
+        { id: 'b', title: 'Live Done', status: 'completed', type: 'minor', startDate: new Date(Date.UTC(year, 0, 2)) },
+        { id: 'c', title: 'Live Draft', status: 'draft', startDate: at(5) },
+        { id: 'd', title: 'Live Cancelled', status: 'open', cancellationStatus: 'cancelled', startDate: at(6) },
+      ];
+      renderAt('/activities/open-climbs');
+      expect(await screen.findByRole('heading', { name: 'Live Upcoming' })).toBeInTheDocument();
+      expect(screen.getByText(/Moderate \(4\/9\)/)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: `Completed in ${year}` })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Live Done' })).toBeInTheDocument();
+      expect(screen.queryByText('Live Draft')).not.toBeInTheDocument();
+      expect(screen.queryByText('Live Cancelled')).not.toBeInTheDocument();
+    });
+
+    it('shows a past year without sample climbs', async () => {
+      renderAt(`/activities/open-climbs?year=${year - 1}`);
+      expect(await screen.findByText(`No climbs recorded for ${year - 1} yet.`)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: `Climbs in ${year - 1}.` })).toBeInTheDocument();
+    });
   });
 });

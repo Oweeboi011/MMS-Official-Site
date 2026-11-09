@@ -80,7 +80,7 @@ P1 = launch · P2 = soon after · P3 = later. Open Climbs parity list: `tests/pa
 | Guest | Climb schedule from DB (fees, trail class, slots left) | 1 |
 | Guest | Register: contact, emergency contact, waiver, medical cert (major). Needs a free site account (Google / email), **not MMS membership**; guest fee via `memberType: joiner` (owner decision 2026-11-09) | 1 |
 | Guest | Pay by GCash / QR Ph transfer, upload receipt, officer verifies; confirmation email | 1 |
-| Guest | **Completed + past climbs** ([#191](https://github.com/Oweeboi011/MMS-Official-Site/issues/191), owner ask 2026-11-09): Open Climbs shows this year's upcoming and completed climbs; every past year recorded in `climbs` and browsable by year (old app via sync; pre-app climbs entered by admins from officer records). Decided 2026-11-09: completed = over (`isClimbOver`) and not cancelled; year = calendar year, Manila; cancelled hidden from public lists; postponed stays upcoming, tagged; upcoming soonest first, completed newest first; completed card = mountain, date, trail class only ([CONTEXT](../guides/CONTEXT.md#climbs), URLs [ADR 0008](../adr/0008-CLIMB-URLS.md)) | 1 |
+| Guest | **Completed + past climbs** ([#191](https://github.com/Oweeboi011/MMS-Official-Site/issues/191), owner ask 2026-11-09): Open Climbs shows this year's upcoming and completed climbs; every past year recorded in `climbs` and browsable by year (old app via sync; pre-app climbs entered by admins from officer records). Decided 2026-11-09: completed = over (`isClimbOver`) and not cancelled; year = calendar year, Manila; cancelled hidden from public lists; postponed stays upcoming, tagged; upcoming soonest first, completed newest first; completed card = mountain, date, trail class only ([CONTEXT](../guides/CONTEXT.md#climbs), URLs [ADR 0008](../adr/0008-CLIMB-URLS.md)). **Built 2026-11-09:** live list, completed this year, past-year picker (`data/climbs.ts`, `useClimbSchedule`) | 1 |
 | Guest | **Share a climb** ([#185](https://github.com/Oweeboi011/MMS-Official-Site/issues/185), owner ask 2026-11-09): Facebook (sharer link), Messenger (phone share sheet only; decided 2026-11-09: no Facebook App ID, desktop gets Facebook + Copy link), Instagram story (generated 1080×1920 story image via the phone share sheet; no web link opens Stories). Link previews need per-climb Open Graph tags (item 18) | 1 |
 | Guest / member | Sign in (Google / email; no SMS) · my registrations + receipts | 1 |
 | Member | Profile (batch, tribe) · climb log / passport | 2–3 |
@@ -271,7 +271,7 @@ Ordered by value for cost. All within the cost cap unless marked.
 | # | Recommendation | Why | When |
 |---|---|---|---|
 | R1 | Services layer + auth state first (item 21), behind `VITE_WRITES_ENABLED=false` | every later phase needs it; read-only keeps sync safe | phase 3 |
-| R2 | Read climbs from Firestore; keep a static fallback if Firestore fails | one source of truth; site stays up | phase 3 |
+| R2 | Read climbs from Firestore; keep a static fallback if Firestore fails (list done 2026-11-09: live `climbs`, sample until data exists; failed read shows nothing, retried next page) | one source of truth; site stays up | phase 3 |
 | R3 | Firestore `onSnapshot` only on officer screens; public pages use one-time reads + cache | stays in free read quota | phase 3+ |
 | R4 | Admin screens for announcements, officers, site settings (item 22) | ends "send it to Owee" bottleneck | phase 6 |
 | R5 | `siteStats` refreshed by a scheduled function into one doc | 1 read per visit instead of counting | phase 3 |

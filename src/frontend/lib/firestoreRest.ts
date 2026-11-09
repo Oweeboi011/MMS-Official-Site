@@ -21,24 +21,34 @@ export function decodeFields(fields: Record<string, Value> = {}): Doc {
   return Object.fromEntries(Object.entries(fields).map(([k, v]) => [k, decodeValue(v)]));
 }
 
+export interface Filter {
+  field: string;
+  op: 'EQUAL' | 'GREATER_THAN_OR_EQUAL' | 'LESS_THAN';
+  value: boolean | Date;
+}
+
 export interface QueryOptions {
-  where?: { field: string; equals: boolean };
-  orderByDesc?: string;
+  where?: Filter[];
+  orderBy?: { field: string; desc?: boolean };
   limit: number;
 }
 
-export function runQueryBody(collection: string, { where, orderByDesc, limit }: QueryOptions) {
+const encode = (v: boolean | Date) => (v instanceof Date ? { timestampValue: v.toISOString() } : { booleanValue: v });
+const fieldFilter = ({ field, op, value }: Filter) => ({ fieldFilter: { field: { fieldPath: field }, op, value: encode(value) } });
+
+export function runQueryBody(collection: string, { where = [], orderBy, limit }: QueryOptions) {
   return {
     structuredQuery: {
       from: [{ collectionId: collection }],
-      ...(where && { where: { fieldFilter: { field: { fieldPath: where.field }, op: 'EQUAL', value: { booleanValue: where.equals } } } }),
-      ...(orderByDesc && { orderBy: [{ field: { fieldPath: orderByDesc }, direction: 'DESCENDING' }] }),
+      ...(where.length === 1 && { where: fieldFilter(where[0]) }),
+      ...(where.length > 1 && { where: { compositeFilter: { op: 'AND', filters: where.map(fieldFilter) } } }),
+      ...(orderBy && { orderBy: [{ field: { fieldPath: orderBy.field }, direction: orderBy.desc ? 'DESCENDING' : 'ASCENDING' }] }),
       limit,
     },
   };
 }
 
-// runQuery answers with one row per document, plus a bare row (no `document`) when nothing matches.
-export function decodeQuery(rows: { document?: { fields?: Record<string, Value> } }[]): Doc[] {
-  return rows.filter((r) => r.document).map((r) => decodeFields(r.document?.fields));
+// runQuery answers with one row per document, plus a bare row (no `document`) when nothing matches. `id` = doc id.
+export function decodeQuery(rows: { document?: { name?: string; fields?: Record<string, Value> } }[]): Doc[] {
+  return rows.flatMap(({ document: d }) => (d ? [{ ...(d.name && { id: d.name.split('/').pop() }), ...decodeFields(d.fields) }] : []));
 }

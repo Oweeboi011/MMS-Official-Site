@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { announcements, officers, surveys, type Announcement, type Officer, type Survey } from '../data/content';
+import { announcements, officers, openClimbs, surveys, type Announcement, type Officer, type Survey } from '../data/content';
 import {
   currentExecom, leadershipBlocks, leadershipPath, pendingSettings, sampleSettings, toAnnouncement, toSettings, toSurveys,
   type SiteSettings,
 } from '../data/liveContent';
+import { splitSchedule, toClimb, type ScheduleClimb } from '../data/climbs';
 import type { ContentBlock } from '../data/subpages';
 import type { Doc } from '../lib/firestoreRest';
-import { announcementsLoader, loadCurrentOfficers, loadOfficers, loadSettings, loadSurveys, publicReadsEnabled } from './publicData';
+import { manilaYear } from '../lib/manila';
+import { announcementsLoader, climbsLoader, loadCurrentOfficers, loadOfficers, loadSettings, loadSurveys, publicReadsEnabled } from './publicData';
 
 // undefined = loading or failed (show nothing); null = nothing there (not configured, no doc). `load` must be module-level.
 function useLoaded<T>(load: (() => Promise<T | null | undefined>) | null): T | null | undefined {
@@ -42,4 +44,24 @@ export function useLeadershipBlocks(path: string, blocks: ContentBlock[] | undef
   const docs = useLoaded(path === leadershipPath ? loadOfficers : null);
   if (path !== leadershipPath || !blocks || docs === null || docs?.length === 0) return blocks;
   return leadershipBlocks(blocks, docs ?? []);
+}
+
+export interface ClimbSchedule {
+  upcoming: ScheduleClimb[];
+  completed: ScheduleClimb[];
+  loading: boolean;
+}
+
+const sampleSchedule: ClimbSchedule = { upcoming: openClimbs.map((c) => ({ ...c, over: false })), completed: [], loading: false };
+
+// year = null: this year's schedule (sample until climbs exist). A past year: its completed climbs, never sample.
+export function useClimbSchedule(year: number | null): ClimbSchedule {
+  const now = new Date();
+  const thisYear = manilaYear(now);
+  const docs = useLoaded(climbsLoader(year ?? thisYear, year !== null));
+  if (docs === undefined) return { upcoming: [], completed: [], loading: true };
+  if (!docs?.length && year === null) return sampleSchedule;
+  const climbs = (docs ?? []).flatMap((d) => toClimb(d, now) ?? []);
+  const { upcoming, completed } = splitSchedule(climbs, year ?? thisYear);
+  return { upcoming: year === null ? upcoming : [], completed, loading: false };
 }
