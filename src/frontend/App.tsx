@@ -1,9 +1,10 @@
-import { Suspense, lazy, type ReactNode } from 'react';
+import { Suspense, lazy, useEffect, type ReactNode } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Footer from './components/Footer';
 import BottomNav from './components/BottomNav';
 import Nav from './components/Nav';
 import RouteErrorBoundary from './components/RouteErrorBoundary';
+import { lazyPage, preloadPages } from './components/lazyPage';
 import ScrollManager from './components/ScrollManager';
 import About from './components/About';
 import Faq from './components/Faq';
@@ -21,10 +22,7 @@ import HomePage from './pages/HomePage';
 import ProgramPage from './pages/ProgramPage';
 import AnnouncementsPage from './pages/AnnouncementsPage';
 import SurveysPage from './pages/SurveysPage';
-import CreditsPage from './pages/CreditsPage';
-import SubPage from './pages/SubPage';
 import SectionPage from './pages/SectionPage';
-import SearchPage from './pages/SearchPage';
 import { programPages } from './data/pages';
 import { legacyRedirects, sectionPath, sitemap, subpagePath } from './data/sitemap';
 
@@ -41,6 +39,10 @@ const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const GuidePage = lazy(() => import('./pages/GuidePage'));
 const AdminRegistrationsPage = lazy(() => import('./pages/AdminRegistrationsPage'));
 const loading = <main className="section"><div className="shell"><p>Loading…</p></div></main>;
+// Sub-page text, the search index and photo credits are big and per-page: load them on demand (initialJs budget).
+const SubPage = lazyPage(() => import('./pages/SubPage'));
+const SearchPage = lazyPage(() => import('./pages/SearchPage'));
+const CreditsPage = lazyPage(() => import('./pages/CreditsPage'));
 
 // Subpages with their own full page layout.
 const programExtras: Record<string, ReactNode> = {
@@ -63,7 +65,21 @@ const pageBodies: Record<string, ReactNode> = {
   '/membership/login': <Passport />,
 };
 
+// After the first page settles, fetch the on-demand public pages so moving between them doesn't flash "Loading…".
+function usePrefetchPages() {
+  useEffect(() => {
+    const run = () => { void preloadPages().catch(() => undefined); };
+    if (typeof window.requestIdleCallback === 'function') { // Safari < 18 lacks it
+      const id = window.requestIdleCallback(run, { timeout: 4000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const timer = setTimeout(run, 2500);
+    return () => clearTimeout(timer);
+  }, []);
+}
+
 export default function App() {
+  usePrefetchPages();
   return (
     <>
       <ScrollManager />
@@ -79,7 +95,7 @@ export default function App() {
             const path = subpagePath(section, page);
             const element = fullPages[path]
               ? <>{fullPages[path]}<RelatedPages section={section} page={page} /></>
-              : <SubPage section={section} page={page}>{pageBodies[path]}</SubPage>;
+              : <Suspense fallback={loading}><SubPage section={section} page={page}>{pageBodies[path]}</SubPage></Suspense>;
             return <Route key={path} path={path} element={element} />;
           }),
         )}
@@ -87,8 +103,8 @@ export default function App() {
           <Route key={from} path={from} element={<Navigate to={to} replace />} />
         ))}
         <Route path="/surveys" element={<SurveysPage />} />
-        <Route path="/search" element={<SearchPage />} />
-        <Route path="/credits" element={<CreditsPage />} />
+        <Route path="/search" element={<Suspense fallback={loading}><SearchPage /></Suspense>} />
+        <Route path="/credits" element={<Suspense fallback={loading}><CreditsPage /></Suspense>} />
         <Route path="/activities/open-climbs/guide" element={<RouteErrorBoundary key="guide"><Suspense fallback={loading}><GuidePage /></Suspense></RouteErrorBoundary>} />
         <Route path="/privacy" element={<RouteErrorBoundary key="privacy"><Suspense fallback={loading}><PrivacyPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/sign-in" element={<RouteErrorBoundary key="sign-in"><Suspense fallback={loading}><SignInPage /></Suspense></RouteErrorBoundary>} />
