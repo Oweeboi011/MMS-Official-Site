@@ -34,6 +34,7 @@ function profile(climb: ClimbDetail): ContentBlock[] {
     ...(climb.stats.length ? [{ type: 'stats' as const, items: climb.stats }] : []),
     ...(about ? [{ type: 'text' as const, eyebrow: 'About the climb', paragraphs: about.split(/\n{2,}/) }] : []),
     ...(climb.fees.length && active(climb) ? [{ type: 'table' as const, eyebrow: 'Fees', title: 'What it costs.', columns: ['Fee', 'Amount', 'Who pays'], rows: climb.fees }] : []),
+    ...(climb.drive && active(climb) ? [{ type: 'text' as const, eyebrow: 'Outreach', title: climb.drive.beneficiary ? `Donation drive for ${climb.drive.beneficiary}.` : 'Donation drive.', paragraphs: [climb.drive.description || 'This climb collects donations for a community on the trail. Registrants can pledge cash or items on My Climbs.', ...(climb.drive.items.length ? [`Needed: ${climb.drive.items.join(', ')}.`] : [])] }] : []),
     ...(climb.officers.length ? [{ type: 'people' as const, eyebrow: 'Climb officers', title: 'Your team leaders.', items: climb.officers }] : []),
   ];
 }
