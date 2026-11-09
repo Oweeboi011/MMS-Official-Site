@@ -12,6 +12,10 @@ const feeColumns: Column[] = [
   { key: 'optional', label: 'Optional', kind: 'bool' },
   { key: 'isGuestFee', label: 'Guest fee', kind: 'bool' },
 ];
+const noticeColumns: Column[] = [
+  { key: 'message', label: 'Announcement', required: true, max: 1000 },
+  { key: 'pinned', label: 'Pinned', kind: 'bool' },
+];
 const OFFICER_ROLES = ['Senior Team Leader', 'Team Leader', 'Assistant Team Leader', 'Scribe'] as const;
 const officerColumns: Column[] = [
   { key: 'role', label: 'Role', kind: 'select', required: true, options: OFFICER_ROLES },
@@ -83,6 +87,7 @@ export const climbsSpec: CollectionSpec = {
     { key: 'donationDrive.beneficiary', label: 'Drive beneficiary (school, community…)', kind: 'text', max: 200 },
     { key: 'donationDrive.description', label: 'Drive description', kind: 'longText', max: 1000 },
     { key: 'donationDrive.suggestedItems', label: 'Items needed (one per line)', kind: 'longText', max: 2000 },
+    { key: 'announcements', label: 'Climb announcements (shown on the climb page)', kind: 'records', columns: noticeColumns, codec: flatCodec(noticeColumns), hint: 'Tick Pinned for reminders that stay on top. **bold** allowed.' },
     { key: 'fees', label: 'Fees', kind: 'records', columns: feeColumns, codec: flatCodec(feeColumns), hint: 'Amount in pesos, or TBA. Guest fee: charged to guests only, never members.' },
     { key: 'officers', label: 'Climb officers (shown on the climb page)', kind: 'records', columns: officerColumns, codec: flatCodec(officerColumns) },
     { key: 'itinerary', label: 'Itinerary', kind: 'records', columns: itineraryColumns, codec: groupedCodec('day', 'entries', itineraryColumns), hint: 'One row per activity; rows with the same day name in a row form that day.' },

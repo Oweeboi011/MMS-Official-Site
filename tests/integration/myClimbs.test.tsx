@@ -124,4 +124,15 @@ describe('My Climbs (switch on)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save pledge' }));
     await vi.waitFor(() => expect(svc.details).toEqual([['pledge', 'r1', { cashPledge: 300, inKind: '5 notebooks', payWithFees: true }]]));
   });
+
+  it('welcomes first-time members once and shows the climb log', async () => {
+    localStorage.removeItem('mms.welcomed');
+    renderAt('/account/climbs');
+    expect(await screen.findByRole('heading', { name: 'Welcome to My Climbs' }, { timeout: 5000 })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Got it' }));
+    expect(screen.queryByRole('heading', { name: 'Welcome to My Climbs' })).not.toBeInTheDocument();
+    expect(localStorage.getItem('mms.welcomed')).toBe('1');
+    expect(screen.getByText('Climb log')).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: 'Mt. Apo' }, { timeout: 5000 })).toBeInTheDocument();
+  });
 });

@@ -9,6 +9,15 @@ import { REQUIRED_DOCS, type DocType } from './requiredDocs';
 
 const https = (v: unknown) => (typeof v === 'string' && v.startsWith('https://') ? v : '');
 
+const noticeDay = (ms: unknown) => (typeof ms === 'number' && ms > 0 ? new Date(ms).toLocaleDateString('en-PH', { dateStyle: 'medium', timeZone: 'Asia/Manila' }) : '');
+
+function noticesOf(v: unknown) {
+  return (Array.isArray(v) ? v : []).map((n) => (n ?? {}) as Doc)
+    .filter((n) => str(n.message))
+    .sort((a, b) => Number(b.pinned === true) - Number(a.pinned === true) || (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0))
+    .map((n) => ({ message: str(n.message), pinned: n.pinned === true, date: noticeDay(n.createdAt) }));
+}
+
 function payToOf(d: Doc) {
   const payTo = { name: str(d.gcashName), number: str(d.gcashNumber), qrUrl: https(d.gcashQrUrl) };
   return payTo.name || payTo.number || payTo.qrUrl ? payTo : null;
@@ -31,6 +40,7 @@ export interface ClimbDetail extends ScheduleClimb {
   feeItems: FeeItem[]; // raw, for registration
   payTo: { name: string; number: string; qrUrl: string } | null; // GCash / QR Ph details (ADR 0007)
   drive: Drive | null; // outreach donation drive
+  notices: { message: string; pinned: boolean; date: string }[]; // per-climb announcements, pinned first
   requiredDocs: (DocType & { sampleUrl: string })[];
   officers: { role: string; name: string }[];
 }
@@ -109,6 +119,7 @@ export function toClimbDetail(d: Doc, now: Date): ClimbDetail | null {
     fees: feesOf(d.fees),
     payTo: payToOf(d),
     drive: driveOf(d),
+    notices: noticesOf(d.announcements),
     requiredDocs: REQUIRED_DOCS.filter((t) => d[t.requiresField] === true).map((t) => ({ ...t, sampleUrl: https(d[t.sampleUrlField]) })),
     feeItems: (Array.isArray(d.fees) ? d.fees.map(record) : []).filter((f) => str(f.label)).map((f) => ({
       label: str(f.label), amount: text(f.amount) || 'TBA', note: str(f.note), optional: f.optional === true, isGuestFee: f.isGuestFee === true,

@@ -1,6 +1,7 @@
 // #135 admin user management: list accounts and set roles (rules: admins update any users/{uid} except
 // canEmailMembers / createdAt; the syncAdminClaim trigger mirrors role into the token claim).
 import { collection, doc, getDocs, limit, query, serverTimestamp, updateDoc } from 'firebase/firestore/lite';
+import { logAudit } from './auditLog';
 import { firebase } from './firebase';
 import { readOnlyMessage, writesEnabled } from './firebaseEnv';
 
@@ -14,7 +15,8 @@ export async function listUsers(): Promise<UserRow[]> {
   }).sort((a, b) => a.email.localeCompare(b.email));
 }
 
-export async function setRole(uid: string, role: 'member' | 'admin'): Promise<void> {
+export async function setRole(uid: string, role: 'member' | 'admin', label = ''): Promise<void> {
   if (!writesEnabled) throw new Error(readOnlyMessage);
   await updateDoc(doc(firebase().db, 'users', uid), { role, updatedAt: serverTimestamp() });
+  await logAudit({ action: 'role changed', targetType: 'user', targetId: uid, targetLabel: label, details: role });
 }
