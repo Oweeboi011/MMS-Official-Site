@@ -33,8 +33,8 @@ describe('Open Climbs parity: admin', () => {
   it.todo('climb detail: registrants, payments, split, refunds, walk-ins, no-shows, services, expenses, net funds, climb-day sheet');
   // all registrations: search, filters, CSV export: tests/integration/adminClimb.test.tsx
   // payments: cash flow, service headcounts: tests/unit/treasury.test.ts (/admin/treasurer)
-  it.todo('analytics: page views, failedRequests log');
-  it.todo('app insights dashboards');
+  // analytics: page views, failedRequests log: services/analytics.ts (tests/unit/analytics.test.ts), /admin/insights
+  // app insights dashboards: /admin/insights (tests/integration/adminInsights.test.tsx)
   it.todo('release notes publish + tracked member email send');
 });
 

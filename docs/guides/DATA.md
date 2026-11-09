@@ -70,3 +70,5 @@ Public read, admin write; replace the matching `content.ts` exports (kept as fal
 | `photoCredits`, `searchIndex` | generated from code |
 
 Personal data: [SECURITY](SECURITY.md#privacy-ra-10173).
+
+**Usage data** (#156): each production page view writes an anonymous `pageViews` row (path, climb id, random per-tab session id, role `guest`, no account) and client crashes write `failedRequests`; both over REST, both expire after 90 days (`expireAt` TTL), as the privacy notice says. Off on preview, in dev and in tests. Admins see the top paths and recent errors on `/admin/insights`.
