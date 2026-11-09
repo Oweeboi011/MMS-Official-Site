@@ -23,8 +23,8 @@ runs:
       run: |
         cd "$RUNNER_TEMP"
         base="https://github.com/gitleaks/gitleaks/releases/download/v$V"
-        curl -sSfLO "$base/gitleaks_${V}_linux_x64.tar.gz"
-        curl -sSfLO "$base/gitleaks_${V}_checksums.txt"
+        curl -sSfLO --retry 5 --retry-all-errors --retry-delay 3 "$base/gitleaks_${V}_linux_x64.tar.gz"
+        curl -sSfLO --retry 5 --retry-all-errors --retry-delay 3 "$base/gitleaks_${V}_checksums.txt"
         sha256sum --ignore-missing -c "gitleaks_${V}_checksums.txt"
         tar -xzf "gitleaks_${V}_linux_x64.tar.gz" gitleaks
         echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
