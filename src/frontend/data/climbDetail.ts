@@ -4,6 +4,14 @@ import type { Coords } from '../lib/trailEmbeds';
 import { isPublic, mapClimb, type ScheduleClimb } from './climbs';
 import type { Stat } from './content';
 import type { FeeItem } from './registration';
+import { REQUIRED_DOCS, type DocType } from './requiredDocs';
+
+const https = (v: unknown) => (typeof v === 'string' && v.startsWith('https://') ? v : '');
+
+function payToOf(d: Doc) {
+  const payTo = { name: str(d.gcashName), number: str(d.gcashNumber), qrUrl: https(d.gcashQrUrl) };
+  return payTo.name || payTo.number || payTo.qrUrl ? payTo : null;
+}
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
 
@@ -20,6 +28,8 @@ export interface ClimbDetail extends ScheduleClimb {
   itinerary: ItineraryDay[];
   fees: string[][]; // Fee, Amount, Who pays (table rows)
   feeItems: FeeItem[]; // raw, for registration
+  payTo: { name: string; number: string; qrUrl: string } | null; // GCash / QR Ph details (ADR 0007)
+  requiredDocs: (DocType & { sampleUrl: string })[];
   officers: { role: string; name: string }[];
 }
 
@@ -95,6 +105,8 @@ export function toClimbDetail(d: Doc, now: Date): ClimbDetail | null {
     coords: coordsOf(d),
     itinerary: itineraryOf(d.itinerary),
     fees: feesOf(d.fees),
+    payTo: payToOf(d),
+    requiredDocs: REQUIRED_DOCS.filter((t) => d[t.requiresField] === true).map((t) => ({ ...t, sampleUrl: https(d[t.sampleUrlField]) })),
     feeItems: (Array.isArray(d.fees) ? d.fees.map(record) : []).filter((f) => str(f.label)).map((f) => ({
       label: str(f.label), amount: text(f.amount) || 'TBA', note: str(f.note), optional: f.optional === true, isGuestFee: f.isGuestFee === true,
     })),

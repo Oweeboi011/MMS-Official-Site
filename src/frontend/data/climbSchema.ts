@@ -1,6 +1,7 @@
 // Admin editor for `climbs` (old Open Climbs shape, read by data/climbs.ts). Rules: admins write, anyone reads.
 import { flatCodec, groupedCodec, type Column } from './records';
-import type { CollectionSpec, Doc, FormValues } from './siteSchemas';
+import { REQUIRED_DOCS } from './requiredDocs';
+import type { CollectionSpec, Doc, Field, FormValues } from './siteSchemas';
 
 // Old app's shapes: fees[{label, amount, note, optional, isGuestFee}], officers[{role, name}], itinerary[{day, entries[{time, activity}]}].
 const feeColumns: Column[] = [
@@ -68,6 +69,13 @@ export const climbsSpec: CollectionSpec = {
     { key: 'waterSourceNote', label: 'Water source note', kind: 'longText', max: 500 },
     { key: 'thingsToBring', label: 'Things to bring (one per line; blank = default list)', kind: 'lines', max: 120 },
     { key: 'trailImages', label: 'Photo links (one https:// link per line)', kind: 'lines', linesAreLinks: true, max: 500 },
+    { key: 'gcashName', label: 'GCash account name (MMS account only)', kind: 'text', max: 120, hint: 'Never a personal wallet (open item 23).' },
+    { key: 'gcashNumber', label: 'GCash number', kind: 'text', max: 20 },
+    { key: 'gcashQrUrl', label: 'GCash / QR Ph code image link', kind: 'link' },
+    ...REQUIRED_DOCS.flatMap((t): Field[] => [
+      { key: t.requiresField, label: `Require: ${t.label}`, kind: 'bool' },
+      { key: t.sampleUrlField, label: `${t.label}: template / sample link`, kind: 'link' },
+    ]),
     { key: 'fees', label: 'Fees', kind: 'records', columns: feeColumns, codec: flatCodec(feeColumns), hint: 'Amount in pesos, or TBA. Guest fee: charged to guests only, never members.' },
     { key: 'officers', label: 'Climb officers (shown on the climb page)', kind: 'records', columns: officerColumns, codec: flatCodec(officerColumns) },
     { key: 'itinerary', label: 'Itinerary', kind: 'records', columns: itineraryColumns, codec: groupedCodec('day', 'entries', itineraryColumns), hint: 'One row per activity; rows with the same day name in a row form that day.' },

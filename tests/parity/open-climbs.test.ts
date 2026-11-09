@@ -14,8 +14,8 @@ describe('Open Climbs parity: member', () => {
   it.todo('register: waitlist when full (details, emergency contact, experience, medical done: /climbs/:id/register)');
   // optional fees + fee breakdown before submit: tests/unit/registration.test.ts, tests/integration/register.test.tsx
   it.todo('printable signed waiver (typed-name waiver done at registration)');
-  it.todo('GCash pay now/later, instalments, receipt upload');
-  it.todo('required documents upload at registration or later');
+  // GCash pay now/later, instalments, receipt upload: tests/integration/myClimbs.test.tsx
+  // required documents upload (after registering): tests/integration/myClimbs.test.tsx
   it.todo('donation drive pledge');
   it.todo('My Climbs: payment log, next steps (status, balance, self-cancel done: /account/climbs)');
   it.todo('rate a climb afterwards');

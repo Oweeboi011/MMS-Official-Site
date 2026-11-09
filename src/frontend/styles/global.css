@@ -208,6 +208,11 @@ button { font: inherit; }
 .my-climb { padding: 20px; border: 1px solid var(--line); border-radius: 18px; }
 .my-climb h2 { margin: 0 0 4px; font-size: 1.2rem; }
 .cancel-box { display: grid; gap: 8px; margin-top: 12px; padding: 14px; border-radius: 14px; background: rgba(169, 46, 42, .06); }
+.pay-form, .doc-uploads { display: grid; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.pay-form h3, .doc-uploads h3 { margin: 0; font-size: 1rem; }
+.pay-to { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.pay-to img { border-radius: 12px; background: #fff; }
+.doc-uploads ul { margin: 0; padding-left: 18px; display: grid; gap: 10px; }
 .year-picker { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 40px; }
 .year-picker select { margin-left: 8px; padding: 8px 10px; border-radius: 10px; font: inherit; }
 .motto { margin: 10px 0 0; color: var(--gold); font-weight: 850; font-style: italic; }
