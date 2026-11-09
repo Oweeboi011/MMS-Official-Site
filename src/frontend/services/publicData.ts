@@ -100,18 +100,20 @@ function climbsIn(s: Snapshot, year: number, onlyThatYear: boolean) {
 }
 
 // Cache id (see the loaders above) → the same answer from the snapshot.
-const fromSnap: Record<string, (s: Snapshot, a: string, b: string) => Doc[] | Doc | null | undefined> = {
+type FromSnap = (s: Snapshot, a: string, b: string) => Doc[] | Doc | null | undefined;
+// A Map, not an object: `kind` can come from a URL (climb id), so no prototype lookups.
+const fromSnap = new Map<string, FromSnap>(Object.entries({
   announcements: (s, a) => rowsOf(s.announcements)?.slice(0, Number(a) || 30),
   surveys: (s) => rowsOf(s.surveys),
   officers: (s, a) => (a === 'current' ? rowsOf(s.officers)?.filter((o) => o.current === true) : rowsOf(s.officers)),
   settings: (s) => (s.settings?.fields ? decodeFields(s.settings.fields) : null),
   climb: (s, a) => rowsOf(s.climbs)?.find((c) => c.id === a) ?? null,
   climbs: (s, a, b) => climbsIn(s, Number(a), b === 'true'),
-};
+} satisfies Record<string, FromSnap>));
 
 export function snapshotFor(id: string, s: Snapshot): Doc[] | Doc | null | undefined {
   const [kind, a = '', b = ''] = id.split(':');
-  return fromSnap[kind]?.(s, a, b);
+  return fromSnap.get(kind)?.(s, a, b);
 }
 
 async function fromSnapshot(id: string) {

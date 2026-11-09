@@ -19,5 +19,7 @@ describe('static fallback snapshot', () => {
     expect(snapshotFor('climb:c2', snap)).toMatchObject({ id: 'c2', title: 'Apo' });
     expect(snapshotFor('climb:zz', snap)).toBeNull();
     expect(snapshotFor('surveys', {} as Parameters<typeof snapshotFor>[1])).toBeUndefined();
+    expect(snapshotFor('constructor:x', snap)).toBeUndefined(); // no prototype lookups
+    expect(snapshotFor('__proto__', snap)).toBeUndefined();
   });
 });
