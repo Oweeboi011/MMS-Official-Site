@@ -8,8 +8,9 @@ if (branch !== 'preview' && branch !== 'main') {
   process.exit(1);
 }
 
-// Preview shares prod Firebase: build it read-only.
-const env = { ...process.env, VITE_WRITES_ENABLED: branch === 'preview' ? 'false' : 'true' };
+// Preview shares prod Firebase: build it read-only, but show the registration screens so officers can review them.
+const preview = branch === 'preview';
+const env = { ...process.env, VITE_WRITES_ENABLED: preview ? 'false' : 'true', ...(preview && { VITE_REGISTRATION_ENABLED: 'true' }) };
 const run = (cmd) => execSync(cmd, { stdio: 'inherit', env });
 
 run('npm run check');

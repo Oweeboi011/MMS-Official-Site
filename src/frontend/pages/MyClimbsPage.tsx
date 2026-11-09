@@ -12,7 +12,7 @@ import WhatsNewBanner from '../components/myclimbs/WhatsNewBanner';
 import RateClimb from '../components/myclimbs/RateClimb';
 import PledgeForm from '../components/myclimbs/PledgeForm';
 import VerifyEmailBanner from '../components/VerifyEmailBanner';
-import type { ClimbDetail } from '../data/climbDetail';
+import { dueLabel, type ClimbDetail } from '../data/climbDetail';
 import { canCancel, draftCancellationPolicy, nextSteps, type MyClimb } from '../data/myClimbs';
 import { registrationEnabled } from '../services/firebaseEnv';
 import { cancelRegistration, myRegistrations } from '../services/registrations';
@@ -99,6 +99,7 @@ function Card({ row, uid, onChange }: { row: MyClimb; uid: string; onChange: () 
       <h2><Link to={`/climbs/${row.climbId}`}>{row.title}</Link></h2>
       <p className="climb-muted">{[row.date, row.statusLabel, row.paymentLabel].filter(Boolean).join(' · ')}</p>
       <Money row={row} balance={balance} />
+      {climb?.paymentDue && balance > 0 && live && row.status !== 'waitlisted' && <p className="climb-muted">Please pay by {dueLabel(climb.paymentDue)}.</p>}
       {climb && <NextSteps steps={nextSteps(row, climb.requiredDocs.map((t) => t.uploadField))} />}
       <PaymentLog row={row} />
       <Records row={row} />

@@ -48,6 +48,7 @@ describe('My Climbs (switch on)', () => {
     renderAt('/account/climbs');
     expect(await screen.findByRole('link', { name: 'Mt. Pulag' }, { timeout: 5000 })).toHaveAttribute('href', '/climbs/soon');
     expect(screen.getByText(/Balance ₱1,300/)).toBeInTheDocument();
+    expect((await screen.findAllByText(/Please pay by/, {}, { timeout: 5000 })).length).toBeGreaterThan(0);
     expect(screen.getByText(/Balance ₱0/)).toBeInTheDocument();
     const buttons = await screen.findAllByRole('button', { name: 'Cancel registration' });
     expect(buttons).toHaveLength(1); // Mt. Apo is over
