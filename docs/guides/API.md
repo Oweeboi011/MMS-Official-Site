@@ -44,6 +44,8 @@ Planned: sync (scheduled, old → new, phase 2). No payment gateway ([ADR 0007](
 | API | Used by | Auth |
 |-----|---------|------|
 | Wikimedia Commons | `tools/fetch-images.mjs` (dev) | none |
+| Open-Meteo forecast + geocoding | climb page weather (`services/weather.ts`), browser, only within 16 days of a climb | none (free, keyless) |
+| AllTrails, Komoot, Google Maps embeds | climb page trail maps (`lib/trailEmbeds.ts`): https links on those hosts only | none |
 | Cloudflare Pages | `wrangler` via `scripts/deploy.mjs` | `wrangler login` / `CLOUDFLARE_API_TOKEN` |
 | Cloud Billing | `billingHardStop` | function service account |
 | Brevo | Open Climbs emails (`email/sendEmail.js`) | `BREVO_API_KEY` (Secret Manager) |
