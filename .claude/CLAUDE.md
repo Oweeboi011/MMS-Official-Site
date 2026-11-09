@@ -45,7 +45,7 @@ New file → its folder above. Root only for files tools require there ([ADR 000
 1. Re-read **Open items** in SOLUTION-PLAN; list gaps this change touches.
 2. `npm run check` green (+ e2e / perf when relevant). IDE problems = 0.
 3. `/code-review` on diff: correctness, SOLID, reuse, dead code, complexity, long comments, folder placement. Fix confirmed, re-run 2.
-4. Update docs + Open items in same change. Decision changed → ADR.
+4. Update docs + Open items in same change; matching issue on the [board](https://github.com/users/Oweeboi011/projects/2) too (new row → new issue, done → close). Decision changed → ADR.
 5. All green → `git commit -s -m "<short imperative subject>"`. No co-author. Not green → report gaps, don't commit.
 6. Branches: `feature/*` → PR `development` (→ preview) → release PR `main` (→ production, approval). Never push straight to `main`.
 
