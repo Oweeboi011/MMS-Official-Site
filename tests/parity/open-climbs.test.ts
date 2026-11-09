@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from 'node:fs';
 
 describe('Open Climbs parity: auth + users', () => {
   it.todo('sign in with email + Google; all old accounts work (hashes migrated)');
-  it.todo('admin user management: create, correct, delete, roles, link walk-ins');
+  it.todo('admin user management: create, correct, delete accounts, link walk-ins (list + roles done: /admin/users)');
 });
 
 describe('Open Climbs parity: member', () => {
