@@ -109,6 +109,8 @@ Every feature of [mms-open-climbs](https://github.com/Oweeboi011/mms-open-climbs
 | Data / files | Firestore `openclimbs`, Storage | same shapes; **one-way sync old → new** |
 | Rules, indexes, functions | old repo | copied to `src/backend` |
 
+**Interim climbs copy (2026-11-10):** `tools/admin/copy-old-climbs.mjs`, run by the owner, puts the old app's climbs on the new site (same ids) before the full sync exists.
+
 **Sync (until switch):** scheduled function in the new project every 15 min; read-only service account on old project (Secret Manager). Users `listUsers` → `importUsers` (scrypt params); Firestore upsert where `updatedAt` > last sync, deletes mirrored, logs not synced; Storage copied by path. New site writes **off** (`VITE_WRITES_ENABLED=false`) and email triggers off — no double emails.
 
 **Switch (owner picks date):** old site read-only + final sync + stop sync → enable writes + emails, `APP_URL` = www → officers use new admin; 2027: old site 301 + repo archived.
