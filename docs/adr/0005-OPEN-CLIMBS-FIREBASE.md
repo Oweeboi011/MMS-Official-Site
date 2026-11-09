@@ -11,7 +11,7 @@
 
 - **New Firebase project, 2 owners** (created by Owee; MMS Gmail added as Owner in Google Cloud IAM, since that Gmail is held by another officer) is the backend for accounts and all live data (climbs, registrations, payments, announcements, officers, surveys). Blaze plan (Functions need it), ≈ ₱0 within free quota, budget alert US$1.70/month.
 - **One-way sync old → new** (users with password hashes, Firestore, Storage) until the owner's switch date; the new site is read-only for member/admin writes and its email triggers are off while sync runs.
-- Frontend rewritten into this repo (TypeScript), served by Cloudflare Pages at `/open-climbs/*`. Same Firestore shapes as the old app.
+- Frontend rewritten into this repo (TypeScript), served by Cloudflare Pages (URLs: [ADR 0008](0008-CLIMB-URLS.md)). Same Firestore shapes as the old app.
 - Plan: [open-climbs-migration](../solution-plan/SOLUTION-PLAN.md#open-climbs-migration).
 
 ## Consequences
