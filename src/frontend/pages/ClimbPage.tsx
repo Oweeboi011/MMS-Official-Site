@@ -1,5 +1,6 @@
 import { Suspense, lazy } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import AddToCalendar from '../components/AddToCalendar';
 import ClimbItinerary from '../components/ClimbItinerary';
 import ClimbPhotos from '../components/ClimbPhotos';
 import ClimbWeather from '../components/ClimbWeather';
@@ -93,6 +94,7 @@ export default function ClimbPage() {
             {note && <p className="climb-notice" role="note">{note}</p>}
             {climb.notices.length > 0 && <ul className="climb-notices" aria-label="Announcements">{climb.notices.map((n) => <li key={n.message} className={n.pinned ? 'is-pinned' : undefined}>{n.pinned && <strong>Reminder: </strong>}<RichText text={n.message} />{n.date && <small className="climb-muted"> · {n.date}</small>}</li>)}</ul>}
             {!climb.cancelled && <ShareClimb climb={climb} />}
+            {active(climb) && <AddToCalendar climb={climb} />}
             <ContentBlocks blocks={profile(climb)} />
             <ClimbPhotos photos={climb.photos} title={climb.title} />
             {registrationEnabled && !climb.cancelled && <Suspense fallback={null}><RegistrantArea climb={climb} /></Suspense>}
