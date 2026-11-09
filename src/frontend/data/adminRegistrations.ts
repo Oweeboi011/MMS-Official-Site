@@ -44,12 +44,10 @@ export function derivePaymentStatus(entries: { status: EntryStatus }[]): string 
 export function reviewPayment(reg: AdminReg, index: number, status: 'verified' | 'rejected', reviewer: { name: string; uid: string }, now: unknown) {
   const at = new Date().toISOString(); // serverTimestamp() isn't allowed inside arrays
   const payments = reg.payments.map((e, i) => (i === index ? { ...e.raw, status, reviewedBy: reviewer.name || reviewer.uid, reviewedAt: at } : e.raw));
-  const statuses = payments.map((p) => ({ status: statusOf(p.status) }));
-  const paymentStatus = derivePaymentStatus(statuses);
+  const rolled = rollUp(payments);
+  const paymentStatus = rolled.paymentStatus;
   return {
-    payments,
-    amountPaid: payments.filter((p) => statusOf(p.status) !== 'rejected').reduce((sum, p) => sum + amountOf(p.amount), 0),
-    paymentStatus,
+    ...rolled,
     verifiedAt: paymentStatus === 'verified' ? now : null,
     verifiedBy: paymentStatus === 'verified' ? { name: reviewer.name, uid: reviewer.uid } : null,
     updatedAt: now,
@@ -137,3 +135,43 @@ export const noShowPatch = (noShow: boolean, markedBy: string, now: unknown) => 
 
 export interface Expense { label: string; amount: number }
 export const expensesTotal = (items: Expense[]) => items.reduce((t, e) => t + e.amount, 0);
+
+// payments + amountPaid + paymentStatus always move together (old buildPaymentPatch).
+function rollUp(payments: Doc[]) {
+  return {
+    payments,
+    amountPaid: payments.filter((p) => statusOf(p.status) !== 'rejected').reduce((sum, p) => sum + amountOf(p.amount), 0),
+    paymentStatus: derivePaymentStatus(payments.map((p) => ({ status: statusOf(p.status) }))),
+  };
+}
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
+// #153 split (old utils/splitPayment): one GCash payment covered friends on the same climb. Each share moves off the
+// payer's entry onto the friend's own history, with the receipt and verdict; both sides carry the same splitId.
+export function splitPatches(payer: AdminReg, index: number, shares: { reg: AdminReg; amount: number }[], actor: string, splitId: (i: number) => string) {
+  const entry = payer.payments[index];
+  if (!entry) throw new Error('That payment no longer exists.');
+  if (entry.status === 'rejected') throw new Error('A rejected payment can’t be split.');
+  if (entry.raw.paidBy) throw new Error('This payment was split onto this record from someone else’s; it can’t be split again.');
+  const parts = shares.map((s, i) => ({ reg: s.reg, amount: round2(s.amount), splitId: splitId(i) })).filter((s) => s.amount > 0);
+  if (!parts.length) throw new Error('Choose who else this payment covers and how much.');
+  if (parts.some((s) => s.reg.id === payer.id)) throw new Error('A payment can’t be split onto the person who paid it.');
+  const moved = round2(parts.reduce((t, s) => t + s.amount, 0));
+  if (moved > entry.amount + 0.005) throw new Error(`Only ₱${entry.amount.toLocaleString('en-PH')} is left on this payment to split.`);
+  const original = (entry.raw.originalAmount as number | undefined) ?? entry.amount;
+  const prior = Array.isArray(entry.raw.splitTo) ? (entry.raw.splitTo as Doc[]) : [];
+  const payerPayments = payer.payments.map((e, i) => (i !== index ? e.raw : {
+    ...e.raw, amount: round2(entry.amount - moved), originalAmount: original,
+    splitTo: [...prior, ...parts.map((s) => ({ registrationId: s.reg.id, name: s.reg.name, amount: s.amount, splitId: s.splitId }))],
+  }));
+  const recipients = parts.map((s) => ({
+    id: s.reg.id,
+    patch: rollUp([...s.reg.payments.map((p) => p.raw), {
+      amount: s.amount, proofs: entry.raw.proofs ?? [], submittedAt: entry.raw.submittedAt ?? null, status: entry.status,
+      paidBy: { registrationId: payer.id, name: payer.name, splitId: s.splitId },
+      note: `Paid by ${payer.name || 'another registrant'}: part of their ₱${original.toLocaleString('en-PH')} payment`, recordedBy: actor,
+    }]),
+  }));
+  return { payer: rollUp(payerPayments), recipients, moved };
+}

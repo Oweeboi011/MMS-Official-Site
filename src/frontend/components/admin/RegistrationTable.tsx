@@ -13,7 +13,7 @@ export default function RegistrationTable({ regs, admin, run, busy, showClimb }:
     <div className="admin-table">
       <table>
         <thead><tr><th scope="col">Registrant</th><th scope="col">Status</th><th scope="col">Payments</th><th scope="col">Documents · notes</th></tr></thead>
-        <tbody>{regs.map((r) => <RegistrationRow key={r.id} reg={r} admin={admin} run={(a) => void run(a)} busy={busy} showClimb={showClimb} />)}</tbody>
+        <tbody>{regs.map((r) => <RegistrationRow key={r.id} reg={r} admin={admin} run={(a) => void run(a)} busy={busy} showClimb={showClimb} others={showClimb ? undefined : regs} />)}</tbody>
       </table>
     </div>
   );

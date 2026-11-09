@@ -1,6 +1,6 @@
 // Admin side of `registrations` (rules: admins read and update any). Lazy: /admin/climbs/:id only.
-import { Timestamp, addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore/lite';
-import { noShowPatch, refundPatch, reviewPayment, toAdminReg, walkInDoc, type AdminReg, type Expense, type WalkIn } from '../data/adminRegistrations';
+import { Timestamp, addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, setDoc, updateDoc, where, writeBatch } from 'firebase/firestore/lite';
+import { noShowPatch, refundPatch, reviewPayment, splitPatches, toAdminReg, walkInDoc, type AdminReg, type Expense, type WalkIn } from '../data/adminRegistrations';
 import { logAudit } from './auditLog';
 import { firebase } from './firebase';
 import { readOnlyMessage, writesEnabled } from './firebaseEnv';
@@ -63,4 +63,17 @@ export async function saveExpenses(climbId: string, items: Expense[]) {
   if (!writesEnabled) throw new Error(readOnlyMessage);
   await setDoc(doc(firebase().db, 'climbExpenses', climbId), { items, updatedAt: serverTimestamp() }, { merge: true });
   await logAudit({ action: 'expenses saved', targetType: 'climb', targetId: climbId, details: `${items.length} line(s)` });
+}
+
+// All registrations change together or not at all.
+export async function splitPayment(payer: AdminReg, index: number, shares: { reg: AdminReg; amount: number }[], actor: string) {
+  if (!writesEnabled) throw new Error(readOnlyMessage);
+  const ids = crypto.getRandomValues(new Uint32Array(shares.length));
+  const { payer: payerPatch, recipients, moved } = splitPatches(payer, index, shares, actor, (i) => `${Date.now().toString(36)}_${ids[i].toString(36)}`);
+  const { db } = firebase();
+  const batch = writeBatch(db);
+  batch.update(doc(db, 'registrations', payer.id), { ...payerPatch, updatedAt: serverTimestamp() });
+  for (const r of recipients) batch.update(doc(db, 'registrations', r.id), { ...r.patch, updatedAt: serverTimestamp() });
+  await batch.commit();
+  await logAudit({ action: 'payment split', targetType: 'registration', targetId: payer.id, targetLabel: `${payer.name} · ${payer.title}`, details: `₱${moved} to ${shares.map((s) => s.reg.name).join(', ')}` });
 }

@@ -9,7 +9,7 @@ const ana = () => toAdminReg('r1', { name: 'Ana Cruz', email: 'ana@x.com', statu
 const ben = () => toAdminReg('r2', { name: 'Ben Reyes', email: 'ben@x.com', status: 'confirmed', climbId: 'c2', climbTitle: 'Mt. Apo' });
 vi.mock('../../src/frontend/services/useAccount', () => ({ useAccount: () => ({ status: 'signedIn', account: { uid: 'a1', email: 'tl@x.com', role: svc.role } }) }));
 vi.mock('../../src/frontend/services/adminRegistrations', () => ({
-  climbRegistrations: async () => [ana()],
+  climbRegistrations: async () => [ana(), toAdminReg('r3', { name: 'Ben Reyes', status: 'pending', climbId: 'c1', climbTitle: 'Mt. Pulag' })],
   recentRegistrations: async () => [ana(), ben()],
   reviewRegistrationPayment: async (reg: { id: string }, index: number, status: string) => { svc.reviews.push([reg.id, index, status]); },
   setRegistrationStatus: async (id: string, status: string) => { svc.statuses.push([id, status]); },
@@ -18,6 +18,7 @@ vi.mock('../../src/frontend/services/adminRegistrations', () => ({
   recordRefund: async (reg: { id: string }, amount: number, note: string) => { svc.notes.push(['refund', reg.id, String(amount), note]); },
   setNoShow: async (reg: { id: string }, v: boolean) => { svc.notes.push(['noshow', reg.id, String(v)]); },
   loadExpenses: async () => [{ label: 'Permit', amount: 300 }],
+  splitPayment: async (payer: { id: string }, _index: number, shares: { reg: { id: string }; amount: number }[]) => { svc.notes.push(['split', payer.id, shares[0].reg.id, String(shares[0].amount)]); },
   saveExpenses: async (id: string, items: unknown[]) => { svc.notes.push(['expenses', id, JSON.stringify(items)]); },
 }));
 vi.mock('../../src/frontend/services/publicData', () => ({
@@ -85,12 +86,21 @@ describe('admin: registrations', () => {
 
   it('records a refund, flags a no-show, and shows net funds after expenses', async () => {
     renderAt('/admin/climbs/c1');
-    fireEvent.click(await screen.findByRole('button', { name: 'Record refund' }, wait));
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Record refund' }, wait))[0]);
     fireEvent.change(screen.getByLabelText('Refund amount for Ana Cruz'), { target: { value: '200' } });
     fireEvent.change(screen.getByLabelText('Refund note for Ana Cruz'), { target: { value: 'GCash 123' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save refund' }));
     await vi.waitFor(() => expect(svc.notes).toContainEqual(['refund', 'r1', '200', 'GCash 123']));
     expect(await screen.findByText(/Expenses and net funds/)).toBeInTheDocument();
     expect(screen.getByText(/− expenses ₱300 =/)).toBeInTheDocument();
+  });
+
+  it('splits a payment onto another registrant', async () => {
+    renderAt('/admin/climbs/c1');
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Split' }, wait))[0]);
+    fireEvent.change(screen.getByLabelText('Split to'), { target: { value: 'r3' } });
+    fireEvent.change(screen.getByLabelText('Split amount'), { target: { value: '400' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Move share' }));
+    await vi.waitFor(() => expect(svc.notes).toContainEqual(['split', 'r1', 'r3', '400']));
   });
 });
