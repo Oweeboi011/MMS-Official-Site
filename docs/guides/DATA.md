@@ -35,7 +35,7 @@ Database `openclimbs` (`asia-southeast1`) and the default Storage bucket (`us-ea
 
 ### Site content collections (open item 22)
 
-Public read, admin write; replace the matching `content.ts` exports (kept as fallback). Required text must be non-blank; site image paths must be flat `/images/<name>.<webp|jpg|jpeg|png|svg>`.
+Public read, admin write; replace the matching `content.ts` exports (kept as fallback). Pages read them since 2026-11-09 ([API](API.md#public-reads-no-sign-in-no-sdk)): an empty collection keeps the sample; a saved `siteSettings/site` wins field by field, blanks included. Required text must be non-blank; site image paths must be flat `/images/<name>.<webp|jpg|jpeg|png|svg>`.
 
 | Collection | Fields | Replaces |
 |---|---|---|

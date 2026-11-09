@@ -45,7 +45,7 @@ flowchart RL
 |-------|-------|------|
 | `lib` | pure helpers (`asset`) | no React, no data |
 | `data` | content + types ([DATA](DATA.md)) | no React |
-| `services` | Firebase calls (phase 3+) | only Firebase importer |
+| `services` | Firebase: SDK on sign-in/admin only; public pages read Firestore REST (`publicData.ts`) with sample fallback | only Firebase caller |
 | `components` | reusable UI; `ContentBlocks` renders all block types | no pages |
 | `pages` | screens | — |
 | `App.tsx` | routes, legacy redirects | — |

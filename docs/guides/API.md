@@ -31,6 +31,10 @@ Planned: sync (scheduled, old → new, phase 2). No payment gateway ([ADR 0007](
 
 `src/frontend/services/siteData.ts`: list / save (merge; blanked fields deleted) / delete for the collections in `src/frontend/data/siteSchemas.ts`, which mirrors the rules. Sign-in: `services/auth.ts` (email/password, Google popup, reset). Roles come from `users/{uid}.role`; admins are set in the console.
 
+### Public reads (no sign-in, no SDK)
+
+`src/frontend/services/publicData.ts` reads site content over the Firestore REST API with the web API key: `:runQuery` for `announcements` (`published == true`, newest `publishedAt` first, 30), `surveys` (50, shown open first), `officers` (one query, current first, 300: Execom on Our story, every term on Leadership), and `GET siteSettings/site`. Rules allow these signed out; an unfiltered `announcements` query is refused. While waiting: settings blank, lists empty (no sample contacts to click). No answer (HTTP error, missing doc) → `content.ts` sample; network error or 5 s timeout → sample and the next page retries. One read per collection per page load. Live officers never mix with sample names: a body with no live officers is hidden. Tests run with Firebase blanked (`vite.config.ts` `test.env`). Hooks: `services/useSiteData.ts`; mapping: `data/liveContent.ts`; REST JSON: `lib/firestoreRest.ts`. Dev with `VITE_USE_EMULATORS=true` reads the emulator.
+
 ## External APIs
 
 | API | Used by | Auth |
