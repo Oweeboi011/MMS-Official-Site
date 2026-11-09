@@ -69,7 +69,7 @@ function PaymentLog({ row }: { row: MyClimb }) {
 
 function Money({ row, balance }: { row: MyClimb; balance: number }) {
   const tba = row.tba ? ' + TBA' : '';
-  return <p>Total {peso(row.total)}{tba} · Paid {peso(row.paid)} · <strong>Balance {peso(balance)}{tba}</strong></p>;
+  return <p className="my-climb-money"><span>Total {peso(row.total)}{tba}</span><span>Paid {peso(row.paid)}</span><strong>Balance {peso(balance)}{tba}</strong></p>;
 }
 
 // #169 sent receipts + #141 printable waiver.
@@ -89,22 +89,41 @@ function Closing({ row, over, uid, onChange }: { row: MyClimb; over: boolean; ui
   return canCancel(row, over) ? <Cancel row={row} onDone={onChange} /> : null;
 }
 
-function Card({ row, uid, onChange }: { row: MyClimb; uid: string; onChange: () => void }) {
-  const climb = useClimb(row.climbId);
-  const balance = Math.max(row.total - row.paid, 0);
-  const live = Boolean(climb) && ['pending', 'confirmed', 'waitlisted'].includes(row.status);
-  const owes = balance > 0 || row.tba;
+function DueNote({ row, climb, balance }: { row: MyClimb; climb: ClimbDetail | null | undefined; balance: number }) {
+  const live = ['pending', 'confirmed', 'waitlisted'].includes(row.status);
+  if (!climb?.paymentDue || balance <= 0 || !live || row.status === 'waitlisted') return null;
+  return <p className="climb-muted">Please pay by {dueLabel(climb.paymentDue)}.</p>;
+}
+
+// Everything a member can do on a registration; hidden while this site is a read-only copy.
+function CardActions({ row, climb, uid, owes, onChange }: { row: MyClimb; climb: ClimbDetail; uid: string; owes: boolean; onChange: () => void }) {
+  const live = ['pending', 'confirmed', 'waitlisted'].includes(row.status);
   return (
-    <li className="my-climb">
-      <h2><Link to={`/climbs/${row.climbId}`}>{row.title}</Link></h2>
-      <p className="climb-muted">{[row.date, row.statusLabel, row.paymentLabel].filter(Boolean).join(' · ')}</p>
-      <Money row={row} balance={balance} />
-      {climb?.paymentDue && balance > 0 && live && row.status !== 'waitlisted' && <p className="climb-muted">Please pay by {dueLabel(climb.paymentDue)}.</p>}
-      {climb && <NextSteps steps={nextSteps(row, climb.requiredDocs.map((t) => t.uploadField))} />}
+    <>
+      <NextSteps steps={nextSteps(row, climb.requiredDocs.map((t) => t.uploadField))} />
       <PaymentLog row={row} />
       <Records row={row} />
-      {live && climb && <LiveActions row={row} climb={climb} uid={uid} owes={owes} onChange={onChange} />}
-      {climb && <Closing row={row} over={climb.over} uid={uid} onChange={onChange} />}
+      {live && <LiveActions row={row} climb={climb} uid={uid} owes={owes} onChange={onChange} />}
+      <Closing row={row} over={climb.over} uid={uid} onChange={onChange} />
+    </>
+  );
+}
+
+function Card({ row, uid, onChange, readOnly }: { row: MyClimb; uid: string; onChange: () => void; readOnly: boolean }) {
+  const climb = useClimb(row.climbId);
+  const balance = Math.max(row.total - row.paid, 0);
+  const owes = balance > 0 || row.tba;
+  return (
+    <li className={`my-climb my-climb--${row.status}`}>
+      <h2><Link to={`/climbs/${row.climbId}`}>{row.title}</Link></h2>
+      <p className="my-climb-meta">
+        {row.date && <span className="my-climb-date">{row.date}</span>}
+        {row.statusLabel && <span className="my-climb-chip">{row.statusLabel}</span>}
+        {row.paymentLabel && <span className="my-climb-chip is-payment">{row.paymentLabel}</span>}
+      </p>
+      <Money row={row} balance={balance} />
+      <DueNote row={row} climb={climb} balance={balance} />
+      {climb && !readOnly ? <CardActions row={row} climb={climb} uid={uid} owes={owes} onChange={onChange} /> : <><PaymentLog row={row} /><Records row={row} /></>}
     </li>
   );
 }
@@ -121,7 +140,7 @@ function LiveActions({ row, climb, uid, owes, onChange }: { row: MyClimb; climb:
   );
 }
 
-function List({ uid }: { uid: string }) {
+function List({ uid, readOnly }: { uid: string; readOnly: boolean }) {
   const [rows, setRows] = useState<MyClimb[] | null>(null);
   const [error, setError] = useState('');
   const load = useCallback(() => {
@@ -131,14 +150,13 @@ function List({ uid }: { uid: string }) {
   if (error) return <p role="alert">{error}</p>;
   if (!rows) return <p role="status">Loading your climbs…</p>;
   if (!rows.length) return <><p>No registrations yet.</p><Link className="btn btn-primary" to="/activities/open-climbs">Find a climb</Link></>;
-  return <><ClimbLog rows={rows} /><ul className="my-climbs">{rows.map((r) => <Card key={r.id} row={r} uid={uid} onChange={load} />)}</ul></>;
+  return <><ClimbLog rows={rows} /><ul className="my-climbs">{rows.map((r) => <Card key={r.id} row={r} uid={uid} onChange={load} readOnly={readOnly} />)}</ul></>;
 }
 
 function Body() {
   const state = useAccount();
-  if (!registrationEnabled) return <p>My Climbs opens here together with climb registration. Until then, use the Open Climbs app you registered with.</p>;
   if (state.status === 'loading') return <p role="status">Checking your sign-in…</p>;
-  if (state.status === 'signedIn') return <><VerifyEmailBanner account={state.account} /><Welcome /><p><Link to="/account/details">My details</Link> · <Link to="/account/whats-new">What’s new</Link></p><WhatsNewBanner /><Notifications uid={state.account.uid} /><List uid={state.account.uid} /></>;
+  if (state.status === 'signedIn') return <><VerifyEmailBanner account={state.account} /><Welcome /><p><Link to="/account/details">My details</Link> · <Link to="/account/whats-new">What’s new</Link></p><WhatsNewBanner />{!registrationEnabled && <p className="climb-notice" role="note">This is a read-only copy of your registrations. To pay, upload documents or cancel, keep using the <a href="https://mms-open-climbs.web.app" target="_blank" rel="noopener noreferrer">Open Climbs app</a> until MMS switches over to this site.</p>}<Notifications uid={state.account.uid} /><List uid={state.account.uid} readOnly={!registrationEnabled} /></>;
   if (state.status === 'error') return <p role="alert">Couldn’t check your sign-in: {state.error}</p>;
   return <><p>Sign in to see your climbs.</p><SignInForm /></>;
 }
