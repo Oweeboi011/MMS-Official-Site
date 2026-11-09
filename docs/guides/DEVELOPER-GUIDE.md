@@ -51,7 +51,7 @@ flowchart LR
 3. `npm run dev` → `/account/sign-in`. First sign-in creates `users/{uid}` as `member`.
 4. Make an admin: Firebase console → Firestore (`openclimbs`) → `users/{uid}` → `role` = `admin` (rules block self-promotion). Then `/admin`.
 
-Firebase code lives only in `src/frontend/services/` and loads on `/account/*` + `/admin` only (bundle budget: `initialJs` vs `lazyJs`).
+Firebase code lives only in `src/frontend/services/` and loads on `/account/*` + `/admin` only (bundle budget: `initialJs` total vs `largestLazyJs` per on-demand file).
 
 ## Design sessions
 
