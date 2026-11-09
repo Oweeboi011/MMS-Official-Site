@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { climbFinder, openClimbs, type ExperienceOption } from '../data/content';
+import { climbFinder, type ExperienceOption } from '../data/content';
 import { recommendClimbs } from '../lib/recommend';
+import { useClimbSchedule } from '../services/useSiteData';
 
 // L7: suggests open climbs for a joiner's experience level (rules + copy in data/content.ts).
 export default function ClimbFinder() {
   const [picked, setPicked] = useState<ExperienceOption | null>(null);
-  const climbs = picked ? recommendClimbs(openClimbs, picked.difficulties) : [];
+  const { upcoming } = useClimbSchedule(null);
+  const climbs = picked ? recommendClimbs(upcoming, picked.difficulties) : [];
 
   return (
     <section className="section climb-finder" id="find-a-climb">

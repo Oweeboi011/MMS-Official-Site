@@ -163,6 +163,10 @@ button { font: inherit; }
 .event-tag.type-special { background: var(--green); }
 .event-tag.closed { background: var(--red); }
 .event-cta { margin-top: 32px; }
+.event-empty { margin: 0; padding: 22px 0; color: rgba(255,255,255,.7); }
+.event-subhead { margin: 48px 0 12px; font-size: 1.1rem; }
+.year-picker { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 40px; }
+.year-picker select { margin-left: 8px; padding: 8px 10px; border-radius: 10px; font: inherit; }
 .motto { margin: 10px 0 0; color: var(--gold); font-weight: 850; font-style: italic; }
 
 .passport { position: relative; overflow: hidden; padding: 30px; border-radius: 32px; color: #fff; background: var(--navy); box-shadow: var(--shadow); }

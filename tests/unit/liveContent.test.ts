@@ -21,7 +21,7 @@ describe('Firestore REST decoding', () => {
   });
 
   it('builds a filtered, ordered query and skips the no-match row', () => {
-    expect(runQueryBody('announcements', { where: { field: 'published', equals: true }, orderByDesc: 'publishedAt', limit: 5 })).toEqual({
+    expect(runQueryBody('announcements', { where: [{ field: 'published', op: 'EQUAL', value: true }], orderBy: { field: 'publishedAt', desc: true }, limit: 5 })).toEqual({
       structuredQuery: {
         from: [{ collectionId: 'announcements' }],
         where: { fieldFilter: { field: { fieldPath: 'published' }, op: 'EQUAL', value: { booleanValue: true } } },
@@ -31,6 +31,17 @@ describe('Firestore REST decoding', () => {
     });
     expect(runQueryBody('surveys', { limit: 2 }).structuredQuery).toEqual({ from: [{ collectionId: 'surveys' }], limit: 2 });
     expect(decodeQuery([{ document: { fields: { a: { stringValue: 'x' } } } }, {}])).toEqual([{ a: 'x' }]);
+    expect(decodeQuery([{ document: { name: 'projects/p/databases/d/documents/climbs/abc', fields: {} } }])).toEqual([{ id: 'abc' }]);
+  });
+
+  it('ANDs several filters (a date range)', () => {
+    const from = new Date('2025-12-31T16:00:00Z');
+    const where = runQueryBody('climbs', { where: [{ field: 'startDate', op: 'GREATER_THAN_OR_EQUAL', value: from }, { field: 'startDate', op: 'LESS_THAN', value: from }], orderBy: { field: 'startDate' }, limit: 1 }).structuredQuery;
+    expect(where.where).toEqual({ compositeFilter: { op: 'AND', filters: [
+      { fieldFilter: { field: { fieldPath: 'startDate' }, op: 'GREATER_THAN_OR_EQUAL', value: { timestampValue: '2025-12-31T16:00:00.000Z' } } },
+      { fieldFilter: { field: { fieldPath: 'startDate' }, op: 'LESS_THAN', value: { timestampValue: '2025-12-31T16:00:00.000Z' } } },
+    ] } });
+    expect(where.orderBy).toEqual([{ field: { fieldPath: 'startDate' }, direction: 'ASCENDING' }]);
   });
 });
 

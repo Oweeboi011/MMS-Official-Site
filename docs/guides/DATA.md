@@ -59,7 +59,7 @@ Public read, admin write; replace the matching `content.ts` exports (kept as fal
 
 | Export | Store |
 |---|---|
-| `openClimbs` | `climbs` (old-app shape) |
+| `openClimbs` | `climbs` (old-app shape). **Read live** on home + `/activities/open-climbs` (REST, by `startDate`: this Manila year onward, or one past year via `?year=`; 200 max). `startDate` / `endDate` must be Timestamps for the query (old `YYYY-MM-DD` strings display but aren't found: imports convert them). Nothing yet → sample climbs |
 | `announcements`, `officers`, `surveys`, `faqs`, `glossary` | same-name collections |
 | `/about/leadership` (Execom, TComm, BOT, past presidents), `/about/committees` blocks | `officers`, `committees` (admins update them; page text stays in code) |
 | `videos`, `gallery` | `media` |
