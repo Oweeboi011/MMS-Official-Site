@@ -27,10 +27,8 @@ describe('Open Climbs parity: member', () => {
 
 describe('Open Climbs parity: admin', () => {
   // dashboard: climbs with type, slots, confirmed, pending: tests/integration/account.test.tsx
-  it.todo('climbs CRUD: open/close, cancel, postpone, fees, QR, officers, docs, meetings, announcements, drives');
   // climb detail: registrants, payments, split, refunds, walk-ins, no-shows, services, expenses, net funds, climb-day sheet: tests/unit/splitPayment.test.ts, adminClimb.test.tsx
   // climbs CRUD: open/close, cancel, postpone, fees, QR, officers, docs, meetings, announcements, drives: climbSchema.ts, MeetingsEditor (tests/unit/climbSchema.test.ts, climbNotices.test.ts)
-  it.todo('climb detail: registrants, payments, split, refunds, walk-ins, no-shows, services, expenses, net funds, climb-day sheet');
   // all registrations: search, filters, CSV export: tests/integration/adminClimb.test.tsx
   // payments: cash flow, service headcounts: tests/unit/treasury.test.ts (/admin/treasurer)
   // analytics: page views, failedRequests log: services/analytics.ts (tests/unit/analytics.test.ts), /admin/insights
