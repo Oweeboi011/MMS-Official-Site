@@ -38,6 +38,7 @@ const AdminClimbPage = lazy(() => import('./pages/AdminClimbPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const GuidePage = lazy(() => import('./pages/GuidePage'));
 const HelpPage = lazy(() => import('./pages/HelpPage'));
+const AdminHelpPage = lazy(() => import('./pages/AdminHelpPage'));
 const AdminRegistrationsPage = lazy(() => import('./pages/AdminRegistrationsPage'));
 const loading = <main className="section"><div className="shell"><p>Loading…</p></div></main>;
 // Sub-page text, the search index and photo credits are big and per-page: load them on demand (initialJs budget).
@@ -107,6 +108,7 @@ export default function App() {
         <Route path="/search" element={<Suspense fallback={loading}><SearchPage /></Suspense>} />
         <Route path="/credits" element={<Suspense fallback={loading}><CreditsPage /></Suspense>} />
         <Route path="/activities/open-climbs/guide" element={<RouteErrorBoundary key="guide"><Suspense fallback={loading}><GuidePage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/admin/help" element={<RouteErrorBoundary key="admin-help"><Suspense fallback={loading}><AdminHelpPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/help" element={<RouteErrorBoundary key="help"><Suspense fallback={loading}><HelpPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/privacy" element={<RouteErrorBoundary key="privacy"><Suspense fallback={loading}><PrivacyPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/sign-in" element={<RouteErrorBoundary key="sign-in"><Suspense fallback={loading}><SignInPage /></Suspense></RouteErrorBoundary>} />
