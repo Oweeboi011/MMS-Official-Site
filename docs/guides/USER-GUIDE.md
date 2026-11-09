@@ -57,6 +57,8 @@ The schedule on `/activities/open-climbs` lists upcoming climbs, climbs complete
 ### Coming
 
 
+**My details** (`/account/details`, linked from My Climbs): your contact, emergency contact and health notes, plus optional BMC batch and Sportsfest tribe. Only you and the officers of your climbs can see them.
+
 Registration, payments, and My Climbs move here from `mms-open-climbs.web.app` (same login). Until the switch, register on the old site. Plan: [Open Climbs migration](../solution-plan/SOLUTION-PLAN.md#open-climbs-migration).
 
 ## Accounts officers hold
