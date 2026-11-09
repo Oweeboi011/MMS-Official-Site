@@ -39,7 +39,7 @@ jobs:
           if [ -z "$TOKEN" ]; then echo "::warning::CLOUDFLARE_API_TOKEN not set; skipping deploy"; echo "skip=1" >> "$GITHUB_OUTPUT"; fi
       - name: Checkout
         if: steps.guard.outputs.skip != '1'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Setup Toolchain
         if: steps.guard.outputs.skip != '1'
         uses: ./.github/actions/setup
@@ -55,3 +55,25 @@ jobs:
           VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
           VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
           VITE_APP_CHECK_SITE_KEY: ${{ vars.VITE_APP_CHECK_SITE_KEY }}
+
+  # Every production release (push to main) gets a GitHub Release: next minor version, notes from merged PRs
+  # (.github/release.yml). Runs whether the Cloudflare step deployed or was skipped (manual deploy:prod until item 5).
+  release:
+    name: GitHub Release
+    needs: deploy
+    if: github.event_name == 'push' && github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          last=$(gh release list --repo "$REPO" --limit 1 --json tagName --jq '.[0].tagName // "v1.0.0"')
+          IFS=. read -r major minor _ <<< "${last#v}"
+          next="v${major}.$((minor + 1)).0"
+          gh release create "$next" --repo "$REPO" --target "$SHA" --title "$next — $(date -u +%Y-%m-%d)" --generate-notes --notes-start-tag "$last"

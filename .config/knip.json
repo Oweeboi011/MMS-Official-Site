@@ -4,11 +4,14 @@
     ".": {
       "entry": [
         "tools/*.mjs",
+        "tools/admin/*.mjs",
         "scripts/*.mjs",
+        "functions/**/*.ts",
         "tests/**/*.{ts,tsx,mjs,js}"
       ],
       "project": [
         "src/frontend/**/*.{ts,tsx}",
+        "functions/**/*.ts",
         "tools/**/*.mjs",
         "scripts/**/*.mjs",
         "tests/**/*.{ts,tsx,mjs,js}"

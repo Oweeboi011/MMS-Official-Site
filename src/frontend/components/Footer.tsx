@@ -30,7 +30,7 @@ export default function Footer() {
             </div>
           ))}
         </div>
-        <div className="footer-note">Prototype content and event details are illustrative. Photos via Wikimedia Commons, mountain data via Wikipedia — <Link to="/credits">credits</Link>.</div>
+        <div className="footer-note">Prototype content and event details are illustrative. Photos via Wikimedia Commons, mountain data via Wikipedia — <Link to="/credits">credits</Link> · <Link to="/privacy">privacy notice</Link> · <Link to="/help">help</Link>.</div>
       </div>
     </footer>
   );

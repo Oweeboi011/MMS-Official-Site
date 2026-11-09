@@ -1,6 +1,7 @@
-import { Timestamp, addDoc, collection, deleteDoc, deleteField, doc, getDocs, limit, query, serverTimestamp, setDoc } from 'firebase/firestore/lite';
+import { Timestamp, addDoc, collection, deleteDoc, deleteField, doc, getDocs, limit, orderBy, query, serverTimestamp, setDoc } from 'firebase/firestore/lite';
 import { fromForm, type CollectionSpec, type FormValues } from '../data/siteSchemas';
 import { firebase } from './firebase';
+import { readOnlyMessage, writesEnabled } from './firebaseEnv';
 import { forgetPublicData } from './publicData';
 
 export interface Row {
@@ -12,12 +13,18 @@ export interface Row {
 export const MAX_ROWS = 200;
 
 export async function listRows(spec: CollectionSpec): Promise<Row[]> {
-  const snap = await getDocs(query(collection(firebase().db, spec.id), limit(MAX_ROWS)));
+  const order = spec.orderBy ? [orderBy(spec.orderBy.field, spec.orderBy.desc ? 'desc' : 'asc')] : [];
+  const snap = await getDocs(query(collection(firebase().db, spec.id), ...order, limit(MAX_ROWS)));
   return snap.docs.map((d) => ({ id: d.id, data: d.data() }));
 }
 
 // Edits merge (keeps fields the form doesn't show, e.g. reviews.feedbackId); blanked fields are deleted.
+function assertWritable() {
+  if (!writesEnabled) throw new Error(readOnlyMessage);
+}
+
 export async function saveRow(spec: CollectionSpec, id: string | null, values: FormValues, locked: string[] = []): Promise<string> {
+  assertWritable();
   const { db } = firebase();
   const docId = spec.singleton ?? id;
   const fields = fromForm(spec, values, Timestamp.fromDate, docId ? deleteField() : undefined);
@@ -34,6 +41,7 @@ export async function saveRow(spec: CollectionSpec, id: string | null, values: F
 }
 
 export async function removeRow(spec: CollectionSpec, id: string): Promise<void> {
+  assertWritable();
   await deleteDoc(doc(firebase().db, spec.id, id));
   forgetPublicData();
 }

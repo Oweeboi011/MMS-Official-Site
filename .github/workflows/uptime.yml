@@ -1,0 +1,24 @@
+name: Uptime
+
+# Fails (GitHub emails the owner) when the live site or public Firestore reads are down,
+# e.g. after the billing hard stop or a domain lapse.
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Site
+        run: curl -fsS --retry 3 --retry-all-errors --retry-delay 10 -o /dev/null https://www.metropolitanms.org/
+      - name: Firestore public read
+        run: |
+          curl -fsS --retry 3 --retry-all-errors --retry-delay 10 -o /dev/null \
+            -H "Content-Type: text/plain" -H "Referer: https://www.metropolitanms.org/" \
+            -d '{"structuredQuery":{"from":[{"collectionId":"officers"}],"where":{"fieldFilter":{"field":{"fieldPath":"current"},"op":"EQUAL","value":{"booleanValue":true}}},"limit":1}}' \
+            "https://firestore.googleapis.com/v1/projects/mms-official-site-513809/databases/openclimbs/documents:runQuery"

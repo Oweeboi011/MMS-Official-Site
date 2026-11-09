@@ -1,6 +1,10 @@
 # User guide
 
-For MMS officers and members: what the site does and how to get changes made. Developers: [DEVELOPER-GUIDE](DEVELOPER-GUIDE.md).
+> - **Purpose:** What the site offers and how to get content changed.
+> - **For:** Officers and leads · Members and guests · Site admins
+> - **In short:** How to find things on the site, how admins update announcements, officers and other content in `/admin`, and how to ask for anything else to change.
+
+Developers: [DEVELOPER-GUIDE](DEVELOPER-GUIDE.md).
 
 ## What's on the site
 
@@ -44,7 +48,16 @@ Waiting on officers: [content needed](../solution-plan/SOLUTION-PLAN.md#content-
 
 Upload to the MMS Google Drive `Albums/YYYY-MM climb` folder, remove photos of anyone who opted out, share as "anyone with link, Viewer", send the folder link. Details: [SOLUTION-PLAN media](../solution-plan/SOLUTION-PLAN.md#media).
 
-## Open Climbs (coming)
+## Open Climbs
+
+The schedule on `/activities/open-climbs` lists upcoming climbs, climbs completed this year, and any past year (**Past years** picker). Each live climb has its own page, `/climbs/<id>`: dates, stats, photos (tap for full screen), weather forecast from 16 days before (plus PAGASA / Windy links), trail maps (AllTrails, Komoot or Google Maps; tabs for alternate routes), water-source note, day-by-day itinerary, packing list, Leave No Trace, and **Share this climb** (phone: Share… for Messenger, Viber and others, plus Instagram story; any device: Facebook, Copy link). Climbs come from the Open Climbs database; until officers load them the schedule shows samples.
+
+**Adding or editing a climb (admins):** sign in, open `/admin` → **Climbs** (newest first, labelled date · name · status). Start as **draft** (hidden), fill name, location, type, start date and what you know (difficulty as N/9, trail class 1–6, distances, packing list one item per line, photo links one per line, map links), then set **open**. Mark **completed** after the climb, **cancelled** if called off (hidden from lists, its link explains), or pick **postponed**. Past years: enter them the same way with their real dates. A **Before opening this climb** box lists what's still missing (dates, slots, fees, GCash details, officers, description). Lists (**Fees**, **Climb officers**, **Itinerary**, **Trail routes**) are small tables: **Add row**, ↑ to reorder, **Remove**. Fees: amount in pesos or TBA; tick **Optional** for extras (transport, meals) and **Guest fee** for the fee only guests pay. Itinerary: one row per activity; rows with the same day name in a row form that day. Changes show on the public pages right away. Pick a saved climb and use **Registrations, payments, CSV →** to see who registered: change a registration's status (pending, confirmed, waitlisted, cancelled, rejected), open receipts, **Verify** or **Reject** each payment (your email and the time are recorded), set **Pre-climb meetings and resources** (only registrants see them, with the list of who's joining), add **notes**, **Add walk-in** for someone who joined without registering online (cash received is recorded as paid), and **Download CSV** for the LGU or jump-off list. **Upcoming climbs** (top of `/admin`) shows each coming climb with slots left, confirmed, pending, waitlist and payments to review; click one for its registrations. **All registrations** searches every climb by name, email, mobile or climb, filters by status, and downloads what you see as CSV. Edit on www.metropolitanms.org: the preview site is read-only.
+
+### Coming
+
+
+**My details** (`/account/details`, linked from My Climbs): your contact, emergency contact and health notes, plus optional BMC batch and Sportsfest tribe. Only you and the officers of your climbs can see them.
 
 Registration, payments, and My Climbs move here from `mms-open-climbs.web.app` (same login). Until the switch, register on the old site. Plan: [Open Climbs migration](../solution-plan/SOLUTION-PLAN.md#open-climbs-migration).
 

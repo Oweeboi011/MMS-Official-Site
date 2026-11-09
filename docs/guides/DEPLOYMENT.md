@@ -1,5 +1,9 @@
 # Deployment
 
+> - **Purpose:** How changes reach the live site, and how the services are set up.
+> - **For:** Developers · Owner (accounts, billing)
+> - **In short:** Every change goes to a preview site first, then to www.metropolitanms.org after the owner approves. Also covers the domain, accounts and Firebase setup.
+
 **Production: https://www.metropolitanms.org/** on Cloudflare Pages (free), project `mms-official-site` in the MMS Cloudflare account. Live since 2026-11-05. Why: [ADR 0001](../adr/0001-HOSTING.md).
 
 ## Deploy (Wrangler CLI)
@@ -13,7 +17,7 @@ npm run deploy:prod       # check → build → perf → production → prod par
 - No Cloudflare Git integration: deploys run from `scripts/deploy.mjs`, locally or via GitHub Actions ([branches](#branches--environments)).
 - Pages URL: `https://mms-official-site-1qd.pages.dev` (`-1qd` suffix: the plain name was taken).
 - No top-level `404.html` → Pages serves `index.html` for deep links (SPA). `public/{assets,images}/404.html` make missing files there a real 404, not cached HTML.
-- Headers/cache: `public/_headers` (security headers, `/assets` 1 yr immutable, `/images` 1 week).
+- Headers/cache: `public/_headers` (security headers, CSP enforced, `/assets` 1 yr immutable, `/images` 1 week).
 - Guards (`scripts/deploy.mjs`): check → build → bundle budget → deploy → prod parity (`main`).
 - CI/CD per branch: [below](#branches--environments).
 - New account only: create the project once with `npx wrangler pages project create mms-official-site --production-branch main --force`. `--force` keeps it on classic Pages; without it wrangler delegates to Workers, rewrites `vite.config.ts`/`package.json`, adds `wrangler.jsonc`, and (4.151–4.157) crashes. Never pass `--force` again after. New `*.pages.dev` hostnames take a few minutes to get TLS.
@@ -34,9 +38,23 @@ flowchart LR
 | `development` | integrated, tested work | PR + push | auto → preview |
 | `main` | released code only (PR from `development`) | PR + push | → production after `production` environment approval, then prod parity |
 
+Data per environment:
+
+| Where | Firebase | Writes |
+|---|---|---|
+| local dev, CI tests | emulators (`VITE_USE_EMULATORS=true`), or none | test data only |
+| preview | prod project | **off**: `deploy.mjs` builds with `VITE_WRITES_ENABLED=false`; `/admin` shows read-only, saves refused |
+| production | prod project | on (admins) |
+
+Climb registration (`VITE_REGISTRATION_ENABLED=true`) stays off on preview and production until the switch from mms-open-climbs; turn it on locally with the emulators only.
+
+Never test data in prod. Rules still guard writes; the flag stops honest mistakes on preview.
+
 AI in the loop (₱0): Claude Code `/code-review` + done gate before every commit (`.claude/CLAUDE.md`); PR template repeats the gate. No paid AI review in Quality Gates (cost cap).
 
 GitHub setup (repo settings, owner): protect `development` + `main` (PR required; `Code Quality & Security`, `End-to-End Tests`, `Security Rules Tests` required; no force push); environment `production` with required reviewer; secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`. **Until those secrets exist, CD passes but skips the deploy** (Release Guard warning): after merging to `main`, run `npm run deploy:prod` locally ([open item 5](../solution-plan/SOLUTION-PLAN.md#open-items)).
+
+**GitHub Releases:** every merge to `main` creates the next release automatically (CD job `release`: v1.1.0, v1.2.0, …, notes = merged PRs grouped by label via `.github/release.yml`), whether the Cloudflare step deployed or was skipped. v1.0.0 was the manual first release.
 
 ## Backend (Firebase)
 

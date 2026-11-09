@@ -1,5 +1,9 @@
 # Overview
 
+> - **Purpose:** One-page summary of the whole project. **Start here.**
+> - **For:** Officers and leads · Members and guests · Site admins · Developers · Owner (accounts, billing)
+> - **In short:** MMS's official website, live at www.metropolitanms.org. It replaces the old Google Sites page and is taking over the Open Climbs registration app, so members and guests can find climbs, register and pay in one place.
+
 Official site of the **Metropolitan Mountaineering Society (MMS)**, live at https://www.metropolitanms.org/. Replaces the old Google Sites page; Open Climbs (registration, payments) moves in from `mms-open-climbs.web.app` ([plan](../solution-plan/SOLUTION-PLAN.md)).
 
 - **Frontend:** React 19 + Vite SPA on Cloudflare Pages (free). Content in TypeScript data files ([DATA](DATA.md)).
@@ -16,9 +20,10 @@ src/frontend/     React SPA: lib/ data/ components/ pages/ App.tsx
 src/backend/      firebase.json, .firebaserc, firebase/ (rules, indexes, CORS), functions/ (own package.json)
 tests/            unit/ component/ integration/ parity/ (vitest) · e2e/ (playwright) · performance/
 scripts/          delivery: deploy.mjs, prod-parity.mjs
-tools/            dev utilities: secrets.mjs (gitleaks), fetch-images.mjs, screenshots.mjs
+tools/            dev utilities: secrets.mjs (gitleaks), fetch-images.mjs, screenshots.mjs; admin/ owner scripts
 data/             tool inputs (images.json)
 public/           static files; _headers = Cloudflare headers + cache
+functions/        Cloudflare Pages Functions (root: Pages requires it): climbs/[id].ts link previews
 .config/          tool configs: playwright, dependency-cruiser, knip, jscpd, gitleaks, lint-staged
 .githooks/        pre-commit (secrets + eslint staged), commit-msg (sign-off, no AI co-author)
 .github/          Quality Gates, Continuous Delivery, shared setup action, PR template

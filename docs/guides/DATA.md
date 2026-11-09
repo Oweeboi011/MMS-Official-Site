@@ -1,5 +1,9 @@
 # Data
 
+> - **Purpose:** What information the site keeps, and where.
+> - **For:** Officers and leads · Site admins · Data privacy officer · Developers
+> - **In short:** Every kind of data (announcements, officers, climbs, registrations, receipts…), where it is stored, and who can see or edit it.
+
 What data exists and where. Today all site content is static TypeScript; live data moves to Firestore with Open Climbs ([plan](../solution-plan/SOLUTION-PLAN.md#open-climbs-migration)).
 
 ## Content (`src/frontend/data`)
@@ -55,7 +59,7 @@ Public read, admin write; replace the matching `content.ts` exports (kept as fal
 
 | Export | Store |
 |---|---|
-| `openClimbs` | `climbs` (old-app shape) |
+| `openClimbs` | `climbs` (old-app shape). **Read live** on home + `/activities/open-climbs` (REST, by `startDate`: this Manila year onward, or one past year via `?year=`; 200 max). `startDate` / `endDate` must be Timestamps for the query (old `YYYY-MM-DD` strings display but aren't found: imports convert them). Nothing yet → sample climbs |
 | `announcements`, `officers`, `surveys`, `faqs`, `glossary` | same-name collections |
 | `/about/leadership` (Execom, TComm, BOT, past presidents), `/about/committees` blocks | `officers`, `committees` (admins update them; page text stays in code) |
 | `videos`, `gallery` | `media` |
@@ -66,3 +70,5 @@ Public read, admin write; replace the matching `content.ts` exports (kept as fal
 | `photoCredits`, `searchIndex` | generated from code |
 
 Personal data: [SECURITY](SECURITY.md#privacy-ra-10173).
+
+**Usage data** (#156): each production page view writes an anonymous `pageViews` row (path, climb id, random per-tab session id, role `guest`, no account) and client crashes write `failedRequests`; both over REST, both expire after 90 days (`expireAt` TTL), as the privacy notice says. Off on preview, in dev and in tests. Admins see the top paths and recent errors on `/admin/insights`.

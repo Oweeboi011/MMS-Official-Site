@@ -2,6 +2,7 @@ import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -15,6 +16,7 @@ export interface Account {
   uid: string;
   email: string;
   role: string;
+  emailVerified: boolean;
 }
 
 // First sign-in creates users/{uid}, role 'member' = any account (old-app value), not MMS membership.
@@ -42,15 +44,23 @@ export function watchAccount(onChange: (account: Account | null) => void, onErro
     const call = ++latest;
     if (!user) return onChange(null);
     roleOf(user)
-      .then((role) => { if (call === latest) onChange({ uid: user.uid, email: user.email ?? '', role }); })
+      .then((role) => { if (call === latest) onChange({ uid: user.uid, email: user.email ?? '', role, emailVerified: user.emailVerified }); })
       .catch((e: Error) => { if (call === latest) onError(e); });
   });
 }
 
 export const signInWithEmail = (email: string, password: string) =>
   signInWithEmailAndPassword(firebase().auth, email, password);
-export const signUpWithEmail = (email: string, password: string) =>
-  createUserWithEmailAndPassword(firebase().auth, email, password);
+// New email accounts get a verification link right away (Google accounts are already verified).
+export async function signUpWithEmail(email: string, password: string) {
+  const cred = await createUserWithEmailAndPassword(firebase().auth, email, password);
+  await sendEmailVerification(cred.user).catch(() => undefined); // the banner offers a resend
+  return cred;
+}
+export async function resendVerification(): Promise<void> {
+  const user = firebase().auth.currentUser;
+  if (user && !user.emailVerified) await sendEmailVerification(user);
+}
 export const signInWithGoogle = () => signInWithPopup(firebase().auth, new GoogleAuthProvider());
 export const resetPassword = (email: string) => sendPasswordResetEmail(firebase().auth, email);
 export const signOut = () => firebaseSignOut(firebase().auth);

@@ -17,14 +17,23 @@ runs:
     - name: Install Functions Dependencies (tests mock these)
       run: npm ci --prefix src/backend/functions
       shell: bash
+    # Cached: GitHub release downloads 504 now and then and failed whole runs.
+    - name: Cache gitleaks
+      id: gitleaks-cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/gitleaks-dl
+        key: gitleaks-8.28.0-linux-x64
     - name: Install gitleaks (pinned, checksum verified)
       shell: bash
-      env: { V: 8.28.0 }
+      env: { V: 8.28.0, HIT: "${{ steps.gitleaks-cache.outputs.cache-hit }}" }
       run: |
-        cd "$RUNNER_TEMP"
+        mkdir -p ~/.cache/gitleaks-dl && cd ~/.cache/gitleaks-dl
         base="https://github.com/gitleaks/gitleaks/releases/download/v$V"
-        curl -sSfLO --retry 5 --retry-all-errors --retry-delay 3 "$base/gitleaks_${V}_linux_x64.tar.gz"
-        curl -sSfLO --retry 5 --retry-all-errors --retry-delay 3 "$base/gitleaks_${V}_checksums.txt"
+        if [ "$HIT" != "true" ]; then
+          curl -sSfLO --retry 8 --retry-all-errors --retry-delay 15 "$base/gitleaks_${V}_linux_x64.tar.gz"
+          curl -sSfLO --retry 8 --retry-all-errors --retry-delay 15 "$base/gitleaks_${V}_checksums.txt"
+        fi
         sha256sum --ignore-missing -c "gitleaks_${V}_checksums.txt"
-        tar -xzf "gitleaks_${V}_linux_x64.tar.gz" gitleaks
+        tar -xzf "gitleaks_${V}_linux_x64.tar.gz" -C "$RUNNER_TEMP" gitleaks
         echo "$RUNNER_TEMP" >> "$GITHUB_PATH"

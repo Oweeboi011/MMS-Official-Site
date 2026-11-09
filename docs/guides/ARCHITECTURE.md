@@ -1,5 +1,9 @@
 # Architecture
 
+> - **Purpose:** How the pieces fit together.
+> - **For:** Developers · Owner (accounts, billing) · Officers and leads
+> - **In short:** The public pages are a fast website on Cloudflare (free). Accounts, climb data and uploads live in Google Firebase. This page shows what runs where and who may see which data.
+
 What runs where. Why: [ADR 0001](../adr/0001-HOSTING.md), [ADR 0005](../adr/0005-OPEN-CLIMBS-FIREBASE.md). Folder layout: [ADR 0006](../adr/0006-REPO-LAYOUT.md).
 
 ## System
@@ -58,7 +62,14 @@ SPA routing: Pages serves `index.html` for unknown paths; `public/{assets,images
 |------|-----|
 | Visitor | read public data (no account) |
 | Account (guest or MMS member) | + own profile, register for a climb, pay, upload receipts. Stored role `member` = has an account, not MMS membership; guest vs member fee = `registrations.memberType` (`joiner` / `member`) |
-| Climb officer | + participants/payments **of their climbs** |
+| Climb officer | + participants/payments **of their climbs** (Phase 6; until then admins only) |
 | Admin | everything, assign roles |
 
-Enforced in Firestore/Storage rules, never only UI. Today the ported rules know only admin + account; climb-officer scoping is [open item 31](../solution-plan/SOLUTION-PLAN.md#open-items). More: [SECURITY](SECURITY.md).
+Enforced in Firestore/Storage rules, never only UI. Today the ported rules know only admin + account; climb-officer scoping comes in Phase 6 ([open item 31](../solution-plan/SOLUTION-PLAN.md#open-items)). More: [SECURITY](SECURITY.md).
+
+**Static fallback (R5c):** `npm run deploy:*` writes `dist/snapshot.json` after the build (`scripts/snapshot.mjs`: the same public reads, raw REST JSON). If a live read fails (Firestore down, billing hard stop), `services/publicData.ts` answers from that last good snapshot instead of showing nothing.
+
+**Data shapes (plan review: shapes):** Firestore data is untrusted at runtime. Reads: every doc passes a mapper in `src/frontend/data/` (`liveContent`, `climbs`, `climbDetail`, `myClimbs`, `adminRegistrations`, `notifications`, `releaseNotes`…) that coerces each field (`str()`, number checks, `https://`-only links, enums with fallbacks) before React sees it, so a malformed doc renders blank, never crashes. Writes: admin forms validate against `siteSchemas` / `climbSchema` / `records` before saving, member writes are built by pure functions (`buildRegistrationDoc`, `refundPatch`…) whose output is pinned by unit tests and the rules emulator test, and `firestore.rules` is the final check. No types are shared with the Functions (JS): the rules are the contract both sides meet (API.md).
+
+**Search:** the static index (`data/searchIndex.ts`) plus live announcements and climbs merged at runtime (`data/liveSearch.ts`).
+

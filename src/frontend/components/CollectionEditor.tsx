@@ -1,6 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { lockedKeys, toForm, validate, type CollectionSpec, type Field, type FormValues } from '../data/siteSchemas';
 import { MAX_ROWS, removeRow, saveRow, type Row } from '../services/siteData';
+import RecordsInput from './RecordsInput';
 import { useCollectionRows } from './useCollectionRows';
 
 const NEW = '__new__';
@@ -13,32 +15,48 @@ const failure = (action: 'saved' | 'deleted', e: unknown) => {
     : 'Not deleted: the database refused. Check that you are still an admin.';
 };
 
-function FieldInput({ field, value, readOnly, locked, onChange }: { field: Field; value: string | boolean; readOnly: boolean; locked: boolean; onChange: (v: string | boolean) => void }) {
+interface InputProps { field: Field; value: string | boolean; disabled: boolean; onChange: (v: string | boolean) => void }
+
+function Control({ field, value, disabled, onChange }: InputProps) {
   const id = `field-${field.key}`;
-  const common = { id, disabled: readOnly || locked };
-  let input;
-  if (field.kind === 'bool') {
-    input = <input {...common} type="checkbox" checked={value === true} onChange={(e) => onChange(e.target.checked)} />;
-  } else if (field.kind === 'select') {
-    input = (
-      <select {...common} value={String(value)} onChange={(e) => onChange(e.target.value)}>
-        <option value="">Choose…</option>
-        {field.options?.map((o) => <option key={o} value={o}>{o}</option>)}
-      </select>
-    );
-  } else if (field.kind === 'longText') {
-    input = <textarea {...common} rows={4} maxLength={field.max} value={String(value)} onChange={(e) => onChange(e.target.value)} />;
-  } else {
-    const type = { int: 'number', date: 'date', link: 'text', text: 'text' }[field.kind];
-    input = <input {...common} type={type} maxLength={field.max} value={String(value)} onChange={(e) => onChange(e.target.value)} />;
+  const text = String(value);
+  const onText = (e: { target: { value: string } }) => onChange(e.target.value);
+  switch (field.kind) {
+    case 'bool':
+      return <input id={id} disabled={disabled} type="checkbox" checked={value === true} onChange={(e) => onChange(e.target.checked)} />;
+    case 'select':
+      return (
+        <select id={id} disabled={disabled} value={text} onChange={onText}>
+          <option value="">Choose…</option>
+          {field.options?.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+      );
+    case 'records':
+      return <RecordsInput id={id} label={field.label} columns={field.columns ?? []} value={text} disabled={disabled} onChange={onChange} />;
+    case 'longText':
+    case 'lines':
+      return <textarea id={id} disabled={disabled} rows={field.kind === 'lines' ? 6 : 4} maxLength={field.max} value={text} onChange={onText} />;
+    default:
+      return <input id={id} disabled={disabled} type={{ int: 'number', date: 'date' }[field.kind as string] ?? 'text'} maxLength={field.max} value={text} onChange={onText} />;
   }
+}
+
+function FieldInput({ field, value, readOnly, locked, onChange }: { field: Field; value: string | boolean; readOnly: boolean; locked: boolean; onChange: (v: string | boolean) => void }) {
   return (
     <div className={`editor-field editor-${field.kind}`}>
-      <label htmlFor={id}>{field.label}{field.required ? ' *' : ''}</label>
-      {input}
+      <label htmlFor={`field-${field.key}`}>{field.label}{field.required ? ' *' : ''}</label>
+      <Control field={field} value={value} disabled={readOnly || locked} onChange={onChange} />
+      {field.hint && <small>{field.hint}</small>}
       {locked && <small>Stored in another format: kept as is (edit in the Firebase console).</small>}
     </div>
   );
+}
+
+// A saved row's own page (e.g. a climb's registrations).
+function RowLink({ spec, selected }: { spec: CollectionSpec; selected: string | null }) {
+  if (!spec.rowLink || !selected || selected === NEW) return null;
+  const { to, label } = spec.rowLink(selected);
+  return <p><Link className="btn" to={to}>{label}</Link></p>;
 }
 
 function RowList({ spec, rows, selected, busy, onPick }: { spec: CollectionSpec; rows: Row[]; selected: string | null; busy: boolean; onPick: (id: string | null) => void }) {
@@ -49,7 +67,7 @@ function RowList({ spec, rows, selected, busy, onPick }: { spec: CollectionSpec;
         {rows.map((r) => (
           <li key={r.id}>
             <button type="button" className={`link-button${r.id === selected ? ' is-active' : ''}`} disabled={busy} onClick={() => onPick(r.id)}>
-              {String(r.data[spec.titleField] ?? r.id)}
+              {spec.rowLabel ? spec.rowLabel(r.data) : String(r.data[spec.titleField] ?? r.id)}
             </button>
           </li>
         ))}
@@ -72,10 +90,16 @@ interface FormProps {
   onDelete: () => void;
 }
 
+function Todo({ items }: { items: string[] }) {
+  if (!items.length) return null;
+  return <div className="editor-todo" role="note"><strong>Before opening this climb:</strong><ul>{items.map((i) => <li key={i}>{i}</li>)}</ul></div>;
+}
+
 function EditorForm({ spec, values, locked, busy, canDelete, confirmDelete, onChange, onSave, onDelete }: FormProps) {
   const readOnly = Boolean(spec.readOnly);
   return (
     <form className="editor-form" onSubmit={(e) => { e.preventDefault(); onSave(); }}>
+      <Todo items={spec.todo?.(values) ?? []} />
       {spec.fields.map((f) => (
         <FieldInput key={f.key} field={f} value={values[f.key]} readOnly={readOnly} locked={locked.includes(f.key)}
           onChange={(v) => onChange({ ...values, [f.key]: v })} />
@@ -162,6 +186,7 @@ export default function CollectionEditor({ spec, onBusyChange }: { spec: Collect
     <div className={spec.singleton ? 'editor is-single' : 'editor'}>
       {!spec.singleton && loaded && <RowList spec={spec} rows={rows} selected={selected} busy={busy} onPick={pick} />}
       {!loaded && !error && <p>Loading…</p>}
+      {loaded && <RowLink spec={spec} selected={selected} />}
       {loaded && selected && (
         <EditorForm spec={spec} values={values} locked={locked} busy={busy} confirmDelete={confirmDelete}
           canDelete={selected !== NEW && !spec.singleton} onChange={setValues} onSave={save} onDelete={remove} />

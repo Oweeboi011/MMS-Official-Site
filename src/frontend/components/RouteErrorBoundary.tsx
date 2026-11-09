@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from 'react';
+import { logClientError } from '../services/analytics';
 
 // Lazy account/admin pages: a chunk that fails to download (often a new deploy) or a page that crashes.
 export default class RouteErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -10,6 +11,7 @@ export default class RouteErrorBoundary extends Component<{ children: ReactNode 
 
   componentDidCatch(error: Error) {
     console.error('Page failed to load', error);
+    logClientError('route', error.message);
   }
 
   render() {

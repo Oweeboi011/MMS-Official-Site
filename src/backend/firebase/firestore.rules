@@ -75,7 +75,7 @@ service cloud.firestore {
       // the whole admin surface to anyone with a browser console.
       // canEmailMembers (email every member) is never written by a client —
       // any admin can mint admins, so an in-app grant could be self-served.
-      // The project owner sets it: functions/scripts/grant-email-members.mjs.
+      // The project owner sets it: tools/admin/grant-email-members.mjs.
       // createdAt is fixed for life: it orders the all-member email send.
       allow update: if (isAdmin() && !affected().hasAny(['canEmailMembers', 'createdAt'])) ||
         (isOwner(userId) && !affected().hasAny(['role', 'canEmailMembers', 'createdAt']));
@@ -89,7 +89,7 @@ service cloud.firestore {
     function memberDetailsAreValid(d) {
       return d.keys().hasOnly([
           'mobile', 'dateOfBirth', 'address', 'medicalConditions', 'experienceLevel',
-          'memberType', 'ecName', 'ecMobile', 'ecRelationship', 'sourceClimbTitle', 'updatedAt'
+          'memberType', 'ecName', 'ecMobile', 'ecRelationship', 'sourceClimbTitle', 'batch', 'tribe', 'updatedAt'
         ]) &&
         (!('memberType' in d) || d.memberType in ['member', 'joiner']) &&
         (!('experienceLevel' in d) || d.experienceLevel in ['beginner', 'intermediate', 'experienced']) &&
@@ -100,6 +100,8 @@ service cloud.firestore {
         (!('ecName' in d) || (d.ecName is string && d.ecName.size() <= 120)) &&
         (!('ecMobile' in d) || (d.ecMobile is string && d.ecMobile.size() <= 40)) &&
         (!('ecRelationship' in d) || (d.ecRelationship is string && d.ecRelationship.size() <= 60)) &&
+        (!('batch' in d) || (d.batch is string && d.batch.size() <= 80)) &&
+        (!('tribe' in d) || d.tribe in ['aeta', 'badjao', 'mangyan', 'tasaday']) &&
         (!('sourceClimbTitle' in d) || (d.sourceClimbTitle is string && d.sourceClimbTitle.size() <= 200));
     }
 

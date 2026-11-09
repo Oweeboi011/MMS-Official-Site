@@ -8,10 +8,13 @@ if (branch !== 'preview' && branch !== 'main') {
   process.exit(1);
 }
 
-const run = (cmd) => execSync(cmd, { stdio: 'inherit' });
+// Preview shares prod Firebase: build it read-only.
+const env = { ...process.env, VITE_WRITES_ENABLED: branch === 'preview' ? 'false' : 'true' };
+const run = (cmd) => execSync(cmd, { stdio: 'inherit', env });
 
 run('npm run check');
 run('npm run build');
+run('node scripts/snapshot.mjs'); // R5c: last good public content for when Firestore can't be read
 run('npm run test:perf');
 run(`npx wrangler pages deploy dist --project-name mms-official-site --branch ${branch}`);
 if (branch === 'main') run('npm run test:parity');

@@ -6,6 +6,7 @@ export default defineConfig({
   testDir: '../tests/e2e',
   outputDir: '../test-results',
   fullyParallel: true,
+  workers: 2, // more parallel tabs overload `vite preview` locally (goto aborts)
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',
   use: { baseURL: 'http://localhost:4173', trace: 'retain-on-failure' },

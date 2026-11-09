@@ -1,5 +1,9 @@
 # ADR 0003 — Quality harness: few tools, one command
 
+> - **Purpose:** A recorded decision: what was chosen and why. Changing it needs a new decision record.
+> - **For:** Officers and leads · Owner (accounts, billing) · Developers
+> - **In short:** A small set of automatic checks, run by one command, instead of many tools.
+
 - **Status:** Accepted
 - **Date:** 2026-10-29, updated 2026-11-05 (gitleaks, `.githooks/`, commit-msg, parity, Quality Gates on)
 

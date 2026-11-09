@@ -1,5 +1,9 @@
 # ADR 0006 — Repo layout
 
+> - **Purpose:** A recorded decision: what was chosen and why. Changing it needs a new decision record.
+> - **For:** Officers and leads · Owner (accounts, billing) · Developers
+> - **In short:** Where each kind of file goes in the code repository, so it stays easy to find things.
+
 - **Status:** Accepted
 - **Date:** 2026-11-05
 
@@ -18,7 +22,7 @@ Root was crowded (configs, scripts, hook tool config in `package.json`). Backend
 | `.github/` | CI/CD (not `.azuredevops`: repo is on GitHub) |
 | `.claude/` | CLAUDE.md + Claude Code settings |
 
-Root keeps only files tools/editors require there: `package.json`/lock, `README.md`, `tsconfig.json`, `vite.config.ts` (vitest + IDE), `eslint.config.js` (IDE + base path), `index.html` (Vite entry), `.editorconfig`, `.gitignore`, `.gitattributes`.
+Root keeps only files tools/editors require there: `package.json`/lock, `README.md`, `tsconfig.json`, `vite.config.ts` (vitest + IDE), `eslint.config.js` (IDE + base path), `index.html` (Vite entry), `.editorconfig`, `.gitignore`, `.gitattributes`, `functions/` (Cloudflare Pages Functions; `wrangler pages deploy` reads it from the working directory).
 
 ## Consequences
 

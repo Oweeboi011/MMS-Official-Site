@@ -1,0 +1,16 @@
+# Monthly, grouped, into development: few PRs, Quality Gates check each one.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directories: ["/", "/src/backend/functions"]
+    target-branch: development
+    schedule: { interval: monthly }
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch: { update-types: [minor, patch] }
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: development
+    schedule: { interval: monthly }
+    groups:
+      actions: { patterns: ["*"] }

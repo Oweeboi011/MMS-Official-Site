@@ -1,5 +1,9 @@
 # Code quality
 
+> - **Purpose:** The automatic checks every change must pass.
+> - **For:** Developers · Owner (accounts, billing)
+> - **In short:** Before anything goes live, tools check for leaked keys, bugs, unused code, accessibility and page size. This lists each check and how to run it.
+
 **Minimum viable harness:** one hook (~2 s), one command (`npm run check`, ~15 s), Quality Gates repeats it. No step unless it catches something real. Why these tools: [ADR 0003](../adr/0003-QUALITY-HARNESS.md).
 
 ```mermaid
@@ -39,8 +43,8 @@ Generated `src/frontend/data/{credits,topMountains}.ts`: excluded from lint + du
 | Integration | `tests/integration` | vitest + Testing Library | every route, redirects, page flows |
 | Security rules | `tests/integration/rules.emulator.mjs` | Firebase emulators (Java), `npm run test:rules` | Firestore + Storage rules: money, roster, private files; Quality Gates only |
 | Parity | `tests/parity`, `scripts/prod-parity.mjs` | vitest todos, node | Open Climbs feature gaps; live = local build |
-| E2E | `tests/e2e` | Playwright (Chromium) | smoke on the real build |
-| Performance | `tests/performance` | node | initial JS ≤ 120 KB gz, lazy JS (sign-in/admin + Firebase) ≤ 150 KB gz, CSS ≤ 20 KB gz, images ≤ 1.2 MB / 15 MB |
+| E2E | `tests/e2e` | Playwright (Chromium) | smoke on the real build; axe WCAG 2.1 AA on key pages (`a11y.spec.ts`) |
+| Performance | `tests/performance` | node | initial JS ≤ 120 KB gz, largest on-demand file ≤ 80 KB gz (per file, not total: owner decision 2026-11-09), CSS ≤ 20 KB gz, images ≤ 1.2 MB / 15 MB |
 
 Lowest level that catches the bug. E2E stays a short smoke suite.
 

@@ -44,7 +44,10 @@ describe('site collection forms', () => {
     expect(lockedKeys(spec('announcements'), doc)).toEqual(['title']);
     expect(toForm(spec('announcements'), doc).title).toBe('');
     expect(validate(spec('announcements'), { ...toForm(spec('announcements'), doc), publishedAt: '2026-11-09' }, ['title'])).toBeNull();
-    expect(lockedKeys(spec('announcements'), { publishedAt: '2026-11-09' })).toEqual(['publishedAt']);
+    expect(lockedKeys(spec('announcements'), { publishedAt: 'Nov 9' })).toEqual(['publishedAt']);
+    // YYYY-MM-DD text (old app) is editable; saving stores a Timestamp
+    expect(lockedKeys(spec('announcements'), { publishedAt: '2026-11-09' })).toEqual([]);
+    expect(toForm(spec('announcements'), { publishedAt: '2026-11-09' }).publishedAt).toBe('2026-11-09');
   });
 
   it('checks cross-field and range rules before saving', () => {

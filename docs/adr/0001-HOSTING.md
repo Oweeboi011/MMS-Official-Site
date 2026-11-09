@@ -1,5 +1,9 @@
 # ADR 0001 — Hosting
 
+> - **Purpose:** A recorded decision: what was chosen and why. Changing it needs a new decision record.
+> - **For:** Officers and leads · Owner (accounts, billing) · Developers
+> - **In short:** The site runs on Cloudflare Pages' free plan: it costs nothing and stops at its limits instead of billing more. Vercel and Azure were ruled out.
+
 - **Status:** Accepted. Cloudflare Pages (free) live at https://www.metropolitanms.org/ since 2026-11-05. Phase 2+ backend superseded by [ADR 0005](0005-OPEN-CLIMBS-FIREBASE.md) (Firebase).
 - **Date:** 2026-10-29, updated 2026-11-05
 - **Supersedes:** Vercel Hobby plan (dropped 2026-11-04: non-commercial terms forbid payments, so phase 3 would force a move); earlier azd → Azure SWA draft (Azure dropped by owner).

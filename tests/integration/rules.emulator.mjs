@@ -60,6 +60,13 @@ console.log("Firestore: registration create");
 await seed();
 await ok("member creates unpaid registration", () => m1().collection("registrations").add(baseReg));
 await ok("member creates with one submitted payment", () => m1().collection("registrations").add({ ...baseReg, paymentStatus: "submitted", amountPaid: 800, payments: [newPay(800)] }));
+// Full doc the new site's form writes (src/frontend/data/registration.ts buildRegistrationDoc).
+await ok("site form registration", () => m1().collection("registrations").add({
+  ...baseReg, climbTitle: "Mt. X", climbDate: "Nov 20", climbLocation: "Benguet", mobile: "0917", dateOfBirth: "", address: "",
+  emergencyContact: { name: "B", mobile: "0918", relationship: "Sister" }, medicalConditions: "", experienceLevel: "beginner",
+  privacyConsentAt: FV.serverTimestamp(), privacyNoticeVersion: "2026-10-18", waiverSignedAt: FV.serverTimestamp(), paymentSubmittedAt: null,
+  feeBreakdown: [{ label: "Guide", amount: "1500", optional: false, selected: true }], createdAt: FV.serverTimestamp(),
+}));
 await no("reject status confirmed", () => m1().collection("registrations").add({ ...baseReg, status: "confirmed" }));
 await no("reject paymentStatus verified", () => m1().collection("registrations").add({ ...baseReg, paymentStatus: "verified" }));
 await no("reject someone else's email", () => m1().collection("registrations").add({ ...baseReg, email: "victim@x.com" }));
@@ -154,6 +161,9 @@ await ok("admin fills in a member's details", () => admin().doc("memberDetails/m
 await no("details reject unknown fields", () => m1().doc("memberDetails/m1").set({ ...details, role: "admin" }));
 await no("details reject a made-up participant type", () => m1().doc("memberDetails/m1").set({ ...details, memberType: "vip" }));
 await no("details reject oversized medical notes", () => m1().doc("memberDetails/m1").set({ ...details, medicalConditions: "x".repeat(2001) }));
+await ok("member saves their batch and tribe", () => m1().doc("memberDetails/m1").set({ ...details, batch: "Pulag 1995", tribe: "aeta" }));
+await no("details reject a made-up tribe", () => m1().doc("memberDetails/m1").set({ ...details, tribe: "vikings" }));
+await no("details reject an oversized batch", () => m1().doc("memberDetails/m1").set({ ...details, batch: "x".repeat(81) }));
 await no("member cannot delete their details record", () => m1().doc("memberDetails/m1").delete());
 await ok("admin reads an email job", () => admin().doc("releaseNoteEmailJobs/j1").get());
 await no("member cannot read an email job", () => m1().doc("releaseNoteEmailJobs/j1").get());

@@ -22,7 +22,7 @@ export interface Mountain {
   alt: string;
 }
 
-type Difficulty = 'Easy' | 'Moderate' | 'Advanced' | 'Not yet rated';
+export type Difficulty = 'Easy' | 'Moderate' | 'Advanced' | 'Not yet rated';
 
 export interface OpenClimb {
   day: string;
@@ -32,6 +32,7 @@ export interface OpenClimb {
   location: string;
   difficulty: Difficulty;
   elevation?: string;
+  distance?: string; // round trip, e.g. "12 km"
   type: 'Major' | 'Minor' | 'Special';
   status: 'Open' | 'Closed';
 }
