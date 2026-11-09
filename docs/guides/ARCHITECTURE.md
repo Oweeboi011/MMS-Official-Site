@@ -58,7 +58,7 @@ SPA routing: Pages serves `index.html` for unknown paths; `public/{assets,images
 |------|-----|
 | Visitor | read public data (no account) |
 | Account (guest or MMS member) | + own profile, register for a climb, pay, upload receipts. Stored role `member` = has an account, not MMS membership; guest vs member fee = `registrations.memberType` (`joiner` / `member`) |
-| Climb officer | + participants/payments **of their climbs** |
+| Climb officer | + participants/payments **of their climbs** (Phase 6; until then admins only) |
 | Admin | everything, assign roles |
 
-Enforced in Firestore/Storage rules, never only UI. Today the ported rules know only admin + account; climb-officer scoping is [open item 31](../solution-plan/SOLUTION-PLAN.md#open-items). More: [SECURITY](SECURITY.md).
+Enforced in Firestore/Storage rules, never only UI. Today the ported rules know only admin + account; climb-officer scoping comes in Phase 6 ([open item 31](../solution-plan/SOLUTION-PLAN.md#open-items)). More: [SECURITY](SECURITY.md).
