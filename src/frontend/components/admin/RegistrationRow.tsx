@@ -3,12 +3,13 @@ import { Link } from 'react-router-dom';
 import { REG_STATUSES } from '../../data/adminRegistrations';
 import { reviewRegistrationPayment, setAdminNotes, setRegistrationStatus } from '../../services/adminRegistrations';
 import RowExtras from './RowExtras';
+import SplitForm from './SplitForm';
 import type { RowProps } from './rowProps';
 
 const peso = (n: number) => `₱${n.toLocaleString('en-PH')}`;
 
 
-function Payments({ reg, admin, run, busy }: RowProps) {
+function Payments({ reg, admin, run, busy, others }: RowProps) {
   if (!reg.payments.length) return <span className="climb-muted"> · no payment yet</span>;
   const reviewer = { name: admin.email, uid: admin.uid };
   return (
@@ -17,6 +18,7 @@ function Payments({ reg, admin, run, busy }: RowProps) {
         <li key={i /* payment history has no ids; position is its identity */}>
           {peso(p.amount)} · {p.status}{p.note && ` · ${p.note}`}
           {p.proofs.map((r, j) => <a key={r.url} href={r.url} target="_blank" rel="noopener noreferrer"> receipt {j + 1}</a>)}
+          {p.status !== 'rejected' && !p.raw.paidBy && <SplitForm payer={reg} index={i} others={others ?? []} actor={admin.email} run={run} busy={busy} />}
           {p.status === 'submitted' && (
             <>
               {' '}<button type="button" className="chip" disabled={busy} onClick={() => run(() => reviewRegistrationPayment(reg, i, 'verified', reviewer))}>Verify</button>
