@@ -20,7 +20,7 @@ describe('Open Climbs parity: member', () => {
   // My Climbs: status, balance, payment log, next steps, self-cancel: tests/unit/myClimbs.test.ts
   it.todo('rate a climb afterwards');
   it.todo('release notes page + one-time what-is-new popup');
-  it.todo('notification bell');
+  // notifications (on My Climbs; header bell would load Firebase on every page): tests/integration/myClimbs.test.tsx
   it.todo('first-login welcome tour');
   it.todo('emails: registration received, status updates, post-climb thank-you');
 });
