@@ -76,6 +76,7 @@ P1 = launch · P2 = soon after · P3 = later. Open Climbs parity list: `tests/pa
 | Guest | Climb schedule from DB (fees, trail class, slots left) | 1 |
 | Guest | Register: contact, emergency contact, waiver, medical cert (major). Needs a free site account (Google / email), **not MMS membership**; guest fee via `memberType: joiner` (owner decision 2026-11-09) | 1 |
 | Guest | Pay by GCash / QR Ph transfer, upload receipt, officer verifies; confirmation email | 1 |
+| Guest | **Completed + past climbs** ([#191](https://github.com/Oweeboi011/MMS-Official-Site/issues/191), owner ask 2026-11-09): Open Climbs shows this year's upcoming and completed climbs; every past year recorded in `climbs` and browsable by year (old app via sync; pre-app climbs entered by admins from officer records) | 1 |
 | Guest | **Share a climb** ([#185](https://github.com/Oweeboi011/MMS-Official-Site/issues/185), owner ask 2026-11-09): Facebook (sharer link), Messenger (phone share sheet; desktop needs an MMS Facebook App ID), Instagram story (generated 1080×1920 story image via the phone share sheet; no web link opens Stories). Link previews need per-climb Open Graph tags (item 18) | 1 |
 | Guest / member | Sign in (Google / email; no SMS) · my registrations + receipts | 1 |
 | Member | Profile (batch, tribe) · climb log / passport | 2–3 |
@@ -244,6 +245,8 @@ Costs, accounts, Firebase hard stop, per-payment fees: [BILLING](../guides/BILLI
 Gates, tests, hooks, Quality Gates: [CODE-QUALITY](../guides/CODE-QUALITY.md). Why: [ADR 0003](../adr/0003-QUALITY-HARNESS.md).
 
 ## Content needed from MMS
+
+**Data loading: Ken** (owner decision 2026-11-09): officers current + past ([#193](https://github.com/Oweeboi011/MMS-Official-Site/issues/193)), past open climbs all years ([#194](https://github.com/Oweeboi011/MMS-Official-Site/issues/194)), past members ([#195](https://github.com/Oweeboi011/MMS-Official-Site/issues/195); roster model to decide first, RA 10173). Dev builds the tooling (climbs editor/import, members roster); Ken's issues are his.
 
 | Item | Page |
 |------|------|
