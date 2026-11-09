@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import type { Coords } from '../lib/trailEmbeds';
 import { planForecast, weatherLabel } from '../lib/weather';
 
-export interface ForecastDay { date: string; label: string; max: number; min: number; rainChance: number }
+interface ForecastDay { date: string; label: string; max: number; min: number; rainChance: number }
 export interface Forecast { status: 'loading' | 'ready' | 'note'; days: ForecastDay[]; message: string; coords: Coords | null }
 
 const TIMEOUT_MS = 8000;
