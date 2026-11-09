@@ -5,6 +5,7 @@ import SignInForm from '../components/SignInForm';
 import DocUploads from '../components/myclimbs/DocUploads';
 import EditDetails from '../components/myclimbs/EditDetails';
 import PayForm from '../components/myclimbs/PayForm';
+import RateClimb from '../components/myclimbs/RateClimb';
 import VerifyEmailBanner from '../components/VerifyEmailBanner';
 import { canCancel, draftCancellationPolicy, nextSteps, type MyClimb } from '../data/myClimbs';
 import { registrationEnabled } from '../services/firebaseEnv';
@@ -76,6 +77,12 @@ function Records({ row }: { row: MyClimb }) {
   );
 }
 
+// After the climb: rate it (confirmed only). Before it ends: cancel.
+function Closing({ row, over, uid, onChange }: { row: MyClimb; over: boolean; uid: string; onChange: () => void }) {
+  if (over) return row.status === 'confirmed' ? <RateClimb row={row} uid={uid} /> : null;
+  return canCancel(row, over) ? <Cancel row={row} onDone={onChange} /> : null;
+}
+
 function Card({ row, uid, onChange }: { row: MyClimb; uid: string; onChange: () => void }) {
   const climb = useClimb(row.climbId);
   const balance = Math.max(row.total - row.paid, 0);
@@ -92,7 +99,7 @@ function Card({ row, uid, onChange }: { row: MyClimb; uid: string; onChange: () 
       {live && climb && <DocUploads row={row} climb={climb} uid={uid} onDone={onChange} />}
       {live && climb && owes && <PayForm row={row} climb={climb} uid={uid} onDone={onChange} />}
       {live && <EditDetails row={row} onDone={onChange} />}
-      {climb && canCancel(row, climb.over) && <Cancel row={row} onDone={onChange} />}
+      {climb && <Closing row={row} over={climb.over} uid={uid} onChange={onChange} />}
     </li>
   );
 }

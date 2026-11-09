@@ -11,6 +11,10 @@ vi.mock('../../src/frontend/services/registrations', () => ({
   cancelRegistration: async (id: string, reason: string) => { svc.cancelled.push([id, reason]); },
   updateMyDetails: async (id: string, x: unknown) => { svc.details.push([id, x]); },
 }));
+vi.mock('../../src/frontend/services/feedback', () => ({
+  myRating: async () => null,
+  rateClimb: async (r: unknown) => { svc.details.push(['rating', r]); },
+}));
 vi.mock('../../src/frontend/services/uploads', () => ({
   submitPayment: async (p: unknown) => { svc.payments.push(p); },
   submitDocument: async (...args: unknown[]) => { svc.docs.push(args); },
@@ -30,7 +34,7 @@ describe('My Climbs (switch on)', () => {
     Object.assign(svc, { cancelled: [], payments: [], docs: [], details: [], verified: true, resent: 0 });
     svc.rows = [
       toMyClimb('r1', { climbId: 'soon', climbTitle: 'Mt. Pulag', status: 'pending', mobile: '0917', emergencyContact: { name: 'Ben', mobile: '0918', relationship: 'Brother' }, paymentStatus: 'unpaid', amountPaid: 200, feeBreakdown: [{ label: 'Guide', amount: '1500', selected: true }] }),
-      toMyClimb('r2', { climbId: 'past', climbTitle: 'Mt. Apo', status: 'confirmed', paymentStatus: 'verified', amountPaid: 900, feeBreakdown: [{ label: 'Guide', amount: '900', selected: true }] }),
+      toMyClimb('r2', { climbId: 'past', climbTitle: 'Mt. Apo', name: 'Ana Cruz', status: 'confirmed', paymentStatus: 'verified', amountPaid: 900, feeBreakdown: [{ label: 'Guide', amount: '900', selected: true }] }),
     ];
   });
 
@@ -83,5 +87,17 @@ describe('My Climbs (switch on)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Resend the link' }));
     expect(await screen.findByText(/Sent\. Check your inbox/)).toBeInTheDocument();
     expect(svc.resent).toBe(1);
+  });
+
+  it('rates a climb after it is over, once', async () => {
+    renderAt('/account/climbs');
+    expect(await screen.findByRole('heading', { name: 'How was the climb?' }, { timeout: 5000 })).toBeInTheDocument(); // Mt. Apo is over
+    fireEvent.click(screen.getByRole('button', { name: 'Send rating' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('Pick 1 to 5 stars.');
+    fireEvent.click(screen.getByLabelText('4 ★'));
+    fireEvent.change(screen.getByLabelText('Comments (optional)'), { target: { value: 'Great trail' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Send rating' }));
+    expect(await screen.findByText('You rated this climb 4 / 5. Thank you!')).toBeInTheDocument();
+    expect(svc.details).toEqual([['rating', { climbId: 'past', climbTitle: 'Mt. Apo', uid: 'u1', name: 'Ana Cruz', rating: 4, comments: 'Great trail' }]]);
   });
 });
