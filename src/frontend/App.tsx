@@ -25,6 +25,7 @@ import AnnouncementsPage from './pages/AnnouncementsPage';
 import SurveysPage from './pages/SurveysPage';
 import SectionPage from './pages/SectionPage';
 import { programPages } from './data/pages';
+import ParamRedirect from './components/ParamRedirect';
 import { legacyRedirects, sectionPath, sitemap, subpagePath } from './data/sitemap';
 
 // Account + admin load Firebase; split out so public pages never download it.
@@ -125,6 +126,9 @@ export default function App() {
         {/* Old Open Climbs app paths: the functions' account emails still link here. */}
         <Route path="/login" element={<Navigate to="/account/sign-in" replace />} />
         <Route path="/my-registrations" element={<Navigate to="/account/climbs" replace />} />
+        <Route path="/event/:id" element={<ParamRedirect to="/climbs/:id" />} />
+        <Route path="/feedback/:id" element={<Navigate to="/account/climbs" replace />} />
+        <Route path="/waiver/:regId" element={<ParamRedirect to="/account/climbs/:regId/waiver" />} />
         <Route path="/account/sign-in" element={<RouteErrorBoundary key="sign-in"><Suspense fallback={loading}><SignInPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/climbs/:id/register" element={<RouteErrorBoundary key="register"><Suspense fallback={loading}><RegisterPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/climbs/:id" element={<RouteErrorBoundary key="climb"><Suspense fallback={loading}><ClimbPage /></Suspense></RouteErrorBoundary>} />
