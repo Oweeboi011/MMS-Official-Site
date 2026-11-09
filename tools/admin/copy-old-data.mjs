@@ -1,11 +1,11 @@
 // One-way copy of everything in the old Open Climbs project's Firestore + sign-in accounts into this project, same ids.
 // Dry run unless --apply; docs already here are kept unless --overwrite. Passwords cannot move (hash settings, #34):
 // accounts arrive with their Google link and emailVerified; email/password people use "Forgot password" once, unless
-// --hash-params <file> is given (JSON with the console's base64_signer_key, base64_salt_separator, rounds, mem_cost):
+// --hash-params <file> is given (the console's "Password hash parameters" text, or JSON with the same keys):
 // then their passwords move too. Keep that file out of the repo.
 // Needs your Google login on both projects: gcloud auth application-default login
 //   node tools/admin/copy-old-data.mjs [--from mms-open-climbs] [--project <id>] [--apply] [--overwrite] [--only a,b] [--hash-params file]
-import { planCopy, toImportRecord } from './copyPlan.mjs';
+import { parseHashParams, planCopy, toImportRecord } from './copyPlan.mjs';
 import { args, connect, connectNamed, main } from './firebaseAdmin.mjs';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -25,10 +25,8 @@ const flagValue = (name) => {
 
 function scryptOptions(file) {
   if (!file) return null;
-  const p = JSON.parse(readFileSync(file, 'utf8'));
-  const missing = ['base64_signer_key', 'base64_salt_separator', 'rounds', 'mem_cost'].filter((k) => p[k] === undefined);
-  if (missing.length) throw new Error(`--hash-params file is missing: ${missing.join(', ')}`);
-  return { hash: { algorithm: 'SCRYPT', key: Buffer.from(p.base64_signer_key, 'base64'), saltSeparator: Buffer.from(p.base64_salt_separator, 'base64'), rounds: p.rounds, memoryCost: p.mem_cost } };
+  const p = parseHashParams(readFileSync(file, 'utf8'));
+  return { hash: { algorithm: 'SCRYPT', key: Buffer.from(p.signerKey, 'base64'), saltSeparator: Buffer.from(p.saltSeparator, 'base64'), rounds: p.rounds, memoryCost: p.memCost } };
 }
 
 async function allUsers(auth) {

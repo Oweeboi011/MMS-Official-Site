@@ -38,12 +38,12 @@ describe('old-app climb copy plan', () => {
       uid: 'u1', email: 'a@x.com', emailVerified: true, displayName: 'Ana', disabled: false,
       metadata: { creationTime: 'Mon, 01 Jan 2024 00:00:00 GMT', lastSignInTime: 'Tue, 02 Jan 2024 00:00:00 GMT' },
       providerData: [{ uid: 'g1', providerId: 'google.com', email: 'a@x.com' }, { uid: 'a@x.com', providerId: 'password', email: 'a@x.com' }],
-      passwordHash: 'aGFzaA==', passwordSalt: 'c2FsdA==',
+      passwordHash: 'aGFzaA==', passwordSalt: 'c2FsdA==', customClaims: { admin: true },
     };
     const plain = toImportRecord(user);
     expect(plain.providerData.map((p: { providerId: string }) => p.providerId)).toEqual(['google.com']);
     expect(plain).not.toHaveProperty('passwordHash');
-    expect(plain).toMatchObject({ uid: 'u1', emailVerified: true, displayName: 'Ana' });
+    expect(plain).toMatchObject({ uid: 'u1', emailVerified: true, displayName: 'Ana', customClaims: { admin: true } });
     const withPassword = toImportRecord(user, true) as unknown as { passwordHash: Buffer; passwordSalt: Buffer };
     expect(withPassword.passwordHash.toString()).toBe('hash');
     expect(withPassword.passwordSalt.toString()).toBe('salt');
