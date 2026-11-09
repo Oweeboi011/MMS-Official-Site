@@ -49,6 +49,10 @@ flowchart LR
 
 Firebase code lives only in `src/frontend/services/` and loads on `/account/*` + `/admin` only (bundle budget: `initialJs` vs `lazyJs`).
 
+## Design sessions
+
+`/grill-with-docs` (Claude Code, `.claude/skills/`): one-question-at-a-time interview on a plan or design; resolved terms go to the domain glossary `docs/guides/CONTEXT.md`, hard-to-reverse decisions to `docs/adr/`. `/grilling` alone = interview without docs.
+
 ## Backend changes
 
 - Functions: `src/backend/functions/src` (ESM). Tests: `tests/unit/functions` (vitest, node env, mocked Firebase). Root `npm run check` covers them.
