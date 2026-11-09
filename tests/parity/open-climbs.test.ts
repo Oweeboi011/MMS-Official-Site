@@ -26,7 +26,7 @@ describe('Open Climbs parity: member', () => {
 });
 
 describe('Open Climbs parity: admin', () => {
-  it.todo('dashboard: climbs with type, slots, confirmed, pending');
+  // dashboard: climbs with type, slots, confirmed, pending: tests/integration/account.test.tsx
   it.todo('climbs CRUD: open/close, cancel, postpone, fees, QR, officers, docs, meetings, announcements, drives');
   it.todo('climb detail: registrants, payments, split, refunds, walk-ins, no-shows, services, expenses, net funds, climb-day sheet');
   // all registrations: search, filters, CSV export: tests/integration/adminClimb.test.tsx
