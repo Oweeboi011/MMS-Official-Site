@@ -36,6 +36,7 @@ const ClimbPage = lazy(() => import('./pages/ClimbPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const MyClimbsPage = lazy(() => import('./pages/MyClimbsPage'));
 const WaiverPrintPage = lazy(() => import('./pages/WaiverPrintPage'));
+const AdminClimbPage = lazy(() => import('./pages/AdminClimbPage'));
 const loading = <main className="section"><div className="shell"><p>Loading…</p></div></main>;
 
 // Subpages with their own full page layout.
@@ -90,6 +91,7 @@ export default function App() {
         <Route path="/climbs/:id" element={<RouteErrorBoundary key="climb"><Suspense fallback={loading}><ClimbPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/climbs/:regId/waiver" element={<RouteErrorBoundary key="waiver"><Suspense fallback={loading}><WaiverPrintPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/climbs" element={<RouteErrorBoundary key="my-climbs"><Suspense fallback={loading}><MyClimbsPage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/admin/climbs/:id" element={<RouteErrorBoundary key="admin-climb"><Suspense fallback={loading}><AdminClimbPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin" element={<RouteErrorBoundary key="admin"><Suspense fallback={loading}><AdminPage /></Suspense></RouteErrorBoundary>} />
         <Route path="*" element={<HomePage />} />
       </Routes>
