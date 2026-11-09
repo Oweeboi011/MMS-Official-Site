@@ -40,7 +40,7 @@ function ClimbRow({ climb }: { climb: ScheduleClimb }) {
 // Sample rows have no id: nothing to open until officers post real climbs.
 function SampleNote({ climbs }: { climbs: ScheduleClimb[] }) {
   if (!climbs.some((c) => !c.id)) return null;
-  return <p className="event-empty" role="note">These are sample entries. Real climbs appear here, with their own pages, once officers post them.</p>;
+  return <p className="event-empty">These are sample entries. Real climbs appear here, with their own pages, once officers post them.</p>;
 }
 
 function ClimbList({ climbs, empty }: { climbs: ScheduleClimb[]; empty: string }) {
