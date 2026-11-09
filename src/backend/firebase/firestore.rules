@@ -89,7 +89,7 @@ service cloud.firestore {
     function memberDetailsAreValid(d) {
       return d.keys().hasOnly([
           'mobile', 'dateOfBirth', 'address', 'medicalConditions', 'experienceLevel',
-          'memberType', 'ecName', 'ecMobile', 'ecRelationship', 'sourceClimbTitle', 'updatedAt'
+          'memberType', 'ecName', 'ecMobile', 'ecRelationship', 'sourceClimbTitle', 'batch', 'tribe', 'updatedAt'
         ]) &&
         (!('memberType' in d) || d.memberType in ['member', 'joiner']) &&
         (!('experienceLevel' in d) || d.experienceLevel in ['beginner', 'intermediate', 'experienced']) &&
@@ -100,6 +100,8 @@ service cloud.firestore {
         (!('ecName' in d) || (d.ecName is string && d.ecName.size() <= 120)) &&
         (!('ecMobile' in d) || (d.ecMobile is string && d.ecMobile.size() <= 40)) &&
         (!('ecRelationship' in d) || (d.ecRelationship is string && d.ecRelationship.size() <= 60)) &&
+        (!('batch' in d) || (d.batch is string && d.batch.size() <= 80)) &&
+        (!('tribe' in d) || d.tribe in ['aeta', 'badjao', 'mangyan', 'tasaday']) &&
         (!('sourceClimbTitle' in d) || (d.sourceClimbTitle is string && d.sourceClimbTitle.size() <= 200));
     }
 
