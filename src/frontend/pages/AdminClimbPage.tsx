@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import PageHero from '../components/PageHero';
 import RegistrationTable, { AdminGate } from '../components/admin/RegistrationTable';
+import ExpensesPanel from '../components/admin/ExpensesPanel';
 import MeetingsEditor from '../components/admin/MeetingsEditor';
 import WalkInForm from '../components/admin/WalkInForm';
 import { useAdminList } from '../components/admin/useAdminList';
@@ -29,6 +30,7 @@ function Registrations({ climbId, climb, admin }: { climbId: string; climb: Clim
       </p>
       <WalkInForm busy={busy} onAdd={(w) => run(() => addWalkIn(ref, w, admin.email))} />
       <MeetingsEditor climbId={climbId} run={run} busy={busy} />
+      <ExpensesPanel climbId={climbId} regs={rows} run={run} busy={busy} />
       {message && <p role="status">{message}</p>}
       <RegistrationTable regs={rows} admin={admin} run={run} busy={busy} />
     </>

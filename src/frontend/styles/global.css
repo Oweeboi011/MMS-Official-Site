@@ -234,6 +234,9 @@ button { font: inherit; }
 .release-note { padding: 18px 0; border-bottom: 1px solid var(--line); }
 .notifications ul { margin: 8px 0; padding-left: 18px; display: grid; gap: 6px; }
 .notifications .is-unread { font-weight: 800; }
+.admin-extras { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; }
+.admin-refund { display: inline-flex; gap: 4px; }
+.admin-refund input { width: 110px; }
 .year-picker { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 40px; }
 .year-picker select { margin-left: 8px; padding: 8px 10px; border-radius: 10px; font: inherit; }
 .motto { margin: 10px 0 0; color: var(--gold); font-weight: 850; font-style: italic; }

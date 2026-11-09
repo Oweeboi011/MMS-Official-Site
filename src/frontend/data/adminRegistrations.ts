@@ -120,3 +120,20 @@ export function matches(reg: AdminReg, text: string, status: string): boolean {
   const hay = [reg.name, reg.email, reg.mobile, reg.title].join(' ').toLowerCase();
   return (!q || hay.includes(q)) && (!status || reg.status === status);
 }
+
+// Refunds live apart from `payments` (members append to payments; a refund must never be overwritten by them).
+const refundList = (d: Doc) => (Array.isArray(d.refunds) ? d.refunds.map((r) => (r ?? {}) as Doc) : []);
+export const refundedTotal = (reg: AdminReg) => refundList(reg.raw).reduce((t, r) => t + amountOf(r.amount), 0);
+
+export function refundPatch(reg: AdminReg, amount: number, note: string, recordedBy: string, stamp: unknown, now: unknown) {
+  const refund = { id: `r${Date.now().toString(36)}`, amount: Math.round(amount * 100) / 100, proofs: [], refundedAt: stamp, recordedBy, ...(note.trim() ? { note: note.trim().slice(0, 500) } : {}) };
+  return { refunds: [...refundList(reg.raw), refund], updatedAt: now };
+}
+
+// No-show is a flag, not a status: the registration stays confirmed (old app utils/noShow).
+export const noShowPatch = (noShow: boolean, markedBy: string, now: unknown) => ({
+  noShow, noShowMarkedBy: noShow ? markedBy : null, noShowMarkedAt: noShow ? now : null, updatedAt: now,
+});
+
+export interface Expense { label: string; amount: number }
+export const expensesTotal = (items: Expense[]) => items.reduce((t, e) => t + e.amount, 0);
