@@ -2,7 +2,9 @@ import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import PageHero from '../components/PageHero';
 import { searchIndex } from '../data/searchIndex';
+import { liveSearchDocs } from '../data/liveSearch';
 import { prepare, searchDocs } from '../lib/search';
+import { useAnnouncements, useClimbSchedule } from '../services/useSiteData';
 
 const countLabel = (shown: number, total: number) => {
   if (!total) return 'No results. Try another word.';
@@ -14,7 +16,9 @@ const countLabel = (shown: number, total: number) => {
 export default function SearchPage() {
   const [params, setParams] = useSearchParams();
   const query = params.get('q') ?? '';
-  const index = useMemo(() => prepare(searchIndex), []);
+  const announcements = useAnnouncements();
+  const { upcoming, completed } = useClimbSchedule(null);
+  const index = useMemo(() => prepare([...searchIndex, ...liveSearchDocs(announcements, [...upcoming, ...completed], searchIndex)]), [announcements, upcoming, completed]);
   const { hits, total } = useMemo(() => searchDocs(index, query), [index, query]);
 
   return (
