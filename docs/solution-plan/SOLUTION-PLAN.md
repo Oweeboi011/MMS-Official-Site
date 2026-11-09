@@ -24,7 +24,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 2 | [#29](https://github.com/Oweeboi011/MMS-Official-Site/issues/29) ~~Grant **Project Billing Manager** to `729371585953-compute@developer.gserviceaccount.com` (hard stop can't unlink billing without it)~~ (done 2026-11-06) | Owee | — |
 | 3 | [#30](https://github.com/Oweeboi011/MMS-Official-Site/issues/30) ~~Merge PR #2, release v1.0.0~~ (done 2026-11-05) | Owee | — |
 | 4 | [#31](https://github.com/Oweeboi011/MMS-Official-Site/issues/31) Accept Namecheap push (MMS account), auto-renew on (expires 2027-01-05); add Owee as Cloudflare Super Administrator | MMS Gmail owner | Domain safety |
-| 5 | [#32](https://github.com/Oweeboi011/MMS-Official-Site/issues/32) Cloudflare API token (Pages:Edit) + account id → repo secrets for `continuous-delivery.yml` | MMS Cloudflare owner | Quality Gates deploy (local deploy works) |
+| 5 | [#32](https://github.com/Oweeboi011/MMS-Official-Site/issues/32) ~~Cloudflare API token + account id → repo secrets~~ (done 2026-11-10): CD run deployed the preview from Actions | MMS Cloudflare owner | |
 | 6 | [#33](https://github.com/Oweeboi011/MMS-Official-Site/issues/33) Firebase console/CLI reachable from company laptops | Owee | Phase 1 |
 | 7 | [#34](https://github.com/Oweeboi011/MMS-Official-Site/issues/34) Old project's password hash parameters (private, never in repo/chat). | Owee | Phase 2 |
 | 8 | [#35](https://github.com/Oweeboi011/MMS-Official-Site/issues/35) Brevo account owned by MMS; SPF/DKIM for `metropolitanms.org` | MMS | Phase 4 |
@@ -304,7 +304,7 @@ Not recommended: payment gateway for now (fees + KYC; revisit per ADR 0007) · S
 | reCAPTCHA Enterprise past 10k checks/month (bot floods sign-in) | US$8 tier > US$1.70 hard stop → Firebase down | low | only `/account/*` + `/admin` load it; token TTL 1 day; check Fraud Defense usage monthly; switch App Check to classic reCAPTCHA v3 (free 1M) if usage climbs |
 | Company laptops block Firebase / Cloudflare consoles (item 6) | can't operate from work | medium | CLI works; personal device fallback |
 | Network TLS interception breaks `gcloud` | can't apply bucket settings | certain on company network | console or another network (item 20) |
-| CD prod deploy skipped without Cloudflare token (item 5) | merged code not live, silently | high until fixed | `npm run deploy:prod` after merge; add token |
+| CD skips the deploy if a Cloudflare secret is missing or empty (it still reports success) | merged code not live, silently | low | check the run log after a merge; token set 2026-11-10; `npm run deploy:prod` as fallback |
 | Content never confirmed by officers (items 11, 13–17) | preview banner stays; sample data public | medium | content list with owners; banner says "sample" |
 | Domain expiry 2027-01-05, auto-renew off (item 4) | site goes dark | medium | accept Namecheap push, auto-renew on |
 | Secrets typed into shells/chat | leak | medium (happened once, prefix only) | prompt-only secret entry; fine-grained, expiring tokens; rotate on doubt |
