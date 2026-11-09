@@ -10,7 +10,7 @@ export default function SignInPage() {
   const [error, setError] = useState<string | null>(null);
   return (
     <>
-      <PageHero eyebrow="Account" title="Sign in" intro="Members and officers: sign in with Google or your email." image="/images/page-surveys.webp" />
+      <PageHero eyebrow="Account" title="Sign in" intro="Guests, members and officers: sign in with Google or your email. A free account; joining a climb doesn't need MMS membership." image="/images/page-surveys.webp" />
       <main>
         <section className="section">
           <div className="shell">
@@ -26,7 +26,7 @@ export default function SignInPage() {
             {state.status === 'signedOut' && <SignInForm />}
             {state.status === 'signedIn' && (
               <div className="account-card">
-                <p>Signed in as <strong>{state.account.email}</strong> ({state.account.role}).</p>
+                <p>Signed in as <strong>{state.account.email}</strong>{state.account.role === 'admin' ? ' (admin)' : ''}.</p>
                 {state.account.role === 'admin' && <Link className="btn btn-primary" to="/admin">Open admin</Link>}
                 <button type="button" className="btn btn-dark"
                   onClick={() => signOut().catch(() => setError('Sign-out failed. Check your connection and try again.'))}>Sign out</button>

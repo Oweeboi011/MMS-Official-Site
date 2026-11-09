@@ -72,9 +72,9 @@ P1 = launch · P2 = soon after · P3 = later. Open Climbs parity list: `tests/pa
 |-----|---------|---|
 | Guest | Public pages | done |
 | Guest | Climb schedule from DB (fees, trail class, slots left) | 1 |
-| Guest | Register: contact, emergency contact, waiver, medical cert (major) | 1 |
+| Guest | Register: contact, emergency contact, waiver, medical cert (major). Needs a free site account (Google / email), **not MMS membership**; guest fee via `memberType: joiner` (owner decision 2026-11-09) | 1 |
 | Guest | Pay by GCash / QR Ph transfer, upload receipt, officer verifies; confirmation email | 1 |
-| Member | Sign in (Google / email; no SMS) · my registrations + receipts | 1 |
+| Guest / member | Sign in (Google / email; no SMS) · my registrations + receipts | 1 |
 | Member | Profile (batch, tribe) · climb log / passport | 2–3 |
 | Climb officer | Climbs CRUD · participants paid/pending/unpaid · verify receipts · LGU CSV | 1 |
 | Climb officer | Post-climb expense report | 2 |
