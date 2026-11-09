@@ -1,5 +1,9 @@
 # Getting started
 
+> - **Purpose:** Set up a computer to work on the site.
+> - **For:** Developers
+> - **In short:** Install the tools, get the code and run the site locally.
+
 MMS official site: https://www.metropolitanms.org/. Big picture + diagrams: [README](../README.md). New here: [OVERVIEW](guides/OVERVIEW.md) → [DEVELOPER-GUIDE](guides/DEVELOPER-GUIDE.md). Officers: [USER-GUIDE](guides/USER-GUIDE.md).
 
 ```sh

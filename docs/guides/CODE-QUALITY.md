@@ -1,5 +1,9 @@
 # Code quality
 
+> - **Purpose:** The automatic checks every change must pass.
+> - **For:** Developers · Owner (accounts, billing)
+> - **In short:** Before anything goes live, tools check for leaked keys, bugs, unused code, accessibility and page size. This lists each check and how to run it.
+
 **Minimum viable harness:** one hook (~2 s), one command (`npm run check`, ~15 s), Quality Gates repeats it. No step unless it catches something real. Why these tools: [ADR 0003](../adr/0003-QUALITY-HARNESS.md).
 
 ```mermaid

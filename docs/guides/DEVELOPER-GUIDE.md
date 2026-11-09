@@ -1,5 +1,9 @@
 # Developer guide
 
+> - **Purpose:** Day-to-day work on the code.
+> - **For:** Developers
+> - **In short:** Commands, folder layout, coding rules and the checks and reviews every change goes through.
+
 Setup: [GETTING-STARTED](../GETTING-STARTED.md). Claude Code rules: `.claude/CLAUDE.md` (humans follow the same).
 
 ## Commands

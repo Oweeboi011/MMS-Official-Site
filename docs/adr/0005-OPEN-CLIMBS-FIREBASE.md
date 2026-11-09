@@ -1,5 +1,9 @@
 # ADR 0005 — Open Climbs on a new MMS Firebase project
 
+> - **Purpose:** A recorded decision: what was chosen and why. Changing it needs a new decision record.
+> - **For:** Officers and leads · Owner (accounts, billing) · Developers
+> - **In short:** Open Climbs moves into this site on a new MMS-owned Firebase project, the one paid service, protected by a billing hard stop.
+
 - **Status:** Accepted (owner, 2026-11-05), including the cost-rule exception below.
 - **Date:** 2026-11-05
 

@@ -1,5 +1,9 @@
 # Solution plan
 
+> - **Purpose:** The delivery plan: what is being built, in what order, and what is waiting on whom.
+> - **For:** Officers and leads · Owner (accounts, billing) · Developers
+> - **In short:** Goals, open items, features, phases and risks. Every row matches an issue on the [project board](https://github.com/users/Oweeboi011/projects/2), so status here and there agree.
+
 How we deliver the MMS site and what it must do. Why: [ADRs](../adr/). What it is / how to run: [guides](../guides/).
 
 **Contents:** [Goal](#goal) · [Open items](#open-items) · [Leads input](#leads-input-2026-11-05) · [Features](#features) · [Architecture](#architecture) · [Open Climbs migration](#open-climbs-migration) · [Gaps](#gaps-ui-vs-backend) · [Plan review](#plan-review-2026-11-09) · [Payments](#payments) · [Media](#media) · [Hosting & billing](#hosting--billing) · [Quality harness](#quality-harness) · [Content needed](#content-needed-from-mms) · [Recommendations](#recommendations--enhancements) · [Risks](#risks--challenges)

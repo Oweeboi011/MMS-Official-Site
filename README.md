@@ -1,10 +1,14 @@
 # MMS Official Site
 
+> - **Purpose:** The front page of the project: what it is, its status, and where to read more.
+> - **For:** Everyone (officers, members, admins, developers, owner)
+> - **In short:** MMS's official website and the Open Climbs app it is absorbing, run by volunteers on free plans. Start with [docs by role](docs/README.md).
+
 Official website of the **Metropolitan Mountaineering Society (MMS)**: https://www.metropolitanms.org/
 
 Replaces the old Google Sites page and is absorbing **Open Climbs** (climb registration, payments, member accounts, officer admin) from the separate app `mms-open-climbs.web.app`. Run by MMS at a hard cost cap of **₱54–₱100/month**.
 
-Details live in [`docs/`](docs/GETTING-STARTED.md). This page is the map.
+Details live in [`docs/`](docs/README.md) (pick your role). This page is the map.
 
 ## Status (2026-11-08)
 

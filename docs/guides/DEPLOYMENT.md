@@ -1,5 +1,9 @@
 # Deployment
 
+> - **Purpose:** How changes reach the live site, and how the services are set up.
+> - **For:** Developers · Owner (accounts, billing)
+> - **In short:** Every change goes to a preview site first, then to www.metropolitanms.org after the owner approves. Also covers the domain, accounts and Firebase setup.
+
 **Production: https://www.metropolitanms.org/** on Cloudflare Pages (free), project `mms-official-site` in the MMS Cloudflare account. Live since 2026-11-05. Why: [ADR 0001](../adr/0001-HOSTING.md).
 
 ## Deploy (Wrangler CLI)

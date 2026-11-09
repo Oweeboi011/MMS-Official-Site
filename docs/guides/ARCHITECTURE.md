@@ -1,5 +1,9 @@
 # Architecture
 
+> - **Purpose:** How the pieces fit together.
+> - **For:** Developers · Owner (accounts, billing) · Officers and leads
+> - **In short:** The public pages are a fast website on Cloudflare (free). Accounts, climb data and uploads live in Google Firebase. This page shows what runs where and who may see which data.
+
 What runs where. Why: [ADR 0001](../adr/0001-HOSTING.md), [ADR 0005](../adr/0005-OPEN-CLIMBS-FIREBASE.md). Folder layout: [ADR 0006](../adr/0006-REPO-LAYOUT.md).
 
 ## System
