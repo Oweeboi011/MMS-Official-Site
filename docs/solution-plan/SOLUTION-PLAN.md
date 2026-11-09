@@ -246,6 +246,8 @@ Gates, tests, hooks, Quality Gates: [CODE-QUALITY](../guides/CODE-QUALITY.md). W
 
 ## Content needed from MMS
 
+**Data loading: Ken** (owner decision 2026-11-09): officers current + past ([#193](https://github.com/Oweeboi011/MMS-Official-Site/issues/193)), past open climbs all years ([#194](https://github.com/Oweeboi011/MMS-Official-Site/issues/194)), past members ([#195](https://github.com/Oweeboi011/MMS-Official-Site/issues/195); roster model to decide first, RA 10173). Dev builds the tooling (climbs editor/import, members roster); Ken's issues are his.
+
 | Item | Page |
 |------|------|
 | Current officers (**waiting**) · committees | About |
