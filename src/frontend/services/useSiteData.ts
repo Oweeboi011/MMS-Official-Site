@@ -6,7 +6,7 @@ import {
 } from '../data/liveContent';
 import type { ContentBlock } from '../data/subpages';
 import type { Doc } from '../lib/firestoreRest';
-import { loadAnnouncements, loadOfficers, loadSettings, loadSurveys, publicReadsEnabled } from './publicData';
+import { announcementsLoader, loadCurrentOfficers, loadOfficers, loadSettings, loadSurveys, publicReadsEnabled } from './publicData';
 
 // undefined = loading or failed (show nothing); null = nothing there (not configured, no doc). `load` must be module-level.
 function useLoaded<T>(load: (() => Promise<T | null | undefined>) | null): T | null | undefined {
@@ -26,9 +26,11 @@ function liveOr<T>(docs: Doc[] | null | undefined, live: (d: Doc[]) => T[], samp
   return docs?.length ? live(docs) : sample;
 }
 
-export const useAnnouncements = (): Announcement[] => liveOr(useLoaded(loadAnnouncements), (d) => d.map(toAnnouncement), announcements);
+const ANNOUNCEMENTS_PAGE = 30;
+export const useAnnouncements = (limit = ANNOUNCEMENTS_PAGE): Announcement[] =>
+  liveOr(useLoaded(announcementsLoader(limit)), (d) => d.map(toAnnouncement), announcements).slice(0, limit);
 export const useSurveys = (): Survey[] => liveOr(useLoaded(loadSurveys), (d) => toSurveys(d, new Date()), surveys);
-export const useExecom = (): Officer[] => liveOr(useLoaded(loadOfficers), currentExecom, officers);
+export const useExecom = (): Officer[] => liveOr(useLoaded(loadCurrentOfficers), currentExecom, officers);
 
 export function useSiteSettings(): SiteSettings {
   const doc = useLoaded(loadSettings);

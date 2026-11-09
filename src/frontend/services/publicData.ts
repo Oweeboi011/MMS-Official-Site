@@ -46,10 +46,18 @@ async function query(collection: string, options: QueryOptions): Promise<Doc[] |
   return Array.isArray(rows) ? decodeQuery(rows) : null;
 }
 
-export const loadAnnouncements = () =>
-  once('announcements', () => query('announcements', { where: { field: 'published', equals: true }, orderByDesc: 'publishedAt', limit: 30 }));
+// Each page reads only what it shows (Firestore bills per document returned; free quota 50k/day).
+const announcementsLoaders = new Map<number, () => Promise<Doc[] | null | undefined>>();
+export function announcementsLoader(limit: number) { // stable per limit, for useLoaded
+  if (!announcementsLoaders.has(limit)) {
+    announcementsLoaders.set(limit, () =>
+      once(`announcements:${limit}`, () => query('announcements', { where: { field: 'published', equals: true }, orderByDesc: 'publishedAt', limit })));
+  }
+  return announcementsLoaders.get(limit)!;
+}
 export const loadSurveys = () => once('surveys', () => query('surveys', { limit: 50 }));
-// One read serves Our story (current Execom) and Leadership (all terms); current officers sort first so the cap never drops them.
+export const loadCurrentOfficers = () => once('officers:current', () => query('officers', { where: { field: 'current', equals: true }, limit: 50 }));
+// Leadership lists every term; current officers sort first so the cap never drops them.
 export const loadOfficers = () => once('officers', () => query('officers', { orderByDesc: 'current', limit: 300 }));
 export const loadSettings = () =>
   once('settings', async () => {

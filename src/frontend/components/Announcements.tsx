@@ -7,8 +7,7 @@ interface Props {
 }
 
 export default function Announcements({ limit }: Props) {
-  const announcements = useAnnouncements();
-  const items = limit ? announcements.slice(0, limit) : announcements;
+  const items = useAnnouncements(limit);
   return (
     <section className="section" id="announcements">
       <div className="shell">
