@@ -68,3 +68,14 @@ export function parseHashParams(text) {
   if (missing.length) throw new Error(`hash parameters are missing: ${missing.join(', ')}`);
   return { signerKey: raw.base64_signer_key, saltSeparator: raw.base64_salt_separator, rounds: Number(raw.rounds), memCost: Number(raw.mem_cost) };
 }
+
+// Download links stored in records point at the old bucket. Copied objects keep their token, so only the bucket
+// segment changes. Plain objects and arrays are walked; Timestamps and other class instances are left alone.
+export function rewriteLinks(value, from, to) {
+  if (typeof value === 'string') return value.replaceAll(`/v0/b/${from}/`, `/v0/b/${to}/`);
+  if (Array.isArray(value)) return value.map((v) => rewriteLinks(v, from, to));
+  if (value && Object.getPrototypeOf(value) === Object.prototype) {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, rewriteLinks(v, from, to)]));
+  }
+  return value;
+}
