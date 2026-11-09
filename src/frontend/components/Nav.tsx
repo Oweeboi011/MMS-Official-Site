@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { asset } from '../lib/asset';
+import { readSignedInHint, subscribeSignedInHint } from '../lib/signedInHint';
 import { sectionPath, sitemap } from '../data/sitemap';
 import { useSiteSettings } from '../services/useSiteData';
 
@@ -31,6 +32,7 @@ export default function Nav() {
   const { previewNotice } = useSiteSettings();
   const { pathname } = useLocation();
   const [scrolled, setScrolled] = useState(false);
+  const signedIn = useSyncExternalStore(subscribeSignedInHint, readSignedInHint, () => false);
 
   // The nav is fixed; it turns solid once the page scrolls past the hero's top edge.
   useEffect(() => {
@@ -59,6 +61,7 @@ export default function Nav() {
           ))}
         </ul>
         <Link className="nav-search" to="/search" aria-label="Search the site" aria-current={pathname === '/search' ? 'page' : undefined}>Search</Link>
+        <Link className="nav-search nav-account" to={signedIn ? '/account/climbs' : '/account/sign-in'} aria-current={pathname.startsWith('/account') ? 'page' : undefined}>{signedIn ? 'My account' : 'Sign in'}</Link>
       </div>
     </nav>
   );
