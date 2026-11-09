@@ -5,7 +5,9 @@ import SignInForm from '../components/SignInForm';
 import DocUploads from '../components/myclimbs/DocUploads';
 import EditDetails from '../components/myclimbs/EditDetails';
 import PayForm from '../components/myclimbs/PayForm';
+import PledgeForm from '../components/myclimbs/PledgeForm';
 import VerifyEmailBanner from '../components/VerifyEmailBanner';
+import type { ClimbDetail } from '../data/climbDetail';
 import { canCancel, draftCancellationPolicy, nextSteps, type MyClimb } from '../data/myClimbs';
 import { registrationEnabled } from '../services/firebaseEnv';
 import { cancelRegistration, myRegistrations } from '../services/registrations';
@@ -89,11 +91,21 @@ function Card({ row, uid, onChange }: { row: MyClimb; uid: string; onChange: () 
       {climb && <NextSteps steps={nextSteps(row, climb.requiredDocs.map((t) => t.uploadField))} />}
       <PaymentLog row={row} />
       <Records row={row} />
-      {live && climb && <DocUploads row={row} climb={climb} uid={uid} onDone={onChange} />}
-      {live && climb && owes && <PayForm row={row} climb={climb} uid={uid} onDone={onChange} />}
-      {live && <EditDetails row={row} onDone={onChange} />}
+      {live && climb && <LiveActions row={row} climb={climb} uid={uid} owes={owes} onChange={onChange} />}
       {climb && canCancel(row, climb.over) && <Cancel row={row} onDone={onChange} />}
     </li>
+  );
+}
+
+// What a member can still do on a pending / confirmed / waitlisted registration.
+function LiveActions({ row, climb, uid, owes, onChange }: { row: MyClimb; climb: ClimbDetail; uid: string; owes: boolean; onChange: () => void }) {
+  return (
+    <>
+      <DocUploads row={row} climb={climb} uid={uid} onDone={onChange} />
+      {owes && <PayForm row={row} climb={climb} uid={uid} onDone={onChange} />}
+      {climb.drive && <PledgeForm row={row} drive={climb.drive} onDone={onChange} />}
+      <EditDetails row={row} onDone={onChange} />
+    </>
   );
 }
 
