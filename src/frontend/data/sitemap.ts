@@ -144,4 +144,7 @@ export const legacyRedirects: Record<string, string> = {
   '/outreach': '/community/outreach',
   '/sart': '/community/sart',
   '/announcements': '/media/news',
+  // Old Open Climbs app paths (its account emails still link here)
+  '/login': '/account/sign-in',
+  '/my-registrations': '/account/climbs',
 };

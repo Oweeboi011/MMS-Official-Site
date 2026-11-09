@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageHero from '../components/PageHero';
 import { AdminGate } from '../components/admin/RegistrationTable';
+import { AddAccount, DeleteAccount } from '../components/admin/AccountForms';
 import { useAdminList } from '../components/admin/useAdminList';
 import type { Account } from '../services/auth';
 import { listUsers, setRole } from '../services/users';
@@ -18,10 +19,11 @@ function Users({ admin }: { admin: Account }) {
         <input id="user-search" type="search" value={q} onChange={(e) => setQ(e.target.value)} />
         <span className="climb-muted">{rows.length} accounts · {rows.filter((u) => u.role === 'admin').length} admins</span>
       </div>
+      <AddAccount run={run} busy={busy} />
       {message && <p role="status">{message}</p>}
       <div className="admin-table">
         <table>
-          <thead><tr><th scope="col">Account</th><th scope="col">Role</th></tr></thead>
+          <thead><tr><th scope="col">Account</th><th scope="col">Role</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead>
           <tbody>
             {shown.map((u) => (
               <tr key={u.uid}>
@@ -35,6 +37,7 @@ function Users({ admin }: { admin: Account }) {
                     <option value="admin">admin</option>
                   </select>
                 </td>
+                <td>{u.uid !== admin.uid && <DeleteAccount user={u} run={run} busy={busy} />}</td>
               </tr>
             ))}
           </tbody>

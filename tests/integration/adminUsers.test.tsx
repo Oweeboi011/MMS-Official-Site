@@ -6,6 +6,8 @@ vi.mock('../../src/frontend/services/useAccount', () => ({ useAccount: () => ({ 
 vi.mock('../../src/frontend/services/users', () => ({
   listUsers: async () => [{ uid: 'a1', email: 'me@x.com', name: 'Me', role: 'admin' }, { uid: 'u2', email: 'ben@x.com', name: 'Ben', role: 'member' }],
   setRole: async (uid: string, role: string) => { svc.roles.push([uid, role]); },
+  createAccount: async (email: string) => { svc.roles.push(['create', email]); return { uid: 'n1', emailSent: false }; },
+  deleteAccount: async (uid: string) => { svc.roles.push(['delete', uid]); },
 }));
 
 describe('admin: accounts and roles', () => {
@@ -17,5 +19,18 @@ describe('admin: accounts and roles', () => {
     await vi.waitFor(() => expect(svc.roles).toEqual([['u2', 'admin']]));
     fireEvent.change(screen.getByLabelText('Search email or name'), { target: { value: 'zzz' } });
     expect(screen.queryByText('ben@x.com')).not.toBeInTheDocument();
+  });
+
+  it('creates and deletes accounts (never your own)', async () => {
+    svc.roles = [];
+    renderAt('/admin/users');
+    fireEvent.change(await screen.findByLabelText('New account email', {}, { timeout: 5000 }), { target: { value: 'carlo@x.com' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Add account' }));
+    expect(await screen.findByText(/Forgot password/)).toBeInTheDocument();
+    expect(svc.roles).toContainEqual(['create', 'carlo@x.com']);
+    expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(1); // only Ben, not me
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm delete ben@x.com' }));
+    await vi.waitFor(() => expect(svc.roles).toContainEqual(['delete', 'u2']));
   });
 });
