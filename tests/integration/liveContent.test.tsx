@@ -105,7 +105,8 @@ describe('pages read site content from Firestore', () => {
       live.climb = { id: 'p', title: 'Mt. Pulag', status: 'open', startDate: soon, location: 'Kabayan, Benguet',
         trailMaps: [{ label: 'Akiki', allTrailsUrl: 'https://www.alltrails.com/trail/philippines/benguet/akiki', komootUrl: 'https://www.komoot.com/tour/123?share_token=abc' }, { label: 'Ambangeg', googleMapsUrl: 'https://www.google.com/maps/@16.58,120.89,13z' }],
         // eslint-disable-next-line sonarjs/no-clear-text-protocols -- the http photo must be dropped
-        trailImages: ['https://img.example/1.jpg', 'https://img.example/2.jpg', 'http://insecure/3.jpg'], waterSourceNote: 'Boil first.' };
+        trailImages: ['https://img.example/1.jpg', 'https://img.example/2.jpg', 'http://insecure/3.jpg'], waterSourceNote: 'Boil first.',
+        itinerary: [{ day: 'Day 1', entries: [{ time: '04:00', activity: 'Start trek' }, { time: '', activity: '' }] }, { day: 'Day 2', entries: [] }] };
       renderAt('/climbs/p');
       expect(await screen.findByText('Fri, Nov 20 · Rain')).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Windy' }).getAttribute('href')).toContain('16.6,120.9');
@@ -114,6 +115,9 @@ describe('pages read site content from Firestore', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Ambangeg' }));
       expect(screen.getByTitle('Mt. Pulag location map')).toHaveAttribute('src', expect.stringContaining('maps.google.com/maps?q=16.58%2C120.89'));
       expect(screen.getByText(/Boil first\./)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Day 1' })).toBeInTheDocument();
+      expect(screen.getByText('Start trek')).toBeInTheDocument();
+      expect(screen.queryByRole('heading', { name: 'Day 2' })).not.toBeInTheDocument(); // empty day dropped
       const thumbs = screen.getAllByRole('button', { name: /Open photo/ });
       expect(thumbs).toHaveLength(2); // http photo dropped
       fireEvent.click(thumbs[0]);

@@ -90,7 +90,10 @@ export interface ClimbDetail extends ScheduleClimb {
   trailMaps: TrailMap[];
   photos: string[]; // https only
   coords: Coords | null;
+  itinerary: ItineraryDay[];
 }
+
+export interface ItineraryDay { day: string; entries: { time: string; activity: string }[] }
 
 export interface TrailMap { label: string; googleMapsUrl: string; allTrailsUrl: string; komootUrl: string }
 
@@ -103,6 +106,14 @@ function trailMapsOf(d: Doc): TrailMap[] {
   return raw
     .map((t) => ({ label: str(t.label), googleMapsUrl: str(t.googleMapsUrl), allTrailsUrl: str(t.allTrailsUrl), komootUrl: str(t.komootUrl) }))
     .filter((t) => t.googleMapsUrl || t.allTrailsUrl || t.komootUrl);
+}
+
+function itineraryOf(v: unknown): ItineraryDay[] {
+  if (!Array.isArray(v)) return [];
+  return v.map(record).map((day) => ({
+    day: str(day.day),
+    entries: (Array.isArray(day.entries) ? day.entries.map(record) : []).map((e) => ({ time: str(e.time), activity: str(e.activity) })).filter((e) => e.activity),
+  })).filter((day) => day.entries.length);
 }
 
 function coordsOf(d: Doc): Coords | null {
@@ -140,5 +151,6 @@ export function toClimbDetail(d: Doc, now: Date): ClimbDetail | null {
     trailMaps: trailMapsOf(d),
     photos: strings(d.trailImages).filter((u) => u.startsWith('https://')),
     coords: coordsOf(d),
+    itinerary: itineraryOf(d.itinerary),
   };
 }

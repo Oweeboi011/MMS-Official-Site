@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
+import ClimbItinerary from '../components/ClimbItinerary';
 import ClimbPhotos from '../components/ClimbPhotos';
 import ClimbWeather from '../components/ClimbWeather';
 import ContentBlocks from '../components/ContentBlocks';
@@ -61,6 +62,7 @@ export default function ClimbPage() {
             {!climb.cancelled && <ShareClimb climb={climb} />}
             <ContentBlocks blocks={profile(climb)} />
             <ClimbPhotos photos={climb.photos} title={climb.title} />
+            {active(climb) && <ClimbItinerary days={climb.itinerary} />}
             {active(climb) && <ClimbWeather climb={climb} />}
             <TrailMaps maps={climb.trailMaps} title={climb.title} />
             {climb.waterNote && active(climb) && <p className="climb-notice" role="note"><strong>Water source:</strong> {climb.waterNote}</p>}

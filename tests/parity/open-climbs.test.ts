@@ -9,7 +9,7 @@ describe('Open Climbs parity: auth + users', () => {
 
 describe('Open Climbs parity: member', () => {
   it.todo('schedule by season, card grid with elevation, difficulty, distance');
-  it.todo('mountain profile: itinerary for signed-in users (stats, jump-off, gain, water, links done on /climbs/:id)');
+  // mountain profile (stats, jump-off, gain, itinerary, water, links): tests/integration/liveContent.test.tsx (climb page)
   // trail photo carousel + keyboard lightbox: tests/integration/liveContent.test.tsx (climb page)
   it.todo('register: details, emergency contact, experience, medical; waitlist when full');
   it.todo('optional fees + fee breakdown before submit');
