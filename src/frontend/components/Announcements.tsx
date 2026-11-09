@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAnnouncements } from '../services/useSiteData';
+import RichText from './RichText';
 
 interface Props {
   // Show only the latest N (home page preview); omit for the full list.
@@ -20,7 +21,7 @@ export default function Announcements({ limit }: Props) {
             <article className="news-card" key={a.date + a.title}>
               <div className="news-meta"><span className={`news-tag tag-${a.category.toLowerCase()}`}>{a.category}</span><time>{a.date}</time></div>
               <h3>{a.title}</h3>
-              <p>{a.summary}</p>
+              <p><RichText text={a.summary} /></p>
             </article>
           ))}
         </div>

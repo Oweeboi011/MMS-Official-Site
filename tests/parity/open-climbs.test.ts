@@ -18,7 +18,7 @@ describe('Open Climbs parity: member', () => {
   // required documents upload (after registering): tests/integration/myClimbs.test.tsx
   // donation drive pledge: tests/unit/donations.test.ts, tests/integration/myClimbs.test.tsx
   // My Climbs: status, balance, payment log, next steps, self-cancel: tests/unit/myClimbs.test.ts
-  it.todo('rate a climb afterwards');
+  // rate a climb afterwards: tests/integration/myClimbs.test.tsx (feedback rules: rules.emulator.mjs)
   it.todo('release notes page + one-time what-is-new popup');
   // notifications (on My Climbs; header bell would load Firebase on every page): tests/integration/myClimbs.test.tsx
   it.todo('first-login welcome tour');
@@ -30,7 +30,7 @@ describe('Open Climbs parity: admin', () => {
   it.todo('climbs CRUD: open/close, cancel, postpone, fees, QR, officers, docs, meetings, announcements, drives');
   it.todo('climb detail: registrants, payments, split, refunds, walk-ins, no-shows, services, expenses, net funds, climb-day sheet');
   // all registrations: search, filters, CSV export: tests/integration/adminClimb.test.tsx
-  it.todo('payments: cash flow, service headcounts');
+  // payments: cash flow, service headcounts: tests/unit/treasury.test.ts (/admin/treasurer)
   it.todo('analytics: page views, failedRequests log');
   it.todo('app insights dashboards');
   it.todo('release notes publish + tracked member email send');
@@ -60,5 +60,5 @@ describe('Open Climbs parity: found in plan review 2026-11-09', () => {
   // admin climb setup checklist: tests/unit/climbSetup.test.ts
   // compress images in the browser before upload: lib/compressImage.ts (tests/unit/slice4.test.ts)
   it.todo('member and admin help guides (old USER_MANUAL)');
-  it.todo('render release notes and announcements with lightweight markdown');
+  // lightweight markdown (**bold**) in announcements, surveys, guides: components/RichText (tests/unit/guide.test.tsx)
 });

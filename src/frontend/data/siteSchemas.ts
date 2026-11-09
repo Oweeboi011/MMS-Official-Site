@@ -45,7 +45,7 @@ export const siteCollections: CollectionSpec[] = [
     id: 'announcements', label: 'Announcements', titleField: 'title',
     fields: [
       { key: 'title', label: 'Title', kind: 'text', required: true, max: 200 },
-      { key: 'summary', label: 'Summary', kind: 'longText', required: true, max: 2000 },
+      { key: 'summary', label: 'Summary (**bold** allowed)', kind: 'longText', required: true, max: 2000 },
       { key: 'category', label: 'Category', kind: 'select', required: true, options: ['Climbs', 'Training', 'Outreach', 'Club', 'SART'] },
       ...published,
     ],
