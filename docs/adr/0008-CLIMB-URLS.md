@@ -1,5 +1,9 @@
 # ADR 0008 — Open Climbs URLs
 
+> - **Purpose:** A recorded decision: what was chosen and why. Changing it needs a new decision record.
+> - **For:** Officers and leads · Owner (accounts, billing) · Developers
+> - **In short:** The web addresses for climbs: the schedule stays at /activities/open-climbs, each climb gets a short link /climbs/… that is easy to share.
+
 - **Status:** Accepted (owner, 2026-11-09). Replaces the `/open-climbs/*` line in [ADR 0005](0005-OPEN-CLIMBS-FIREBASE.md).
 - **Date:** 2026-11-09
 

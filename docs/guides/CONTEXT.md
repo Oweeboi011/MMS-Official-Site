@@ -1,5 +1,9 @@
 # MMS domain
 
+> - **Purpose:** The words we use, and what each one means.
+> - **For:** Officers and leads · Admins · Developers
+> - **In short:** One meaning per word (guest, account, completed climb…), so officers, docs and code never talk past each other.
+
 Words used for the MMS site and Open Climbs, so code, docs and officers mean the same thing. Visitor tooltips (BMCM, LNT…) live in `src/frontend/data/glossary.ts`, not here.
 
 ## People
