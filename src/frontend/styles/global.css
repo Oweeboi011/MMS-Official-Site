@@ -240,6 +240,10 @@ button { font: inherit; }
 .climb-notices { list-style: none; margin: 0 0 20px; padding: 0; display: grid; gap: 8px; }
 .climb-notices li { padding: 10px 14px; border-left: 4px solid var(--gold); background: rgba(214, 160, 40, .1); border-radius: 8px; }
 .climb-log ul { margin: 8px 0; padding-left: 18px; }
+.insight { display: grid; gap: 4px; margin: 0; }
+.insight > div { display: grid; grid-template-columns: 160px 1fr; gap: 8px; }
+.insight dt { font-weight: 800; }
+.insight dd { margin: 0; overflow-wrap: anywhere; }
 .year-picker { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 40px; }
 .year-picker select { margin-left: 8px; padding: 8px 10px; border-radius: 10px; font: inherit; }
 .motto { margin: 10px 0 0; color: var(--gold); font-weight: 850; font-style: italic; }
