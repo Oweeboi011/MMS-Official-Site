@@ -2,6 +2,7 @@ import PageHero from '../components/PageHero';
 import type { Survey } from '../data/content';
 import { surveyState } from '../lib/survey';
 import { useSurveys } from '../services/useSiteData';
+import RichText from '../components/RichText';
 
 const label = (s: Survey, state: string) => {
   if (state === 'closed') return 'Closed';
@@ -35,7 +36,7 @@ export default function SurveysPage() {
                       <span>{label(s, state)}</span>
                     </div>
                     <h3>{s.title}</h3>
-                    <p>{s.description}</p>
+                    <p><RichText text={s.description} /></p>
                     {state === 'open' && <a className="btn btn-dark" href={s.formUrl} target="_blank" rel="noopener noreferrer">Take survey</a>}
                     {state === 'soon' && <span className="survey-closed">Form coming soon</span>}
                     {state === 'closed' && <span className="survey-closed">No longer accepting responses</span>}
