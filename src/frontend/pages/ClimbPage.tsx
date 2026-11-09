@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ClimbItinerary from '../components/ClimbItinerary';
 import ClimbPhotos from '../components/ClimbPhotos';
@@ -10,6 +11,9 @@ import { defaultPacking, type ClimbDetail } from '../data/climbDetail';
 import { leaveNoTrace, type ContentBlock } from '../data/subpages';
 import { registrationEnabled } from '../services/firebaseEnv';
 import { useClimb } from '../services/useClimb';
+
+// Registrants-only section needs the Firebase SDK: its own chunk, only when registration is on.
+const RegistrantArea = lazy(() => import('../components/RegistrantArea'));
 
 const SCHEDULE = '/activities/open-climbs';
 const HERO_IMAGE = '/images/page-open-climbs.webp';
@@ -51,6 +55,28 @@ function Missing({ loading }: { loading: boolean }) {
   );
 }
 
+// Only for climbs still ahead: itinerary, forecast, water warning.
+function Upcoming({ climb }: { climb: ClimbDetail }) {
+  return (
+    <>
+      <ClimbItinerary days={climb.itinerary} />
+      <ClimbWeather climb={climb} />
+      {climb.waterNote && <p className="climb-notice" role="note"><strong>Water source:</strong> {climb.waterNote}</p>}
+    </>
+  );
+}
+
+function Cta({ climb, id }: { climb: ClimbDetail; id: string }) {
+  const open = active(climb) && climb.status === 'Open';
+  return (
+    <div className="event-cta">
+      {open && registrationEnabled && <Link className="btn btn-primary" to={`/climbs/${id}/register`}>Register <span aria-hidden="true">→</span></Link>}
+      {open && !registrationEnabled && <Link className="btn btn-primary" to="/#join">Ask to join this climb <span aria-hidden="true">→</span></Link>}
+      {' '}<Link className="btn" to={SCHEDULE}>All open climbs</Link>
+    </div>
+  );
+}
+
 export default function ClimbPage() {
   const { id = '' } = useParams();
   const climb = useClimb(id);
@@ -66,17 +92,11 @@ export default function ClimbPage() {
             {!climb.cancelled && <ShareClimb climb={climb} />}
             <ContentBlocks blocks={profile(climb)} />
             <ClimbPhotos photos={climb.photos} title={climb.title} />
-            {active(climb) && <ClimbItinerary days={climb.itinerary} />}
-            {active(climb) && <ClimbWeather climb={climb} />}
+            {registrationEnabled && !climb.cancelled && <Suspense fallback={null}><RegistrantArea climb={climb} /></Suspense>}
+            {active(climb) && <Upcoming climb={climb} />}
             <TrailMaps maps={climb.trailMaps} title={climb.title} />
-            {climb.waterNote && active(climb) && <p className="climb-notice" role="note"><strong>Water source:</strong> {climb.waterNote}</p>}
             <ContentBlocks blocks={prep(climb)} />
-            <div className="event-cta">
-              {active(climb) && climb.status === 'Open' && (registrationEnabled
-                ? <Link className="btn btn-primary" to={`/climbs/${id}/register`}>Register <span aria-hidden="true">→</span></Link>
-                : <Link className="btn btn-primary" to="/#join">Ask to join this climb <span aria-hidden="true">→</span></Link>)}
-              {' '}<Link className="btn" to={SCHEDULE}>All open climbs</Link>
-            </div>
+            <Cta climb={climb} id={id} />
           </div>
         </section>
       </main>

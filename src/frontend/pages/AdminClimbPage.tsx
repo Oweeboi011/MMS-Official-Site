@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import PageHero from '../components/PageHero';
 import RegistrationTable, { AdminGate } from '../components/admin/RegistrationTable';
+import MeetingsEditor from '../components/admin/MeetingsEditor';
 import WalkInForm from '../components/admin/WalkInForm';
 import { useAdminList } from '../components/admin/useAdminList';
 import { summary, toCsv } from '../data/adminRegistrations';
@@ -26,6 +27,7 @@ function Registrations({ climbId, climb, admin }: { climbId: string; climb: Clim
         <button type="button" className="btn" disabled={!rows.length} onClick={() => downloadCsv(ref.title, toCsv(rows))}>Download CSV (LGU / jump-off)</button>
       </p>
       <WalkInForm busy={busy} onAdd={(w) => run(() => addWalkIn(ref, w, admin.email))} />
+      <MeetingsEditor climbId={climbId} run={run} busy={busy} />
       {message && <p role="status">{message}</p>}
       <RegistrationTable regs={rows} admin={admin} run={run} busy={busy} />
     </>
