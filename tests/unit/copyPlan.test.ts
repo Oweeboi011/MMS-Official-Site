@@ -1,4 +1,4 @@
-import { describe as describeClimb, normalizeDates, planCopy, toImportRecord } from '../../tools/admin/copyPlan.mjs';
+import { describe as describeClimb, normalizeDates, planCopy, rewriteLinks, toImportRecord } from '../../tools/admin/copyPlan.mjs';
 
 const doc = (id: string, data: Record<string, unknown> = {}) => ({ id, data });
 
@@ -47,5 +47,16 @@ describe('old-app climb copy plan', () => {
     const withPassword = toImportRecord(user, true) as unknown as { passwordHash: Buffer; passwordSalt: Buffer };
     expect(withPassword.passwordHash.toString()).toBe('hash');
     expect(withPassword.passwordSalt.toString()).toBe('salt');
+  });
+
+  it('repoints stored download links to the new bucket, deeply, leaving other values alone', () => {
+    const old = 'https://firebasestorage.googleapis.com/v0/b/old.firebasestorage.app/o/a%2Fb.jpg?alt=media&token=t';
+    const stamp = new Date();
+    const out = rewriteLinks({ receipt: old, payments: [{ proofs: [{ url: old }] }], n: 3, at: stamp, note: 'old.firebasestorage.app' }, 'old.firebasestorage.app', 'new.firebasestorage.app');
+    expect(out.receipt).toContain('/v0/b/new.firebasestorage.app/o/a%2Fb.jpg?alt=media&token=t');
+    expect(out.payments[0].proofs[0].url).toContain('/v0/b/new.firebasestorage.app/');
+    expect(out.n).toBe(3);
+    expect(out.at).toBe(stamp);
+    expect(out.note).toBe('old.firebasestorage.app');
   });
 });
