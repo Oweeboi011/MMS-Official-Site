@@ -14,7 +14,7 @@
     "test:perf": "node tests/performance/bundle-budget.mjs",
     "lint": "eslint .",
     "check:secrets": "node tools/secrets.mjs",
-    "check:deps": "depcruise --config .config/dependency-cruiser.cjs src/frontend src/backend/functions/src",
+    "check:deps": "depcruise --config .config/dependency-cruiser.cjs src/frontend src/backend/functions/src functions",
     "check:dead": "knip --config .config/knip.json",
     "check:dupes": "jscpd --config .config/jscpd.json",
     "check:audit": "npm audit --audit-level=high && npm audit --prefix src/backend/functions --audit-level=high",
