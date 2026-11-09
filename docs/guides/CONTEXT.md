@@ -32,6 +32,14 @@ _Avoid_: past climb, done climb
 **Cancelled climb**:
 `status` or `cancellationStatus` is `cancelled`. Hidden from public lists; admins still see it.
 
+**Difficulty**:
+A climb's score on the Philippine 1–9 scale (stored as `"4/9"`). Shown as Easy (1–2), Moderate (3–4) or Advanced (5–9): the old app's climb-card badges (owner decision 2026-11-09).
+_Avoid_: grade, level
+
+**Trail class**:
+A separate 1–6 score for technical terrain (1 easy walking … 6 needs climbing gear). Independent of difficulty.
+_Avoid_: class (alone), YDS
+
 **Climb year**:
 Calendar year (January–December), Manila time, of the climb's start date. Groups the schedule and the past-years archive.
 _Avoid_: season, club year

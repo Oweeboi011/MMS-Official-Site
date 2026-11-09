@@ -22,12 +22,12 @@ function toDate(v: unknown): Date | undefined {
   return /^\d{4}-\d{2}-\d{2}$/.test(str(v)) ? fromManilaDay(str(v)) : undefined;
 }
 
-// 1–3 easy, 4–6 moderate, 7–9 advanced on the /9 scale. Bands: officers to confirm with the climb finder (open item 17).
+// 1–2 easy, 3–4 moderate, 5–9 advanced: the old app's climb-card badges (owner decision 2026-11-09; CONTEXT.md).
 function difficultyOf(rating: string): Difficulty {
   const n = Number(/^(\d)\s*\/\s*9$/.exec(rating)?.[1]);
   if (!n) return 'Not yet rated';
-  if (n <= 3) return 'Easy';
-  return n <= 6 ? 'Moderate' : 'Advanced';
+  if (n <= 2) return 'Easy';
+  return n <= 4 ? 'Moderate' : 'Advanced';
 }
 
 function dateRange(start: Date, end: Date | undefined): string {
