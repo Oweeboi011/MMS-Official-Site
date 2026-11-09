@@ -17,7 +17,8 @@ export interface Account {
   role: string;
 }
 
-// First sign-in creates users/{uid} as a member (rules allow only that); admins are set in the console.
+// First sign-in creates users/{uid}, role 'member' = any account (old-app value), not MMS membership.
+// Guests and members alike; registrations.memberType sets the fee. Admins are set in the console.
 async function roleOf(user: User): Promise<string> {
   const { db } = firebase();
   const ref = doc(db, 'users', user.uid);

@@ -22,7 +22,7 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 6 | Firebase console/CLI reachable from company laptops | Owee | Phase 1 |
 | 7 | Old project's password hash parameters (private, never in repo/chat). | Owee | Phase 2 |
 | 8 | Brevo account owned by MMS; SPF/DKIM for `metropolitanms.org` | MMS | Phase 4 |
-| 9 | `npm audit`: 11 moderate (minimatch via eslint 10, undici via wrangler deps); below the high gate. High undici fixed by wrangler 4.158.0 (2026-11-05) | upstream | — |
+| 9 | ~~`npm audit` moderates (minimatch via eslint, undici via wrangler)~~ (done 2026-11-09: `overrides.minimatch ^11.0.1`, audit 0 site + backend; drop the override once eslint ships minimatch 11) | dev | — |
 | 10 | Open Climbs feature parity: 41 `it.todo` in `tests/parity/open-climbs.test.ts` (16 added by the [plan review](#plan-review-2026-11-09)) | dev | Switch |
 | 11 | Content from MMS ([below](#content-needed-from-mms)); then set `previewNotice = ''` | officers | Remove preview banner |
 | 12 | ~~SDLC setup~~ (done 2026-11-05): `development` default branch; `development` + `main` protected (PR, Quality Gates required, no force push, admins included); `production` environment needs Owee approval, protected branches only | Owee | — |
@@ -72,9 +72,9 @@ P1 = launch · P2 = soon after · P3 = later. Open Climbs parity list: `tests/pa
 |-----|---------|---|
 | Guest | Public pages | done |
 | Guest | Climb schedule from DB (fees, trail class, slots left) | 1 |
-| Guest | Register: contact, emergency contact, waiver, medical cert (major) | 1 |
+| Guest | Register: contact, emergency contact, waiver, medical cert (major). Needs a free site account (Google / email), **not MMS membership**; guest fee via `memberType: joiner` (owner decision 2026-11-09) | 1 |
 | Guest | Pay by GCash / QR Ph transfer, upload receipt, officer verifies; confirmation email | 1 |
-| Member | Sign in (Google / email; no SMS) · my registrations + receipts | 1 |
+| Guest / member | Sign in (Google / email; no SMS) · my registrations + receipts | 1 |
 | Member | Profile (batch, tribe) · climb log / passport | 2–3 |
 | Climb officer | Climbs CRUD · participants paid/pending/unpaid · verify receipts · LGU CSV | 1 |
 | Climb officer | Post-climb expense report | 2 |
