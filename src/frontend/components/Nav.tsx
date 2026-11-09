@@ -44,7 +44,7 @@ export default function Nav() {
     <nav className={`nav${scrolled ? ' is-scrolled' : ''}`} aria-label="Primary navigation">
       {previewNotice && <p className="preview-banner" role="note">{previewNotice}</p>}
       <div className="shell nav-inner">
-        <Link className="brand" to="/" aria-label="MMS home">
+        <Link className="brand" to="/">
           <span className="brand-mark" aria-hidden="true">
             <img src={asset('/mms-logo.png')} alt="" />
           </span>
