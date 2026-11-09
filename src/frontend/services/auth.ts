@@ -11,6 +11,7 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore/lite';
 import { firebase } from './firebase';
+import { setSignedInHint } from '../lib/signedInHint';
 
 export interface Account {
   uid: string;
@@ -42,6 +43,7 @@ export function watchAccount(onChange: (account: Account | null) => void, onErro
   let latest = 0; // a slow role lookup must not overwrite a later sign-out or account switch
   return onAuthStateChanged(firebase().auth, (user) => {
     const call = ++latest;
+    setSignedInHint(Boolean(user));
     if (!user) return onChange(null);
     roleOf(user)
       .then((role) => { if (call === latest) onChange({ uid: user.uid, email: user.email ?? '', role, emailVerified: user.emailVerified }); })

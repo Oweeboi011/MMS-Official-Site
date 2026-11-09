@@ -37,6 +37,12 @@ function ClimbRow({ climb }: { climb: ScheduleClimb }) {
   );
 }
 
+// Sample rows have no id: nothing to open until officers post real climbs.
+function SampleNote({ climbs }: { climbs: ScheduleClimb[] }) {
+  if (!climbs.some((c) => !c.id)) return null;
+  return <p className="event-empty" role="note">These are sample entries. Real climbs appear here, with their own pages, once officers post them.</p>;
+}
+
 function ClimbList({ climbs, empty }: { climbs: ScheduleClimb[]; empty: string }) {
   if (!climbs.length) return <p className="event-empty">{empty}</p>;
   return <div className="event-list">{climbs.map((c) => <ClimbRow key={c.id ?? c.title + c.dates} climb={c} />)}</div>;
@@ -80,6 +86,7 @@ function Schedule({ year, thisYear }: { year: number | null; thisYear: number })
   return (
     <>
       <p className="event-guide">New to mountaineering? <Link to="/activities/open-climbs/guide">Read the beginner guide</Link>: ratings, what to bring, what to expect.</p>
+      <SampleNote climbs={upcoming} />
       <ClimbList climbs={upcoming} empty="No upcoming climbs posted yet. Check back soon." />
       <div className="event-cta"><Link className="btn btn-primary" to="/#join">Ask to join a climb <span aria-hidden="true">→</span></Link></div>
       {completed.length > 0 && (
@@ -97,6 +104,7 @@ function Preview({ limit }: { limit: number }) {
   const { upcoming, loading } = useClimbSchedule(null);
   return (
     <>
+      {!loading && <SampleNote climbs={upcoming} />}
       {!loading && <ClimbList climbs={upcoming.slice(0, limit)} empty="No upcoming climbs posted yet." />}
       <div className="event-cta"><Link className="btn btn-primary" to={SCHEDULE_PATH}>See all open climbs <span aria-hidden="true">→</span></Link></div>
     </>
