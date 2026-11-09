@@ -8,13 +8,14 @@ if (branch !== 'preview' && branch !== 'main') {
   process.exit(1);
 }
 
-// Preview shares prod Firebase: build it read-only, but show the registration screens so officers can review them.
+// Preview shares prod Firebase: build it read-only, but show the registration screens (build only, so the tests
+// that assume registration is off still pass) for officers to review.
 const preview = branch === 'preview';
-const env = { ...process.env, VITE_WRITES_ENABLED: preview ? 'false' : 'true', ...(preview && { VITE_REGISTRATION_ENABLED: 'true' }) };
-const run = (cmd) => execSync(cmd, { stdio: 'inherit', env });
+const env = { ...process.env, VITE_WRITES_ENABLED: preview ? 'false' : 'true' };
+const run = (cmd, extra = {}) => execSync(cmd, { stdio: 'inherit', env: { ...env, ...extra } });
 
 run('npm run check');
-run('npm run build');
+run('npm run build', preview ? { VITE_REGISTRATION_ENABLED: 'true' } : {});
 run('node scripts/snapshot.mjs'); // R5c: last good public content for when Firestore can't be read
 run('npm run test:perf');
 run(`npx wrangler pages deploy dist --project-name mms-official-site --branch ${branch}`);
