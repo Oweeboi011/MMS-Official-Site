@@ -237,6 +237,9 @@ button { font: inherit; }
 .admin-extras { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; }
 .admin-refund { display: inline-flex; gap: 4px; }
 .admin-refund input { width: 110px; }
+.climb-notices { list-style: none; margin: 0 0 20px; padding: 0; display: grid; gap: 8px; }
+.climb-notices li { padding: 10px 14px; border-left: 4px solid var(--gold); background: rgba(214, 160, 40, .1); border-radius: 8px; }
+.climb-log ul { margin: 8px 0; padding-left: 18px; }
 .year-picker { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 40px; }
 .year-picker select { margin-left: 8px; padding: 8px 10px; border-radius: 10px; font: inherit; }
 .motto { margin: 10px 0 0; color: var(--gold); font-weight: 850; font-style: italic; }

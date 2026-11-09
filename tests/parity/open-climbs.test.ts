@@ -21,7 +21,7 @@ describe('Open Climbs parity: member', () => {
   // release notes page + one-time what's-new banner: tests/unit/releaseNotes.test.ts, tests/integration/whatsNew.test.tsx
   // rate a climb afterwards: tests/integration/myClimbs.test.tsx (feedback rules: rules.emulator.mjs)
   // notifications (on My Climbs; header bell would load Firebase on every page): tests/integration/myClimbs.test.tsx
-  it.todo('first-login welcome tour');
+  // first-login welcome (My Climbs, once per browser): tests/integration/myClimbs.test.tsx
   it.todo('emails: registration received, status updates, post-climb thank-you');
 });
 
@@ -29,6 +29,8 @@ describe('Open Climbs parity: admin', () => {
   // dashboard: climbs with type, slots, confirmed, pending: tests/integration/account.test.tsx
   it.todo('climbs CRUD: open/close, cancel, postpone, fees, QR, officers, docs, meetings, announcements, drives');
   it.todo('climb detail: split one payment across registrations (registrants, payments, refunds, walk-ins, no-shows, services, expenses, net funds, climb-day sheet done)');
+  // climbs CRUD: open/close, cancel, postpone, fees, QR, officers, docs, meetings, announcements, drives: climbSchema.ts, MeetingsEditor (tests/unit/climbSchema.test.ts, climbNotices.test.ts)
+  it.todo('climb detail: registrants, payments, split, refunds, walk-ins, no-shows, services, expenses, net funds, climb-day sheet');
   // all registrations: search, filters, CSV export: tests/integration/adminClimb.test.tsx
   // payments: cash flow, service headcounts: tests/unit/treasury.test.ts (/admin/treasurer)
   it.todo('analytics: page views, failedRequests log');

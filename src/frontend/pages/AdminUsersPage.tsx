@@ -30,7 +30,7 @@ function Users({ admin }: { admin: Account }) {
                   <label className="sr-only" htmlFor={`role-${u.uid}`}>Role for {u.email}</label>
                   {/* Your own role is locked here so an admin can't lock themselves out. */}
                   <select id={`role-${u.uid}`} value={u.role} disabled={busy || u.uid === admin.uid}
-                    onChange={(e) => void run(() => setRole(u.uid, e.target.value as 'member' | 'admin'))}>
+                    onChange={(e) => void run(() => setRole(u.uid, e.target.value as 'member' | 'admin', u.email))}>
                     <option value="member">member (any account)</option>
                     <option value="admin">admin</option>
                   </select>
