@@ -1,5 +1,7 @@
 // Admin editor fields per site collection. Mirrors src/backend/firebase/firestore.rules (rules are the real check).
-type FieldKind = 'text' | 'longText' | 'lines' | 'int' | 'bool' | 'select' | 'date' | 'link';
+import { rowsFromForm, rowsProblem, rowsToForm, type Column, type RecordsCodec } from './records';
+
+type FieldKind = 'text' | 'longText' | 'lines' | 'records' | 'int' | 'bool' | 'select' | 'date' | 'link';
 
 export interface Field {
   key: string; // dotted keys (socials.facebook) are nested maps in Firestore
@@ -13,6 +15,8 @@ export interface Field {
   range?: readonly [number, number]; // int bounds
   defaultOn?: boolean; // bool shown ticked on new docs
   linesAreLinks?: boolean; // lines: each must be https://
+  columns?: Column[]; // records
+  codec?: RecordsCodec; // records: stored shape <-> rows
   hint?: string;
 }
 
@@ -166,7 +170,8 @@ export function lockedKeys(spec: CollectionSpec, doc: Doc = {}): string[] {
       const v = getPath(doc, f.key);
       if (v === undefined || v === null) return false;
       if (f.kind === 'date') return !(typeof v === 'object' && 'toDate' in v) && !(typeof v === 'string' && ISO_DAY.test(v));
-      if (f.kind === 'lines') return !(Array.isArray(v) && v.every((x) => typeof x === 'string'));
+      const list = listKinds[f.kind];
+      if (list) return list.locked(v);
       return f.kind === 'bool' ? typeof v !== 'boolean' : typeof v === 'object';
     })
     .map((f) => f.key);
@@ -178,7 +183,8 @@ export function toForm(spec: CollectionSpec, doc: Doc = {}): FormValues {
     const v = getPath(doc, f.key);
     if (f.kind === 'bool') return [f.key, v === true || (v === undefined && f.defaultOn === true)];
     if (f.kind === 'date') return [f.key, asDateInput(v)];
-    if (f.kind === 'lines') return [f.key, Array.isArray(v) ? v.join('\n') : ''];
+    const list = listKinds[f.kind];
+    if (list) return [f.key, list.toForm(f, v)];
     return [f.key, v === undefined || v === null || typeof v === 'object' ? '' : String(v)];
   }));
 }
@@ -199,7 +205,8 @@ export function fromForm(spec: CollectionSpec, values: FormValues, toTimestamp: 
 
 function convert(f: Field, raw: RawValue, toTimestamp: (d: Date) => unknown): unknown {
   if (f.kind === 'bool') return raw === true;
-  if (f.kind === 'lines') return lines(raw).length ? lines(raw) : undefined;
+  const list = listKinds[f.kind];
+  if (list) return list.store(f, raw);
   const text = typeof raw === 'string' ? raw.trim() : '';
   if (!text) return f.required || f.keepEmpty ? text : undefined;
   if (f.kind === 'int') return Number.parseInt(text, 10);
@@ -231,8 +238,32 @@ function linesProblem(f: Field, raw: RawValue): string | null {
   return f.linesAreLinks && items.some((l) => !/^https:\/\/\S+$/.test(l)) ? `${f.label}: every line must start with https://.` : null;
 }
 
+// Kinds stored as arrays: how each is locked, shown, stored and checked.
+interface ListKind {
+  locked: (stored: unknown) => boolean;
+  toForm: (f: Field, stored: unknown) => string;
+  store: (f: Field, raw: RawValue) => unknown;
+  problem: (f: Field, raw: RawValue) => string | null;
+}
+const nonEmpty = (v: unknown) => (Array.isArray(v) && v.length ? v : undefined);
+const listKinds: Partial<Record<FieldKind, ListKind>> = {
+  lines: {
+    locked: (v) => !(Array.isArray(v) && v.every((x) => typeof x === 'string')),
+    toForm: (_f, v) => (Array.isArray(v) ? v.join('\n') : ''),
+    store: (_f, raw) => nonEmpty(lines(raw)),
+    problem: linesProblem,
+  },
+  records: {
+    locked: (v) => !Array.isArray(v),
+    toForm: (f, v) => rowsToForm(f.codec?.decode(v) ?? []),
+    store: (f, raw) => nonEmpty(f.codec?.encode(rowsFromForm(raw))),
+    problem: (f, raw) => rowsProblem(f.label, f.columns ?? [], rowsFromForm(raw)),
+  },
+};
+
 function fieldProblem(f: Field, raw: RawValue): string | null {
-  if (f.kind === 'lines') return linesProblem(f, raw);
+  const list = listKinds[f.kind];
+  if (list) return list.problem(f, raw);
   const text = typeof raw === 'string' ? raw.trim() : '';
   if (!text) return f.required && f.kind !== 'bool' ? `${f.label} is required.` : null;
   const max = f.max ?? (f.kind === 'link' ? 500 : undefined); // rules cap links at 500

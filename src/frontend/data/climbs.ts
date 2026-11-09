@@ -91,9 +91,23 @@ export interface ClimbDetail extends ScheduleClimb {
   photos: string[]; // https only
   coords: Coords | null;
   itinerary: ItineraryDay[];
+  fees: string[][]; // Fee, Amount, Who pays (table rows)
+  officers: { role: string; name: string }[];
 }
 
 export interface ItineraryDay { day: string; entries: { time: string; activity: string }[] }
+
+const peso = (amount: string) => (/^\d+(\.\d+)?$/.test(amount) ? `₱${Number(amount).toLocaleString('en-PH')}` : amount || 'TBA');
+
+// Guest fee: guests only, never members (old app feeSummary). Optional: only if availed.
+function feesOf(v: unknown): string[][] {
+  return (Array.isArray(v) ? v.map(record) : []).filter((f) => str(f.label)).map((f) => {
+    let who = str(f.note);
+    if (f.isGuestFee === true) who = 'Guests only';
+    else if (f.optional === true) who = ['Optional', str(f.note)].filter(Boolean).join(': ');
+    return [str(f.label), peso(text(f.amount)), who || 'Everyone'];
+  });
+}
 
 export interface TrailMap { label: string; googleMapsUrl: string; allTrailsUrl: string; komootUrl: string }
 
@@ -152,5 +166,7 @@ export function toClimbDetail(d: Doc, now: Date): ClimbDetail | null {
     photos: strings(d.trailImages).filter((u) => u.startsWith('https://')),
     coords: coordsOf(d),
     itinerary: itineraryOf(d.itinerary),
+    fees: feesOf(d.fees),
+    officers: (Array.isArray(d.officers) ? d.officers.map(record) : []).map((o) => ({ role: str(o.role), name: str(o.name) })).filter((o) => o.name),
   };
 }

@@ -88,13 +88,19 @@ describe('pages read site content from Firestore', () => {
     const soon = new Date(Date.now() + 10 * 86400_000);
 
     it('shows the climb, its stats, packing list and share links', async () => {
-      live.climb = { id: 'pulag', title: 'Mt. Pulag', location: 'Benguet', type: 'major', status: 'open', startDate: soon, difficulty: '7/9', elevation: 2926, jumpOff: 'Ranger station', description: 'Sea of clouds.' };
+      live.climb = { id: 'pulag', title: 'Mt. Pulag', location: 'Benguet', type: 'major', status: 'open', startDate: soon, difficulty: '7/9', elevation: 2926, jumpOff: 'Ranger station', description: 'Sea of clouds.',
+        fees: [{ label: 'Guide Fee', amount: '1500' }, { label: 'Guest Fee', amount: '450', optional: true, isGuestFee: true }, { label: 'Van', amount: 'TBA', optional: true, note: 'if availed' }],
+        officers: [{ role: 'Team Leader', name: 'Ana Cruz', userId: 'u1' }] };
       renderAt('/climbs/pulag');
       expect(await screen.findByRole('heading', { level: 1, name: 'Mt. Pulag' })).toBeInTheDocument();
       expect(screen.getByText('2,926m')).toBeInTheDocument();
       expect(screen.getByText('Ranger station')).toBeInTheDocument();
       expect(screen.getByText('Sea of clouds.')).toBeInTheDocument();
       expect(screen.getByText('Head lamp')).toBeInTheDocument();
+      expect(screen.getByRole('cell', { name: '₱1,500' })).toBeInTheDocument();
+      expect(screen.getByRole('cell', { name: 'Guests only' })).toBeInTheDocument();
+      expect(screen.getByRole('cell', { name: 'Optional: if availed' })).toBeInTheDocument();
+      expect(screen.getByText('Ana Cruz')).toBeInTheDocument();
       const share = screen.getByRole('group', { name: 'Share this climb' });
       expect(within(share).getByRole('link', { name: 'Facebook' }).getAttribute('href')).toContain(encodeURIComponent('/climbs/pulag'));
       expect(within(share).getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
