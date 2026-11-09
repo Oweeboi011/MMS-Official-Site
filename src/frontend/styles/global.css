@@ -228,6 +228,9 @@ button { font: inherit; }
 .next-steps { margin: 4px 0 8px; padding-left: 18px; font-weight: 700; }
 .payment-log { margin: 4px 0 8px; }
 .payment-log ul { margin: 6px 0 0; padding-left: 18px; }
+.day-sheet { width: 100%; border-collapse: collapse; font-size: .85rem; }
+.day-sheet th, .day-sheet td { border: 1px solid var(--line); padding: 6px; text-align: left; vertical-align: top; }
+.tick-box { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--ink); }
 .release-note { padding: 18px 0; border-bottom: 1px solid var(--line); }
 .notifications ul { margin: 8px 0; padding-left: 18px; display: grid; gap: 6px; }
 .notifications .is-unread { font-weight: 800; }
@@ -533,6 +536,8 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 @media print {
   .nav, .preview-banner, footer, .bottom-nav, .page-hero, .no-print { display: none !important; }
   .waiver-print { max-width: none; font-size: 11pt; }
+  .day-sheet-page { max-width: none; }
+  .day-sheet { font-size: 9pt; }
 }
 .waiver-print h1 { font-size: 1.6rem; margin: 0 0 6px; }
 .waiver-print h4 { margin: 14px 0 4px; }
