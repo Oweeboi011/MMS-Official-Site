@@ -27,7 +27,7 @@
     "test:rules": "npx -y firebase-tools@15.35.0 emulators:exec --config src/backend/firebase.json --only firestore,storage --project demo-rules \"node tests/integration/rules.emulator.mjs\""
   },
   "dependencies": {
-    "firebase": "12.19.0",
+    "firebase": "13.2.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.5"
