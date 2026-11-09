@@ -71,6 +71,7 @@ export function mapClimb(d: Doc, now: Date): ScheduleClimb {
     difficulty: difficultyOf(rating),
     rating: rating || undefined,
     elevation: elevationOf(d.elevation),
+    distance: str(d.roundTripDistance) || undefined,
     type: TYPES[str(d.type).toLowerCase()] ?? 'Minor',
     status: str(d.status) === 'closed' ? 'Closed' : 'Open',
     slotsLeft: slotsOf(d),
