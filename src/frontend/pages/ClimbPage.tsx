@@ -95,7 +95,7 @@ export default function ClimbPage() {
             {climb.notices.length > 0 && <ul className="climb-notices" aria-label="Announcements">{climb.notices.map((n) => <li key={n.message} className={n.pinned ? 'is-pinned' : undefined}>{n.pinned && <strong>Reminder: </strong>}<RichText text={n.message} />{n.date && <small className="climb-muted"> · {n.date}</small>}</li>)}</ul>}
             {!climb.cancelled && <ShareClimb climb={climb} />}
             {active(climb) && <AddToCalendar climb={climb} />}
-            <ContentBlocks blocks={profile(climb)} />
+            <div className="climb-profile"><ContentBlocks blocks={profile(climb)} /></div>
             <ClimbPhotos photos={climb.photos} title={climb.title} />
             {registrationEnabled && !climb.cancelled && <Suspense fallback={null}><RegistrantArea climb={climb} /></Suspense>}
             {active(climb) && <Upcoming climb={climb} />}
