@@ -3,17 +3,20 @@
 const KEY = 'mms.signedIn';
 const EVENT = 'mms-signed-in';
 
-export function readSignedInHint(): boolean {
+function stored(): string | null {
   try {
-    return localStorage.getItem(KEY) === '1';
+    return localStorage.getItem(KEY);
   } catch {
-    return false;
+    return null;
   }
 }
 
-export function setSignedInHint(signedIn: boolean): void {
+export const readSignedInHint = (): boolean => stored() !== null;
+export const readAdminHint = (): boolean => stored() === 'admin'; // shows the header's Admin link; /admin still checks the real role
+
+export function setSignedInHint(signedIn: boolean, role?: string): void {
   try {
-    if (signedIn) localStorage.setItem(KEY, '1');
+    if (signedIn) localStorage.setItem(KEY, role === 'admin' ? 'admin' : '1');
     else localStorage.removeItem(KEY);
   } catch {
     // storage blocked: the header just keeps offering "Sign in"
