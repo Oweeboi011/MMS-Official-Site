@@ -60,5 +60,5 @@ describe('Open Climbs parity: found in plan review 2026-11-09', () => {
   // admin climb setup checklist: tests/unit/climbSetup.test.ts
   // compress images in the browser before upload: lib/compressImage.ts (tests/unit/slice4.test.ts)
   it.todo('member and admin help guides (old USER_MANUAL)');
-  it.todo('render release notes and announcements with lightweight markdown');
+  // lightweight markdown (**bold**) in announcements, surveys, guides: components/RichText (tests/unit/guide.test.tsx)
 });
