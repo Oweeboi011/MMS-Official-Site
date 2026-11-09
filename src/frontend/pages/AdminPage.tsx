@@ -4,9 +4,10 @@ import CollectionEditor from '../components/CollectionEditor';
 import Dashboard from '../components/admin/Dashboard';
 import PageHero from '../components/PageHero';
 import { climbsSpec } from '../data/climbSchema';
+import { releaseNotesSpec } from '../data/releaseNotes';
 import { siteCollections } from '../data/siteSchemas';
 
-const collections = [climbsSpec, ...siteCollections];
+const collections = [climbsSpec, ...siteCollections, releaseNotesSpec];
 import { readOnlyMessage, writesEnabled } from '../services/firebaseEnv';
 import { useAccount } from '../services/useAccount';
 

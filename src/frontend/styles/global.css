@@ -228,6 +228,7 @@ button { font: inherit; }
 .next-steps { margin: 4px 0 8px; padding-left: 18px; font-weight: 700; }
 .payment-log { margin: 4px 0 8px; }
 .payment-log ul { margin: 6px 0 0; padding-left: 18px; }
+.release-note { padding: 18px 0; border-bottom: 1px solid var(--line); }
 .notifications ul { margin: 8px 0; padding-left: 18px; display: grid; gap: 6px; }
 .notifications .is-unread { font-weight: 800; }
 .year-picker { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 40px; }
