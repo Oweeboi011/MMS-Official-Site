@@ -17,7 +17,7 @@ describe('Open Climbs parity: member', () => {
   it.todo('GCash pay now/later, instalments, receipt upload');
   it.todo('required documents upload at registration or later');
   it.todo('donation drive pledge');
-  it.todo('My Climbs: status, balance, payment log, next steps, self-cancel');
+  it.todo('My Climbs: payment log, next steps (status, balance, self-cancel done: /account/climbs)');
   it.todo('rate a climb afterwards');
   it.todo('release notes page + one-time what-is-new popup');
   it.todo('notification bell');

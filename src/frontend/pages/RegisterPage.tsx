@@ -67,7 +67,7 @@ function Form({ climb, account }: { climb: ClimbDetail; account: Account }) {
       <div role="status">
         <h2>You’re registered.</h2>
         <p>Your slot is pending until the climb officers confirm it and your payment. A confirmation email is on its way to {account.email}.</p>
-        {climbLink(climb.id ?? '')}
+        <Link className="btn btn-primary" to="/account/climbs">My Climbs</Link> {climbLink(climb.id ?? '')}
       </div>
     );
   }

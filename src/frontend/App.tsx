@@ -34,6 +34,7 @@ const AdminPage = lazy(() => import('./pages/AdminPage'));
 // Climb pages: own chunk (share + story image) so the first load stays in budget.
 const ClimbPage = lazy(() => import('./pages/ClimbPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const MyClimbsPage = lazy(() => import('./pages/MyClimbsPage'));
 const loading = <main className="section"><div className="shell"><p>Loading…</p></div></main>;
 
 // Subpages with their own full page layout.
@@ -86,6 +87,7 @@ export default function App() {
         <Route path="/account/sign-in" element={<RouteErrorBoundary key="sign-in"><Suspense fallback={loading}><SignInPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/climbs/:id/register" element={<RouteErrorBoundary key="register"><Suspense fallback={loading}><RegisterPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/climbs/:id" element={<RouteErrorBoundary key="climb"><Suspense fallback={loading}><ClimbPage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/account/climbs" element={<RouteErrorBoundary key="my-climbs"><Suspense fallback={loading}><MyClimbsPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin" element={<RouteErrorBoundary key="admin"><Suspense fallback={loading}><AdminPage /></Suspense></RouteErrorBoundary>} />
         <Route path="*" element={<HomePage />} />
       </Routes>
