@@ -5,6 +5,10 @@ Lives at `docs/guides/CONTEXT.md`.
 ```md
 # MMS domain
 
+> - **Purpose:** The words we use, and what each one means.
+> - **For:** Officers and leads · Admins · Developers
+> - **In short:** {one plain-language sentence}
+
 {One or two sentences: what this context is and why it exists.}
 
 ## Language

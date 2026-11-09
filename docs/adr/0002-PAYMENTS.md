@@ -1,5 +1,9 @@
 # ADR 0002 — Payments: QR Ph via PayMongo, manual transfer as fallback
 
+> - **Purpose:** A recorded decision: what was chosen and why. Changing it needs a new decision record.
+> - **For:** Officers and leads · Owner (accounts, billing) · Developers
+> - **In short:** **Replaced by ADR 0007.** The earlier choice of PayMongo for online payments, kept for history.
+
 - **Status:** Superseded by [ADR 0007](0007-PAYMENTS-MANUAL.md) (2026-11-08): no PayMongo.
 - **Date:** 2026-10-29
 

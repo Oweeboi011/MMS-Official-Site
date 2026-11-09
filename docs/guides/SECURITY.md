@@ -1,5 +1,9 @@
 # Security
 
+> - **Purpose:** How passwords, accounts and personal data are protected.
+> - **For:** Owner (accounts, billing) · Data privacy officer · Officers and leads · Developers
+> - **In short:** Keys and passwords never go into the code. Personal data follows the Data Privacy Act (RA 10173). Database rules, not the screens, decide who can see what.
+
 ## Secrets
 
 - Never in code, docs, chat, or commits. Server keys → Firebase Secret Manager; Quality Gates → GitHub repo secrets.

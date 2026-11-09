@@ -1,5 +1,9 @@
 # ADR 0004 — Media: site photos in repo, albums on Drive (link only), videos on YouTube/Facebook
 
+> - **Purpose:** A recorded decision: what was chosen and why. Changing it needs a new decision record.
+> - **For:** Officers and leads · Owner (accounts, billing) · Developers
+> - **In short:** Site photos are stored with the code; full albums stay on Google Drive (linked) and videos on YouTube or Facebook, keeping costs at zero.
+
 - **Status:** Accepted
 - **Date:** 2026-10-29
 

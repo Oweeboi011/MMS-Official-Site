@@ -1,5 +1,9 @@
 # Overview
 
+> - **Purpose:** One-page summary of the whole project. **Start here.**
+> - **For:** Officers and leads · Members and guests · Site admins · Developers · Owner (accounts, billing)
+> - **In short:** MMS's official website, live at www.metropolitanms.org. It replaces the old Google Sites page and is taking over the Open Climbs registration app, so members and guests can find climbs, register and pay in one place.
+
 Official site of the **Metropolitan Mountaineering Society (MMS)**, live at https://www.metropolitanms.org/. Replaces the old Google Sites page; Open Climbs (registration, payments) moves in from `mms-open-climbs.web.app` ([plan](../solution-plan/SOLUTION-PLAN.md)).
 
 - **Frontend:** React 19 + Vite SPA on Cloudflare Pages (free). Content in TypeScript data files ([DATA](DATA.md)).

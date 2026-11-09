@@ -7,6 +7,10 @@ ADRs live in `docs/adr/`, numbered sequentially with an ALL CAPS slug: `0008-MEM
 ```md
 # ADR NNNN — {Short title of the decision}
 
+> - **Purpose:** A recorded decision: what was chosen and why. Changing it needs a new decision record.
+> - **For:** Officers and leads · Owner (accounts, billing) · Developers
+> - **In short:** {one plain-language sentence a non-developer understands}
+
 - **Status:** Accepted (owner, YYYY-MM-DD).
 - **Date:** YYYY-MM-DD
 

@@ -1,6 +1,10 @@
 # User guide
 
-For MMS officers and members: what the site does and how to get changes made. Developers: [DEVELOPER-GUIDE](DEVELOPER-GUIDE.md).
+> - **Purpose:** What the site offers and how to get content changed.
+> - **For:** Officers and leads · Members and guests · Site admins
+> - **In short:** How to find things on the site, how admins update announcements, officers and other content in `/admin`, and how to ask for anything else to change.
+
+Developers: [DEVELOPER-GUIDE](DEVELOPER-GUIDE.md).
 
 ## What's on the site
 

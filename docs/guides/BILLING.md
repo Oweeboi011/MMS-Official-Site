@@ -1,5 +1,9 @@
 # Billing
 
+> - **Purpose:** What the site costs and who pays.
+> - **For:** Owner (accounts, billing) · Officers and leads · Developers
+> - **In short:** The site is built to cost ₱54–₱100 a month, mostly the domain. Every service is on a free plan; Firebase has an automatic hard stop that switches billing off before charges pass about US$1.70.
+
 What we pay and who owns it. Hard cap **₱54–₱100/month** ([ADR 0001](../adr/0001-HOSTING.md)). Checked 2026-11-05, ₱58 = US$1.
 
 | Service | Provider / account | Cost/month |

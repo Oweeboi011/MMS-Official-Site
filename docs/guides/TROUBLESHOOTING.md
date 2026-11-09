@@ -1,5 +1,9 @@
 # Troubleshooting
 
+> - **Purpose:** Known problems and their fixes.
+> - **For:** Developers · Owner (accounts, billing)
+> - **In short:** Something broke while building, testing or deploying? Look here first.
+
 Problems already hit on this project.
 
 | Symptom | Fix |

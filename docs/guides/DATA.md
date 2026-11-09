@@ -1,5 +1,9 @@
 # Data
 
+> - **Purpose:** What information the site keeps, and where.
+> - **For:** Officers and leads · Site admins · Data privacy officer · Developers
+> - **In short:** Every kind of data (announcements, officers, climbs, registrations, receipts…), where it is stored, and who can see or edit it.
+
 What data exists and where. Today all site content is static TypeScript; live data moves to Firestore with Open Climbs ([plan](../solution-plan/SOLUTION-PLAN.md#open-climbs-migration)).
 
 ## Content (`src/frontend/data`)

@@ -1,5 +1,9 @@
 # ADR 0007 — Payments: GCash / QR Ph transfer + receipt upload, no PayMongo
 
+> - **Purpose:** A recorded decision: what was chosen and why. Changing it needs a new decision record.
+> - **For:** Officers and leads · Owner (accounts, billing) · Developers
+> - **In short:** Climb fees are paid by GCash / QR Ph transfer plus a receipt upload that an officer checks. No payment gateway, no fee per payment.
+
 - **Status:** Accepted (owner, 2026-11-08). Supersedes [ADR 0002](0002-PAYMENTS.md).
 - **Date:** 2026-11-08
 

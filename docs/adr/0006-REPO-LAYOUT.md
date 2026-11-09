@@ -1,5 +1,9 @@
 # ADR 0006 — Repo layout
 
+> - **Purpose:** A recorded decision: what was chosen and why. Changing it needs a new decision record.
+> - **For:** Officers and leads · Owner (accounts, billing) · Developers
+> - **In short:** Where each kind of file goes in the code repository, so it stays easy to find things.
+
 - **Status:** Accepted
 - **Date:** 2026-11-05
 

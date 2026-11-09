@@ -1,5 +1,9 @@
 # API
 
+> - **Purpose:** The server functions and outside services the site uses.
+> - **For:** Developers · Site admins
+> - **In short:** Small server programs (Cloud Functions) send emails and reminders and keep counts up to date. This lists each one, what starts it and what it does.
+
 Backend endpoints and external APIs. Code: `src/backend/functions/src`.
 
 ## Cloud Functions (`mms-official-site-513809`, `asia-southeast1`)
