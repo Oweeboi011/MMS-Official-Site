@@ -192,6 +192,18 @@ button { font: inherit; }
 .itinerary-day dl > div { display: grid; grid-template-columns: 90px 1fr; gap: 12px; }
 .itinerary-day dt { font-weight: 800; color: var(--muted); }
 .itinerary-day dd { margin: 0; }
+.register-shell { max-width: 760px; }
+.register-form { display: grid; gap: 24px; }
+.register-section { display: grid; gap: 14px; margin: 0; padding: 20px; border: 1px solid var(--line); border-radius: 18px; }
+.register-section legend { padding: 0 6px; font-weight: 850; }
+.field-error { color: var(--red); font-weight: 700; }
+.fee-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.fee-lines li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; }
+.fee-lines small { flex-basis: 100%; color: var(--muted); }
+.legal-box { max-height: 260px; overflow-y: auto; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; font-size: .9rem; }
+.legal-box h4 { margin: 12px 0 4px; }
+.consent-check { display: flex; gap: 10px; align-items: flex-start; }
+.consent-check input { margin-top: 4px; }
 .year-picker { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 40px; }
 .year-picker select { margin-left: 8px; padding: 8px 10px; border-radius: 10px; font: inherit; }
 .motto { margin: 10px 0 0; color: var(--gold); font-weight: 850; font-style: italic; }

@@ -8,6 +8,7 @@ import ShareClimb from '../components/ShareClimb';
 import TrailMaps from '../components/TrailMaps';
 import { defaultPacking, type ClimbDetail } from '../data/climbDetail';
 import { leaveNoTrace, type ContentBlock } from '../data/subpages';
+import { registrationEnabled } from '../services/firebaseEnv';
 import { useClimb } from '../services/useClimb';
 
 const SCHEDULE = '/activities/open-climbs';
@@ -70,7 +71,9 @@ export default function ClimbPage() {
             {climb.waterNote && active(climb) && <p className="climb-notice" role="note"><strong>Water source:</strong> {climb.waterNote}</p>}
             <ContentBlocks blocks={prep(climb)} />
             <div className="event-cta">
-              {active(climb) && climb.status === 'Open' && <Link className="btn btn-primary" to="/#join">Ask to join this climb <span aria-hidden="true">→</span></Link>}
+              {active(climb) && climb.status === 'Open' && (registrationEnabled
+                ? <Link className="btn btn-primary" to={`/climbs/${id}/register`}>Register <span aria-hidden="true">→</span></Link>
+                : <Link className="btn btn-primary" to="/#join">Ask to join this climb <span aria-hidden="true">→</span></Link>)}
               {' '}<Link className="btn" to={SCHEDULE}>All open climbs</Link>
             </div>
           </div>
