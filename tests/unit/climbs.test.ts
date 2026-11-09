@@ -1,4 +1,4 @@
-import { splitSchedule, toClimb } from '../../src/frontend/data/climbs';
+import { splitSchedule, toClimb, toClimbDetail } from '../../src/frontend/data/climbs';
 import { fromManilaDay, manilaDay, manilaYear, manilaYearStart } from '../../src/frontend/lib/manila';
 
 const now = new Date('2026-11-09T04:00:00Z'); // Nov 9 noon, Manila
@@ -44,5 +44,15 @@ describe('splitSchedule', () => {
     const { upcoming, completed } = splitSchedule(climbs, 2026);
     expect(upcoming.map((c) => c.title)).toEqual(['2026-11-20', '2026-12-05']);
     expect(completed.map((c) => c.title)).toEqual(['2026-06-01', '2026-03-01']);
+  });
+});
+
+describe('toClimbDetail', () => {
+  it('collects stats, hides drafts, keeps cancelled with a flag', () => {
+    const d = toClimbDetail({ title: 'T', elevation: '633m', difficulty: '3/9', trailClass: 2, roundTripDistance: '8 km', thingsToBring: ['Water', '', 4] }, now)!;
+    expect(d.stats).toEqual([{ value: '633m', label: 'Elevation' }, { value: '3/9', label: 'Difficulty' }, { value: '2', label: 'Trail class' }, { value: '8 km', label: 'Round trip' }]);
+    expect(d.thingsToBring).toEqual(['Water']);
+    expect(toClimbDetail({ status: 'draft' }, now)).toBeNull();
+    expect(toClimbDetail({ status: 'cancelled' }, now)?.cancelled).toBe(true);
   });
 });

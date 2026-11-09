@@ -31,6 +31,8 @@ import { legacyRedirects, sectionPath, sitemap, subpagePath } from './data/sitem
 // Account + admin load Firebase; split out so public pages never download it.
 const SignInPage = lazy(() => import('./pages/SignInPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
+// Climb pages: own chunk (share + story image) so the first load stays in budget.
+const ClimbPage = lazy(() => import('./pages/ClimbPage'));
 const loading = <main className="section"><div className="shell"><p>Loading…</p></div></main>;
 
 // Subpages with their own full page layout.
@@ -81,6 +83,7 @@ export default function App() {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/credits" element={<CreditsPage />} />
         <Route path="/account/sign-in" element={<RouteErrorBoundary key="sign-in"><Suspense fallback={loading}><SignInPage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/climbs/:id" element={<RouteErrorBoundary key="climb"><Suspense fallback={loading}><ClimbPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin" element={<RouteErrorBoundary key="admin"><Suspense fallback={loading}><AdminPage /></Suspense></RouteErrorBoundary>} />
         <Route path="*" element={<HomePage />} />
       </Routes>

@@ -71,6 +71,11 @@ export function climbsLoader(fromYear: number, onlyThatYear: boolean) { // stabl
   }
   return climbsLoaders.get(key)!;
 }
+export const climbLoader = (id: string) =>
+  once(`climb:${id}`, async () => {
+    const doc = (await request(`/climbs/${encodeURIComponent(id)}`)) as { fields?: Parameters<typeof decodeFields>[0] } | null;
+    return doc?.fields ? { id, ...decodeFields(doc.fields) } : null;
+  });
 export const loadSettings = () =>
   once('settings', async () => {
     const doc = (await request('/siteSettings/site')) as { fields?: Parameters<typeof decodeFields>[0] } | null;

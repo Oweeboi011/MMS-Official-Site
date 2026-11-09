@@ -23,6 +23,16 @@ export type ContentBlock = BlockHead & (
   | { type: 'checklist'; items: string[] }
 );
 
+export const leaveNoTrace = [
+  'Plan ahead and prepare.',
+  'Travel and camp on durable surfaces.',
+  'Dispose of waste properly.',
+  'Leave what you find.',
+  'Minimize campfire impacts.',
+  'Respect wildlife.',
+  'Be considerate of other visitors.',
+];
+
 // Sample content for peer review — names, dates, and figures are illustrative, not official MMS records.
 export const subpageContent: Record<string, ContentBlock[]> = {
   '/about/glossary': [
@@ -399,15 +409,7 @@ export const subpageContent: Record<string, ContentBlock[]> = {
     { type: 'checklist', eyebrow: 'Before every climb', title: 'Pre-climb checklist.', items: ['Itinerary filed with the Climbs Committee', 'Weather and volcano advisories checked', 'Medical certificates on file (major climbs)', 'Signed waivers for all participants', 'First aid kit and radios packed', 'Emergency contacts shared with base'] },
     {
       type: 'checklist', eyebrow: 'Leave No Trace', title: 'The 7 LNT principles.',
-      items: [
-        'Plan ahead and prepare.',
-        'Travel and camp on durable surfaces.',
-        'Dispose of waste properly.',
-        'Leave what you find.',
-        'Minimize campfire impacts.',
-        'Respect wildlife.',
-        'Be considerate of other visitors.',
-      ],
+      items: leaveNoTrace,
     },
   ],
 

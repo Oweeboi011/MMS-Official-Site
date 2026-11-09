@@ -165,6 +165,11 @@ button { font: inherit; }
 .event-cta { margin-top: 32px; }
 .event-empty { margin: 0; padding: 22px 0; color: rgba(255,255,255,.7); }
 .event-subhead { margin: 48px 0 12px; font-size: 1.1rem; }
+.event h3 a { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.climb-notice { margin: 0 0 24px; padding: 14px 18px; border-radius: 14px; background: rgba(214, 64, 52, .1); color: var(--red); font-weight: 800; }
+.share-climb { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 32px; }
+.share-label { font-weight: 850; margin-right: 6px; }
+.share-status { flex-basis: 100%; margin: 0; min-height: 1.4em; font-size: .9rem; }
 .year-picker { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 40px; }
 .year-picker select { margin-left: 8px; padding: 8px 10px; border-radius: 10px; font: inherit; }
 .motto { margin: 10px 0 0; color: var(--gold); font-weight: 850; font-style: italic; }
