@@ -4,6 +4,7 @@ import type { Coords } from '../lib/trailEmbeds';
 import { isPublic, mapClimb, type ScheduleClimb } from './climbs';
 import type { Stat } from './content';
 import type { FeeItem } from './registration';
+import { driveOf, type Drive } from './donations';
 import { REQUIRED_DOCS, type DocType } from './requiredDocs';
 
 const https = (v: unknown) => (typeof v === 'string' && v.startsWith('https://') ? v : '');
@@ -29,6 +30,7 @@ export interface ClimbDetail extends ScheduleClimb {
   fees: string[][]; // Fee, Amount, Who pays (table rows)
   feeItems: FeeItem[]; // raw, for registration
   payTo: { name: string; number: string; qrUrl: string } | null; // GCash / QR Ph details (ADR 0007)
+  drive: Drive | null; // outreach donation drive
   requiredDocs: (DocType & { sampleUrl: string })[];
   officers: { role: string; name: string }[];
 }
@@ -106,6 +108,7 @@ export function toClimbDetail(d: Doc, now: Date): ClimbDetail | null {
     itinerary: itineraryOf(d.itinerary),
     fees: feesOf(d.fees),
     payTo: payToOf(d),
+    drive: driveOf(d),
     requiredDocs: REQUIRED_DOCS.filter((t) => d[t.requiresField] === true).map((t) => ({ ...t, sampleUrl: https(d[t.sampleUrlField]) })),
     feeItems: (Array.isArray(d.fees) ? d.fees.map(record) : []).filter((f) => str(f.label)).map((f) => ({
       label: str(f.label), amount: text(f.amount) || 'TBA', note: str(f.note), optional: f.optional === true, isGuestFee: f.isGuestFee === true,
