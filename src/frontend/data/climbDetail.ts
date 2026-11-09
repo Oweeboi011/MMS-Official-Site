@@ -3,6 +3,7 @@ import type { Doc } from '../lib/firestoreRest';
 import type { Coords } from '../lib/trailEmbeds';
 import { isPublic, mapClimb, type ScheduleClimb } from './climbs';
 import type { Stat } from './content';
+import type { FeeItem } from './registration';
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
 
@@ -18,6 +19,7 @@ export interface ClimbDetail extends ScheduleClimb {
   coords: Coords | null;
   itinerary: ItineraryDay[];
   fees: string[][]; // Fee, Amount, Who pays (table rows)
+  feeItems: FeeItem[]; // raw, for registration
   officers: { role: string; name: string }[];
 }
 
@@ -93,6 +95,9 @@ export function toClimbDetail(d: Doc, now: Date): ClimbDetail | null {
     coords: coordsOf(d),
     itinerary: itineraryOf(d.itinerary),
     fees: feesOf(d.fees),
+    feeItems: (Array.isArray(d.fees) ? d.fees.map(record) : []).filter((f) => str(f.label)).map((f) => ({
+      label: str(f.label), amount: text(f.amount) || 'TBA', note: str(f.note), optional: f.optional === true, isGuestFee: f.isGuestFee === true,
+    })),
     officers: (Array.isArray(d.officers) ? d.officers.map(record) : []).map((o) => ({ role: str(o.role), name: str(o.name) })).filter((o) => o.name),
   };
 }

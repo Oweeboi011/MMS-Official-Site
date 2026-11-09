@@ -11,9 +11,9 @@ describe('Open Climbs parity: member', () => {
   it.todo('schedule by season, card grid with elevation, difficulty, distance');
   // mountain profile (stats, jump-off, gain, itinerary, water, links): tests/integration/liveContent.test.tsx (climb page)
   // trail photo carousel + keyboard lightbox: tests/integration/liveContent.test.tsx (climb page)
-  it.todo('register: details, emergency contact, experience, medical; waitlist when full');
-  it.todo('optional fees + fee breakdown before submit');
-  it.todo('digital waiver (typed name) + printable signed waiver');
+  it.todo('register: waitlist when full (details, emergency contact, experience, medical done: /climbs/:id/register)');
+  // optional fees + fee breakdown before submit: tests/unit/registration.test.ts, tests/integration/register.test.tsx
+  it.todo('printable signed waiver (typed-name waiver done at registration)');
   it.todo('GCash pay now/later, instalments, receipt upload');
   it.todo('required documents upload at registration or later');
   it.todo('donation drive pledge');

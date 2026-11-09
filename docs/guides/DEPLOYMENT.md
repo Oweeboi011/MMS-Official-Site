@@ -46,6 +46,8 @@ Data per environment:
 | preview | prod project | **off**: `deploy.mjs` builds with `VITE_WRITES_ENABLED=false`; `/admin` shows read-only, saves refused |
 | production | prod project | on (admins) |
 
+Climb registration (`VITE_REGISTRATION_ENABLED=true`) stays off on preview and production until the switch from mms-open-climbs; turn it on locally with the emulators only.
+
 Never test data in prod. Rules still guard writes; the flag stops honest mistakes on preview.
 
 AI in the loop (₱0): Claude Code `/code-review` + done gate before every commit (`.claude/CLAUDE.md`); PR template repeats the gate. No paid AI review in Quality Gates (cost cap).
