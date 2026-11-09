@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useSyncExternalStore } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import AddToCalendar from '../components/AddToCalendar';
 import ClimbItinerary from '../components/ClimbItinerary';
@@ -11,6 +11,7 @@ import ShareClimb from '../components/ShareClimb';
 import TrailMaps from '../components/TrailMaps';
 import { defaultPacking, type ClimbDetail } from '../data/climbDetail';
 import { leaveNoTrace, type ContentBlock } from '../data/subpages';
+import { readSignedInHint, subscribeSignedInHint } from '../lib/signedInHint';
 import { registrationEnabled } from '../services/firebaseEnv';
 import { useClimb } from '../services/useClimb';
 
@@ -83,6 +84,9 @@ function Cta({ climb, id }: { climb: ClimbDetail; id: string }) {
 export default function ClimbPage() {
   const { id = '' } = useParams();
   const climb = useClimb(id);
+  // Signed-in members get the registrants-only section (meetings, resources, who's joining) even before the switch;
+  // visitors who aren't signed in never load the Firebase SDK here.
+  const signedIn = useSyncExternalStore(subscribeSignedInHint, readSignedInHint, () => false);
   if (!climb) return <Missing loading={climb === undefined} />;
   const note = notice(climb);
   return (
@@ -97,7 +101,7 @@ export default function ClimbPage() {
             {active(climb) && <AddToCalendar climb={climb} />}
             <div className="climb-profile"><ContentBlocks blocks={profile(climb)} /></div>
             <ClimbPhotos photos={climb.photos} title={climb.title} />
-            {registrationEnabled && !climb.cancelled && <Suspense fallback={null}><RegistrantArea climb={climb} /></Suspense>}
+            {(registrationEnabled || signedIn) && !climb.cancelled && <Suspense fallback={null}><RegistrantArea climb={climb} /></Suspense>}
             {active(climb) && <Upcoming climb={climb} />}
             <TrailMaps maps={climb.trailMaps} title={climb.title} />
             <ContentBlocks blocks={prep(climb)} />
