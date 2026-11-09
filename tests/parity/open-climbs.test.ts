@@ -18,7 +18,7 @@ describe('Open Climbs parity: member', () => {
   // required documents upload (after registering): tests/integration/myClimbs.test.tsx
   // donation drive pledge: tests/unit/donations.test.ts, tests/integration/myClimbs.test.tsx
   // My Climbs: status, balance, payment log, next steps, self-cancel: tests/unit/myClimbs.test.ts
-  it.todo('rate a climb afterwards');
+  // rate a climb afterwards: tests/integration/myClimbs.test.tsx (feedback rules: rules.emulator.mjs)
   it.todo('release notes page + one-time what-is-new popup');
   it.todo('notification bell');
   it.todo('first-login welcome tour');
