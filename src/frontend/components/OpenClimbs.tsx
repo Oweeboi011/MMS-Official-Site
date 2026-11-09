@@ -31,7 +31,7 @@ function ClimbRow({ climb }: { climb: ScheduleClimb }) {
         </div>
         <h3>{climb.id ? <Link to={`/climbs/${climb.id}`}>{climb.title}</Link> : climb.title}</h3>
         {/* Completed cards: date + trail class only (owner decision 2026-11-09, #191). */}
-        <p>{(climb.over ? [climb.dates, difficulty] : [climb.dates, climb.location, difficulty, climb.elevation]).filter(Boolean).join(' · ')}</p>
+        <p>{(climb.over ? [climb.dates, difficulty] : [climb.dates, climb.location, difficulty, climb.elevation, climb.distance]).filter(Boolean).join(' · ')}</p>
       </div>
     </div>
   );

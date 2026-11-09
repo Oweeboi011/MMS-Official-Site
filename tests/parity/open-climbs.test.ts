@@ -8,7 +8,7 @@ describe('Open Climbs parity: auth + users', () => {
 });
 
 describe('Open Climbs parity: member', () => {
-  it.todo('schedule by season, card grid with elevation, difficulty, distance');
+  // schedule by year (season), rows with elevation, difficulty, distance: tests/unit/climbs.test.ts
   // mountain profile (stats, jump-off, gain, itinerary, water, links): tests/integration/liveContent.test.tsx (climb page)
   // trail photo carousel + keyboard lightbox: tests/integration/liveContent.test.tsx (climb page)
   // register: details, emergency contact, experience, medical; waitlist when full: tests/integration/register.test.tsx, liveContent (slots)
@@ -17,7 +17,7 @@ describe('Open Climbs parity: member', () => {
   // GCash pay now/later, instalments, receipt upload: tests/integration/myClimbs.test.tsx
   // required documents upload (after registering): tests/integration/myClimbs.test.tsx
   // donation drive pledge: tests/unit/donations.test.ts, tests/integration/myClimbs.test.tsx
-  it.todo('My Climbs: payment log, next steps (status, balance, self-cancel done: /account/climbs)');
+  // My Climbs: status, balance, payment log, next steps, self-cancel: tests/unit/myClimbs.test.ts
   it.todo('rate a climb afterwards');
   it.todo('release notes page + one-time what-is-new popup');
   it.todo('notification bell');

@@ -21,6 +21,7 @@ export interface MyClimb {
   waiver: { name: string; signedAt: number; location: string } | null;
   pledge: Pledge | null;
   details: Details;
+  payments: { amount: number; status: string; note: string }[];
 }
 
 // The fields a member may change after registering (rules: memberIsUpdatingOwnDetails).
@@ -68,6 +69,7 @@ export function toMyClimb(id: string, d: Doc): MyClimb {
     uploaded: REQUIRED_DOCS.map((t) => t.uploadField).filter((f) => d[f] && typeof d[f] === 'object'),
     receipts: receiptsOf(d.paymentProofs),
     details: detailsOf(d),
+    payments: (Array.isArray(d.payments) ? d.payments : []).map((p) => (p ?? {}) as Doc).map((p) => ({ amount: typeof p.amount === 'number' ? p.amount : Number(p.amount) || 0, status: str(p.status) || 'submitted', note: str(p.note) })),
     waiver: d.waiverSigned === true ? { name: str(d.waiverSignedName), signedAt: millis(d.waiverSignedAt), location: str(d.climbLocation) } : null,
   };
 }
@@ -86,3 +88,25 @@ export const draftCancellationPolicy = [
   'If MMS cancels or postpones the climb, you can move to the new date or get a full refund of fees not yet spent.',
   'Refunds are sent by GCash within 14 days. Donations are not refundable once handed over.',
 ];
+
+// What the member should do next, in order (old app My Climbs 'next steps').
+const LIVE = ['pending', 'confirmed', 'waitlisted'];
+const plural = (n: number) => (n === 1 ? '' : 's');
+
+function todo(row: MyClimb, missing: number): string[] {
+  const has = (status: string) => row.payments.some((p) => p.status === status);
+  return [
+    row.status === 'waitlisted' && 'You’re on the waitlist: we’ll tell you if a slot opens.',
+    has('submitted') && 'Payment sent: officers will verify it.',
+    has('rejected') && 'A payment was not accepted: check the note and send it again.',
+    row.total > row.paid && row.status !== 'waitlisted' && 'Pay your balance below.',
+    missing > 0 && `Upload ${missing} required document${plural(missing)}.`,
+  ].filter((s): s is string => Boolean(s));
+}
+
+export function nextSteps(row: MyClimb, requiredUploads: string[]): string[] {
+  if (!LIVE.includes(row.status)) return [];
+  const steps = todo(row, requiredUploads.filter((f) => !row.uploaded.includes(f)).length);
+  if (steps.length) return steps;
+  return [row.status === 'confirmed' ? 'You’re confirmed. See you at the pre-climb meeting.' : 'All set on your side: officers will confirm your slot.'];
+}

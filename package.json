@@ -27,7 +27,7 @@
     "test:rules": "npx -y firebase-tools@15.35.0 emulators:exec --config src/backend/firebase.json --only firestore,storage --project demo-rules \"node tests/integration/rules.emulator.mjs\""
   },
   "dependencies": {
-    "firebase": "12.19.0",
+    "firebase": "13.1.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.5"
@@ -35,7 +35,7 @@
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
     "@eslint/js": "^10.0.1",
-    "@firebase/rules-unit-testing": "5.0.2",
+    "@firebase/rules-unit-testing": "6.0.0",
     "@playwright/test": "^1.65.0",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",

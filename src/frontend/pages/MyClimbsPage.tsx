@@ -8,7 +8,7 @@ import PayForm from '../components/myclimbs/PayForm';
 import PledgeForm from '../components/myclimbs/PledgeForm';
 import VerifyEmailBanner from '../components/VerifyEmailBanner';
 import type { ClimbDetail } from '../data/climbDetail';
-import { canCancel, draftCancellationPolicy, type MyClimb } from '../data/myClimbs';
+import { canCancel, draftCancellationPolicy, nextSteps, type MyClimb } from '../data/myClimbs';
 import { registrationEnabled } from '../services/firebaseEnv';
 import { cancelRegistration, myRegistrations } from '../services/registrations';
 import { useAccount } from '../services/useAccount';
@@ -45,6 +45,23 @@ function Cancel({ row, onDone }: { row: MyClimb; onDone: () => void }) {
   );
 }
 
+function NextSteps({ steps }: { steps: string[] }) {
+  if (!steps.length) return null;
+  return <ul className="next-steps" aria-label="Next steps">{steps.map((s) => <li key={s}>{s}</li>)}</ul>;
+}
+
+// #145: each payment and its verdict.
+function PaymentLog({ row }: { row: MyClimb }) {
+  if (!row.payments.length) return null;
+  const label: Record<string, string> = { submitted: 'under review', verified: 'verified', rejected: 'not accepted' };
+  return (
+    <details className="payment-log">
+      <summary>Payments ({row.payments.length})</summary>
+      <ul>{row.payments.map((p, i) => <li key={i /* history order is its identity */}>{peso(p.amount)} · {label[p.status] ?? p.status}{p.note && ` · ${p.note}`}</li>)}</ul>
+    </details>
+  );
+}
+
 function Money({ row, balance }: { row: MyClimb; balance: number }) {
   const tba = row.tba ? ' + TBA' : '';
   return <p>Total {peso(row.total)}{tba} · Paid {peso(row.paid)} · <strong>Balance {peso(balance)}{tba}</strong></p>;
@@ -71,6 +88,8 @@ function Card({ row, uid, onChange }: { row: MyClimb; uid: string; onChange: () 
       <h2><Link to={`/climbs/${row.climbId}`}>{row.title}</Link></h2>
       <p className="climb-muted">{[row.date, row.statusLabel, row.paymentLabel].filter(Boolean).join(' · ')}</p>
       <Money row={row} balance={balance} />
+      {climb && <NextSteps steps={nextSteps(row, climb.requiredDocs.map((t) => t.uploadField))} />}
+      <PaymentLog row={row} />
       <Records row={row} />
       {live && climb && <LiveActions row={row} climb={climb} uid={uid} owes={owes} onChange={onChange} />}
       {climb && canCancel(row, climb.over) && <Cancel row={row} onDone={onChange} />}

@@ -32,6 +32,7 @@ export interface OpenClimb {
   location: string;
   difficulty: Difficulty;
   elevation?: string;
+  distance?: string; // round trip, e.g. "12 km"
   type: 'Major' | 'Minor' | 'Special';
   status: 'Open' | 'Closed';
 }

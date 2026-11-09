@@ -21,6 +21,10 @@ describe('toClimb', () => {
       day: '20', month: 'Nov', dates: 'Nov 20–22', over: false });
   });
 
+  it('carries the round-trip distance for the schedule', () => {
+    expect(toClimb({ roundTripDistance: '12 km' }, now)?.distance).toBe('12 km');
+  });
+
   it('accepts YYYY-MM-DD dates and spans months', () => {
     expect(toClimb({ title: 'K', startDate: '2026-11-29', endDate: '2026-12-02' }, now)).toMatchObject({ dates: 'Nov 29 – Dec 2', difficulty: 'Not yet rated', type: 'Minor' });
   });
