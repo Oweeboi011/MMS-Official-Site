@@ -51,7 +51,7 @@ New file → its folder above. Root only for files tools require there ([ADR 000
 
 ## Docs
 
-- `docs/guides` what · `docs/solution-plan` how/what (one file) · `docs/adr` why. Names ALL CAPS.
+- `docs/guides` what · `docs/solution-plan` how/what (one file) · `docs/adr` why. Names ALL CAPS. Domain terms: `docs/guides/CONTEXT.md` (via `/grill-with-docs`).
 - Markdown + Mermaid. Close to code. Deprecate aggressively. No boilerplate. One topic, one place.
 
 ## Deploy
