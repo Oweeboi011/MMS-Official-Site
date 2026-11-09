@@ -5,6 +5,7 @@ import SignInForm from '../components/SignInForm';
 import DocUploads from '../components/myclimbs/DocUploads';
 import EditDetails from '../components/myclimbs/EditDetails';
 import PayForm from '../components/myclimbs/PayForm';
+import WhatsNewBanner from '../components/myclimbs/WhatsNewBanner';
 import VerifyEmailBanner from '../components/VerifyEmailBanner';
 import { canCancel, draftCancellationPolicy, nextSteps, type MyClimb } from '../data/myClimbs';
 import { registrationEnabled } from '../services/firebaseEnv';
@@ -114,7 +115,7 @@ function Body() {
   const state = useAccount();
   if (!registrationEnabled) return <p>My Climbs opens here together with climb registration. Until then, use the Open Climbs app you registered with.</p>;
   if (state.status === 'loading') return <p role="status">Checking your sign-in…</p>;
-  if (state.status === 'signedIn') return <><VerifyEmailBanner account={state.account} /><List uid={state.account.uid} /></>;
+  if (state.status === 'signedIn') return <><VerifyEmailBanner account={state.account} /><WhatsNewBanner /><List uid={state.account.uid} /></>;
   if (state.status === 'error') return <p role="alert">Couldn’t check your sign-in: {state.error}</p>;
   return <><p>Sign in to see your climbs.</p><SignInForm /></>;
 }
