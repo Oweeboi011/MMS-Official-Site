@@ -4,8 +4,10 @@ import PageHero from '../components/PageHero';
 import SignInForm from '../components/SignInForm';
 import DocUploads from '../components/myclimbs/DocUploads';
 import EditDetails from '../components/myclimbs/EditDetails';
+import Notifications from '../components/myclimbs/Notifications';
 import PayForm from '../components/myclimbs/PayForm';
 import WhatsNewBanner from '../components/myclimbs/WhatsNewBanner';
+import RateClimb from '../components/myclimbs/RateClimb';
 import PledgeForm from '../components/myclimbs/PledgeForm';
 import VerifyEmailBanner from '../components/VerifyEmailBanner';
 import type { ClimbDetail } from '../data/climbDetail';
@@ -79,6 +81,12 @@ function Records({ row }: { row: MyClimb }) {
   );
 }
 
+// After the climb: rate it (confirmed only). Before it ends: cancel.
+function Closing({ row, over, uid, onChange }: { row: MyClimb; over: boolean; uid: string; onChange: () => void }) {
+  if (over) return row.status === 'confirmed' ? <RateClimb row={row} uid={uid} /> : null;
+  return canCancel(row, over) ? <Cancel row={row} onDone={onChange} /> : null;
+}
+
 function Card({ row, uid, onChange }: { row: MyClimb; uid: string; onChange: () => void }) {
   const climb = useClimb(row.climbId);
   const balance = Math.max(row.total - row.paid, 0);
@@ -93,7 +101,7 @@ function Card({ row, uid, onChange }: { row: MyClimb; uid: string; onChange: () 
       <PaymentLog row={row} />
       <Records row={row} />
       {live && climb && <LiveActions row={row} climb={climb} uid={uid} owes={owes} onChange={onChange} />}
-      {climb && canCancel(row, climb.over) && <Cancel row={row} onDone={onChange} />}
+      {climb && <Closing row={row} over={climb.over} uid={uid} onChange={onChange} />}
     </li>
   );
 }
@@ -127,7 +135,7 @@ function Body() {
   const state = useAccount();
   if (!registrationEnabled) return <p>My Climbs opens here together with climb registration. Until then, use the Open Climbs app you registered with.</p>;
   if (state.status === 'loading') return <p role="status">Checking your sign-in…</p>;
-  if (state.status === 'signedIn') return <><VerifyEmailBanner account={state.account} /><WhatsNewBanner /><List uid={state.account.uid} /></>;
+  if (state.status === 'signedIn') return <><VerifyEmailBanner account={state.account} /><WhatsNewBanner /><Notifications uid={state.account.uid} /><List uid={state.account.uid} /></>;
   if (state.status === 'error') return <p role="alert">Couldn’t check your sign-in: {state.error}</p>;
   return <><p>Sign in to see your climbs.</p><SignInForm /></>;
 }
