@@ -23,6 +23,7 @@ scripts/          delivery: deploy.mjs, prod-parity.mjs
 tools/            dev utilities: secrets.mjs (gitleaks), fetch-images.mjs, screenshots.mjs; admin/ owner scripts
 data/             tool inputs (images.json)
 public/           static files; _headers = Cloudflare headers + cache
+functions/        Cloudflare Pages Functions (root: Pages requires it): climbs/[id].ts link previews
 .config/          tool configs: playwright, dependency-cruiser, knip, jscpd, gitleaks, lint-staged
 .githooks/        pre-commit (secrets + eslint staged), commit-msg (sign-off, no AI co-author)
 .github/          Quality Gates, Continuous Delivery, shared setup action, PR template
