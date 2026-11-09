@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { REG_STATUSES, type AdminReg } from '../../data/adminRegistrations';
-import type { Account } from '../../services/auth';
+import { REG_STATUSES } from '../../data/adminRegistrations';
 import { reviewRegistrationPayment, setAdminNotes, setRegistrationStatus } from '../../services/adminRegistrations';
+import RowExtras from './RowExtras';
+import type { RowProps } from './rowProps';
 
 const peso = (n: number) => `₱${n.toLocaleString('en-PH')}`;
 
-export interface RowProps { reg: AdminReg; admin: Account; run: (action: () => Promise<void>) => void; busy: boolean; showClimb?: boolean }
 
 function Payments({ reg, admin, run, busy }: RowProps) {
   if (!reg.payments.length) return <span className="climb-muted"> · no payment yet</span>;
@@ -56,7 +56,7 @@ export default function RegistrationRow(props: RowProps) {
           {REG_STATUSES.map((s) => <option key={s}>{s}</option>)}
         </select>
       </td>
-      <td>{peso(reg.paid)} of {peso(reg.total)}{reg.tba ? ' + TBA' : ''}<Payments {...props} /></td>
+      <td>{peso(reg.paid)} of {peso(reg.total)}{reg.tba ? ' + TBA' : ''}<Payments {...props} /><RowExtras {...props} /></td>
       <td>{reg.uploaded.length ? `${reg.uploaded.length} doc(s)` : '—'}{reg.waiver && <><br /><small>Waiver: {reg.waiver.name}</small></>}<Notes {...props} /></td>
     </tr>
   );

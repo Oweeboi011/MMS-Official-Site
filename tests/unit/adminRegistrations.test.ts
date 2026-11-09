@@ -1,4 +1,4 @@
-import { CSV_HEADERS, derivePaymentStatus, emptyWalkIn, matches, reviewPayment, summary, toAdminReg, toCsv, walkInDoc, walkInProblem } from '../../src/frontend/data/adminRegistrations';
+import { CSV_HEADERS, derivePaymentStatus, emptyWalkIn, expensesTotal, matches, noShowPatch, refundPatch, refundedTotal, reviewPayment, summary, toAdminReg, toCsv, walkInDoc, walkInProblem } from '../../src/frontend/data/adminRegistrations';
 
 const pay = (amount: number, status = 'submitted', extra = {}) => ({ amount, proofs: [{ url: 'https://x/r.jpg', fileName: 'r.jpg' }], status, submittedAt: 1, ...extra });
 const reg = toAdminReg('r1', {
@@ -56,5 +56,22 @@ describe('walk-ins and search', () => {
     expect(matches(reg, 'pulag', 'pending')).toBe(true);
     expect(matches(reg, 'pulag', 'confirmed')).toBe(false);
     expect(matches(reg, 'apo', '')).toBe(false);
+  });
+});
+
+describe('refunds, no-shows, expenses', () => {
+  it('appends a refund without touching payments and totals refunds', () => {
+    const r = toAdminReg('r', { refunds: [{ amount: 100 }], payments: [{ amount: 800, status: 'verified' }] });
+    const p = refundPatch(r, 250.555, ' gcash ref 9 ', 'tl@x.com', 'STAMP', 'NOW');
+    expect(p.refunds).toHaveLength(2);
+    expect(p.refunds[1]).toMatchObject({ amount: 250.56, note: 'gcash ref 9', recordedBy: 'tl@x.com', refundedAt: 'STAMP' });
+    expect(p).not.toHaveProperty('payments');
+    expect(refundedTotal(toAdminReg('r2', { refunds: p.refunds }))).toBeCloseTo(350.56);
+  });
+
+  it('marks and clears a no-show as a flag', () => {
+    expect(noShowPatch(true, 'tl', 'NOW')).toEqual({ noShow: true, noShowMarkedBy: 'tl', noShowMarkedAt: 'NOW', updatedAt: 'NOW' });
+    expect(noShowPatch(false, 'tl', 'NOW')).toEqual({ noShow: false, noShowMarkedBy: null, noShowMarkedAt: null, updatedAt: 'NOW' });
+    expect(expensesTotal([{ label: 'Permit', amount: 300 }, { label: 'Van', amount: 4500 }])).toBe(4800);
   });
 });

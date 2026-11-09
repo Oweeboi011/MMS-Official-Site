@@ -15,7 +15,7 @@ vi.mock('../../src/frontend/services/climbPrivate', () => ({
   loadClimbPrivateRaw: async () => ({ preClimbMeetings: [{ date: '2026-11-18', time: '7 PM' }], resources: [], participants: [{ name: 'X' }] }),
   saveClimbPrivate: async (...args: unknown[]) => { svc.saved.push(args); },
 }));
-vi.mock('../../src/frontend/services/adminRegistrations', () => ({ climbRegistrations: async () => [] }));
+vi.mock('../../src/frontend/services/adminRegistrations', () => ({ climbRegistrations: async () => [], loadExpenses: async () => [], saveExpenses: async () => undefined }));
 vi.mock('../../src/frontend/services/publicData', () => ({
   publicReadsEnabled: true,
   climbLoader: async (id: string) => ({ id, title: 'Mt. Pulag', status: 'open', startDate: new Date(Date.now() + 864e6), officers: [{ role: 'Team Leader', name: 'Tess L.' }] }),

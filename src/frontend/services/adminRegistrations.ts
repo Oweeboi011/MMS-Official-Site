@@ -1,6 +1,6 @@
 // Admin side of `registrations` (rules: admins read and update any). Lazy: /admin/climbs/:id only.
-import { Timestamp, addDoc, collection, doc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc, where } from 'firebase/firestore/lite';
-import { reviewPayment, toAdminReg, walkInDoc, type AdminReg, type WalkIn } from '../data/adminRegistrations';
+import { Timestamp, addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore/lite';
+import { noShowPatch, refundPatch, reviewPayment, toAdminReg, walkInDoc, type AdminReg, type Expense, type WalkIn } from '../data/adminRegistrations';
 import { logAudit } from './auditLog';
 import { firebase } from './firebase';
 import { readOnlyMessage, writesEnabled } from './firebaseEnv';
@@ -40,4 +40,27 @@ export async function addWalkIn(climb: { id: string; title: string; dateLabel: s
 export async function recentRegistrations(): Promise<AdminReg[]> {
   const snap = await getDocs(query(collection(firebase().db, 'registrations'), orderBy('createdAt', 'desc'), limit(300)));
   return snap.docs.map((d) => toAdminReg(d.id, d.data()));
+}
+
+export async function recordRefund(reg: AdminReg, amount: number, note: string, by: string) {
+  await patch(reg.id, refundPatch(reg, amount, note, by, Timestamp.now(), serverTimestamp()));
+  await logAudit({ action: 'refund recorded', targetType: 'registration', targetId: reg.id, targetLabel: `${reg.name} · ${reg.title}`, details: `₱${amount}` });
+}
+
+export async function setNoShow(reg: AdminReg, noShow: boolean, by: string) {
+  await patch(reg.id, noShowPatch(noShow, by, serverTimestamp()));
+  await logAudit({ action: noShow ? 'marked no-show' : 'no-show cleared', targetType: 'registration', targetId: reg.id, targetLabel: `${reg.name} · ${reg.title}` });
+}
+
+// climbExpenses/{climbId}: admin-only cost lines (old app ExpensesCard: items [{ label, amount }]).
+export async function loadExpenses(climbId: string): Promise<Expense[]> {
+  const snap = await getDoc(doc(firebase().db, 'climbExpenses', climbId));
+  const items = snap.exists() && Array.isArray(snap.data().items) ? (snap.data().items as Record<string, unknown>[]) : [];
+  return items.map((i) => ({ label: String(i.label ?? ''), amount: Number(i.amount) || 0 })).filter((i) => i.label);
+}
+
+export async function saveExpenses(climbId: string, items: Expense[]) {
+  if (!writesEnabled) throw new Error(readOnlyMessage);
+  await setDoc(doc(firebase().db, 'climbExpenses', climbId), { items, updatedAt: serverTimestamp() }, { merge: true });
+  await logAudit({ action: 'expenses saved', targetType: 'climb', targetId: climbId, details: `${items.length} line(s)` });
 }

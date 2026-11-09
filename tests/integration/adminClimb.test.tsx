@@ -15,6 +15,10 @@ vi.mock('../../src/frontend/services/adminRegistrations', () => ({
   setRegistrationStatus: async (id: string, status: string) => { svc.statuses.push([id, status]); },
   setAdminNotes: async (id: string, notes: string) => { svc.notes.push([id, notes]); },
   addWalkIn: async (...args: unknown[]) => { svc.walkIns.push(args); },
+  recordRefund: async (reg: { id: string }, amount: number, note: string) => { svc.notes.push(['refund', reg.id, String(amount), note]); },
+  setNoShow: async (reg: { id: string }, v: boolean) => { svc.notes.push(['noshow', reg.id, String(v)]); },
+  loadExpenses: async () => [{ label: 'Permit', amount: 300 }],
+  saveExpenses: async (id: string, items: unknown[]) => { svc.notes.push(['expenses', id, JSON.stringify(items)]); },
 }));
 vi.mock('../../src/frontend/services/publicData', () => ({
   publicReadsEnabled: true,
@@ -77,5 +81,16 @@ describe('admin: registrations', () => {
     renderAt('/admin/climbs/c1');
     expect(await screen.findByText(/Admins only/, {}, wait)).toBeInTheDocument();
     expect(screen.queryByText('Ana Cruz')).not.toBeInTheDocument();
+  });
+
+  it('records a refund, flags a no-show, and shows net funds after expenses', async () => {
+    renderAt('/admin/climbs/c1');
+    fireEvent.click(await screen.findByRole('button', { name: 'Record refund' }, wait));
+    fireEvent.change(screen.getByLabelText('Refund amount for Ana Cruz'), { target: { value: '200' } });
+    fireEvent.change(screen.getByLabelText('Refund note for Ana Cruz'), { target: { value: 'GCash 123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save refund' }));
+    await vi.waitFor(() => expect(svc.notes).toContainEqual(['refund', 'r1', '200', 'GCash 123']));
+    expect(await screen.findByText(/Expenses and net funds/)).toBeInTheDocument();
+    expect(screen.getByText(/− expenses ₱300 =/)).toBeInTheDocument();
   });
 });
