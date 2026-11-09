@@ -1,6 +1,7 @@
 // A member's registrations (old Open Climbs shape) → My Climbs rows.
 import type { Doc } from '../lib/firestoreRest';
 import { feeTotal, type FeeLine } from './registration';
+import { REQUIRED_DOCS } from './requiredDocs';
 
 export interface MyClimb {
   id: string;
@@ -14,6 +15,7 @@ export interface MyClimb {
   tba: boolean;
   paid: number;
   createdAt: number;
+  uploaded: string[]; // registration upload fields already holding a file
 }
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
@@ -37,6 +39,7 @@ export function toMyClimb(id: string, d: Doc): MyClimb {
     id, climbId: str(d.climbId), title: str(d.climbTitle) || 'Climb', date: str(d.climbDate),
     status, statusLabel: STATUS[status] ?? status, paymentLabel: PAYMENT[str(d.paymentStatus)] ?? 'Not paid yet',
     total, tba, paid: typeof d.amountPaid === 'number' ? d.amountPaid : 0, createdAt: millis(d.createdAt),
+    uploaded: REQUIRED_DOCS.map((t) => t.uploadField).filter((f) => d[f] && typeof d[f] === 'object'),
   };
 }
 
