@@ -25,6 +25,7 @@ function Registrations({ climbId, climb, admin }: { climbId: string; climb: Clim
       <p>{s.confirmed} confirmed · {s.pending} pending · {s.waitlisted} waitlisted · {s.cancelled} cancelled · <strong>{s.toReview} payment(s) to review</strong> · {peso(s.collected)} recorded</p>
       <p className="editor-actions">
         <button type="button" className="btn" disabled={!rows.length} onClick={() => downloadCsv(ref.title, toCsv(rows))}>Download CSV (LGU / jump-off)</button>
+        <Link className="btn" to={`/admin/climbs/${climbId}/sheet`}>Climb-day sheet (print)</Link>
       </p>
       <WalkInForm busy={busy} onAdd={(w) => run(() => addWalkIn(ref, w, admin.email))} />
       <MeetingsEditor climbId={climbId} run={run} busy={busy} />

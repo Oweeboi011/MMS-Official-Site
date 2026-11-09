@@ -35,6 +35,7 @@ const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const MyClimbsPage = lazy(() => import('./pages/MyClimbsPage'));
 const WaiverPrintPage = lazy(() => import('./pages/WaiverPrintPage'));
 const AdminClimbPage = lazy(() => import('./pages/AdminClimbPage'));
+const ClimbDaySheetPage = lazy(() => import('./pages/ClimbDaySheetPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const GuidePage = lazy(() => import('./pages/GuidePage'));
 const HelpPage = lazy(() => import('./pages/HelpPage'));
@@ -115,6 +116,7 @@ export default function App() {
         <Route path="/account/climbs/:regId/waiver" element={<RouteErrorBoundary key="waiver"><Suspense fallback={loading}><WaiverPrintPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/climbs" element={<RouteErrorBoundary key="my-climbs"><Suspense fallback={loading}><MyClimbsPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/registrations" element={<RouteErrorBoundary key="admin-regs"><Suspense fallback={loading}><AdminRegistrationsPage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/admin/climbs/:id/sheet" element={<RouteErrorBoundary key="day-sheet"><Suspense fallback={loading}><ClimbDaySheetPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/climbs/:id" element={<RouteErrorBoundary key="admin-climb"><Suspense fallback={loading}><AdminClimbPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin" element={<RouteErrorBoundary key="admin"><Suspense fallback={loading}><AdminPage /></Suspense></RouteErrorBoundary>} />
         <Route path="*" element={<HomePage />} />
