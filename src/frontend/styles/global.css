@@ -553,3 +553,12 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .waiver-print h1 { font-size: 1.6rem; margin: 0 0 6px; }
 .waiver-print h4 { margin: 14px 0 4px; }
 .waiver-signature { margin-top: 28px; padding-top: 12px; border-top: 1px solid var(--ink); }
+
+/* Admin home */
+.admin-jump { margin: 0 0 24px; font-weight: 700; }
+#open-climbs, #site-content, #people, #health { margin-top: 40px; scroll-margin-top: 90px; }
+.admin-tiles { list-style: none; margin: 20px 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.admin-tiles a { display: block; height: 100%; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: #fff; text-decoration: none; color: inherit; }
+.admin-tiles a:hover, .admin-tiles a:focus-visible { border-color: var(--navy); }
+.admin-tiles strong { display: block; color: var(--navy); }
+.admin-tiles span { display: block; margin-top: 4px; font-size: .88rem; color: var(--muted); }

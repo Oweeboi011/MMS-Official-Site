@@ -29,4 +29,14 @@ describe('Nav', () => {
     act(() => setSignedInHint(false));
     expect(screen.getByRole('link', { name: 'Sign in' })).toBeInTheDocument();
   });
+
+  it('shows an Admin link only when the session hint says admin', () => {
+    setSignedInHint(true, 'member');
+    renderNav('/');
+    expect(screen.queryByRole('link', { name: 'Admin' })).not.toBeInTheDocument();
+    act(() => setSignedInHint(true, 'admin'));
+    expect(screen.getByRole('link', { name: 'Admin' })).toHaveAttribute('href', '/admin');
+    act(() => setSignedInHint(false));
+    expect(screen.queryByRole('link', { name: 'Admin' })).not.toBeInTheDocument();
+  });
 });

@@ -43,8 +43,11 @@ describe('sign-in and admin pages', () => {
     expect(await screen.findByRole('button', { name: 'Climbs' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Leadership' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Committees' })).toBeInTheDocument();
-    expect(await screen.findByRole('button', { name: /BMC open/ })).toBeInTheDocument(); // climbs tab: date · title · status
+    expect((await screen.findAllByRole('button', { name: /BMC open/ })).length).toBeGreaterThan(0); // climbs tab: date · title · status (site content tab shows rows too)
     expect(await screen.findByRole('link', { name: 'Mt. Pulag' })).toHaveAttribute('href', '/admin/climbs/c1');
     expect(screen.getByRole('table', { name: 'Upcoming climbs' })).toHaveTextContent('3 left');
+    expect(screen.getByRole('heading', { level: 2, name: 'Site content' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Payments and treasurer/ })).toHaveAttribute('href', '/admin/treasurer');
+    expect(screen.getByRole('link', { name: /Accounts and roles/ })).toHaveAttribute('href', '/admin/users');
   });
 });
