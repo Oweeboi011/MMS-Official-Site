@@ -27,14 +27,14 @@ describe('sign-in and admin pages', () => {
   });
 
   it('a member is not let into the editors', async () => {
-    state = { status: 'signedIn', account: { uid: 'm1', email: 'm@x.com', role: 'member' } };
+    state = { status: 'signedIn', account: { uid: 'm1', email: 'm@x.com', role: 'member', emailVerified: true } };
     renderAt('/admin');
     expect(await screen.findByText(/not an admin/)).toBeInTheDocument();
     expect(screen.queryByRole('navigation', { name: 'Collections' })).not.toBeInTheDocument();
   });
 
   it('an admin sees every collection and its rows', async () => {
-    state = { status: 'signedIn', account: { uid: 'a1', email: 'a@x.com', role: 'admin' } };
+    state = { status: 'signedIn', account: { uid: 'a1', email: 'a@x.com', role: 'admin', emailVerified: true } };
     renderAt('/admin');
     expect(await screen.findByRole('button', { name: 'Climbs' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Leadership' })).toBeInTheDocument();

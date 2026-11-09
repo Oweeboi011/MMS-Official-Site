@@ -2,12 +2,14 @@ import { fireEvent, screen } from '@testing-library/react';
 import { renderAt } from '../helpers';
 import { toMyClimb } from '../../src/frontend/data/myClimbs';
 
-const svc = vi.hoisted(() => ({ cancelled: [] as string[][], rows: [] as unknown[], payments: [] as unknown[], docs: [] as unknown[][] }));
+const svc = vi.hoisted(() => ({ cancelled: [] as string[][], rows: [] as unknown[], payments: [] as unknown[], docs: [] as unknown[][], details: [] as unknown[][], verified: true, resent: 0 }));
 vi.mock('../../src/frontend/services/firebaseEnv', async (original) => ({ ...(await original<object>()), registrationEnabled: true }));
-vi.mock('../../src/frontend/services/useAccount', () => ({ useAccount: () => ({ status: 'signedIn', account: { uid: 'u1', email: 'ana@x.com', role: 'member' } }) }));
+vi.mock('../../src/frontend/services/useAccount', () => ({ useAccount: () => ({ status: 'signedIn', account: { uid: 'u1', email: 'ana@x.com', role: 'member', emailVerified: svc.verified } }) }));
+vi.mock('../../src/frontend/services/auth', async (original) => ({ ...(await original<object>()), resendVerification: async () => { svc.resent += 1; } }));
 vi.mock('../../src/frontend/services/registrations', () => ({
   myRegistrations: async () => svc.rows,
   cancelRegistration: async (id: string, reason: string) => { svc.cancelled.push([id, reason]); },
+  updateMyDetails: async (id: string, x: unknown) => { svc.details.push([id, x]); },
 }));
 vi.mock('../../src/frontend/services/uploads', () => ({
   submitPayment: async (p: unknown) => { svc.payments.push(p); },
@@ -25,9 +27,9 @@ const receipt = new File(['x'], 'receipt.jpg', { type: 'image/jpeg' });
 
 describe('My Climbs (switch on)', () => {
   beforeEach(() => {
-    Object.assign(svc, { cancelled: [], payments: [], docs: [] });
+    Object.assign(svc, { cancelled: [], payments: [], docs: [], details: [], verified: true, resent: 0 });
     svc.rows = [
-      toMyClimb('r1', { climbId: 'soon', climbTitle: 'Mt. Pulag', status: 'pending', paymentStatus: 'unpaid', amountPaid: 200, feeBreakdown: [{ label: 'Guide', amount: '1500', selected: true }] }),
+      toMyClimb('r1', { climbId: 'soon', climbTitle: 'Mt. Pulag', status: 'pending', mobile: '0917', emergencyContact: { name: 'Ben', mobile: '0918', relationship: 'Brother' }, paymentStatus: 'unpaid', amountPaid: 200, feeBreakdown: [{ label: 'Guide', amount: '1500', selected: true }] }),
       toMyClimb('r2', { climbId: 'past', climbTitle: 'Mt. Apo', status: 'confirmed', paymentStatus: 'verified', amountPaid: 900, feeBreakdown: [{ label: 'Guide', amount: '900', selected: true }] }),
     ];
   });
@@ -63,5 +65,23 @@ describe('My Climbs (switch on)', () => {
     renderAt('/account/climbs');
     fireEvent.change(await screen.findByLabelText('Upload Medical certificate', {}, { timeout: 5000 }), { target: { files: [receipt] } });
     await vi.waitFor(() => expect(svc.docs).toEqual([['r1', 'soon', 'u1', 'medical-cert-uploads', 'medicalCertUpload', receipt]]));
+  });
+
+  it('edits details after registering', async () => {
+    renderAt('/account/climbs');
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Edit my details' }, { timeout: 5000 }))[0]); // Mt. Pulag
+    expect(screen.getByLabelText('Emergency contact name')).toHaveValue('Ben');
+    fireEvent.change(screen.getByLabelText('Emergency contact mobile'), { target: { value: '0999' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save details' }));
+    await vi.waitFor(() => expect(svc.details).toEqual([['r1', { mobile: '0917', ecName: 'Ben', ecMobile: '0999', ecRelationship: 'Brother', medicalConditions: '' }]]));
+  });
+
+  it('asks unverified email accounts to verify, and resends the link', async () => {
+    svc.verified = false;
+    renderAt('/account/climbs');
+    expect(await screen.findByText(/Please verify ana@x.com/, {}, { timeout: 5000 })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Resend the link' }));
+    expect(await screen.findByText(/Sent\. Check your inbox/)).toBeInTheDocument();
+    expect(svc.resent).toBe(1);
   });
 });

@@ -1,6 +1,6 @@
 // Member side of `registrations` (rules: own docs only; create while the climb is open).
 import { addDoc, collection, doc, getDoc, getDocs, limit, query, serverTimestamp, updateDoc, where } from 'firebase/firestore/lite';
-import { newestFirst, toMyClimb, type MyClimb } from '../data/myClimbs';
+import { newestFirst, toMyClimb, type Details, type MyClimb } from '../data/myClimbs';
 import { buildRegistrationDoc, type ClimbRef, type FeeItem, type RegistrationForm } from '../data/registration';
 import { firebase } from './firebase';
 import { readOnlyMessage, writesEnabled } from './firebaseEnv';
@@ -35,5 +35,15 @@ export async function cancelRegistration(id: string, reason: string): Promise<vo
   await updateDoc(doc(firebase().db, 'registrations', id), {
     status: 'cancelled', cancelledByMember: true, cancellationReason: reason.trim().slice(0, 500) || 'Cancelled by the member',
     cancelledAt: serverTimestamp(), updatedAt: serverTimestamp(),
+  });
+}
+
+// Exactly the fields the rules let a member change after registering.
+export async function updateMyDetails(id: string, x: Details): Promise<void> {
+  if (!writesEnabled) throw new Error(readOnlyMessage);
+  await updateDoc(doc(firebase().db, 'registrations', id), {
+    mobile: x.mobile.trim(), medicalConditions: x.medicalConditions.trim().slice(0, 1000),
+    emergencyContact: { name: x.ecName.trim(), mobile: x.ecMobile.trim(), relationship: x.ecRelationship.trim() },
+    updatedAt: serverTimestamp(),
   });
 }

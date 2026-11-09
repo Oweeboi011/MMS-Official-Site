@@ -1,5 +1,6 @@
 // Admin editor for `climbs` (old Open Climbs shape, read by data/climbs.ts). Rules: admins write, anyone reads.
 import { flatCodec, groupedCodec, type Column } from './records';
+import { setupGaps } from './climbSetup';
 import { REQUIRED_DOCS } from './requiredDocs';
 import type { CollectionSpec, Doc, Field, FormValues } from './siteSchemas';
 
@@ -44,6 +45,7 @@ function check(v: FormValues): string | null {
 export const climbsSpec: CollectionSpec = {
   id: 'climbs', label: 'Climbs', titleField: 'title', check,
   orderBy: { field: 'startDate', desc: true },
+  todo: setupGaps,
   rowLink: (id) => ({ to: `/admin/climbs/${id}`, label: 'Registrations, payments, CSV →' }),
   rowLabel: (d: Doc) => `${dayOf(d.startDate)} · ${String(d.title ?? '(untitled)')} · ${String(d.status ?? '')}`,
   fields: [

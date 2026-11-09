@@ -42,7 +42,7 @@ describe('Open Climbs parity: found in plan review 2026-11-09', () => {
   // packing list + Leave No Trace ethics on the climb page: tests/integration/liveContent.test.tsx (climb page)
   it.todo('registrant-only section: participants, resources, pre-climb meetings, officer contacts');
   it.todo('admin audit log of sensitive actions');
-  it.todo('help and privacy pages');
+  it.todo('help page (privacy page done: /privacy)');
   it('installable app: web manifest + icons', () => {
     const manifest = JSON.parse(readFileSync('public/manifest.webmanifest', 'utf8')) as { display: string; start_url: string; icons: { src: string; sizes: string; purpose?: string }[] };
     expect(manifest.display).toBe('standalone');
@@ -53,11 +53,11 @@ describe('Open Climbs parity: found in plan review 2026-11-09', () => {
     expect(readFileSync('index.html', 'utf8')).toContain('rel="manifest"');
   });
   // accessibility checks (axe) on key pages: tests/e2e/a11y.spec.ts
-  it.todo('verify-email banner after sign-up');
-  it.todo('edit registration details after submitting');
+  // verify-email banner after sign-up: tests/integration/myClimbs.test.tsx
+  // edit registration details after submitting: tests/integration/myClimbs.test.tsx
   // view an uploaded receipt: My Climbs receipt links (tests/unit/slice4.test.ts)
   it.todo('beginner mountaineering guide + registration and cancellation policy text');
-  it.todo('admin climb setup checklist (completeness before opening)');
+  // admin climb setup checklist: tests/unit/climbSetup.test.ts
   // compress images in the browser before upload: lib/compressImage.ts (tests/unit/slice4.test.ts)
   it.todo('member and admin help guides (old USER_MANUAL)');
   it.todo('render release notes and announcements with lightweight markdown');

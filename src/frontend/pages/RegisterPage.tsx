@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import PageHero from '../components/PageHero';
 import SignInForm from '../components/SignInForm';
+import VerifyEmailBanner from '../components/VerifyEmailBanner';
 import FeeBreakdown from '../components/register/FeeBreakdown';
 import RegisterFields from '../components/register/RegisterFields';
 import WaiverConsent from '../components/register/WaiverConsent';
@@ -96,7 +97,7 @@ function Gate({ climb }: { climb: ClimbDetail }) {
   const state = useAccount();
   if (climb.cancelled || climb.over || climb.status !== 'Open') return <><p>Registration for this climb is closed.</p>{climbLink(climb.id ?? '')}</>;
   if (state.status === 'loading') return <p role="status">Checking your sign-in…</p>;
-  if (state.status === 'signedIn') return <Signed climb={climb} account={state.account} />;
+  if (state.status === 'signedIn') return <><VerifyEmailBanner account={state.account} /><Signed climb={climb} account={state.account} /></>;
   if (state.status === 'error') return <p role="alert">Couldn’t check your sign-in: {state.error}</p>;
   return <><p>Sign in or create a free account to register. Guests welcome: no MMS membership needed.</p><SignInForm /></>;
 }
