@@ -44,6 +44,7 @@ function check(v: FormValues): string | null {
 export const climbsSpec: CollectionSpec = {
   id: 'climbs', label: 'Climbs', titleField: 'title', check,
   orderBy: { field: 'startDate', desc: true },
+  rowLink: (id) => ({ to: `/admin/climbs/${id}`, label: 'Registrations, payments, CSV →' }),
   rowLabel: (d: Doc) => `${dayOf(d.startDate)} · ${String(d.title ?? '(untitled)')} · ${String(d.status ?? '')}`,
   fields: [
     { key: 'title', label: 'Mountain / climb name', kind: 'text', required: true, max: 200 },

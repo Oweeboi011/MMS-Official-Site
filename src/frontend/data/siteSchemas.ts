@@ -30,6 +30,7 @@ export interface CollectionSpec {
   check?: (values: FormValues) => string | null; // cross-field rules
   orderBy?: { field: string; desc?: boolean }; // list order (default: unordered)
   rowLabel?: (doc: Doc) => string; // list label (default: titleField)
+  rowLink?: (id: string) => { to: string; label: string }; // page for the selected row
 }
 
 const order: Field = { key: 'order', label: 'Order', kind: 'int', required: true };

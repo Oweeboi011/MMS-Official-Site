@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { lockedKeys, toForm, validate, type CollectionSpec, type Field, type FormValues } from '../data/siteSchemas';
 import { MAX_ROWS, removeRow, saveRow, type Row } from '../services/siteData';
 import RecordsInput from './RecordsInput';
@@ -49,6 +50,13 @@ function FieldInput({ field, value, readOnly, locked, onChange }: { field: Field
       {locked && <small>Stored in another format: kept as is (edit in the Firebase console).</small>}
     </div>
   );
+}
+
+// A saved row's own page (e.g. a climb's registrations).
+function RowLink({ spec, selected }: { spec: CollectionSpec; selected: string | null }) {
+  if (!spec.rowLink || !selected || selected === NEW) return null;
+  const { to, label } = spec.rowLink(selected);
+  return <p><Link className="btn" to={to}>{label}</Link></p>;
 }
 
 function RowList({ spec, rows, selected, busy, onPick }: { spec: CollectionSpec; rows: Row[]; selected: string | null; busy: boolean; onPick: (id: string | null) => void }) {
@@ -172,6 +180,7 @@ export default function CollectionEditor({ spec, onBusyChange }: { spec: Collect
     <div className={spec.singleton ? 'editor is-single' : 'editor'}>
       {!spec.singleton && loaded && <RowList spec={spec} rows={rows} selected={selected} busy={busy} onPick={pick} />}
       {!loaded && !error && <p>Loading…</p>}
+      {loaded && <RowLink spec={spec} selected={selected} />}
       {loaded && selected && (
         <EditorForm spec={spec} values={values} locked={locked} busy={busy} confirmDelete={confirmDelete}
           canDelete={selected !== NEW && !spec.singleton} onChange={setValues} onSave={save} onDelete={remove} />
