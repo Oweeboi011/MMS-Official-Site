@@ -6,8 +6,8 @@ import { createRequire } from 'node:module';
 const require = createRequire(new URL('../../src/backend/functions/package.json', import.meta.url));
 const { initializeApp, getApps } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
-const { getFirestore, FieldValue } = require('firebase-admin/firestore');
-export { FieldValue };
+const { getFirestore, FieldValue, Timestamp } = require('firebase-admin/firestore');
+export { FieldValue, Timestamp };
 
 function envProject() {
   if (process.env.VITE_FIREBASE_PROJECT_ID) return process.env.VITE_FIREBASE_PROJECT_ID;

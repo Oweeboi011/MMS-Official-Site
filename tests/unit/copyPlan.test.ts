@@ -1,4 +1,4 @@
-import { describe as describeClimb, planCopy } from '../../tools/admin/copyPlan.mjs';
+import { describe as describeClimb, normalizeDates, planCopy } from '../../tools/admin/copyPlan.mjs';
 
 const doc = (id: string, data: Record<string, unknown> = {}) => ({ id, data });
 
@@ -22,5 +22,14 @@ describe('old-app climb copy plan', () => {
     const startDate = { toDate: () => new Date('2026-12-05T00:00:00Z') };
     expect(describeClimb(doc('x', { title: 'Mt. Pulag', startDate }))).toBe('x  2026-12-05  Mt. Pulag');
     expect(describeClimb(doc('y'))).toBe('y  no date  (untitled)');
+  });
+
+  it('turns text dates into Manila-midnight timestamps and leaves the rest', () => {
+    const ts = (d: Date) => d.toISOString();
+    const out = normalizeDates({ startDate: '2026-09-26', endDate: '2026-09-27T01:00:00Z', paymentDueDate: '2026-09-21', title: 'x' }, ts);
+    expect(out).toEqual({ startDate: '2026-09-25T16:00:00.000Z', endDate: '2026-09-27T01:00:00.000Z', paymentDueDate: '2026-09-21', title: 'x' });
+    const already = { startDate: { seconds: 1 } };
+    expect(normalizeDates(already, ts).startDate).toBe(already.startDate);
+    expect(() => normalizeDates({ startDate: 'soon' }, ts)).toThrow(/Unreadable startDate/);
   });
 });
