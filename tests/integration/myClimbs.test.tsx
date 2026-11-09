@@ -10,6 +10,7 @@ vi.mock('../../src/frontend/services/registrations', () => ({
   myRegistrations: async () => svc.rows,
   cancelRegistration: async (id: string, reason: string) => { svc.cancelled.push([id, reason]); },
   updateMyDetails: async (id: string, x: unknown) => { svc.details.push([id, x]); },
+  setMyPledge: async (id: string, p: unknown) => { svc.details.push(['pledge', id, p]); },
 }));
 vi.mock('../../src/frontend/services/feedback', () => ({
   myRating: async () => null,
@@ -22,7 +23,7 @@ vi.mock('../../src/frontend/services/uploads', () => ({
 vi.mock('../../src/frontend/services/publicData', () => ({
   publicReadsEnabled: true,
   climbLoader: async (id: string) => ({ id, title: id, status: 'open', startDate: new Date(Date.now() + (id === 'past' ? -864e6 : 864e6)),
-    gcashName: 'MMS Treasury', gcashNumber: '0917 000 0000', requiresMedicalCert: id === 'soon' }),
+    gcashName: 'MMS Treasury', gcashNumber: '0917 000 0000', requiresMedicalCert: id === 'soon', donationDrive: { enabled: id === 'soon', beneficiary: 'Sitio School', suggestedItems: 'Notebooks' } }),
   climbsLoader: () => async () => null, announcementsLoader: () => async () => null, loadSettings: async () => null,
   loadSurveys: async () => null, loadOfficers: async () => null, loadCurrentOfficers: async () => null,
 }));
@@ -99,5 +100,15 @@ describe('My Climbs (switch on)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Send rating' }));
     expect(await screen.findByText('You rated this climb 4 / 5. Thank you!')).toBeInTheDocument();
     expect(svc.details).toEqual([['rating', { climbId: 'past', climbTitle: 'Mt. Apo', uid: 'u1', name: 'Ana Cruz', rating: 4, comments: 'Great trail' }]]);
+  });
+
+  it('pledges a donation to the climb’s drive', async () => {
+    renderAt('/account/climbs');
+    fireEvent.click(await screen.findByRole('button', { name: 'Pledge a donation' }, { timeout: 5000 }));
+    expect(screen.getByText('Needed: Notebooks')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Cash (₱, optional)'), { target: { value: '300' } });
+    fireEvent.change(screen.getByLabelText('Items I’ll bring (optional)'), { target: { value: '5 notebooks' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save pledge' }));
+    await vi.waitFor(() => expect(svc.details).toEqual([['pledge', 'r1', { cashPledge: 300, inKind: '5 notebooks', payWithFees: true }]]));
   });
 });
