@@ -34,4 +34,6 @@ No gateway ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)): participants transfer t
 
 WebP + image budget · cache headers (`public/_headers`) · no SMS login · albums on Drive, not in repo.
 
+**Public Firestore reads** (item 22): billed per document returned, free 50k/day (first database only, `openclimbs`). Each page reads only what it shows, once per page load: home ≈ 4 (settings + 3 announcements), news ≤ 31, surveys ≤ 51, Our story ≤ 51, Leadership ≤ 301 (every officer term). An empty query or missing doc still counts 1. ≈ 160+ full Leadership loads or 12,000 home loads a day before any charge (then ≈ US$0.03 per 100k reads, under the US$1.70 hard stop).
+
 Sources: [Firebase](https://firebase.google.com/pricing) · [Cloudflare Pages limits](https://developers.cloudflare.com/pages/platform/limits/) · [PayMongo](https://www.paymongo.com/pricing) · [Namecheap .org](https://www.namecheap.com/domains/registration/gtld/org/) · [Workspace for Nonprofits](https://support.google.com/nonprofits/answer/2858465).

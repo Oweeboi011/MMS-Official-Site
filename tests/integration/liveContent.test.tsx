@@ -7,9 +7,10 @@ const live = vi.hoisted(() => ({ settings: null as Record<string, unknown> | nul
 vi.mock('../../src/frontend/services/publicData', () => ({
   publicReadsEnabled: true,
   loadSettings: async () => live.settings,
-  loadAnnouncements: async () => live.announcements,
+  announcementsLoader: () => async () => live.announcements,
   loadSurveys: async () => null,
   loadOfficers: async () => [{ body: 'execom', role: 'President', name: 'Live President', current: true, order: 1 }],
+  loadCurrentOfficers: async () => [{ body: 'execom', role: 'President', name: 'Live President', current: true, order: 1 }],
 }));
 
 describe('pages read site content from Firestore', () => {
