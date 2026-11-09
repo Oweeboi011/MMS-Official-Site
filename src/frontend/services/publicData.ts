@@ -1,5 +1,6 @@
 // Public reads of site content (item 22): Firestore REST + API key, rules allow them signed out. Any failure → null → sample content.
 import { decodeFields, decodeQuery, runQueryBody, type Doc, type Filter, type QueryOptions } from '../lib/firestoreRest';
+import { asset } from '../lib/asset';
 import { manilaYearStart } from '../lib/manila';
 
 import { DATABASE_ID, FIRESTORE_EMULATOR, firebaseConfig, firebaseConfigured, useEmulators } from './firebaseEnv';
@@ -31,9 +32,9 @@ async function request(path: string, init?: RequestInit): Promise<unknown> {
 const cache = new Map<string, Promise<unknown>>();
 function once<T>(id: string, load: () => Promise<T | null>): Promise<T | null | undefined> {
   if (!cache.has(id)) {
-    cache.set(id, load().catch(() => {
+    cache.set(id, load().catch(async () => {
       cache.delete(id);
-      return undefined;
+      return (await fromSnapshot(id)) as T | null | undefined; // R5c: last good deploy-time copy, else undefined
     }));
   }
   return cache.get(id) as Promise<T | null | undefined>;
@@ -81,3 +82,39 @@ export const loadSettings = () =>
     const doc = (await request('/siteSettings/site')) as { fields?: Parameters<typeof decodeFields>[0] } | null;
     return doc?.fields ? decodeFields(doc.fields) : null;
   });
+
+// R5c static fallback: dist/snapshot.json is written at deploy (scripts/snapshot.mjs) with the same reads, raw REST JSON.
+type Rows = Parameters<typeof decodeQuery>[0];
+interface Snapshot { announcements?: Rows; surveys?: Rows; officers?: Rows; climbs?: Rows; settings?: { fields?: Parameters<typeof decodeFields>[0] } | null }
+let snapshot: Promise<Snapshot | null> | null = null;
+const loadSnapshot = () => (snapshot ??= fetch(asset('/snapshot.json')).then((r) => (r.ok ? (r.json() as Promise<Snapshot>) : null), () => null));
+
+const startMs = (d: Doc) => (d.startDate instanceof Date ? d.startDate.getTime() : 0);
+
+const rowsOf = (r?: Rows) => (Array.isArray(r) ? decodeQuery(r) : undefined);
+
+function climbsIn(s: Snapshot, year: number, onlyThatYear: boolean) {
+  const from = manilaYearStart(year).getTime();
+  const to = onlyThatYear ? manilaYearStart(year + 1).getTime() : Infinity;
+  return rowsOf(s.climbs)?.filter((c) => startMs(c) >= from && startMs(c) < to);
+}
+
+// Cache id (see the loaders above) → the same answer from the snapshot.
+const fromSnap: Record<string, (s: Snapshot, a: string, b: string) => Doc[] | Doc | null | undefined> = {
+  announcements: (s, a) => rowsOf(s.announcements)?.slice(0, Number(a) || 30),
+  surveys: (s) => rowsOf(s.surveys),
+  officers: (s, a) => (a === 'current' ? rowsOf(s.officers)?.filter((o) => o.current === true) : rowsOf(s.officers)),
+  settings: (s) => (s.settings?.fields ? decodeFields(s.settings.fields) : null),
+  climb: (s, a) => rowsOf(s.climbs)?.find((c) => c.id === a) ?? null,
+  climbs: (s, a, b) => climbsIn(s, Number(a), b === 'true'),
+};
+
+export function snapshotFor(id: string, s: Snapshot): Doc[] | Doc | null | undefined {
+  const [kind, a = '', b = ''] = id.split(':');
+  return fromSnap[kind]?.(s, a, b);
+}
+
+async function fromSnapshot(id: string) {
+  const s = await loadSnapshot();
+  return s ? snapshotFor(id, s) : undefined;
+}

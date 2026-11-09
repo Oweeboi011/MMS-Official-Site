@@ -66,3 +66,5 @@ SPA routing: Pages serves `index.html` for unknown paths; `public/{assets,images
 | Admin | everything, assign roles |
 
 Enforced in Firestore/Storage rules, never only UI. Today the ported rules know only admin + account; climb-officer scoping comes in Phase 6 ([open item 31](../solution-plan/SOLUTION-PLAN.md#open-items)). More: [SECURITY](SECURITY.md).
+
+**Static fallback (R5c):** `npm run deploy:*` writes `dist/snapshot.json` after the build (`scripts/snapshot.mjs`: the same public reads, raw REST JSON). If a live read fails (Firestore down, billing hard stop), `services/publicData.ts` answers from that last good snapshot instead of showing nothing.
