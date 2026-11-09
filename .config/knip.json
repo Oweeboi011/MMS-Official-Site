@@ -4,6 +4,7 @@
     ".": {
       "entry": [
         "tools/*.mjs",
+        "tools/admin/*.mjs",
         "scripts/*.mjs",
         "tests/**/*.{ts,tsx,mjs,js}"
       ],

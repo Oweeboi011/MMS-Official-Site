@@ -40,6 +40,7 @@ function create(collection: string, fields: Record<string, Value>, serverTimeFie
 }
 
 export function logPageView(path: string) {
+  if (/^\/(admin|account)(\/|$)/.test(path)) return; // signed-in pages: not anonymous traffic
   const climbId = /^\/climbs\/([\w-]+)/.exec(path)?.[1];
   create('pageViews', { path: s(path.slice(0, 300)), climbId: climbId ? s(climbId) : { nullValue: null }, userId: { nullValue: null }, userRole: s('guest'), sessionId: s(sessionId()) }, 'timestamp');
 }
