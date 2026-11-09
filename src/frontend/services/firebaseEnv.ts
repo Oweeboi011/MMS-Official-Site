@@ -9,6 +9,8 @@ export const firebaseConfig = {
 };
 
 export const firebaseConfigured = Boolean(firebaseConfig.apiKey && firebaseConfig.projectId);
+// reCAPTCHA Enterprise site key (public) for App Check; blank = App Check off.
+export const appCheckSiteKey: string = env.VITE_APP_CHECK_SITE_KEY ?? '';
 export const DATABASE_ID = 'openclimbs';
 // Local CRUD testing against `firebase emulators:start`; dev server only, so a leftover flag can't ship.
 export const useEmulators = Boolean(env.DEV && env.VITE_USE_EMULATORS === 'true');

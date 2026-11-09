@@ -42,7 +42,7 @@ flowchart LR
 
 ## Sign-in + admin (local)
 
-1. `cp .env.example .env.local`, fill `VITE_FIREBASE_API_KEY` from `cd src/backend && npx firebase-tools@15 apps:sdkconfig WEB` (keep `# gitleaks:allow` on that line).
+1. `cp .env.example .env.local`, fill `VITE_FIREBASE_API_KEY` from `cd src/backend && npx firebase-tools@15 apps:sdkconfig WEB` (keep `# gitleaks:allow` on that line). Optional `VITE_APP_CHECK_SITE_KEY` (public; [DEPLOYMENT](DEPLOYMENT.md#firebase-web-key--app-check), same `# gitleaks:allow`). Only `localhost:5173` / `4173` are allowed referrers for the web key.
 2. Safe testing: `VITE_USE_EMULATORS=true` + `cd src/backend && npx firebase-tools@15 emulators:start --only auth,firestore` (Java). Prod: `false`.
 3. `npm run dev` → `/account/sign-in`. First sign-in creates `users/{uid}` as `member`.
 4. Make an admin: Firebase console → Firestore (`openclimbs`) → `users/{uid}` → `role` = `admin` (rules block self-promotion). Then `/admin`.

@@ -27,7 +27,7 @@ flowchart LR
 | Functions | Cloud Functions v2, Node 22, ESM, `asia-southeast1` | `src/backend/functions` → Firebase `mms-official-site-513809` (Blaze + hard stop) |
 | Database | Firestore named DB `openclimbs`, `asia-southeast1` | rules + indexes `src/backend/firebase` |
 | Files | Cloud Storage default bucket `mms-official-site-513809.firebasestorage.app`, `us-east1` (no-cost location) | rules `src/backend/firebase/storage.rules` |
-| Accounts | Firebase Auth: email/password + Google; authorized domain `www.metropolitanms.org` | console |
+| Accounts | Firebase Auth: email/password + Google; authorized domains www + preview; web key referrer-restricted; App Check (reCAPTCHA Enterprise, monitor mode) | console |
 | DNS, CDN, TLS | Cloudflare (MMS account) | root → `www` 301 |
 
 ## Frontend layers
