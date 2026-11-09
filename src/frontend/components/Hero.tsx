@@ -8,7 +8,7 @@ export default function Hero() {
 
       <div className="shell hero-content">
         <div className="eyebrow">Metropolitan Mountaineering Society</div>
-        <h1>Looking for<br />a new hobby?</h1>
+        <h1>Your first<br />summit starts here.</h1>
         <p className="hero-copy">
           Join our hikes. MMS open climbs welcome first-timers and seasoned hikers alike: train with us, climb
           safely, and find your trail family.

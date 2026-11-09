@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { announcements } from '../data/content';
+import { useAnnouncements } from '../services/useSiteData';
 
 interface Props {
   // Show only the latest N (home page preview); omit for the full list.
@@ -7,7 +7,7 @@ interface Props {
 }
 
 export default function Announcements({ limit }: Props) {
-  const items = limit ? announcements.slice(0, limit) : announcements;
+  const items = useAnnouncements(limit);
   return (
     <section className="section" id="announcements">
       <div className="shell">
@@ -17,7 +17,7 @@ export default function Announcements({ limit }: Props) {
         </div>
         <div className="news-grid">
           {items.map((a) => (
-            <article className="news-card" key={a.title}>
+            <article className="news-card" key={a.date + a.title}>
               <div className="news-meta"><span className={`news-tag tag-${a.category.toLowerCase()}`}>{a.category}</span><time>{a.date}</time></div>
               <h3>{a.title}</h3>
               <p>{a.summary}</p>

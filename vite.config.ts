@@ -24,6 +24,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './tests/setup.ts',
+    // No Firebase in tests even when .env.local configures it: pages render sample content, no network.
+    env: { VITE_FIREBASE_API_KEY: '', VITE_FIREBASE_PROJECT_ID: '' },
     include: ['tests/{unit,component,integration,parity}/**/*.test.{ts,tsx,js}'],
   },
 });

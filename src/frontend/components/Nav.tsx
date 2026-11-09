@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { asset } from '../lib/asset';
 import { sectionPath, sitemap } from '../data/sitemap';
-import { previewNotice } from '../data/content';
+import { useSiteSettings } from '../services/useSiteData';
 
 // Which top-nav item is current: the section under the viewport on the home page, else the subpage's section.
 function useActiveSection() {
@@ -28,6 +28,7 @@ function useActiveSection() {
 
 export default function Nav() {
   const active = useActiveSection();
+  const { previewNotice } = useSiteSettings();
   const { pathname } = useLocation();
   const [scrolled, setScrolled] = useState(false);
 

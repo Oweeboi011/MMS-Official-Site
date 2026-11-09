@@ -27,6 +27,7 @@
     "test:rules": "npx -y firebase-tools@15.35.0 emulators:exec --config src/backend/firebase.json --only firestore,storage --project demo-rules \"node tests/integration/rules.emulator.mjs\""
   },
   "dependencies": {
+    "firebase": "12.19.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.18.4"
@@ -46,7 +47,6 @@
     "eslint": "^10.13.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-sonarjs": "^4.2.2",
-    "firebase": "12.19.0",
     "globals": "^17.13.0",
     "jscpd": "^5.4.2",
     "jsdom": "^30.1.2",
@@ -61,6 +61,7 @@
     "wrangler": "4.158.0"
   },
   "overrides": {
-    "@grpc/grpc-js": "1.14.7"
+    "@grpc/grpc-js": "1.14.7",
+    "minimatch": "^11.0.1"
   }
 }

@@ -40,6 +40,14 @@ service cloud.firestore {
     function affected() {
       return request.resource.data.diff(resource.data).affectedKeys();
     }
+    // Absent counts as empty text; min counts non-blank characters.
+    function text(d, k, min, max) {
+      let v = d.get(k, '');
+      return v is string && v.trim().size() >= min && v.size() <= max;
+    }
+    function shortText(d, k, max) {
+      return text(d, k, 0, max);
+    }
 
     // A member may *declare* a payment — "I sent ₱500, here's the receipt" —
     // but never approve one. Verifying is the admin's call, and the
@@ -377,9 +385,17 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    function checkpointOk(d) {
+      return d.sourceCommit is string && d.sourceCommit.matches('^[0-9a-fA-F]{7,40}$') &&
+        text(d, 'sourceRepo', 1, 120);
+    }
     match /releaseNotes/{noteId} {
       allow read: if isSignedIn() && (resource.data.status == 'published' || isAdmin());
-      allow write: if isAdmin();
+      // A new or changed checkpoint needs its repo, or drafts can't tell this repo's commits from the old app's.
+      allow create: if isAdmin() && (!('sourceCommit' in request.resource.data) || checkpointOk(request.resource.data));
+      allow update: if isAdmin() && (!affected().hasAny(['sourceCommit', 'sourceRepo']) ||
+        !('sourceCommit' in request.resource.data) || checkpointOk(request.resource.data));
+      allow delete: if isAdmin();
     }
 
     // Email send jobs: queued by the sendReleaseNoteEmail callable, worked by
@@ -442,6 +458,182 @@ service cloud.firestore {
         feedbackTextIsBounded(request.resource.data);
       allow read: if isAdmin() || isOwner(resource.data.userId);
       allow update, delete: if false;
+    }
+
+    // ── Site content (open item 22): public read, admin write ──────────────
+    // Absent is fine; present must match.
+    function link(d, k, pattern) {
+      return !(k in d) || (d[k] is string && d[k].size() <= 500 && d[k].matches(pattern));
+    }
+    // https link or a flat site image (no '..'): /images/<name>.<ext>.
+    function siteLink(d, k) {
+      return link(d, k, '^(https://.*|/images/[A-Za-z0-9_-]+[.](webp|jpg|jpeg|png|svg))$');
+    }
+    function hasFields(d, required, optional) {
+      return d.keys().hasAll(required) && d.keys().hasOnly(required.concat(optional));
+    }
+    // Admin-edited site docs: fixed keys plus an optional updatedAt timestamp.
+    function siteDoc(d, required, optional) {
+      return hasFields(d, required, optional.concat(['updatedAt'])) &&
+        (!('updatedAt' in d) || d.updatedAt is timestamp);
+    }
+    // Rules can't check list items. Until the services layer exists (item 21) nothing does: it must validate before render.
+    function shortList(d, k) {
+      return !(k in d) || (d[k] is list && d[k].size() <= 20);
+    }
+    function socialsOk(d) {
+      return !('socials' in d) || (d.socials is map &&
+        d.socials.keys().hasOnly(['facebook', 'instagram', 'youtube', 'tiktok']) &&
+        link(d.socials, 'facebook', '^https://.*') && link(d.socials, 'instagram', '^https://.*') &&
+        link(d.socials, 'youtube', '^https://.*') && link(d.socials, 'tiktok', '^https://.*'));
+    }
+
+    match /announcements/{id} {
+      // Drafts stay hidden until published.
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update: if isAdmin() &&
+        siteDoc(request.resource.data, ['title', 'summary', 'category', 'publishedAt', 'published'], []) &&
+        request.resource.data.category in ['Climbs', 'Training', 'Outreach', 'Club', 'SART'] &&
+        request.resource.data.published is bool &&
+        request.resource.data.publishedAt is timestamp &&
+        text(request.resource.data, 'title', 1, 200) &&
+        text(request.resource.data, 'summary', 1, 2000);
+      allow delete: if isAdmin();
+    }
+
+    // Leadership page: current Execom, TComm, BOT, plus past officers by term (current == false).
+    match /officers/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin() &&
+        siteDoc(request.resource.data, ['body', 'role', 'name', 'order', 'current'], ['term']) &&
+        request.resource.data.body in ['execom', 'tcomm', 'bot'] &&
+        request.resource.data.current is bool &&
+        (request.resource.data.current || text(request.resource.data, 'term', 1, 40)) &&
+        request.resource.data.order is int &&
+        text(request.resource.data, 'role', 1, 120) &&
+        text(request.resource.data, 'name', 1, 120) &&
+        shortText(request.resource.data, 'term', 40);
+      allow delete: if isAdmin();
+    }
+
+    // Committees page: one doc per committee with its head.
+    match /committees/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin() &&
+        siteDoc(request.resource.data, ['tag', 'title', 'headTitle', 'headName', 'description', 'order'], []) &&
+        request.resource.data.order is int &&
+        text(request.resource.data, 'tag', 1, 40) &&
+        text(request.resource.data, 'title', 1, 120) &&
+        text(request.resource.data, 'headTitle', 1, 40) &&
+        shortText(request.resource.data, 'headName', 120) &&
+        shortText(request.resource.data, 'description', 1000);
+      allow delete: if isAdmin();
+    }
+
+    match /surveys/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin() &&
+        siteDoc(request.resource.data, ['title', 'description', 'audience', 'status', 'formUrl'], ['closes']) &&
+        request.resource.data.audience in ['Members', 'Guests', 'Everyone'] &&
+        request.resource.data.status in ['Open', 'Closed'] &&
+        request.resource.data.formUrl is string &&
+        request.resource.data.formUrl.matches('^(https://.*|#)$') &&
+        request.resource.data.formUrl.size() <= 500 &&
+        text(request.resource.data, 'title', 1, 200) &&
+        shortText(request.resource.data, 'description', 2000) &&
+        shortText(request.resource.data, 'closes', 40);
+      allow delete: if isAdmin();
+    }
+
+    // ── Site data, open item 24 ─────────────────────────────────────────────
+    // Membership / climb inquiries (L2): anyone may send one (with privacy consent); only admins read.
+    // Spam: App Check on the client (open item 21); rules alone can't rate-limit.
+    match /inquiries/{id} {
+      allow create: if hasFields(request.resource.data, ['name', 'email', 'interest', 'message', 'consent', 'createdAt'], ['phone']) &&
+        request.resource.data.interest in ['membership', 'climb', 'other'] &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.email is string && request.resource.data.email.size() <= 200 &&
+        request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$') &&
+        request.resource.data.consent == true &&
+        text(request.resource.data, 'name', 1, 120) &&
+        shortText(request.resource.data, 'phone', 40) &&
+        text(request.resource.data, 'message', 1, 2000);
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Approved climb reviews (L6): admin publishes a quote from feedback/, with the member's consent.
+    match /reviews/{id} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update: if isAdmin() &&
+        siteDoc(request.resource.data, ['climbTitle', 'name', 'rating', 'quote', 'published', 'publishedAt'], ['climbId', 'feedbackId']) &&
+        request.resource.data.rating is int &&
+        request.resource.data.rating >= 1 && request.resource.data.rating <= 5 &&
+        request.resource.data.published is bool &&
+        request.resource.data.publishedAt is timestamp &&
+        text(request.resource.data, 'climbTitle', 1, 200) &&
+        text(request.resource.data, 'name', 1, 120) &&
+        text(request.resource.data, 'quote', 1, 1000);
+      allow delete: if isAdmin();
+    }
+
+    match /faqs/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin() &&
+        siteDoc(request.resource.data, ['q', 'a', 'order'], []) &&
+        request.resource.data.order is int &&
+        text(request.resource.data, 'q', 1, 300) &&
+        text(request.resource.data, 'a', 1, 2000);
+      allow delete: if isAdmin();
+    }
+
+    match /glossary/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin() &&
+        siteDoc(request.resource.data, ['term', 'name', 'about'], []) &&
+        text(request.resource.data, 'term', 1, 20) &&
+        text(request.resource.data, 'name', 1, 120) &&
+        text(request.resource.data, 'about', 1, 1000);
+      allow delete: if isAdmin();
+    }
+
+    // Videos, gallery photos, album links: links only, never Drive files as media (SOLUTION-PLAN media).
+    match /media/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin() &&
+        siteDoc(request.resource.data, ['kind', 'title', 'url', 'order'], ['place', 'poster', 'credit']) &&
+        request.resource.data.kind in ['video', 'photo', 'album'] &&
+        request.resource.data.order is int &&
+        siteLink(request.resource.data, 'url') &&
+        siteLink(request.resource.data, 'poster') &&
+        text(request.resource.data, 'title', 1, 200) &&
+        shortText(request.resource.data, 'place', 200) &&
+        shortText(request.resource.data, 'credit', 300);
+      allow delete: if isAdmin();
+    }
+
+    // One doc per concern (e.g. siteSettings/site): contact, socials, notices.
+    match /siteSettings/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin() && id == 'site' &&
+        siteDoc(request.resource.data, [], ['previewNotice', 'motto', 'membershipEmail', 'contactName', 'contactPhone',
+          'photoAlbumsUrl', 'socials', 'tickerItems', 'heroMeta', 'journey', 'joinSteps', 'stats']) &&
+        shortText(request.resource.data, 'previewNotice', 300) &&
+        shortText(request.resource.data, 'motto', 200) &&
+        shortText(request.resource.data, 'membershipEmail', 200) &&
+        shortText(request.resource.data, 'contactName', 120) &&
+        shortText(request.resource.data, 'contactPhone', 40) &&
+        link(request.resource.data, 'photoAlbumsUrl', '^(https://.*)?$') &&
+        socialsOk(request.resource.data) &&
+        shortList(request.resource.data, 'tickerItems') && shortList(request.resource.data, 'heroMeta') &&
+        shortList(request.resource.data, 'journey') && shortList(request.resource.data, 'joinSteps') &&
+        shortList(request.resource.data, 'stats');
+      allow delete: if isAdmin();
+    }
+
+    // Written only by refreshSiteStats (Admin SDK).
+    match /siteStats/{id} {
+      allow read: if true;
+      allow write: if false;
     }
 
     match /notifications/{notifId} {

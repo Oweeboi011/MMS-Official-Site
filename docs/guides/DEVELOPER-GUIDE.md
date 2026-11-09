@@ -13,7 +13,9 @@ Setup: [GETTING-STARTED](../GETTING-STARTED.md). Claude Code rules: `.claude/CLA
 | `npm run build && npm run test:perf` | build + bundle budget |
 | `npm run test:parity` | live site serves local `dist/` |
 | `npm run check:audit` | high+ vulnerabilities (site + backend) |
+| `npm run test:rules` | Firestore + Storage rules on emulators (needs Java) |
 | `npm run deploy:preview` / `deploy:prod` | [DEPLOYMENT](DEPLOYMENT.md) |
+| `cd src/backend && npx firebase-tools@15 deploy --only …` | backend ([DEPLOYMENT](DEPLOYMENT.md#backend-firebase)) |
 
 ## Workflow
 
@@ -36,6 +38,23 @@ flowchart LR
 - New subpage: add to `sitemap.ts`, then its blocks to `subpages.ts`.
 - Photos: add to `data/images.json` → `node tools/fetch-images.mjs`. Albums: Drive links ([media](../solution-plan/SOLUTION-PLAN.md#media)).
 - Real data only from MMS. All confirmed → `previewNotice = ''`.
+- UI changed → `node tools/screenshots.mjs` (live site; pass a URL for preview/local) to refresh `docs/images/screenshots` used by README + USER-GUIDE.
+
+## Sign-in + admin (local)
+
+1. `cp .env.example .env.local`, fill `VITE_FIREBASE_API_KEY` from `cd src/backend && npx firebase-tools@15 apps:sdkconfig WEB` (keep `# gitleaks:allow` on that line). Optional `VITE_APP_CHECK_SITE_KEY` (public; [DEPLOYMENT](DEPLOYMENT.md#firebase-web-key--app-check), same `# gitleaks:allow`). Only `localhost:5173` / `4173` are allowed referrers for the web key.
+2. Safe testing: `VITE_USE_EMULATORS=true` + `cd src/backend && npx firebase-tools@15 emulators:start --only auth,firestore` (Java). Prod: `false`.
+3. `npm run dev` → `/account/sign-in`. First sign-in creates `users/{uid}` as `member`.
+4. Make an admin: Firebase console → Firestore (`openclimbs`) → `users/{uid}` → `role` = `admin` (rules block self-promotion). Then `/admin`.
+
+Firebase code lives only in `src/frontend/services/` and loads on `/account/*` + `/admin` only (bundle budget: `initialJs` vs `lazyJs`).
+
+## Backend changes
+
+- Functions: `src/backend/functions/src` (ESM). Tests: `tests/unit/functions` (vitest, node env, mocked Firebase). Root `npm run check` covers them.
+- Rules: `src/backend/firebase/*.rules` → `npm run test:rules` locally, or let Quality Gates run **Security Rules Tests**.
+- New dependency: `npm i --prefix src/backend/functions -E <pkg>`.
+- Deploy after merge ([DEPLOYMENT](DEPLOYMENT.md#backend-firebase)). Emails stay off until the switch (`EMAILS_ENABLED`).
 
 ## Code style
 

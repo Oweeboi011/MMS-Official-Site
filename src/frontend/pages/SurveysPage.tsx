@@ -1,6 +1,7 @@
 import PageHero from '../components/PageHero';
-import { surveys, type Survey } from '../data/content';
+import type { Survey } from '../data/content';
 import { surveyState } from '../lib/survey';
+import { useSurveys } from '../services/useSiteData';
 
 const label = (s: Survey, state: string) => {
   if (state === 'closed') return 'Closed';
@@ -8,6 +9,7 @@ const label = (s: Survey, state: string) => {
 };
 
 export default function SurveysPage() {
+  const surveys = useSurveys();
   return (
     <>
       <PageHero

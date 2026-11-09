@@ -6,8 +6,9 @@ What we pay and who owns it. Hard cap **₱54–₱100/month** ([ADR 0001](../ad
 |---------|--------------------|------------|
 | Hosting, CDN, TLS, DNS | Cloudflare free (MMS) | ₱0 |
 | Auth, DB, functions, storage | Firebase Blaze `mms-official-site-513809` | ≈ ₱0 (free quota) |
+| App Check (reCAPTCHA Enterprise / Fraud Defense) | same project | ₱0 up to 10k checks/month; next tier US$8 would trip the hard stop (sign-in/admin only, token 1 day) |
 | Domain `metropolitanms.org` | Namecheap (MMS; push pending) | ₱92 (US$18.98/yr); Cloudflare Registrar ₱54 later |
-| Payments | PayMongo (planned) | per payment only |
+| Payments | GCash / QR Ph transfer to MMS account, receipt upload ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)) | ₱0 |
 | Albums | MMS Google Drive | ₱0 |
 | Officer email | Workspace for Nonprofits | ₱0 if approved |
 | Code + CI/CD | GitHub, public repo | ₱0 |
@@ -25,12 +26,14 @@ flowchart LR
 - Budget scoped to the project. Native GCP spend caps cover only some services; the function is the real stop.
 - Alerts alone don't stop spend. Treasurer checks the bill monthly.
 
-## Per-payment fees (PayMongo, +12% VAT on fee)
+## Payments
 
-On ₱3,000: QR Ph 1.34% **₱45** · online banking 0.71%/₱13.39 ₱24 · Maya 1.79% ₱60 · GCash 2.23% ₱75 · card 3.125% + ₱13.39 ₱120 · manual receipt ₱0. Payouts → MMS bank account.
+No gateway ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)): participants transfer to the MMS account by QR, upload the receipt, officers verify. ₱0 to MMS; any transfer fee is the sender's bank/wallet fee. PayMongo (ADR 0002, superseded) would have cost 1.34% + VAT per QR Ph payment (≈ ₱45 on ₱3,000).
 
 ## Stay in free quota
 
 WebP + image budget · cache headers (`public/_headers`) · no SMS login · albums on Drive, not in repo.
+
+**Public Firestore reads** (item 22): billed per document returned, free 50k/day (first database only, `openclimbs`). Each page reads only what it shows, once per page load: home ≈ 4 (settings + 3 announcements), news ≤ 31, surveys ≤ 51, Our story ≤ 51, Leadership ≤ 301 (every officer term). An empty query or missing doc still counts 1. ≈ 160+ full Leadership loads or 12,000 home loads a day before any charge (then ≈ US$0.03 per 100k reads, under the US$1.70 hard stop).
 
 Sources: [Firebase](https://firebase.google.com/pricing) · [Cloudflare Pages limits](https://developers.cloudflare.com/pages/platform/limits/) · [PayMongo](https://www.paymongo.com/pricing) · [Namecheap .org](https://www.namecheap.com/domains/registration/gtld/org/) · [Workspace for Nonprofits](https://support.google.com/nonprofits/answer/2858465).
