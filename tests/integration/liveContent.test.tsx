@@ -3,12 +3,13 @@ import { renderAt } from '../helpers';
 import { previewNotice } from '../../src/frontend/data/content';
 
 // Firestore answers are injected; the REST client itself is covered in unit/liveContent.
-const live = vi.hoisted(() => ({ settings: null as Record<string, unknown> | null, announcements: null as Record<string, unknown>[] | null, climbs: null as Record<string, unknown>[] | null }));
+const live = vi.hoisted(() => ({ settings: null as Record<string, unknown> | null, announcements: null as Record<string, unknown>[] | null, climbs: null as Record<string, unknown>[] | null, climb: null as Record<string, unknown> | null }));
 vi.mock('../../src/frontend/services/publicData', () => ({
   publicReadsEnabled: true,
   loadSettings: async () => live.settings,
   announcementsLoader: () => async () => live.announcements,
   climbsLoader: () => async () => live.climbs,
+  climbLoader: async () => live.climb,
   loadSurveys: async () => null,
   loadOfficers: async () => [{ body: 'execom', role: 'President', name: 'Live President', current: true, order: 1 }],
   loadCurrentOfficers: async () => [{ body: 'execom', role: 'President', name: 'Live President', current: true, order: 1 }],
@@ -19,6 +20,7 @@ describe('pages read site content from Firestore', () => {
     live.settings = null;
     live.announcements = null;
     live.climbs = null;
+    live.climb = null;
   });
 
   it('keeps sample content while Firestore has nothing', async () => {
@@ -75,6 +77,37 @@ describe('pages read site content from Firestore', () => {
       renderAt(`/activities/open-climbs?year=${year - 1}`);
       expect(await screen.findByText(`No climbs recorded for ${year - 1} yet.`)).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: `Climbs in ${year - 1}.` })).toBeInTheDocument();
+    });
+  });
+
+  describe('climb page', () => {
+    const soon = new Date(Date.now() + 10 * 86400_000);
+
+    it('shows the climb, its stats, packing list and share links', async () => {
+      live.climb = { id: 'pulag', title: 'Mt. Pulag', location: 'Benguet', type: 'major', status: 'open', startDate: soon, difficulty: '7/9', elevation: 2926, jumpOff: 'Ranger station', description: 'Sea of clouds.' };
+      renderAt('/climbs/pulag');
+      expect(await screen.findByRole('heading', { level: 1, name: 'Mt. Pulag' })).toBeInTheDocument();
+      expect(screen.getByText('2,926m')).toBeInTheDocument();
+      expect(screen.getByText('Ranger station')).toBeInTheDocument();
+      expect(screen.getByText('Sea of clouds.')).toBeInTheDocument();
+      expect(screen.getByText('Head lamp')).toBeInTheDocument();
+      const share = screen.getByRole('group', { name: 'Share this climb' });
+      expect(within(share).getByRole('link', { name: 'Facebook' }).getAttribute('href')).toContain(encodeURIComponent('/climbs/pulag'));
+      expect(within(share).getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /Ask to join this climb/ })).toBeInTheDocument();
+    });
+
+    it('explains a cancelled climb instead of hiding the shared link', async () => {
+      live.climb = { id: 'x', title: 'Mt. Gone', status: 'cancelled', startDate: soon };
+      renderAt('/climbs/x');
+      expect(await screen.findByText('This climb was cancelled.')).toBeInTheDocument();
+      expect(screen.queryByRole('group', { name: 'Share this climb' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: /Ask to join/ })).not.toBeInTheDocument();
+    });
+
+    it('says when a climb does not exist', async () => {
+      renderAt('/climbs/nope');
+      expect(await screen.findByRole('heading', { name: 'Climb not found' })).toBeInTheDocument();
     });
   });
 });

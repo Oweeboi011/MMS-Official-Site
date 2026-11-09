@@ -1,7 +1,7 @@
 // `climbs` docs (old Open Climbs shape) → schedule rows. Rules: docs/guides/CONTEXT.md#climbs.
 import type { Doc } from '../lib/firestoreRest';
 import { fromManilaDay, manilaDay, manilaYear } from '../lib/manila';
-import type { Difficulty, OpenClimb } from './content';
+import type { Difficulty, OpenClimb, Stat } from './content';
 
 export interface ScheduleClimb extends OpenClimb {
   id?: string;
@@ -45,8 +45,9 @@ function datesOf(d: Doc, start: Date | undefined, end: Date | undefined) {
   return { day: manilaDay(start).slice(8), month: monthFmt.format(start), dates: str(d.dateLabel) || dateRange(start, end) };
 }
 
-export function toClimb(d: Doc, now: Date): ScheduleClimb | null {
-  if (!isPublic(d)) return null;
+export const toClimb = (d: Doc, now: Date): ScheduleClimb | null => (isPublic(d) ? mapClimb(d, now) : null);
+
+function mapClimb(d: Doc, now: Date): ScheduleClimb {
   const start = toDate(d.startDate);
   const end = toDate(d.endDate);
   const rating = str(d.difficulty);
@@ -73,5 +74,39 @@ export function splitSchedule(climbs: ScheduleClimb[], year: number) {
   return {
     upcoming: climbs.filter((c) => !c.over).sort((a, b) => time(a) - time(b)),
     completed: climbs.filter((c) => c.over && c.start && manilaYear(c.start) === year).sort((a, b) => time(b) - time(a)),
+  };
+}
+
+export interface ClimbDetail extends ScheduleClimb {
+  cancelled: boolean;
+  description: string;
+  stats: Stat[];
+  thingsToBring: string[]; // empty → default packing list
+}
+
+// Old app's packing list, used when a climb sets none.
+export const defaultPacking = [
+  'Day pack / overnight pack', 'Water, 2–3 litres per day', 'Snacks / trail food', 'Packed meals', 'Mess kit',
+  'Sunscreen / umbrella', 'Jacket (preferably rainproof)', 'Rain gear', 'Emergency blanket', 'Individual first aid kit',
+  'Personal toiletries', 'Head lamp', 'Camera / mobile phone', 'Plastic bag / trash bag',
+];
+
+const STAT_FIELDS: [string, string][] = [
+  ['difficulty', 'Difficulty'], ['trailClass', 'Trail class'], ['jumpOff', 'Jump-off'], ['distanceToSummit', 'Jump-off to peak'],
+  ['roundTripDistance', 'Round trip'], ['elevationGain', 'Elevation gain'], ['recommendedDays', 'Recommended'],
+];
+const text = (v: unknown) => (typeof v === 'number' ? String(v) : str(v));
+
+// One climb page (/climbs/:id). Drafts stay hidden; a cancelled climb still opens so shared links explain it.
+export function toClimbDetail(d: Doc, now: Date): ClimbDetail | null {
+  if (str(d.status) === 'draft') return null;
+  const climb = mapClimb(d, now);
+  const stats = STAT_FIELDS.map(([key, label]) => ({ value: text(d[key]), label })).filter((s) => s.value);
+  return {
+    ...climb,
+    cancelled: !isPublic(d),
+    description: str(d.description),
+    stats: climb.elevation ? [{ value: climb.elevation, label: 'Elevation' }, ...stats] : stats,
+    thingsToBring: Array.isArray(d.thingsToBring) ? d.thingsToBring.filter((t): t is string => typeof t === 'string' && t !== '') : [],
   };
 }
