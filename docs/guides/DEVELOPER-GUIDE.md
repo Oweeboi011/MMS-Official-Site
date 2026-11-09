@@ -48,7 +48,7 @@ flowchart LR
 
 1. `cp .env.example .env.local`, fill `VITE_FIREBASE_API_KEY` from `cd src/backend && npx firebase-tools@15 apps:sdkconfig WEB` (keep `# gitleaks:allow` on that line). Optional `VITE_APP_CHECK_SITE_KEY` (public; [DEPLOYMENT](DEPLOYMENT.md#firebase-web-key--app-check), same `# gitleaks:allow`). Only `localhost:5173` / `4173` are allowed referrers for the web key.
 2. Safe testing: `VITE_USE_EMULATORS=true` + `cd src/backend && npx firebase-tools@15 emulators:start --only auth,firestore` (Java). Prod: `false`.
-3. Emulator data: `node tools/admin/seed-emulator.mjs` (sample admin + member sign-ins, 2 sample climbs; prints the password).
+3. Emulator data: `SEED_PASSWORD=<pick one> node tools/admin/seed-emulator.mjs` (sample admin + member sign-ins, 2 sample climbs).
 4. `npm run dev` → `/account/sign-in`. First sign-in creates `users/{uid}` as `member`.
 5. Make an admin (real project, owner, after `gcloud auth application-default login`): `node tools/admin/set-admin.mjs <uid|email>` (rules block self-promotion). Then `/admin`. Never commit uids.
 
