@@ -1,4 +1,4 @@
-import { describe as describeClimb, normalizeDates, planCopy, toImportRecord } from '../../tools/admin/copyPlan.mjs';
+import { describe as describeClimb, normalizeDates, planCopy, rewriteLinks, toImportRecord } from '../../tools/admin/copyPlan.mjs';
 
 const doc = (id: string, data: Record<string, unknown> = {}) => ({ id, data });
 
