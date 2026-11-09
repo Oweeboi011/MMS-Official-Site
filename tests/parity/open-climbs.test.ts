@@ -16,7 +16,7 @@ describe('Open Climbs parity: member', () => {
   // digital waiver (typed name) + printable signed waiver: tests/integration/waiverPrint.test.tsx
   // GCash pay now/later, instalments, receipt upload: tests/integration/myClimbs.test.tsx
   // required documents upload (after registering): tests/integration/myClimbs.test.tsx
-  it.todo('donation drive pledge');
+  // donation drive pledge: tests/unit/donations.test.ts, tests/integration/myClimbs.test.tsx
   it.todo('My Climbs: payment log, next steps (status, balance, self-cancel done: /account/climbs)');
   it.todo('rate a climb afterwards');
   it.todo('release notes page + one-time what-is-new popup');

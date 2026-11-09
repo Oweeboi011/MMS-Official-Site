@@ -1,5 +1,6 @@
 // Member side of `registrations` (rules: own docs only; create while the climb is open).
 import { addDoc, collection, doc, getDoc, getDocs, limit, query, serverTimestamp, updateDoc, where } from 'firebase/firestore/lite';
+import type { Pledge } from '../data/donations';
 import { newestFirst, toMyClimb, type Details, type MyClimb } from '../data/myClimbs';
 import { buildRegistrationDoc, type ClimbRef, type FeeItem, type RegistrationForm } from '../data/registration';
 import { firebase } from './firebase';
@@ -46,4 +47,10 @@ export async function updateMyDetails(id: string, x: Details): Promise<void> {
     emergencyContact: { name: x.ecName.trim(), mobile: x.ecMobile.trim(), relationship: x.ecRelationship.trim() },
     updatedAt: serverTimestamp(),
   });
+}
+
+// Rules: memberIsUpdatingOwnPledge (donation + updatedAt only; null clears it).
+export async function setMyPledge(id: string, pledge: Pledge | null): Promise<void> {
+  if (!writesEnabled) throw new Error(readOnlyMessage);
+  await updateDoc(doc(firebase().db, 'registrations', id), { donation: pledge, updatedAt: serverTimestamp() });
 }
