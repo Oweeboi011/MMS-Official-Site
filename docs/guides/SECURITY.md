@@ -15,7 +15,7 @@
 
 - Banned (eslint): `eval`, `new Function`, `innerHTML`, `dangerouslySetInnerHTML`. React escapes text by default.
 - `npm audit` high+ blocks Quality Gates (site + backend). Moderate: [open items](../solution-plan/SOLUTION-PLAN.md#open-items).
-- Headers (`public/_headers`): `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` (no camera/mic/location), `Content-Security-Policy-Report-Only` (violations show in the browser console; enforce after a clean run, open item 30). Uptime: `uptime.yml` every 6 h. Dependencies: Dependabot monthly.
+- Headers (`public/_headers`): `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` (no camera/mic/location), `Content-Security-Policy` (enforced 2026-11-09 after a clean report-only run on preview; violations go to the error log, admin Insights). Uptime: `uptime.yml` every 6 h. Dependencies: Dependabot monthly.
 - Access control in Firestore/Storage rules + functions, never only UI ([roles](ARCHITECTURE.md#roles-planned)). Rules live since 2026-11-08; emulator tests (`npm run test:rules`) required in Quality Gates.
 - Function secrets in Secret Manager; set from your own terminal at the prompt, never as a command argument (lands in shell history) or in chat. `GITHUB_TOKEN`: fine-grained, read-only, one repo, expiring.
 

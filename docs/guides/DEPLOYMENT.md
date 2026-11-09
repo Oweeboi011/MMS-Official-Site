@@ -17,7 +17,7 @@ npm run deploy:prod       # check → build → perf → production → prod par
 - No Cloudflare Git integration: deploys run from `scripts/deploy.mjs`, locally or via GitHub Actions ([branches](#branches--environments)).
 - Pages URL: `https://mms-official-site-1qd.pages.dev` (`-1qd` suffix: the plain name was taken).
 - No top-level `404.html` → Pages serves `index.html` for deep links (SPA). `public/{assets,images}/404.html` make missing files there a real 404, not cached HTML.
-- Headers/cache: `public/_headers` (security headers, CSP report-only, `/assets` 1 yr immutable, `/images` 1 week).
+- Headers/cache: `public/_headers` (security headers, CSP enforced, `/assets` 1 yr immutable, `/images` 1 week).
 - Guards (`scripts/deploy.mjs`): check → build → bundle budget → deploy → prod parity (`main`).
 - CI/CD per branch: [below](#branches--environments).
 - New account only: create the project once with `npx wrangler pages project create mms-official-site --production-branch main --force`. `--force` keeps it on classic Pages; without it wrangler delegates to Workers, rewrites `vite.config.ts`/`package.json`, adds `wrangler.jsonc`, and (4.151–4.157) crashes. Never pass `--force` again after. New `*.pages.dev` hostnames take a few minutes to get TLS.
