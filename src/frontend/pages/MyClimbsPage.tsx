@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import PageHero from '../components/PageHero';
 import SignInForm from '../components/SignInForm';
 import DocUploads from '../components/myclimbs/DocUploads';
+import EditDetails from '../components/myclimbs/EditDetails';
 import PayForm from '../components/myclimbs/PayForm';
+import VerifyEmailBanner from '../components/VerifyEmailBanner';
 import { canCancel, draftCancellationPolicy, type MyClimb } from '../data/myClimbs';
 import { registrationEnabled } from '../services/firebaseEnv';
 import { cancelRegistration, myRegistrations } from '../services/registrations';
@@ -70,6 +72,7 @@ function Card({ row, uid, onChange }: { row: MyClimb; uid: string; onChange: () 
       <Records row={row} />
       {live && climb && <DocUploads row={row} climb={climb} uid={uid} onDone={onChange} />}
       {live && climb && owes && <PayForm row={row} climb={climb} uid={uid} onDone={onChange} />}
+      {live && <EditDetails row={row} onDone={onChange} />}
       {climb && canCancel(row, climb.over) && <Cancel row={row} onDone={onChange} />}
     </li>
   );
@@ -92,7 +95,7 @@ function Body() {
   const state = useAccount();
   if (!registrationEnabled) return <p>My Climbs opens here together with climb registration. Until then, use the Open Climbs app you registered with.</p>;
   if (state.status === 'loading') return <p role="status">Checking your sign-in…</p>;
-  if (state.status === 'signedIn') return <List uid={state.account.uid} />;
+  if (state.status === 'signedIn') return <><VerifyEmailBanner account={state.account} /><List uid={state.account.uid} /></>;
   if (state.status === 'error') return <p role="alert">Couldn’t check your sign-in: {state.error}</p>;
   return <><p>Sign in to see your climbs.</p><SignInForm /></>;
 }

@@ -90,10 +90,16 @@ interface FormProps {
   onDelete: () => void;
 }
 
+function Todo({ items }: { items: string[] }) {
+  if (!items.length) return null;
+  return <div className="editor-todo" role="note"><strong>Before opening this climb:</strong><ul>{items.map((i) => <li key={i}>{i}</li>)}</ul></div>;
+}
+
 function EditorForm({ spec, values, locked, busy, canDelete, confirmDelete, onChange, onSave, onDelete }: FormProps) {
   const readOnly = Boolean(spec.readOnly);
   return (
     <form className="editor-form" onSubmit={(e) => { e.preventDefault(); onSave(); }}>
+      <Todo items={spec.todo?.(values) ?? []} />
       {spec.fields.map((f) => (
         <FieldInput key={f.key} field={f} value={values[f.key]} readOnly={readOnly} locked={locked.includes(f.key)}
           onChange={(v) => onChange({ ...values, [f.key]: v })} />

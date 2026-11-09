@@ -28,6 +28,7 @@ export interface CollectionSpec {
   singleton?: string; // fixed doc id (siteSettings/site)
   readOnly?: boolean; // admins read and delete only (inquiries)
   check?: (values: FormValues) => string | null; // cross-field rules
+  todo?: (values: FormValues) => string[]; // advisory checklist shown above the form (not blocking)
   orderBy?: { field: string; desc?: boolean }; // list order (default: unordered)
   rowLabel?: (doc: Doc) => string; // list label (default: titleField)
   rowLink?: (id: string) => { to: string; label: string }; // page for the selected row

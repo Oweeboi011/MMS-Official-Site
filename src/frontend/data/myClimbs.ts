@@ -18,7 +18,11 @@ export interface MyClimb {
   uploaded: string[]; // registration upload fields already holding a file
   receipts: { url: string; fileName: string }[]; // https only
   waiver: { name: string; signedAt: number; location: string } | null;
+  details: Details;
 }
+
+// The fields a member may change after registering (rules: memberIsUpdatingOwnDetails).
+export interface Details { mobile: string; ecName: string; ecMobile: string; ecRelationship: string; medicalConditions: string }
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
 const STATUS: Record<string, string> = {
@@ -40,6 +44,16 @@ function receiptsOf(v: unknown) {
     .map((p) => ({ url: str(p.url), fileName: str(p.fileName) || 'Receipt' }));
 }
 
+function detailsOf(d: Doc): Details {
+  const ec = (d.emergencyContact ?? {}) as Doc;
+  return { mobile: str(d.mobile), ecName: str(ec.name), ecMobile: str(ec.mobile), ecRelationship: str(ec.relationship), medicalConditions: str(d.medicalConditions) };
+}
+
+export function detailsProblem(x: Details): string | null {
+  if (!x.mobile.trim() || !x.ecName.trim() || !x.ecMobile.trim() || !x.ecRelationship.trim()) return 'Mobile and all emergency contact fields are required.';
+  return null;
+}
+
 export function toMyClimb(id: string, d: Doc): MyClimb {
   const status = str(d.status) || 'pending';
   const { total, tba } = feeTotal(lines(d.feeBreakdown));
@@ -49,6 +63,7 @@ export function toMyClimb(id: string, d: Doc): MyClimb {
     total, tba, paid: typeof d.amountPaid === 'number' ? d.amountPaid : 0, createdAt: millis(d.createdAt),
     uploaded: REQUIRED_DOCS.map((t) => t.uploadField).filter((f) => d[f] && typeof d[f] === 'object'),
     receipts: receiptsOf(d.paymentProofs),
+    details: detailsOf(d),
     waiver: d.waiverSigned === true ? { name: str(d.waiverSignedName), signedAt: millis(d.waiverSignedAt), location: str(d.climbLocation) } : null,
   };
 }
