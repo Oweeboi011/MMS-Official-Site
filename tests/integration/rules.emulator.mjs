@@ -60,6 +60,13 @@ console.log("Firestore: registration create");
 await seed();
 await ok("member creates unpaid registration", () => m1().collection("registrations").add(baseReg));
 await ok("member creates with one submitted payment", () => m1().collection("registrations").add({ ...baseReg, paymentStatus: "submitted", amountPaid: 800, payments: [newPay(800)] }));
+// Full doc the new site's form writes (src/frontend/data/registration.ts buildRegistrationDoc).
+await ok("site form registration", () => m1().collection("registrations").add({
+  ...baseReg, climbTitle: "Mt. X", climbDate: "Nov 20", climbLocation: "Benguet", mobile: "0917", dateOfBirth: "", address: "",
+  emergencyContact: { name: "B", mobile: "0918", relationship: "Sister" }, medicalConditions: "", experienceLevel: "beginner",
+  privacyConsentAt: FV.serverTimestamp(), privacyNoticeVersion: "2026-10-18", waiverSignedAt: FV.serverTimestamp(), paymentSubmittedAt: null,
+  feeBreakdown: [{ label: "Guide", amount: "1500", optional: false, selected: true }], createdAt: FV.serverTimestamp(),
+}));
 await no("reject status confirmed", () => m1().collection("registrations").add({ ...baseReg, status: "confirmed" }));
 await no("reject paymentStatus verified", () => m1().collection("registrations").add({ ...baseReg, paymentStatus: "verified" }));
 await no("reject someone else's email", () => m1().collection("registrations").add({ ...baseReg, email: "victim@x.com" }));
