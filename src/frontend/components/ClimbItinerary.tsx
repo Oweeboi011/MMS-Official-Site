@@ -1,4 +1,4 @@
-import type { ItineraryDay } from '../data/climbs';
+import type { ItineraryDay } from '../data/climbDetail';
 
 // #137: day-by-day plan. Public here: climb docs are world-readable, so the old app's sign-in gate hid nothing.
 export default function ClimbItinerary({ days }: { days: ItineraryDay[] }) {

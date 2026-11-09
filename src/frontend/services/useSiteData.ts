@@ -1,17 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { announcements, officers, openClimbs, surveys, type Announcement, type Officer, type Survey } from '../data/content';
 import {
   currentExecom, leadershipBlocks, leadershipPath, pendingSettings, sampleSettings, toAnnouncement, toSettings, toSurveys,
   type SiteSettings,
 } from '../data/liveContent';
-import { splitSchedule, toClimb, toClimbDetail, type ClimbDetail, type ScheduleClimb } from '../data/climbs';
+import { splitSchedule, toClimb, type ScheduleClimb } from '../data/climbs';
 import type { ContentBlock } from '../data/subpages';
 import type { Doc } from '../lib/firestoreRest';
 import { manilaYear } from '../lib/manila';
-import { announcementsLoader, climbLoader, climbsLoader, loadCurrentOfficers, loadOfficers, loadSettings, loadSurveys, publicReadsEnabled } from './publicData';
+import { announcementsLoader, climbsLoader, loadCurrentOfficers, loadOfficers, loadSettings, loadSurveys, publicReadsEnabled } from './publicData';
 
 // undefined = loading or failed (show nothing); null = nothing there (not configured, no doc). `load` must be module-level.
-function useLoaded<T>(load: (() => Promise<T | null | undefined>) | null): T | null | undefined {
+export function useLoaded<T>(load: (() => Promise<T | null | undefined>) | null): T | null | undefined {
   const [value, setValue] = useState<T | null | undefined>(load && publicReadsEnabled ? undefined : null);
   useEffect(() => {
     if (!load || !publicReadsEnabled) return undefined;
@@ -64,12 +64,4 @@ export function useClimbSchedule(year: number | null): ClimbSchedule {
   const climbs = (docs ?? []).flatMap((d) => toClimb(d, now) ?? []);
   const { upcoming, completed } = splitSchedule(climbs, year ?? thisYear);
   return { upcoming: year === null ? upcoming : [], completed, loading: false };
-}
-
-// undefined = loading or failed; null = no such public climb.
-export function useClimb(id: string): ClimbDetail | null | undefined {
-  const load = useMemo(() => () => climbLoader(id), [id]);
-  const doc = useLoaded(load);
-  if (doc === undefined) return undefined;
-  return doc ? toClimbDetail(doc, new Date()) : null;
 }

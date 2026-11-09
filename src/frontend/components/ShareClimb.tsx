@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { ClimbDetail } from '../data/climbs';
+import type { ClimbDetail } from '../data/climbDetail';
 import { asset } from '../lib/asset';
 import { storyImage } from '../lib/storyImage';
 

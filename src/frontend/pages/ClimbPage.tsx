@@ -6,9 +6,9 @@ import ContentBlocks from '../components/ContentBlocks';
 import PageHero from '../components/PageHero';
 import ShareClimb from '../components/ShareClimb';
 import TrailMaps from '../components/TrailMaps';
-import { defaultPacking, type ClimbDetail } from '../data/climbs';
+import { defaultPacking, type ClimbDetail } from '../data/climbDetail';
 import { leaveNoTrace, type ContentBlock } from '../data/subpages';
-import { useClimb } from '../services/useSiteData';
+import { useClimb } from '../services/useClimb';
 
 const SCHEDULE = '/activities/open-climbs';
 const HERO_IMAGE = '/images/page-open-climbs.webp';

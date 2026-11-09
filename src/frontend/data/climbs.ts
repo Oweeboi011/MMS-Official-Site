@@ -1,8 +1,7 @@
 // `climbs` docs (old Open Climbs shape) → schedule rows. Rules: docs/guides/CONTEXT.md#climbs.
 import type { Doc } from '../lib/firestoreRest';
 import { fromManilaDay, manilaDay, manilaYear } from '../lib/manila';
-import type { Coords } from '../lib/trailEmbeds';
-import type { Difficulty, OpenClimb, Stat } from './content';
+import type { Difficulty, OpenClimb } from './content';
 
 export interface ScheduleClimb extends OpenClimb {
   id?: string;
@@ -39,7 +38,7 @@ function dateRange(start: Date, end: Date | undefined): string {
 const elevationOf = (v: unknown) => (typeof v === 'number' ? `${v.toLocaleString('en-US')}m` : str(v) || undefined);
 
 // Drafts and cancelled climbs never reach the public schedule.
-const isPublic = (d: Doc) => !['draft', 'cancelled'].includes(str(d.status)) && str(d.cancellationStatus) !== 'cancelled';
+export const isPublic = (d: Doc) => !['draft', 'cancelled'].includes(str(d.status)) && str(d.cancellationStatus) !== 'cancelled';
 const isOver = (d: Doc, last: Date | undefined, now: Date) => str(d.status) === 'completed' || (!!last && manilaDay(last) < manilaDay(now));
 
 function datesOf(d: Doc, start: Date | undefined, end: Date | undefined) {
@@ -49,7 +48,7 @@ function datesOf(d: Doc, start: Date | undefined, end: Date | undefined) {
 
 export const toClimb = (d: Doc, now: Date): ScheduleClimb | null => (isPublic(d) ? mapClimb(d, now) : null);
 
-function mapClimb(d: Doc, now: Date): ScheduleClimb {
+export function mapClimb(d: Doc, now: Date): ScheduleClimb {
   const start = toDate(d.startDate);
   const end = toDate(d.endDate);
   const rating = str(d.difficulty);
@@ -77,96 +76,5 @@ export function splitSchedule(climbs: ScheduleClimb[], year: number) {
   return {
     upcoming: climbs.filter((c) => !c.over).sort((a, b) => time(a) - time(b)),
     completed: climbs.filter((c) => c.over && c.start && manilaYear(c.start) === year).sort((a, b) => time(b) - time(a)),
-  };
-}
-
-export interface ClimbDetail extends ScheduleClimb {
-  cancelled: boolean;
-  description: string;
-  stats: Stat[];
-  thingsToBring: string[]; // empty → default packing list
-  features: string;
-  waterNote: string;
-  trailMaps: TrailMap[];
-  photos: string[]; // https only
-  coords: Coords | null;
-  itinerary: ItineraryDay[];
-  fees: string[][]; // Fee, Amount, Who pays (table rows)
-  officers: { role: string; name: string }[];
-}
-
-export interface ItineraryDay { day: string; entries: { time: string; activity: string }[] }
-
-const peso = (amount: string) => (/^\d+(\.\d+)?$/.test(amount) ? `₱${Number(amount).toLocaleString('en-PH')}` : amount || 'TBA');
-
-// Guest fee: guests only, never members (old app feeSummary). Optional: only if availed.
-function feesOf(v: unknown): string[][] {
-  return (Array.isArray(v) ? v.map(record) : []).filter((f) => str(f.label)).map((f) => {
-    let who = str(f.note);
-    if (f.isGuestFee === true) who = 'Guests only';
-    else if (f.optional === true) who = ['Optional', str(f.note)].filter(Boolean).join(': ');
-    return [str(f.label), peso(text(f.amount)), who || 'Everyone'];
-  });
-}
-
-export interface TrailMap { label: string; googleMapsUrl: string; allTrailsUrl: string; komootUrl: string }
-
-const strings = (v: unknown) => (Array.isArray(v) ? v.filter((t): t is string => typeof t === 'string' && t !== '') : []);
-const record = (v: unknown) => (v && typeof v === 'object' ? (v as Doc) : {});
-
-// trailMaps[] (current) or the legacy single googleMapsUrl / allTrailsUrl / komootUrl fields.
-function trailMapsOf(d: Doc): TrailMap[] {
-  const raw = Array.isArray(d.trailMaps) && d.trailMaps.length ? d.trailMaps.map(record) : [d];
-  return raw
-    .map((t) => ({ label: str(t.label), googleMapsUrl: str(t.googleMapsUrl), allTrailsUrl: str(t.allTrailsUrl), komootUrl: str(t.komootUrl) }))
-    .filter((t) => t.googleMapsUrl || t.allTrailsUrl || t.komootUrl);
-}
-
-function itineraryOf(v: unknown): ItineraryDay[] {
-  if (!Array.isArray(v)) return [];
-  return v.map(record).map((day) => ({
-    day: str(day.day),
-    entries: (Array.isArray(day.entries) ? day.entries.map(record) : []).map((e) => ({ time: str(e.time), activity: str(e.activity) })).filter((e) => e.activity),
-  })).filter((day) => day.entries.length);
-}
-
-function coordsOf(d: Doc): Coords | null {
-  const lat = Number(d.mapLat);
-  const lng = Number(d.mapLng);
-  return d.mapLat && d.mapLng && Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
-}
-
-// Old app's packing list, used when a climb sets none.
-export const defaultPacking = [
-  'Day pack / overnight pack', 'Water, 2–3 litres per day', 'Snacks / trail food', 'Packed meals', 'Mess kit',
-  'Sunscreen / umbrella', 'Jacket (preferably rainproof)', 'Rain gear', 'Emergency blanket', 'Individual first aid kit',
-  'Personal toiletries', 'Head lamp', 'Camera / mobile phone', 'Plastic bag / trash bag',
-];
-
-const STAT_FIELDS: [string, string][] = [
-  ['difficulty', 'Difficulty'], ['trailClass', 'Trail class'], ['jumpOff', 'Jump-off'], ['jumpOffElevation', 'Jump-off elevation (m)'], ['distanceToSummit', 'Jump-off to peak'],
-  ['roundTripDistance', 'Round trip'], ['elevationGain', 'Elevation gain'], ['recommendedDays', 'Recommended'],
-];
-const text = (v: unknown) => (typeof v === 'number' ? String(v) : str(v));
-
-// One climb page (/climbs/:id). Drafts stay hidden; a cancelled climb still opens so shared links explain it.
-export function toClimbDetail(d: Doc, now: Date): ClimbDetail | null {
-  if (str(d.status) === 'draft') return null;
-  const climb = mapClimb(d, now);
-  const stats = STAT_FIELDS.map(([key, label]) => ({ value: text(d[key]), label })).filter((s) => s.value);
-  return {
-    ...climb,
-    cancelled: !isPublic(d),
-    description: str(d.description),
-    stats: climb.elevation ? [{ value: climb.elevation, label: 'Elevation' }, ...stats] : stats,
-    thingsToBring: strings(d.thingsToBring),
-    features: str(d.features),
-    waterNote: str(d.waterSourceNote),
-    trailMaps: trailMapsOf(d),
-    photos: strings(d.trailImages).filter((u) => u.startsWith('https://')),
-    coords: coordsOf(d),
-    itinerary: itineraryOf(d.itinerary),
-    fees: feesOf(d.fees),
-    officers: (Array.isArray(d.officers) ? d.officers.map(record) : []).map((o) => ({ role: str(o.role), name: str(o.name) })).filter((o) => o.name),
   };
 }

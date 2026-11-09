@@ -1,4 +1,5 @@
-import { splitSchedule, toClimb, toClimbDetail } from '../../src/frontend/data/climbs';
+import { toClimbDetail } from '../../src/frontend/data/climbDetail';
+import { splitSchedule, toClimb } from '../../src/frontend/data/climbs';
 import { fromManilaDay, manilaDay, manilaYear, manilaYearStart } from '../../src/frontend/lib/manila';
 
 const now = new Date('2026-11-09T04:00:00Z'); // Nov 9 noon, Manila

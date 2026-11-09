@@ -1,4 +1,4 @@
-import type { ClimbDetail } from '../data/climbs';
+import type { ClimbDetail } from '../data/climbDetail';
 import { mapsCoords } from '../lib/trailEmbeds';
 import { useForecast } from '../services/weather';
 

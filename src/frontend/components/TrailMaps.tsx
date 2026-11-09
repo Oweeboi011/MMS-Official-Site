@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { TrailMap } from '../data/climbs';
+import type { TrailMap } from '../data/climbDetail';
 import { allTrailsEmbed, googleMapEmbed, komootEmbed, type Embed } from '../lib/trailEmbeds';
 
 function Frame({ embed, title, source, height }: { embed: Embed | null; title: string; source: string; height: number }) {
