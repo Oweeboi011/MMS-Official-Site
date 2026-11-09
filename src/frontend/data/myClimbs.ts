@@ -1,6 +1,7 @@
 // A member's registrations (old Open Climbs shape) → My Climbs rows.
 import type { Doc } from '../lib/firestoreRest';
 import { feeTotal, type FeeLine } from './registration';
+import { pledgeInBalance, pledgeOf, type Pledge } from './donations';
 import { REQUIRED_DOCS } from './requiredDocs';
 
 export interface MyClimb {
@@ -18,7 +19,9 @@ export interface MyClimb {
   uploaded: string[]; // registration upload fields already holding a file
   receipts: { url: string; fileName: string }[]; // https only
   waiver: { name: string; signedAt: number; location: string } | null;
+  pledge: Pledge | null;
   details: Details;
+  name: string; // as registered
   payments: { amount: number; status: string; note: string }[];
 }
 
@@ -57,14 +60,17 @@ export function detailsProblem(x: Details): string | null {
 
 export function toMyClimb(id: string, d: Doc): MyClimb {
   const status = str(d.status) || 'pending';
-  const { total, tba } = feeTotal(lines(d.feeBreakdown));
+  const { total: fees, tba } = feeTotal(lines(d.feeBreakdown));
+  const pledge = pledgeOf(d.donation);
+  const total = fees + pledgeInBalance(pledge);
   return {
     id, climbId: str(d.climbId), title: str(d.climbTitle) || 'Climb', date: str(d.climbDate),
     status, statusLabel: STATUS[status] ?? status, paymentLabel: PAYMENT[str(d.paymentStatus)] ?? 'Not paid yet',
-    total, tba, paid: typeof d.amountPaid === 'number' ? d.amountPaid : 0, createdAt: millis(d.createdAt),
+    pledge, total, tba, paid: typeof d.amountPaid === 'number' ? d.amountPaid : 0, createdAt: millis(d.createdAt),
     uploaded: REQUIRED_DOCS.map((t) => t.uploadField).filter((f) => d[f] && typeof d[f] === 'object'),
     receipts: receiptsOf(d.paymentProofs),
     details: detailsOf(d),
+    name: str(d.name),
     payments: (Array.isArray(d.payments) ? d.payments : []).map((p) => (p ?? {}) as Doc).map((p) => ({ amount: typeof p.amount === 'number' ? p.amount : Number(p.amount) || 0, status: str(p.status) || 'submitted', note: str(p.note) })),
     waiver: d.waiverSigned === true ? { name: str(d.waiverSignedName), signedAt: millis(d.waiverSignedAt), location: str(d.climbLocation) } : null,
   };

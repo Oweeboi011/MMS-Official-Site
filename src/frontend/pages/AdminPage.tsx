@@ -4,9 +4,10 @@ import CollectionEditor from '../components/CollectionEditor';
 import Dashboard from '../components/admin/Dashboard';
 import PageHero from '../components/PageHero';
 import { climbsSpec } from '../data/climbSchema';
+import { releaseNotesSpec } from '../data/releaseNotes';
 import { siteCollections } from '../data/siteSchemas';
 
-const collections = [climbsSpec, ...siteCollections];
+const collections = [climbsSpec, ...siteCollections, releaseNotesSpec];
 import { readOnlyMessage, writesEnabled } from '../services/firebaseEnv';
 import { useAccount } from '../services/useAccount';
 
@@ -31,7 +32,7 @@ function Editors() {
 export default function AdminPage() {
   const state = useAccount();
   let body;
-  if (state.status === 'signedIn' && state.account.role === 'admin') body = <><h2>Upcoming climbs</h2><Dashboard /><p><Link className="btn" to="/admin/registrations">All registrations</Link> <Link className="btn" to="/admin/help">Officer guide</Link></p><Editors /></>;
+  if (state.status === 'signedIn' && state.account.role === 'admin') body = <><h2>Upcoming climbs</h2><Dashboard /><p className="editor-actions"><Link className="btn" to="/admin/registrations">All registrations</Link> <Link className="btn" to="/admin/help">Officer guide</Link> <Link className="btn" to="/admin/treasurer">Treasurer summary</Link></p><Editors /></>;
   else if (state.status === 'signedIn') body = <p>Signed in as {state.account.email}, but not an admin. An admin sets your role in the Firebase console.</p>;
   else if (state.status === 'loading') body = <p>Checking your sign-in…</p>;
   else if (state.status === 'error') body = <p role="alert">Couldn&apos;t load your account: {state.error}</p>;
