@@ -41,7 +41,7 @@ describe('Open Climbs parity: found in plan review 2026-11-09', () => {
   // trail map embeds (AllTrails, Komoot, Google Maps): tests/integration/liveContent.test.tsx (climb page)
   // packing list + Leave No Trace ethics on the climb page: tests/integration/liveContent.test.tsx (climb page)
   // registrant-only section: participants, resources, pre-climb meetings, officers: tests/integration/registrantArea.test.tsx
-  it.todo('admin audit log of sensitive actions');
+  // admin audit log of sensitive actions: tests/integration/adminAudit.test.tsx
   // help and privacy pages: tests/integration/help.test.tsx, privacy.test.tsx
   it('installable app: web manifest + icons', () => {
     const manifest = JSON.parse(readFileSync('public/manifest.webmanifest', 'utf8')) as { display: string; start_url: string; icons: { src: string; sizes: string; purpose?: string }[] };

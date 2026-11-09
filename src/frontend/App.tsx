@@ -41,6 +41,7 @@ const HelpPage = lazy(() => import('./pages/HelpPage'));
 const AdminHelpPage = lazy(() => import('./pages/AdminHelpPage'));
 const WhatsNewPage = lazy(() => import('./pages/WhatsNewPage'));
 const AdminRegistrationsPage = lazy(() => import('./pages/AdminRegistrationsPage'));
+const AdminAuditPage = lazy(() => import('./pages/AdminAuditPage'));
 const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
 const AdminTreasurerPage = lazy(() => import('./pages/AdminTreasurerPage'));
 const loading = <main className="section"><div className="shell"><p>Loading…</p></div></main>;
@@ -120,6 +121,7 @@ export default function App() {
         <Route path="/climbs/:id" element={<RouteErrorBoundary key="climb"><Suspense fallback={loading}><ClimbPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/climbs/:regId/waiver" element={<RouteErrorBoundary key="waiver"><Suspense fallback={loading}><WaiverPrintPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/climbs" element={<RouteErrorBoundary key="my-climbs"><Suspense fallback={loading}><MyClimbsPage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/admin/audit" element={<RouteErrorBoundary key="admin-audit"><Suspense fallback={loading}><AdminAuditPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/users" element={<RouteErrorBoundary key="admin-users"><Suspense fallback={loading}><AdminUsersPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/treasurer" element={<RouteErrorBoundary key="admin-treasurer"><Suspense fallback={loading}><AdminTreasurerPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/registrations" element={<RouteErrorBoundary key="admin-regs"><Suspense fallback={loading}><AdminRegistrationsPage /></Suspense></RouteErrorBoundary>} />
