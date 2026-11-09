@@ -99,21 +99,27 @@ function climbsIn(s: Snapshot, year: number, onlyThatYear: boolean) {
   return rowsOf(s.climbs)?.filter((c) => startMs(c) >= from && startMs(c) < to);
 }
 
-// Cache id (see the loaders above) → the same answer from the snapshot.
-type FromSnap = (s: Snapshot, a: string, b: string) => Doc[] | Doc | null | undefined;
-// A Map, not an object: `kind` can come from a URL (climb id), so no prototype lookups.
-const fromSnap = new Map<string, FromSnap>(Object.entries({
-  announcements: (s, a) => rowsOf(s.announcements)?.slice(0, Number(a) || 30),
-  surveys: (s) => rowsOf(s.surveys),
-  officers: (s, a) => (a === 'current' ? rowsOf(s.officers)?.filter((o) => o.current === true) : rowsOf(s.officers)),
-  settings: (s) => (s.settings?.fields ? decodeFields(s.settings.fields) : null),
-  climb: (s, a) => rowsOf(s.climbs)?.find((c) => c.id === a) ?? null,
-  climbs: (s, a, b) => climbsIn(s, Number(a), b === 'true'),
-} satisfies Record<string, FromSnap>));
+// Cache id (see the loaders above) → the same answer from the snapshot. A switch, not a lookup table: the id can
+// contain a climb id from the URL, so nothing is dispatched by name (CodeQL js/unvalidated-dynamic-method-call).
+const announcementsFrom = (s: Snapshot, n: string) => rowsOf(s.announcements)?.slice(0, Number(n) || 30);
+const officersFrom = (s: Snapshot, which: string) => {
+  const all = rowsOf(s.officers);
+  return which === 'current' ? all?.filter((o) => o.current === true) : all;
+};
+const settingsFrom = (s: Snapshot) => (s.settings?.fields ? decodeFields(s.settings.fields) : null);
+const climbFrom = (s: Snapshot, id: string) => rowsOf(s.climbs)?.find((c) => c.id === id) ?? null;
 
 export function snapshotFor(id: string, s: Snapshot): Doc[] | Doc | null | undefined {
   const [kind, a = '', b = ''] = id.split(':');
-  return fromSnap.get(kind)?.(s, a, b);
+  switch (kind) {
+    case 'announcements': return announcementsFrom(s, a);
+    case 'surveys': return rowsOf(s.surveys);
+    case 'officers': return officersFrom(s, a);
+    case 'settings': return settingsFrom(s);
+    case 'climb': return climbFrom(s, a);
+    case 'climbs': return climbsIn(s, Number(a), b === 'true');
+    default: return undefined;
+  }
 }
 
 async function fromSnapshot(id: string) {
