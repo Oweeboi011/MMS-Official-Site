@@ -42,7 +42,7 @@ describe('Open Climbs parity: found in plan review 2026-11-09', () => {
   // packing list + Leave No Trace ethics on the climb page: tests/integration/liveContent.test.tsx (climb page)
   // registrant-only section: participants, resources, pre-climb meetings, officers: tests/integration/registrantArea.test.tsx
   it.todo('admin audit log of sensitive actions');
-  it.todo('help page (privacy page done: /privacy)');
+  // help and privacy pages: tests/integration/help.test.tsx, privacy.test.tsx
   it('installable app: web manifest + icons', () => {
     const manifest = JSON.parse(readFileSync('public/manifest.webmanifest', 'utf8')) as { display: string; start_url: string; icons: { src: string; sizes: string; purpose?: string }[] };
     expect(manifest.display).toBe('standalone');
