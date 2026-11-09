@@ -34,6 +34,16 @@ flowchart LR
 | `development` | integrated, tested work | PR + push | auto → preview |
 | `main` | released code only (PR from `development`) | PR + push | → production after `production` environment approval, then prod parity |
 
+Data per environment:
+
+| Where | Firebase | Writes |
+|---|---|---|
+| local dev, CI tests | emulators (`VITE_USE_EMULATORS=true`), or none | test data only |
+| preview | prod project | **off**: `deploy.mjs` builds with `VITE_WRITES_ENABLED=false`; `/admin` shows read-only, saves refused |
+| production | prod project | on (admins) |
+
+Never test data in prod. Rules still guard writes; the flag stops honest mistakes on preview.
+
 AI in the loop (₱0): Claude Code `/code-review` + done gate before every commit (`.claude/CLAUDE.md`); PR template repeats the gate. No paid AI review in Quality Gates (cost cap).
 
 GitHub setup (repo settings, owner): protect `development` + `main` (PR required; `Code Quality & Security`, `End-to-End Tests`, `Security Rules Tests` required; no force push); environment `production` with required reviewer; secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`. **Until those secrets exist, CD passes but skips the deploy** (Release Guard warning): after merging to `main`, run `npm run deploy:prod` locally ([open item 5](../solution-plan/SOLUTION-PLAN.md#open-items)).
