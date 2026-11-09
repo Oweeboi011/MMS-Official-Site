@@ -38,8 +38,11 @@ const AdminClimbPage = lazy(() => import('./pages/AdminClimbPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const GuidePage = lazy(() => import('./pages/GuidePage'));
 const HelpPage = lazy(() => import('./pages/HelpPage'));
+const AdminHelpPage = lazy(() => import('./pages/AdminHelpPage'));
+const WhatsNewPage = lazy(() => import('./pages/WhatsNewPage'));
 const AdminRegistrationsPage = lazy(() => import('./pages/AdminRegistrationsPage'));
 const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
+const AdminTreasurerPage = lazy(() => import('./pages/AdminTreasurerPage'));
 const loading = <main className="section"><div className="shell"><p>Loading…</p></div></main>;
 // Sub-page text, the search index and photo credits are big and per-page: load them on demand (initialJs budget).
 const SubPage = lazyPage(() => import('./pages/SubPage'));
@@ -108,6 +111,8 @@ export default function App() {
         <Route path="/search" element={<Suspense fallback={loading}><SearchPage /></Suspense>} />
         <Route path="/credits" element={<Suspense fallback={loading}><CreditsPage /></Suspense>} />
         <Route path="/activities/open-climbs/guide" element={<RouteErrorBoundary key="guide"><Suspense fallback={loading}><GuidePage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/admin/help" element={<RouteErrorBoundary key="admin-help"><Suspense fallback={loading}><AdminHelpPage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/account/whats-new" element={<RouteErrorBoundary key="whats-new"><Suspense fallback={loading}><WhatsNewPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/help" element={<RouteErrorBoundary key="help"><Suspense fallback={loading}><HelpPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/privacy" element={<RouteErrorBoundary key="privacy"><Suspense fallback={loading}><PrivacyPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/sign-in" element={<RouteErrorBoundary key="sign-in"><Suspense fallback={loading}><SignInPage /></Suspense></RouteErrorBoundary>} />
@@ -116,6 +121,7 @@ export default function App() {
         <Route path="/account/climbs/:regId/waiver" element={<RouteErrorBoundary key="waiver"><Suspense fallback={loading}><WaiverPrintPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/climbs" element={<RouteErrorBoundary key="my-climbs"><Suspense fallback={loading}><MyClimbsPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/users" element={<RouteErrorBoundary key="admin-users"><Suspense fallback={loading}><AdminUsersPage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/admin/treasurer" element={<RouteErrorBoundary key="admin-treasurer"><Suspense fallback={loading}><AdminTreasurerPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/registrations" element={<RouteErrorBoundary key="admin-regs"><Suspense fallback={loading}><AdminRegistrationsPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/climbs/:id" element={<RouteErrorBoundary key="admin-climb"><Suspense fallback={loading}><AdminClimbPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin" element={<RouteErrorBoundary key="admin"><Suspense fallback={loading}><AdminPage /></Suspense></RouteErrorBoundary>} />
