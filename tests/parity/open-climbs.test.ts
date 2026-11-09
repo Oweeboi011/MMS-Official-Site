@@ -11,9 +11,9 @@ describe('Open Climbs parity: member', () => {
   it.todo('schedule by season, card grid with elevation, difficulty, distance');
   // mountain profile (stats, jump-off, gain, itinerary, water, links): tests/integration/liveContent.test.tsx (climb page)
   // trail photo carousel + keyboard lightbox: tests/integration/liveContent.test.tsx (climb page)
-  it.todo('register: waitlist when full (details, emergency contact, experience, medical done: /climbs/:id/register)');
+  // register: details, emergency contact, experience, medical; waitlist when full: tests/integration/register.test.tsx, liveContent (slots)
   // optional fees + fee breakdown before submit: tests/unit/registration.test.ts, tests/integration/register.test.tsx
-  it.todo('printable signed waiver (typed-name waiver done at registration)');
+  // digital waiver (typed name) + printable signed waiver: tests/integration/waiverPrint.test.tsx
   // GCash pay now/later, instalments, receipt upload: tests/integration/myClimbs.test.tsx
   // required documents upload (after registering): tests/integration/myClimbs.test.tsx
   it.todo('donation drive pledge');
@@ -55,10 +55,10 @@ describe('Open Climbs parity: found in plan review 2026-11-09', () => {
   // accessibility checks (axe) on key pages: tests/e2e/a11y.spec.ts
   it.todo('verify-email banner after sign-up');
   it.todo('edit registration details after submitting');
-  it.todo('view an uploaded receipt (receipt modal)');
+  // view an uploaded receipt: My Climbs receipt links (tests/unit/slice4.test.ts)
   it.todo('beginner mountaineering guide + registration and cancellation policy text');
   it.todo('admin climb setup checklist (completeness before opening)');
-  it.todo('compress images in the browser before upload');
+  // compress images in the browser before upload: lib/compressImage.ts (tests/unit/slice4.test.ts)
   it.todo('member and admin help guides (old USER_MANUAL)');
   it.todo('render release notes and announcements with lightweight markdown');
 });

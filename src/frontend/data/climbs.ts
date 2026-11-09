@@ -10,6 +10,7 @@ export interface ScheduleClimb extends OpenClimb {
   over: boolean;
   postponed?: boolean;
   rating?: string; // Philippine scale, e.g. "4/9"
+  slotsLeft?: number; // maxParticipants − registrationCount (old app ClimbCard); the server waitlists past it
 }
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
@@ -48,6 +49,12 @@ function datesOf(d: Doc, start: Date | undefined, end: Date | undefined) {
 
 export const toClimb = (d: Doc, now: Date): ScheduleClimb | null => (isPublic(d) ? mapClimb(d, now) : null);
 
+function slotsOf(d: Doc): number | undefined {
+  const max = typeof d.maxParticipants === 'number' ? d.maxParticipants : 0;
+  if (max <= 0) return undefined;
+  return Math.max(max - (typeof d.registrationCount === 'number' ? d.registrationCount : 0), 0);
+}
+
 export function mapClimb(d: Doc, now: Date): ScheduleClimb {
   const start = toDate(d.startDate);
   const end = toDate(d.endDate);
@@ -66,6 +73,7 @@ export function mapClimb(d: Doc, now: Date): ScheduleClimb {
     elevation: elevationOf(d.elevation),
     type: TYPES[str(d.type).toLowerCase()] ?? 'Minor',
     status: str(d.status) === 'closed' ? 'Closed' : 'Open',
+    slotsLeft: slotsOf(d),
   };
 }
 

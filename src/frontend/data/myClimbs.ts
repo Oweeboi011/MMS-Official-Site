@@ -16,6 +16,8 @@ export interface MyClimb {
   paid: number;
   createdAt: number;
   uploaded: string[]; // registration upload fields already holding a file
+  receipts: { url: string; fileName: string }[]; // https only
+  waiver: { name: string; signedAt: number; location: string } | null;
 }
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
@@ -32,6 +34,12 @@ function lines(v: unknown): FeeLine[] {
   });
 }
 
+function receiptsOf(v: unknown) {
+  return (Array.isArray(v) ? v : []).map((p) => (p ?? {}) as Doc)
+    .filter((p) => str(p.url).startsWith('https://'))
+    .map((p) => ({ url: str(p.url), fileName: str(p.fileName) || 'Receipt' }));
+}
+
 export function toMyClimb(id: string, d: Doc): MyClimb {
   const status = str(d.status) || 'pending';
   const { total, tba } = feeTotal(lines(d.feeBreakdown));
@@ -40,6 +48,8 @@ export function toMyClimb(id: string, d: Doc): MyClimb {
     status, statusLabel: STATUS[status] ?? status, paymentLabel: PAYMENT[str(d.paymentStatus)] ?? 'Not paid yet',
     total, tba, paid: typeof d.amountPaid === 'number' ? d.amountPaid : 0, createdAt: millis(d.createdAt),
     uploaded: REQUIRED_DOCS.map((t) => t.uploadField).filter((f) => d[f] && typeof d[f] === 'object'),
+    receipts: receiptsOf(d.paymentProofs),
+    waiver: d.waiverSigned === true ? { name: str(d.waiverSignedName), signedAt: millis(d.waiverSignedAt), location: str(d.climbLocation) } : null,
   };
 }
 

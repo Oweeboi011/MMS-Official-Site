@@ -63,7 +63,7 @@ describe('pages read site content from Firestore', () => {
 
     it('lists upcoming climbs and this year’s completed ones, hides drafts and cancelled', async () => {
       live.climbs = [
-        { id: 'a', title: 'Live Upcoming', status: 'open', type: 'major', startDate: at(10), difficulty: '4/9' },
+        { id: 'a', title: 'Live Upcoming', status: 'open', type: 'major', startDate: at(10), difficulty: '4/9', maxParticipants: 20, registrationCount: 20 },
         { id: 'b', title: 'Live Done', status: 'completed', type: 'minor', startDate: new Date(Date.UTC(year, 0, 2)) },
         { id: 'c', title: 'Live Draft', status: 'draft', startDate: at(5) },
         { id: 'd', title: 'Live Cancelled', status: 'open', cancellationStatus: 'cancelled', startDate: at(6) },
@@ -71,6 +71,7 @@ describe('pages read site content from Firestore', () => {
       renderAt('/activities/open-climbs');
       expect(await screen.findByRole('heading', { name: 'Live Upcoming' })).toBeInTheDocument();
       expect(screen.getByText(/Moderate \(4\/9\)/)).toBeInTheDocument();
+      expect(screen.getByText('Full · waitlist')).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: `Completed in ${year}` })).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: 'Live Done' })).toBeInTheDocument();
       expect(screen.queryByText('Live Draft')).not.toBeInTheDocument();

@@ -1,6 +1,7 @@
 // Member uploads: receipts and required documents (storage.rules: own folder, create-only, ≤ 10 MB) + the registration update.
 import { arrayUnion, doc, serverTimestamp, Timestamp, updateDoc } from 'firebase/firestore/lite';
 import { connectStorageEmulator, getDownloadURL, getStorage, ref, uploadBytes, type FirebaseStorage } from 'firebase/storage';
+import { compressImage } from '../lib/compressImage';
 import { firebase } from './firebase';
 import { readOnlyMessage, storageBucket, useEmulators, writesEnabled } from './firebaseEnv';
 
@@ -16,8 +17,9 @@ interface Uploaded { url: string; fileName: string }
 
 const safeName = (name: string) => name.replace(/[^\w.-]+/g, '_').slice(-80);
 
-async function upload(prefix: string, climbId: string, uid: string, file: File): Promise<Uploaded> {
+async function upload(prefix: string, climbId: string, uid: string, original: File): Promise<Uploaded> {
   if (!writesEnabled) throw new Error(readOnlyMessage);
+  const file = await compressImage(original);
   const path = `${prefix}/${climbId}/${uid}/${Date.now()}_${safeName(file.name)}`;
   const snap = await uploadBytes(ref(bucket(), path), file, { contentType: file.type || undefined });
   return { url: await getDownloadURL(snap.ref), fileName: file.name };

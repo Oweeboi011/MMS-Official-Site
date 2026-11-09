@@ -76,6 +76,7 @@ function Form({ climb, account }: { climb: ClimbDetail; account: Account }) {
     <form className="register-form" onSubmit={(e) => void submit(e)} noValidate>
       {message && <p className="climb-notice" role="alert">{message}</p>}
       <p className="climb-muted">Signed in as {account.email}. Fields marked * are required.</p>
+      {climb.slotsLeft === 0 && <p className="climb-notice" role="note">This climb is full: you’ll join the waitlist and move up if a slot opens.</p>}
       <RegisterFields {...props} />
       <FeeBreakdown {...props} fees={climb.feeItems} />
       <WaiverConsent {...props} activity={[climb.title, climb.dates, climb.location].filter(Boolean).join(' · ')} />

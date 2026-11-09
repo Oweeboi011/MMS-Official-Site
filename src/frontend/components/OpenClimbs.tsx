@@ -12,6 +12,11 @@ interface Props {
   limit?: number;
 }
 
+function slotsText(n: number): string {
+  if (n <= 0) return 'Full · waitlist';
+  return n === 1 ? '1 slot left' : `${n} slots left`;
+}
+
 function ClimbRow({ climb }: { climb: ScheduleClimb }) {
   const difficulty = climb.rating ? `${climb.difficulty} (${climb.rating})` : climb.difficulty;
   return (
@@ -22,6 +27,7 @@ function ClimbRow({ climb }: { climb: ScheduleClimb }) {
           <span className={`event-tag type-${climb.type.toLowerCase()}`}>{climb.type}</span>
           {climb.postponed && <span className="event-tag closed">Postponed</span>}
           {!climb.over && climb.status === 'Closed' && <span className="event-tag closed">Closed</span>}
+          {!climb.over && climb.status === 'Open' && climb.slotsLeft !== undefined && <span className="event-tag">{slotsText(climb.slotsLeft)}</span>}
         </div>
         <h3>{climb.id ? <Link to={`/climbs/${climb.id}`}>{climb.title}</Link> : climb.title}</h3>
         {/* Completed cards: date + trail class only (owner decision 2026-11-09, #191). */}
