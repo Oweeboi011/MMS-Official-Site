@@ -61,6 +61,7 @@
     "wrangler": "4.158.0"
   },
   "overrides": {
-    "@grpc/grpc-js": "1.14.7"
+    "@grpc/grpc-js": "1.14.7",
+    "minimatch": "^11.0.1"
   }
 }

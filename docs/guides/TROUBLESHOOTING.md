@@ -22,4 +22,3 @@ Problems already hit on this project.
 | `functions:secrets:set` via Claude `!`: "Secret Payload cannot be empty" | `!` can't prompt; run it in your own terminal |
 | Deploy fails: secret has no versions | `functions:secrets:get NAME` shows none → set it, then redeploy |
 | `gcloud` TLS `CERTIFICATE_VERIFY_FAILED` | network intercepts TLS; use the Firebase CLI or the console |
-| `npm audit` moderate (minimatch via eslint) | known, below the high gate ([open items](../solution-plan/SOLUTION-PLAN.md#open-items)) |
