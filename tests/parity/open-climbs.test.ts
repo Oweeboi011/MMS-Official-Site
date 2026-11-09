@@ -40,7 +40,7 @@ describe('Open Climbs parity: found in plan review 2026-11-09', () => {
   // weather forecast per climb (Open-Meteo) + PAGASA / Windy links: tests/integration/liveContent.test.tsx (climb page)
   // trail map embeds (AllTrails, Komoot, Google Maps): tests/integration/liveContent.test.tsx (climb page)
   // packing list + Leave No Trace ethics on the climb page: tests/integration/liveContent.test.tsx (climb page)
-  it.todo('registrant-only section: participants, resources, pre-climb meetings, officer contacts');
+  // registrant-only section: participants, resources, pre-climb meetings, officers: tests/integration/registrantArea.test.tsx
   it.todo('admin audit log of sensitive actions');
   it.todo('help page (privacy page done: /privacy)');
   it('installable app: web manifest + icons', () => {
