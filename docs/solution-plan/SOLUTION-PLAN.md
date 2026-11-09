@@ -2,7 +2,7 @@
 
 How we deliver the MMS site and what it must do. Why: [ADRs](../adr/). What it is / how to run: [guides](../guides/).
 
-**Contents:** [Goal](#goal) · [Open items](#open-items) · [Leads input](#leads-input-2026-11-05) · [Features](#features) · [Architecture](#architecture) · [Open Climbs migration](#open-climbs-migration) · [Gaps](#gaps-ui-vs-backend) · [Payments](#payments) · [Media](#media) · [Hosting & billing](#hosting--billing) · [Quality harness](#quality-harness) · [Content needed](#content-needed-from-mms) · [Recommendations](#recommendations--enhancements) · [Risks](#risks--challenges)
+**Contents:** [Goal](#goal) · [Open items](#open-items) · [Leads input](#leads-input-2026-11-05) · [Features](#features) · [Architecture](#architecture) · [Open Climbs migration](#open-climbs-migration) · [Gaps](#gaps-ui-vs-backend) · [Plan review](#plan-review-2026-11-09) · [Payments](#payments) · [Media](#media) · [Hosting & billing](#hosting--billing) · [Quality harness](#quality-harness) · [Content needed](#content-needed-from-mms) · [Recommendations](#recommendations--enhancements) · [Risks](#risks--challenges)
 
 ## Goal
 
@@ -20,10 +20,10 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 4 | Accept Namecheap push (MMS account), auto-renew on (expires 2027-01-05); add Owee as Cloudflare Super Administrator | MMS Gmail owner | Domain safety |
 | 5 | Cloudflare API token (Pages:Edit) + account id → repo secrets for `continuous-delivery.yml` | MMS Cloudflare owner | Quality Gates deploy (local deploy works) |
 | 6 | Firebase console/CLI reachable from company laptops | Owee | Phase 1 |
-| 7 | Old project's password hash parameters (private, never in repo/chat) | Owee | Phase 2 |
+| 7 | Old project's password hash parameters (private, never in repo/chat). | Owee | Phase 2 |
 | 8 | Brevo account owned by MMS; SPF/DKIM for `metropolitanms.org` | MMS | Phase 4 |
 | 9 | `npm audit`: 11 moderate (minimatch via eslint 10, undici via wrangler deps); below the high gate. High undici fixed by wrangler 4.158.0 (2026-11-05) | upstream | — |
-| 10 | Open Climbs feature parity: 25 `it.todo` in `tests/parity/open-climbs.test.ts` | dev | Switch |
+| 10 | Open Climbs feature parity: 41 `it.todo` in `tests/parity/open-climbs.test.ts` (16 added by the [plan review](#plan-review-2026-11-09)) | dev | Switch |
 | 11 | Content from MMS ([below](#content-needed-from-mms)); then set `previewNotice = ''` | officers | Remove preview banner |
 | 12 | ~~SDLC setup~~ (done 2026-11-05): `development` default branch; `development` + `main` protected (PR, Quality Gates required, no force push, admins included); `production` environment needs Owee approval, protected branches only | Owee | — |
 | 13 | Leads: who is TCOM + notification recipients (by role); official FB page URL; is Viber a must (likely paid)? | leads | L2 |
@@ -34,11 +34,21 @@ Single tracker. Claude reads this before every commit and updates it in the same
 | 18 | Ported Open Climbs functions over complexity limits (warn-only override in `eslint.config.js`): refactor `reminders`, `registrations`, `climbs`, `users`, `promoteFromWaitlist` when touched. Replace `ogPrerender` (social cards) + `cspReport` with Cloudflare equivalents | dev | Phase 3 |
 | 19 | ~~Phase 1 finish~~ (done 2026-11-08): Google sign-in on (support email Owee's Gmail for now, item 1). Brevo secrets are placeholders until Phase 4 (item 8); `GITHUB_TOKEN` is a fine-grained PAT: renew before its GitHub expiry | Owee | — |
 | 20 | Apply `storage-lifecycle.json` + `cors.json` to the bucket (`gcloud storage buckets update gs://mms-official-site-513809.firebasestorage.app --lifecycle-file=… --cors-file=…`; gcloud blocked on company network). Officers pick retention: file says 730 days, [SECURITY](../guides/SECURITY.md#privacy-ra-10173) says medical certs + receipts 90 days after the climb | Owee, officers | Phase 3 (uploads) |
-| 21 | Register Firebase web app (none yet: `apps:list` empty) + App Check; build `src/frontend/services/` (Firebase init, auth state, data reads); config via `VITE_*` | dev | Phase 3 |
+| 21 | Firebase web app **registered 2026-11-09** (`1:729371585953:web:3bc72ba88bd5b127fd2fe0`). **Built:** `src/frontend/services/` (Firebase lazy-loaded, sign-in email + Google, account state, CRUD), `/account/sign-in`, `/admin` editor for every site collection. Left: App Check; restrict the web API key to site domains (Google Cloud → Credentials); add preview hosts to Auth authorized domains; public pages read Firestore with `content.ts` fallback; `VITE_FIREBASE_*` as GitHub repo **Variables** (CD reads `vars.*`) | dev, Owee | Phase 3 |
 | 22 | **Decided 2026-11-08: all site data in Firestore.** Built: `announcements` (drafts hidden), `officers`, `surveys`, `siteSettings` (contact, socials, notices), `siteStats` (daily `refreshSiteStats`); rules + emulator tests, index. Left: deploy, seed from `content.ts` (needs item 21 or admin screens), UI reads them with `content.ts` as fallback ([gaps](#gaps-ui-vs-backend)) | dev | Phase 3 |
 | 23 | MMS-owned GCash / bank receiving account + its QR (not a personal wallet); who verifies receipts per climb ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)) | treasurer, officers | Phase 5 |
-| 24 | Site data collections ([audit](#gaps-ui-vs-backend)): `inquiries`, `reviews`, `faqs`, `glossary`, `media` rules + tests built. Left: deploy, seed, UI (item 21), inquiry notification (item 13). Page bodies + mountains stay in code unless officers need to edit them | dev | Phase 3–6 |
+| 24 | Site data collections ([audit](#gaps-ui-vs-backend)): `inquiries`, `reviews`, `faqs`, `glossary`, `media`, plus leadership (`officers` by body + past terms, `committees`, owner ask 2026-11-09) rules + tests built. Left: deploy, seed, UI (item 21), inquiry notification (item 13). Page bodies + mountains stay in code unless officers need to edit them | dev | Phase 3–6 |
 | 25 | Release-note drafts: this repo's commit subjects have no `type:` prefix, so docs/tooling commits land in "Improvements". Pick: conventional prefixes here, or filter by changed paths (`src/frontend`) | dev, Owee | Phase 6 |
+| 26 | **URL plan** before phase 3: ADR 0005 says `/open-climbs/*`, but `/open-climbs` already 301s to the info page `/activities/open-climbs` (`legacyRedirects`). Pick app routes (proposal: `/climbs/:id`, `/register/:id`, `/account/*`, `/admin/*`) + old-app redirects (`mms-open-climbs.web.app/event/:id` → new) at the switch | dev, Owee | Phase 3 |
+| 27 | **Environments:** local + CI = emulators only; preview site = prod Firebase with writes off (`VITE_WRITES_ENABLED=false`) until the switch; never test data in prod. Document in DEPLOYMENT | dev | Phase 3 |
+| 28 | **Backups** before real data (phase 2): Firestore scheduled backups or weekly export to a bucket; check cost against the cap first; restore drill once | Owee | Phase 2 |
+| 29 | **Bundle budget vs Firebase SDK:** JS is 112.7 / 120 KB gz; Auth + Firestore SDK won't fit. Lazy-load Firebase only on app routes (`/climbs`, `/account`, `/admin`), budget per chunk | dev | Phase 3 |
+| 30 | **CSP header** (`public/_headers`) before Firebase: allow Firebase/Google APIs, Open-Meteo, trail embeds, YouTube/Wikimedia; report-only first (replaces `cspReport`, item 18) | dev | Phase 3 |
+| 31 | **Climb officer role:** ARCHITECTURE promises officers see only their climbs; ported rules are admin-only (old model). Keep admin-only, or add per-climb officer access (`climbInternal.officerEmails`) in rules + tests | officers, dev | Phase 6 |
+| 32 | **Privacy (RA 10173):** `/privacy` + `/help` pages (old app has both), consent text on registration + inquiry, retention per collection (inquiries, medical certs, receipts, `pageViews`, `failedRequests`, `auditLog`), data-export on request, DPO named | officers, dev | Phase 4 |
+| 33 | **Firestore free tier guard:** quota applies to the project's first database only ([Firebase pricing](https://firebase.google.com/docs/firestore/pricing)); `openclimbs` is the only one. Never delete it or add a second database | Owee | — |
+| 34 | **Admin scripts** not ported: first-admin bootstrap (`set-admin`), `grant-email-members` (the `users` rule comment points to it; path missing here), `purge-admin-pageviews`, emulator seed. Backfills (`backfill-climb-denorm`, `backfill-member-details`) only if synced data still needs them. Old `set-admin` uses the CLI token + REST: rewrite for `mms-official-site-513809`, never commit uids | dev | Phase 2 |
+| 35 | **Climb history per member** (owner ask 2026-11-09, planned): `refreshSiteStats` also writes private `memberStats/{uid}` (`climbCount`, `climbs` newest first, `lastClimbAt`; member + admins read, function-only write) from confirmed, non-no-show registrations on finished climbs; admin list sorted by climb count; member sees own log (replaces sample `passportStats`). Old-app history arrives with the sync (phase 2); pre-app climbs only if officers supply records | dev | Phase 4 |
 
 ## Leads input (2026-11-05)
 
@@ -135,6 +145,49 @@ Backend with no UI yet: `users`, `memberDetails`, `registrations`, `climbPrivate
 
 Missing functions: sync old → new (phase 2, item 7) · `ogPrerender`, `cspReport` replacements on Cloudflare (item 18). Missing services: Firebase web app + App Check (item 21) · Brevo (item 8) · MMS receiving account (item 23). No payment gateway ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)).
 
+## Plan review (2026-11-09)
+
+Full pass over architecture, API, data and Open Climbs feature parity. New open items 26–34; parity todos added to `tests/parity/open-climbs.test.ts`.
+
+### Architecture
+
+| Area | Finding | Action |
+|---|---|---|
+| Routing | app URLs undecided; `/open-climbs` already redirects to an info page | item 26 |
+| Environments | one Firebase project; preview + local would hit prod | item 27 |
+| Backups / DR | no Firestore backup; hard stop runbook exists | item 28 |
+| Bundle | Firebase SDK exceeds the 120 KB budget unless lazy-loaded | item 29 |
+| Security headers | no CSP yet | item 30 |
+| Roles | climb-officer scoping promised, not in rules | item 31 |
+| Backend delivery | rules + functions deployed by hand; no CD | keep manual until item 5; then CD job with keyless Workload Identity (₱0) |
+| Monitoring | errors only in Cloud Logging; no alert | R8 uptime + free log-based email alert on function errors |
+| Regions | Firestore + Functions `asia-southeast1`, Storage `us-east1` | accepted (cost); see risks |
+| Static fallback | R5c needs a build-time snapshot of public collections | design with item 21 |
+
+### API
+
+| Area | Finding | Action |
+|---|---|---|
+| Contracts | callables have no documented inputs/outputs/errors | document per callable in API.md as each UI lands |
+| Abuse | callables + public `inquiries` lack App Check | `enforceAppCheck` on callables with item 21 |
+| Email | Brevo free tier is daily-capped; reminders + announcements batch through `batchSend` | check volume vs cap before emails on (item 8) |
+| External | Open-Meteo (weather, free, no key), AllTrails/Komoot/Google Maps embeds, PAGASA/Windy links used by old event page | allow in CSP (item 30); no keys needed |
+| Release notes | checkpoint per repo (`sourceRepo`, contract in [API](../guides/API.md)); commit-type noise | item 25 |
+
+### Data
+
+| Area | Finding | Action |
+|---|---|---|
+| Free tier | only the first database gets free quota | item 33 |
+| Shapes | functions are JS, frontend TS; list items in `siteSettings` can't be checked by rules | shared types + runtime validation in the services layer (item 21) |
+| Search | `searchIndex` is static; Firestore content (climbs, announcements) won't be searchable | merge Firestore results at runtime, or index at build, with item 21 |
+| Retention | lifecycle file 730 d vs policy 90 d; no retention for inquiries/logs | items 20, 32 |
+| Seed | sample `content.ts` is not official: seed only officer-confirmed content (item 11); sample stays as fallback | items 11, 22 |
+
+### Open Climbs features not yet tracked
+
+Compared the old app's routes and pages with the parity todos; these were missing and are now `it.todo`: weather forecast per climb (Open-Meteo) + PAGASA/Windy links · trail map embeds (AllTrails/Komoot/Maps) · packing list + LNT ethics · registrant-only section (participants, resources, pre-climb meetings, officer contacts) behind sign-in · admin audit log · help + privacy pages · installable app (PWA manifest, icons) · accessibility tests (old app has `tests/accessibility`) · verify-email banner · edit registration · receipt viewer · beginner guide + registration/cancellation policy · admin climb setup checklist · in-browser image compression (keeps Storage small) · member + admin help guides (old `USER_MANUAL.md`) · lightweight markdown for notes. Admin scripts: item 34. Swept: all old routes, pages, components, utils, hooks, contexts, data and scripts.
+
 ## Payments
 
 Goal: every fee collected **before the climb**, no officer advancing money. No gateway, ₱0 per payment: [ADR 0007](../adr/0007-PAYMENTS-MANUAL.md) (supersedes PayMongo, ADR 0002).
@@ -198,6 +251,7 @@ Gates, tests, hooks, Quality Gates: [CODE-QUALITY](../guides/CODE-QUALITY.md). W
 | MMS photos/videos (replace Wikimedia) | Media, home |
 | Member stats · history after 2003 | Members, History |
 | Trail-class review (Top 100) · past-officer spellings | Mountains, Leadership |
+| **Past officers from way back** (Execom, TComm, BOT): name, role, term per year; entered in `/admin` → Leadership (`current` off) | Leadership |
 | Refund policy · privacy notice | Registration |
 
 ## Recommendations & enhancements

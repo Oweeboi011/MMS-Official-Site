@@ -64,10 +64,23 @@ function collectionRef(name) {
         data: () => data,
       })),
     }),
+    where: (field, op, value) => query(store, []).where(field, op, value),
+    orderBy: () => query(store, []).orderBy(),
+  };
+}
+
+// Equality filters + createdAt desc ordering, as the code queries.
+function query(store, filters) {
+  return {
+    where: (field, op, value) => {
+      if (op !== "==") throw new Error(`mock supports == only, got ${op}`);
+      return query(store, [...filters, [field, value]]);
+    },
     orderBy: () => ({
       limit: (n) => ({
         get: async () => {
           const docs = Object.entries(store)
+            .filter(([, d]) => filters.every(([f, v]) => d[f] === v))
             .sort(([, a], [, b]) => (b.createdAt || 0) - (a.createdAt || 0))
             .slice(0, n)
             .map(([id, data]) => ({ id, data: () => data }));
@@ -433,6 +446,18 @@ describe("release-note email job", () => {
   });
 });
 
+// Answers GitHub calls by URL substring; unknown paths 404.
+function github(routes) {
+  return vi.fn(async (url) => {
+    const hit = Object.entries(routes).find(([path]) => url.includes(path));
+    if (!hit) return { ok: false, status: 404, text: () => Promise.resolve("Not Found") };
+    return { ok: true, json: () => Promise.resolve(hit[1]) };
+  });
+}
+const raw = (sha, message, date) => ({ sha, commit: { message, author: { name: "Dev", date } } });
+const ME = "Oweeboi011/MMS-Official-Site";
+const OLD = "Oweeboi011/mms-open-climbs";
+
 describe("getReleaseNoteCommitOptions callable", () => {
   it("throws permission-denied for a non-admin caller", async () => {
     usersStore["u1"] = { role: "member" };
@@ -441,48 +466,24 @@ describe("getReleaseNoteCommitOptions callable", () => {
     ).rejects.toMatchObject({ code: "permission-denied" });
   });
 
-  it("returns the last checkpoint and shaped commits from GitHub", async () => {
+  it("returns the last published checkpoint of this repo and shaped commits", async () => {
     usersStore["admin-1"] = { role: "admin" };
-    releaseNotesStore["rn1"] = { createdAt: 2, sourceCommit: "abc123", sourceRepo: "Oweeboi011/MMS-Official-Site" };
-    releaseNotesStore["rn0"] = { createdAt: 1, sourceCommit: "old000" };
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () =>
-        Promise.resolve([
-          {
-            sha: "deadbeefcafe",
-            commit: {
-              message: "feat: add thing\n\nbody",
-              author: { name: "Dev", date: "2026-01-01" },
-            },
-          },
-        ]),
-    });
+    releaseNotesStore["rn3"] = { createdAt: 3, status: "draft", sourceCommit: "draft-sha", sourceRepo: ME };
+    releaseNotesStore["rn2"] = { createdAt: 2, status: "published", sourceCommit: "old-app", sourceRepo: OLD };
+    releaseNotesStore["rn1"] = { createdAt: 1, status: "published", sourceCommit: "abc1234", sourceRepo: ME };
+    global.fetch = github({ "/commits?sha=main": [raw("deadbeefcafe", "feat: add thing\n\nbody", "2026-01-01")] });
 
-    const result = await index.getReleaseNoteCommitOptions({
-      auth: { uid: "admin-1" },
-      data: {},
-    });
+    const result = await index.getReleaseNoteCommitOptions({ auth: { uid: "admin-1" }, data: {} });
 
-    expect(result.since).toBe("abc123");
+    expect(result.since).toBe("abc1234");
     expect(result.commits).toEqual([
-      {
-        sha: "deadbeefcafe",
-        shortSha: "deadbee",
-        subject: "feat: add thing",
-        date: "2026-01-01",
-        author: "Dev",
-      },
+      { sha: "deadbeefcafe", shortSha: "deadbee", subject: "feat: add thing", date: "2026-01-01", author: "Dev" },
     ]);
   });
 
   it("wraps a GitHub API error as internal", async () => {
     usersStore["admin-1"] = { role: "admin" };
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: false,
-      status: 403,
-      text: () => Promise.resolve("rate limited"),
-    });
+    global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 403, text: () => Promise.resolve("rate limited") });
     await expect(
       index.getReleaseNoteCommitOptions({ auth: { uid: "admin-1" }, data: {} }),
     ).rejects.toMatchObject({ code: "internal" });
@@ -498,120 +499,135 @@ describe("getReleaseNoteCommitOptions callable", () => {
 });
 
 describe("generateReleaseNoteDraft callable", () => {
-  it("throws invalid-argument when until is missing", async () => {
-    usersStore["admin-1"] = { role: "admin" };
-    await expect(
-      index.generateReleaseNoteDraft({ auth: { uid: "admin-1" }, data: {} }),
-    ).rejects.toMatchObject({ code: "invalid-argument" });
+  const draft = (until) => index.generateReleaseNoteDraft({ auth: { uid: "admin-1" }, data: { until } });
+  const published = (sha) => ({ createdAt: 1, status: "published", sourceCommit: sha, sourceRepo: ME });
+  beforeEach(() => { usersStore["admin-1"] = { role: "admin" }; });
+
+  it.each([[undefined], ["../../users/x"], ["x?per_page=1"], ["feature/x"]])("rejects until %s as invalid", async (until) => {
+    global.fetch = github({});
+    await expect(draft(until)).rejects.toMatchObject({ code: "invalid-argument" });
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 
-  it("returns an empty draft when since equals until", async () => {
-    usersStore["admin-1"] = { role: "admin" };
-    releaseNotesStore["rn1"] = { createdAt: 1, sourceCommit: "same-sha", sourceRepo: "Oweeboi011/MMS-Official-Site" };
+  it("rejects an until GitHub doesn't know as invalid-argument", async () => {
+    global.fetch = github({});
+    await expect(draft("abcdef0")).rejects.toMatchObject({ code: "invalid-argument" });
+  });
 
-    const result = await index.generateReleaseNoteDraft({
-      auth: { uid: "admin-1" },
-      data: { until: "same-sha" },
-    });
+  it("returns an empty draft when the checkpoint is the selected commit", async () => {
+    releaseNotesStore["rn1"] = published("5a5e5a5");
+    global.fetch = github({ "...main?": { status: "ahead" }, "/commits/5a5e5a5": raw("5a5e5a5", "x", "2026-02-01") });
+
+    const result = await draft("5a5e5a5");
 
     expect(result.commitCount).toBe(0);
     expect(result.body).toBe("");
-    expect(result.sourceCommit).toBe("same-sha");
+    expect(result.sourceCommit).toBe("5a5e5a5");
   });
 
-  it("fetches the full commit list when there is no prior checkpoint", async () => {
-    usersStore["admin-1"] = { role: "admin" };
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () =>
-        Promise.resolve([
-          {
-            sha: "111aaaa",
-            commit: {
-              message: "fix(payments): correct rounding",
-              author: { name: "Dev", date: "2026-02-01" },
-            },
-          },
-          {
-            sha: "222bbbb",
-            commit: {
-              message: "chore: bump deps",
-              committer: { date: "2026-02-02" },
-            },
-          },
-          {
-            sha: "333cccc",
-            commit: { message: "improve coverage reporting" },
-          },
-        ]),
-    });
+  it("first note: newest 50 commits, noise filtered, truncation flagged", async () => {
+    const list = [raw("333cccc", "improve coverage reporting", "2026-02-03"), raw("222bbbb", "chore: bump deps", "2026-02-02"),
+      raw("111aaaa", "fix(payments): correct rounding", "2026-02-01")];
+    global.fetch = github({ "...main?": { status: "ahead" }, "/commits/333cccc": list[0], "/commits?sha=333cccc": list });
 
-    const result = await index.generateReleaseNoteDraft({
-      auth: { uid: "admin-1" },
-      data: { until: "333cccc" },
-    });
+    const result = await draft("333cccc");
 
     expect(result.commitCount).toBe(3);
-    // "chore:" is noise (dropped) and the coverage-mention commit is dropped
-    // regardless of type — only the fix: commit survives into the body.
     expect(result.droppedCount).toBe(2);
     expect(result.body).toContain("Fixes");
     expect(result.body).toContain("Correct rounding");
-    expect(result.title).toMatch(/^What's New — /);
+    expect(result.title).toBe("What's New — February 3, 2026");
+    expect(result.truncated).toBe(false);
   });
 
-  it("ignores checkpoints from the old app's repo", async () => {
-    usersStore["admin-1"] = { role: "admin" };
-    releaseNotesStore["rn1"] = { createdAt: 1, sourceCommit: "old-repo-sha" };
-    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve([]) });
+  it("ignores old-app and unpublished notes as checkpoints", async () => {
+    releaseNotesStore["rn2"] = { createdAt: 2, status: "published", sourceCommit: "old-app", sourceRepo: OLD };
+    releaseNotesStore["rn1"] = { createdAt: 1, status: "draft", sourceCommit: "draft-sha", sourceRepo: ME };
+    global.fetch = github({ "...main?": { status: "ahead" }, "/commits/4e4e4e4": raw("4e4e4e4", "fix: z", "2026-04-01"), "/commits?sha=4e4e4e4": [raw("4e4e4e4", "fix: z", "2026-04-01")] });
 
-    const result = await index.generateReleaseNoteDraft({ auth: { uid: "admin-1" }, data: { until: "new-sha" } });
+    await draft("4e4e4e4");
 
-    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("/commits?sha=new-sha"), expect.anything());
-    expect(result.sourceRepo).toBe("Oweeboi011/MMS-Official-Site");
+    expect(global.fetch).not.toHaveBeenCalledWith(expect.stringMatching(/compare\/(old-app|draft-sha)/), expect.anything());
   });
 
-  it("dates the title from the selected commit, not the oldest in the list", async () => {
-    usersStore["admin-1"] = { role: "admin" };
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve([
-        { sha: "newest", commit: { message: "fix: a", author: { date: "2026-03-10T00:00:00Z" } } },
-        { sha: "older", commit: { message: "fix: b", author: { date: "2026-01-05T00:00:00Z" } } },
-      ]),
+  it("pages through compare and stores the resolved sha for a branch name", async () => {
+    releaseNotesStore["rn1"] = published("0d0d0d0");
+    const page1 = Array.from({ length: 100 }, (_, i) => raw(`p1-${i}`, "fix: a", "2026-03-01"));
+    global.fetch = github({
+      "/commits/main": raw("head-sha", "fix: b", "2026-03-10"),
+      "&page=1": { status: "ahead", total_commits: 101, commits: page1 },
+      "&page=2": { status: "ahead", total_commits: 101, commits: [raw("head-sha", "plain commit", "2026-03-10")] },
     });
 
-    const result = await index.generateReleaseNoteDraft({ auth: { uid: "admin-1" }, data: { until: "newest" } });
+    const result = await draft("main");
 
-    expect(result.title).toContain("March 10, 2026");
-  });
-
-  it("compares since...until when a prior checkpoint exists", async () => {
-    usersStore["admin-1"] = { role: "admin" };
-    releaseNotesStore["rn1"] = { createdAt: 1, sourceCommit: "old-sha", sourceRepo: "Oweeboi011/MMS-Official-Site" };
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () =>
-        Promise.resolve({
-          commits: [
-            {
-              sha: "444dddd",
-              commit: { message: "plain commit with no conventional prefix" },
-            },
-          ],
-        }),
-    });
-
-    const result = await index.generateReleaseNoteDraft({
-      auth: { uid: "admin-1" },
-      data: { until: "new-sha" },
-    });
-
-    expect(result.commitCount).toBe(1);
+    expect(result.commitCount).toBe(101);
     expect(result.body).toContain("Improvements");
-    expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining("/compare/old-sha...new-sha"),
-      expect.anything(),
-    );
+    expect(result.sourceCommit).toBe("head-sha");
+    expect(result.title).toBe("What's New — March 10, 2026");
+  });
+
+  it("flags a first note cut at 50 commits", async () => {
+    const list = Array.from({ length: 51 }, (_, i) => raw(`${String(i).padStart(7, "a")}`, "fix: a", "2026-02-01"));
+    global.fetch = github({ "...main?": { status: "ahead" }, "/commits/aaaaaa0": list[0], "/commits?sha=aaaaaa0": list });
+
+    const result = await draft("aaaaaa0");
+    expect(result.truncated).toBe(true);
+    expect(result.commitCount).toBe(50);
+  });
+
+  it("refuses more than 1,000 commits since the last note", async () => {
+    releaseNotesStore["rn1"] = published("0d0d0d0");
+    const page = Array.from({ length: 100 }, () => raw("c0ffee0", "fix: a", "2026-03-01"));
+    global.fetch = github({ "/commits/main": raw("b1b1b1b", "fix", "2026-03-10"), "/compare/": { status: "ahead", total_commits: 5000, commits: page } });
+
+    await expect(draft("main")).rejects.toMatchObject({ code: "failed-precondition" });
+  });
+
+  it("refuses a commit that is only on a feature branch", async () => {
+    global.fetch = github({ "/commits/fea7fea": raw("fea7fea", "fix", "2026-03-01"), "...main?": { status: "diverged" } });
+    await expect(draft("fea7fea")).rejects.toMatchObject({ code: "failed-precondition", message: expect.stringContaining("not on main") });
+  });
+
+  it("accepts an uppercase sha", async () => {
+    global.fetch = github({ "...main?": { status: "ahead" }, "/commits/ABCDEF1": raw("abcdef1", "fix: a", "2026-03-01"), "/commits?sha=abcdef1": [] });
+    await expect(draft("ABCDEF1")).resolves.toMatchObject({ sourceCommit: "abcdef1" });
+  });
+
+  it("falls back to an older published checkpoint when the newest isn't a sha", async () => {
+    releaseNotesStore["rn2"] = { ...published("main"), createdAt: 2 };
+    releaseNotesStore["rn1"] = published("0d0d0d0");
+    global.fetch = github({ "/commits/main": raw("b1b1b1b", "fix", "2026-03-10"), "/compare/0d0d0d0...b1b1b1b": { status: "ahead", total_commits: 0, commits: [] } });
+
+    await draft("main");
+
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("/compare/0d0d0d0...b1b1b1b"), expect.anything());
+  });
+
+  it("explains a checkpoint that is no longer on main", async () => {
+    releaseNotesStore["rn1"] = published("0d0d0d0");
+    global.fetch = github({ "/commits/main": raw("b1b1b1b", "fix", "2026-03-10"), "/compare/": { status: "diverged", total_commits: 2, commits: [] } });
+
+    await expect(draft("main")).rejects.toMatchObject({ code: "failed-precondition", message: expect.stringContaining("no longer on main") });
+  });
+
+  it("ignores a stored checkpoint that is not a sha (old code saved branch names)", async () => {
+    releaseNotesStore["rn1"] = published("main");
+    global.fetch = github({ "/commits/main": raw("b1b1b1b", "fix: a", "2026-03-10"), "/commits?sha=b1b1b1b": [raw("b1b1b1b", "fix: a", "2026-03-10")] });
+
+    await draft("main");
+
+    expect(global.fetch).not.toHaveBeenCalledWith(expect.stringContaining("/compare/"), expect.anything());
+  });
+
+  it("refuses a commit that is not after the last published note", async () => {
+    releaseNotesStore["rn1"] = published("0d0d0d0");
+    global.fetch = github({
+      "/commits/01de201": raw("01de201", "fix: z", "2025-12-01"),
+      "...main?": { status: "ahead" },
+      "/compare/0d0d0d0...01de201": { status: "behind", total_commits: 0, commits: [] },
+    });
+
+    await expect(draft("01de201")).rejects.toMatchObject({ code: "failed-precondition" });
   });
 });
