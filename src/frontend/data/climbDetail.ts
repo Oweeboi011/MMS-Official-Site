@@ -1,5 +1,6 @@
 // One climb's page data (/climbs/:id). Own module so it loads with the climb page, not the home page.
 import type { Doc } from '../lib/firestoreRest';
+import { fromManilaDay, manilaDay } from '../lib/manila';
 import type { Coords } from '../lib/trailEmbeds';
 import { isPublic, mapClimb, type ScheduleClimb } from './climbs';
 import type { Stat } from './content';
@@ -25,6 +26,13 @@ function payToOf(d: Doc) {
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
 
+const DEFAULT_DUE_DAYS_BEFORE = 5; // old app registrationPolicy default; officers can set paymentDueDate
+export function paymentDueOf(d: Doc, start?: Date): string {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str(d.paymentDueDate))) return str(d.paymentDueDate);
+  return start ? manilaDay(new Date(start.getTime() - DEFAULT_DUE_DAYS_BEFORE * 86400000)) : '';
+}
+export const dueLabel = (day: string) => fromManilaDay(day).toLocaleDateString('en-PH', { month: 'long', day: 'numeric', timeZone: 'Asia/Manila' });
+
 export interface ClimbDetail extends ScheduleClimb {
   cancelled: boolean;
   description: string;
@@ -43,6 +51,7 @@ export interface ClimbDetail extends ScheduleClimb {
   notices: { message: string; pinned: boolean; date: string }[]; // per-climb announcements, pinned first
   requiredDocs: (DocType & { sampleUrl: string })[];
   officers: { role: string; name: string }[];
+  paymentDue: string; // YYYY-MM-DD (Manila): the officers' date, else 5 days before the start; '' when undated
 }
 
 export interface ItineraryDay { day: string; entries: { time: string; activity: string }[] }
@@ -125,5 +134,6 @@ export function toClimbDetail(d: Doc, now: Date): ClimbDetail | null {
       label: str(f.label), amount: text(f.amount) || 'TBA', note: str(f.note), optional: f.optional === true, isGuestFee: f.isGuestFee === true,
     })),
     officers: (Array.isArray(d.officers) ? d.officers.map(record) : []).map((o) => ({ role: str(o.role), name: str(o.name) })).filter((o) => o.name),
+    paymentDue: paymentDueOf(d, climb.start),
   };
 }
