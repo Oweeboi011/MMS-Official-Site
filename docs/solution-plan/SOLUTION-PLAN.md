@@ -84,7 +84,7 @@ P1 = launch · P2 = soon after · P3 = later. Open Climbs parity list: `tests/pa
 | Guest | **Share a climb** ([#185](https://github.com/Oweeboi011/MMS-Official-Site/issues/185), owner ask 2026-11-09): Facebook (sharer link), Messenger (phone share sheet only; decided 2026-11-09: no Facebook App ID, desktop gets Facebook + Copy link), Instagram story (generated 1080×1920 story image via the phone share sheet; no web link opens Stories). Link previews need per-climb Open Graph tags (item 18). **Built 2026-11-09** on `/climbs/:id` (`ShareClimb`, story image `lib/storyImage.ts`); link previews still wait on item 18 | 1 |
 | Guest / member | Sign in (Google / email; no SMS) · my registrations + receipts | 1 |
 | Member | Profile (batch, tribe) · climb log / passport | 2–3 |
-| Climb officer | Climbs CRUD · participants paid/pending/unpaid · verify receipts · LGU CSV | 1 |
+| Climb officer | Climbs CRUD · participants paid/pending/unpaid · verify receipts · LGU CSV. Climb editor in `/admin` built 2026-11-09 (`data/climbSchema.ts`: details, dates, status, postpone, stats, packing, photos, map links); left: fees, QR, officers, docs, multi-route + itinerary editing | 1 |
 | Climb officer | Post-climb expense report | 2 |
 | Admin | Announcements · roles | 1 |
 | Admin | In-app content editing · treasurer summary | 2 |

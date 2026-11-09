@@ -1,4 +1,4 @@
-import { Timestamp, addDoc, collection, deleteDoc, deleteField, doc, getDocs, limit, query, serverTimestamp, setDoc } from 'firebase/firestore/lite';
+import { Timestamp, addDoc, collection, deleteDoc, deleteField, doc, getDocs, limit, orderBy, query, serverTimestamp, setDoc } from 'firebase/firestore/lite';
 import { fromForm, type CollectionSpec, type FormValues } from '../data/siteSchemas';
 import { firebase } from './firebase';
 import { readOnlyMessage, writesEnabled } from './firebaseEnv';
@@ -13,7 +13,8 @@ export interface Row {
 export const MAX_ROWS = 200;
 
 export async function listRows(spec: CollectionSpec): Promise<Row[]> {
-  const snap = await getDocs(query(collection(firebase().db, spec.id), limit(MAX_ROWS)));
+  const order = spec.orderBy ? [orderBy(spec.orderBy.field, spec.orderBy.desc ? 'desc' : 'asc')] : [];
+  const snap = await getDocs(query(collection(firebase().db, spec.id), ...order, limit(MAX_ROWS)));
   return snap.docs.map((d) => ({ id: d.id, data: d.data() }));
 }
 
