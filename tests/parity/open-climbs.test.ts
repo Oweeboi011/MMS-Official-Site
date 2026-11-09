@@ -29,7 +29,7 @@ describe('Open Climbs parity: admin', () => {
   it.todo('dashboard: climbs with type, slots, confirmed, pending');
   it.todo('climbs CRUD: open/close, cancel, postpone, fees, QR, officers, docs, meetings, announcements, drives');
   it.todo('climb detail: registrants, payments, split, refunds, walk-ins, no-shows, services, expenses, net funds, climb-day sheet');
-  it.todo('all registrations: search, filters, CSV export');
+  // all registrations: search, filters, CSV export: tests/integration/adminClimb.test.tsx
   it.todo('payments: cash flow, service headcounts');
   it.todo('analytics: page views, failedRequests log');
   it.todo('app insights dashboards');

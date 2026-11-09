@@ -1,4 +1,4 @@
-import { CSV_HEADERS, derivePaymentStatus, reviewPayment, summary, toAdminReg, toCsv } from '../../src/frontend/data/adminRegistrations';
+import { CSV_HEADERS, derivePaymentStatus, emptyWalkIn, matches, reviewPayment, summary, toAdminReg, toCsv, walkInDoc, walkInProblem } from '../../src/frontend/data/adminRegistrations';
 
 const pay = (amount: number, status = 'submitted', extra = {}) => ({ amount, proofs: [{ url: 'https://x/r.jpg', fileName: 'r.jpg' }], status, submittedAt: 1, ...extra });
 const reg = toAdminReg('r1', {
@@ -37,5 +37,24 @@ describe('admin registrations', () => {
     expect(csv[2]).toContain(`"'=HYPERLINK(""http://x"")"`);
     expect(csv[2]).toContain('"says ""hi"""');
     expect(csv[1]).toContain('"500 verified; 800 submitted"');
+  });
+});
+
+describe('walk-ins and search', () => {
+  const climb = { id: 'c1', title: 'Mt. Pulag', dateLabel: 'Nov 20', location: 'Benguet' };
+  it('records a walk-in with no account, and cash as a verified payment', () => {
+    const doc = walkInDoc(climb, { ...emptyWalkIn(), name: ' Carlo ', cash: '₱1,500' }, 'tl@x.com', 'NOW', 'STAMP');
+    expect(doc).toMatchObject({ climbId: 'c1', userId: null, name: 'Carlo', status: 'confirmed', paymentStatus: 'verified', amountPaid: 1500, addedByAdmin: true, confirmedAt: 'NOW' });
+    expect(doc.payments).toEqual([{ amount: 1500, proofs: [], submittedAt: 'STAMP', status: 'verified', recordedBy: 'tl@x.com', note: 'Cash, recorded by an officer' }]);
+    expect(walkInDoc(climb, { ...emptyWalkIn(), name: 'D' }, 'x', 'NOW', 'S')).toMatchObject({ paymentStatus: 'unpaid', amountPaid: null, payments: [] });
+    expect(walkInProblem(emptyWalkIn())).toMatch(/name/);
+    expect(walkInProblem({ ...emptyWalkIn(), name: 'D', cash: 'abc' })).toMatch(/peso/);
+  });
+
+  it('matches name, email, mobile or climb, and status', () => {
+    expect(matches(reg, 'ANA', '')).toBe(true);
+    expect(matches(reg, 'pulag', 'pending')).toBe(true);
+    expect(matches(reg, 'pulag', 'confirmed')).toBe(false);
+    expect(matches(reg, 'apo', '')).toBe(false);
   });
 });
