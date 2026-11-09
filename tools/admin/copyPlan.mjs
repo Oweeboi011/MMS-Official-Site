@@ -44,10 +44,27 @@ export function toImportRecord(user, withPassword = false) {
     disabled: user.disabled,
     metadata: { creationTime: user.metadata?.creationTime, lastSignInTime: user.metadata?.lastSignInTime },
     providerData,
+    customClaims: user.customClaims, // an upsert would otherwise clear the admin claim
   };
   if (withPassword && user.passwordHash) {
     record.passwordHash = Buffer.from(user.passwordHash, 'base64');
     if (user.passwordSalt) record.passwordSalt = Buffer.from(user.passwordSalt, 'base64');
   }
   return record;
+}
+
+// The console's "Password hash parameters" come as text (`key: value` lines inside `hash_config { }`); JSON also works.
+export function parseHashParams(text) {
+  let raw;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    raw = Object.fromEntries(text.split(String.fromCharCode(10)).flatMap((line) => {
+      const at = line.indexOf(':');
+      return at < 0 ? [] : [[line.slice(0, at).trim(), line.slice(at + 1).trim().replace(/,$/, '')]];
+    }));
+  }
+  const missing = ['base64_signer_key', 'base64_salt_separator', 'rounds', 'mem_cost'].filter((k) => raw[k] === undefined || raw[k] === '');
+  if (missing.length) throw new Error(`hash parameters are missing: ${missing.join(', ')}`);
+  return { signerKey: raw.base64_signer_key, saltSeparator: raw.base64_salt_separator, rounds: Number(raw.rounds), memCost: Number(raw.mem_cost) };
 }
