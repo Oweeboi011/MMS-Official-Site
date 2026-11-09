@@ -39,7 +39,7 @@ jobs:
           if [ -z "$TOKEN" ]; then echo "::warning::CLOUDFLARE_API_TOKEN not set; skipping deploy"; echo "skip=1" >> "$GITHUB_OUTPUT"; fi
       - name: Checkout
         if: steps.guard.outputs.skip != '1'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Setup Toolchain
         if: steps.guard.outputs.skip != '1'
         uses: ./.github/actions/setup
