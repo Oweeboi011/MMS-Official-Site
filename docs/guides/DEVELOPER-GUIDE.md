@@ -60,6 +60,7 @@ Owner-only scripts (`tools/admin`, firebase-admin from `src/backend/functions`; 
 | `grant-email-members.mjs <uid\|email> [--revoke]` | `canEmailMembers` (rules refuse it from every client) |
 | `purge-admin-pageviews.mjs` | one-off: drop page views logged on `/admin` + `/account` before the client skipped them |
 | `copy-old-data.mjs [--apply] [--overwrite] [--only a,b] [--hash-params file]` | everything from the old project: sign-in accounts (Google link kept; passwords only with `--hash-params`) + all 11 other collections, same ids. Dry run by default. Set `GOOGLE_CLOUD_QUOTA_PROJECT=<this project>` for Auth calls. Re-copy climbs with `copy-old-climbs.mjs --overwrite` afterwards: registration triggers bump the counts |
+| `swap-account.mjs [--apply]` | one-off after the copy: an account here that shares an email with a different-id old account is replaced by the old one (role and registrations belong to it). Deletes the new account; dry run by default. The admin claim is only set when the role changes, so set it once for a swapped admin |
 | `seed-emulator.mjs` | emulator only |
 | `copy-old-climbs.mjs [--from mms-open-climbs] [--apply] [--overwrite]` | copies the old app's `climbs` here with the same ids; dry run by default, existing climbs kept unless `--overwrite`. Needs your Google login on both projects. Interim until the scheduled sync (plan item 7); registrations are not copied |
 
