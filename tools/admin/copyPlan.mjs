@@ -28,3 +28,26 @@ export function normalizeDates(data, toTimestamp) {
   }
   return out;
 }
+
+// Old Auth user → importUsers record. The Google link, verified flag and sign-in times come across. Email/password
+// people keep their password only when `withPassword` (hash params supplied); "password" is not a linkable provider.
+export function toImportRecord(user, withPassword = false) {
+  const providerData = (user.providerData ?? [])
+    .filter((p) => p.providerId !== 'password')
+    .map((p) => ({ uid: p.uid, providerId: p.providerId, email: p.email, displayName: p.displayName, photoURL: p.photoURL }));
+  const record = {
+    uid: user.uid,
+    email: user.email,
+    emailVerified: user.emailVerified,
+    displayName: user.displayName,
+    photoURL: user.photoURL,
+    disabled: user.disabled,
+    metadata: { creationTime: user.metadata?.creationTime, lastSignInTime: user.metadata?.lastSignInTime },
+    providerData,
+  };
+  if (withPassword && user.passwordHash) {
+    record.passwordHash = Buffer.from(user.passwordHash, 'base64');
+    if (user.passwordSalt) record.passwordSalt = Buffer.from(user.passwordSalt, 'base64');
+  }
+  return record;
+}

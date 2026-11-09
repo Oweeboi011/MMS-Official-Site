@@ -1,4 +1,4 @@
-import { describe as describeClimb, normalizeDates, planCopy } from '../../tools/admin/copyPlan.mjs';
+import { describe as describeClimb, normalizeDates, planCopy, toImportRecord } from '../../tools/admin/copyPlan.mjs';
 
 const doc = (id: string, data: Record<string, unknown> = {}) => ({ id, data });
 
@@ -31,5 +31,21 @@ describe('old-app climb copy plan', () => {
     const already = { startDate: { seconds: 1 } };
     expect(normalizeDates(already, ts).startDate).toBe(already.startDate);
     expect(() => normalizeDates({ startDate: 'soon' }, ts)).toThrow(/Unreadable startDate/);
+  });
+
+  it('maps an old sign-in account, keeping the Google link and dropping the password unless hash settings are given', () => {
+    const user = {
+      uid: 'u1', email: 'a@x.com', emailVerified: true, displayName: 'Ana', disabled: false,
+      metadata: { creationTime: 'Mon, 01 Jan 2024 00:00:00 GMT', lastSignInTime: 'Tue, 02 Jan 2024 00:00:00 GMT' },
+      providerData: [{ uid: 'g1', providerId: 'google.com', email: 'a@x.com' }, { uid: 'a@x.com', providerId: 'password', email: 'a@x.com' }],
+      passwordHash: 'aGFzaA==', passwordSalt: 'c2FsdA==',
+    };
+    const plain = toImportRecord(user);
+    expect(plain.providerData.map((p: { providerId: string }) => p.providerId)).toEqual(['google.com']);
+    expect(plain).not.toHaveProperty('passwordHash');
+    expect(plain).toMatchObject({ uid: 'u1', emailVerified: true, displayName: 'Ana' });
+    const withPassword = toImportRecord(user, true) as unknown as { passwordHash: Buffer; passwordSalt: Buffer };
+    expect(withPassword.passwordHash.toString()).toBe('hash');
+    expect(withPassword.passwordSalt.toString()).toBe('salt');
   });
 });
