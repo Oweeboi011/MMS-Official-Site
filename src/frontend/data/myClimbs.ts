@@ -21,6 +21,7 @@ export interface MyClimb {
   waiver: { name: string; signedAt: number; location: string } | null;
   pledge: Pledge | null;
   details: Details;
+  name: string; // as registered
   payments: { amount: number; status: string; note: string }[];
 }
 
@@ -69,6 +70,7 @@ export function toMyClimb(id: string, d: Doc): MyClimb {
     uploaded: REQUIRED_DOCS.map((t) => t.uploadField).filter((f) => d[f] && typeof d[f] === 'object'),
     receipts: receiptsOf(d.paymentProofs),
     details: detailsOf(d),
+    name: str(d.name),
     payments: (Array.isArray(d.payments) ? d.payments : []).map((p) => (p ?? {}) as Doc).map((p) => ({ amount: typeof p.amount === 'number' ? p.amount : Number(p.amount) || 0, status: str(p.status) || 'submitted', note: str(p.note) })),
     waiver: d.waiverSigned === true ? { name: str(d.waiverSignedName), signedAt: millis(d.waiverSignedAt), location: str(d.climbLocation) } : null,
   };

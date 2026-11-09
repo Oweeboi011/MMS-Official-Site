@@ -39,6 +39,23 @@ Planned: sync (scheduled, old → new, phase 2). No payment gateway ([ADR 0007](
 
 `src/frontend/services/publicData.ts` reads site content over the Firestore REST API with the web API key: `:runQuery` for `announcements` (`published == true`, newest `publishedAt` first; home reads 3, `/media/news` 30), `surveys` (50, shown open first), `officers` (`current == true`, 50, for Our story; every term, current first, 300, for Leadership only), and `GET siteSettings/site`. Rules allow these signed out; an unfiltered `announcements` query is refused. While waiting: settings blank, lists empty (no sample contacts to click). No answer (HTTP error, missing doc) → `content.ts` sample; network error or 5 s timeout → sample and the next page retries. One read per collection per page load. Live officers never mix with sample names: a body with no live officers is hidden. Tests run with Firebase blanked (`vite.config.ts` `test.env`). Hooks: `services/useSiteData.ts`; mapping: `data/liveContent.ts`; REST JSON: `lib/firestoreRest.ts`. Dev with `VITE_USE_EMULATORS=true` reads the emulator.
 
+### Signed-in reads and writes (SDK, per service)
+
+Each service writes exactly the fields its rule allows; the rule named is the contract (`src/backend/firebase/firestore.rules`).
+
+| Service (`src/frontend/services/`) | Reads / writes | Rule |
+|---|---|---|
+| `registrations.ts` | create own registration (pending, unpaid); list own; cancel; edit mobile / emergency contact / health; donation pledge | `memberRegistrationIsHonest`, `memberIsCancellingOwn`, `memberIsUpdatingOwnDetails`, `memberIsUpdatingOwnPledge` |
+| `uploads.ts` | Storage `payment-proofs/`, `*-uploads/` (own folder, create-only, ≤ 10 MB); append one unreviewed payment; set an upload field | `storage.rules`; `memberAppendsOnePayment`, `memberUploadsAreFiles` |
+| `climbPrivate.ts` | read meetings / resources / participants (registrants); admins merge meetings + resources | `isRegisteredFor`; admin write |
+| `feedback.ts` | create `feedback/{climbId}_{uid}` once, rating 1–5 | `feedback` create |
+| `notifications.ts` | read own (userId + createdAt index); flip `read` | owner update `read` only |
+| `releaseNotes.ts` | read published (status + publishedAt index) | signed-in read |
+| `adminRegistrations.ts`, `dashboard.ts` | admins: list / update any registration, walk-ins, payment review, counts | `isAdmin()` |
+| `siteData.ts` | admins: collection editor (`siteSchemas.ts`, `climbSchema.ts`, `releaseNotes.ts`) | per-collection rules |
+
+Callables (`callables/`) are not called from the site yet; each gets a row here when its UI lands.
+
 ## External APIs
 
 | API | Used by | Auth |

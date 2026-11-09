@@ -1,6 +1,7 @@
 // climbPrivate/{id} over the SDK (needs the signed-in user: rules let registrants and admins read).
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore/lite';
 import { toClimbPrivate, type ClimbPrivate } from '../data/climbPrivate';
+import { logAudit } from './auditLog';
 import { firebase } from './firebase';
 import { readOnlyMessage, writesEnabled } from './firebaseEnv';
 
@@ -24,4 +25,5 @@ export async function loadClimbPrivateRaw(climbId: string): Promise<Record<strin
 export async function saveClimbPrivate(climbId: string, data: { preClimbMeetings: unknown; resources: unknown }): Promise<void> {
   if (!writesEnabled) throw new Error(readOnlyMessage);
   await setDoc(doc(firebase().db, 'climbPrivate', climbId), { ...data, updatedAt: serverTimestamp() }, { merge: true });
+  await logAudit({ action: 'meetings / resources saved', targetType: 'climb', targetId: climbId });
 }

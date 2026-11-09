@@ -231,6 +231,9 @@ button { font: inherit; }
 .day-sheet { width: 100%; border-collapse: collapse; font-size: .85rem; }
 .day-sheet th, .day-sheet td { border: 1px solid var(--line); padding: 6px; text-align: left; vertical-align: top; }
 .tick-box { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--ink); }
+.release-note { padding: 18px 0; border-bottom: 1px solid var(--line); }
+.notifications ul { margin: 8px 0; padding-left: 18px; display: grid; gap: 6px; }
+.notifications .is-unread { font-weight: 800; }
 .year-picker { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 40px; }
 .year-picker select { margin-left: 8px; padding: 8px 10px; border-radius: 10px; font: inherit; }
 .motto { margin: 10px 0 0; color: var(--gold); font-weight: 850; font-style: italic; }

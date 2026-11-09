@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from 'node:fs';
 
 describe('Open Climbs parity: auth + users', () => {
   it.todo('sign in with email + Google; all old accounts work (hashes migrated)');
-  it.todo('admin user management: create, correct, delete, roles, link walk-ins');
+  it.todo('admin user management: create, correct, delete accounts, link walk-ins (list + roles done: /admin/users)');
 });
 
 describe('Open Climbs parity: member', () => {
@@ -18,9 +18,9 @@ describe('Open Climbs parity: member', () => {
   // required documents upload (after registering): tests/integration/myClimbs.test.tsx
   // donation drive pledge: tests/unit/donations.test.ts, tests/integration/myClimbs.test.tsx
   // My Climbs: status, balance, payment log, next steps, self-cancel: tests/unit/myClimbs.test.ts
-  it.todo('rate a climb afterwards');
-  it.todo('release notes page + one-time what-is-new popup');
-  it.todo('notification bell');
+  // release notes page + one-time what's-new banner: tests/unit/releaseNotes.test.ts, tests/integration/whatsNew.test.tsx
+  // rate a climb afterwards: tests/integration/myClimbs.test.tsx (feedback rules: rules.emulator.mjs)
+  // notifications (on My Climbs; header bell would load Firebase on every page): tests/integration/myClimbs.test.tsx
   it.todo('first-login welcome tour');
   it.todo('emails: registration received, status updates, post-climb thank-you');
 });
@@ -30,7 +30,7 @@ describe('Open Climbs parity: admin', () => {
   it.todo('climbs CRUD: open/close, cancel, postpone, fees, QR, officers, docs, meetings, announcements, drives');
   it.todo('climb detail: registrants, payments, split, refunds, walk-ins, no-shows, services, expenses, net funds, climb-day sheet');
   // all registrations: search, filters, CSV export: tests/integration/adminClimb.test.tsx
-  it.todo('payments: cash flow, service headcounts');
+  // payments: cash flow, service headcounts: tests/unit/treasury.test.ts (/admin/treasurer)
   it.todo('analytics: page views, failedRequests log');
   it.todo('app insights dashboards');
   it.todo('release notes publish + tracked member email send');
@@ -41,7 +41,7 @@ describe('Open Climbs parity: found in plan review 2026-11-09', () => {
   // trail map embeds (AllTrails, Komoot, Google Maps): tests/integration/liveContent.test.tsx (climb page)
   // packing list + Leave No Trace ethics on the climb page: tests/integration/liveContent.test.tsx (climb page)
   // registrant-only section: participants, resources, pre-climb meetings, officers: tests/integration/registrantArea.test.tsx
-  it.todo('admin audit log of sensitive actions');
+  // admin audit log of sensitive actions: tests/integration/adminAudit.test.tsx
   // help and privacy pages: tests/integration/help.test.tsx, privacy.test.tsx
   it('installable app: web manifest + icons', () => {
     const manifest = JSON.parse(readFileSync('public/manifest.webmanifest', 'utf8')) as { display: string; start_url: string; icons: { src: string; sizes: string; purpose?: string }[] };
@@ -59,6 +59,6 @@ describe('Open Climbs parity: found in plan review 2026-11-09', () => {
   it.todo('registration and cancellation policy page (beginner guide done: /activities/open-climbs/guide)');
   // admin climb setup checklist: tests/unit/climbSetup.test.ts
   // compress images in the browser before upload: lib/compressImage.ts (tests/unit/slice4.test.ts)
-  it.todo('member and admin help guides (old USER_MANUAL)');
-  it.todo('render release notes and announcements with lightweight markdown');
+  // member (/help) and officer (/admin/help) guides: tests/integration/help.test.tsx
+  // lightweight markdown (**bold**) in announcements, surveys, guides: components/RichText (tests/unit/guide.test.tsx)
 });

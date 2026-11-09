@@ -1,6 +1,7 @@
 // Admin side of `registrations` (rules: admins read and update any). Lazy: /admin/climbs/:id only.
 import { Timestamp, addDoc, collection, doc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc, where } from 'firebase/firestore/lite';
 import { reviewPayment, toAdminReg, walkInDoc, type AdminReg, type WalkIn } from '../data/adminRegistrations';
+import { logAudit } from './auditLog';
 import { firebase } from './firebase';
 import { readOnlyMessage, writesEnabled } from './firebaseEnv';
 
@@ -14,16 +15,25 @@ async function patch(id: string, data: Record<string, unknown>) {
   await updateDoc(doc(firebase().db, 'registrations', id), data);
 }
 
-export const setRegistrationStatus = (id: string, status: string) => patch(id, { status, updatedAt: serverTimestamp() });
+export async function setRegistrationStatus(id: string, status: string, label = '') {
+  await patch(id, { status, updatedAt: serverTimestamp() });
+  await logAudit({ action: 'registration status', targetType: 'registration', targetId: id, targetLabel: label, details: status });
+}
 
-export const reviewRegistrationPayment = (reg: AdminReg, index: number, status: 'verified' | 'rejected', reviewer: { name: string; uid: string }) =>
-  patch(reg.id, reviewPayment(reg, index, status, reviewer, serverTimestamp()));
+export async function reviewRegistrationPayment(reg: AdminReg, index: number, status: 'verified' | 'rejected', reviewer: { name: string; uid: string }) {
+  await patch(reg.id, reviewPayment(reg, index, status, reviewer, serverTimestamp()));
+  await logAudit({ action: `payment ${status}`, targetType: 'registration', targetId: reg.id, targetLabel: `${reg.name} · ${reg.title}`, details: `₱${reg.payments[index]?.amount ?? 0}` });
+}
 
-export const setAdminNotes = (id: string, notes: string) => patch(id, { adminNotes: notes.trim().slice(0, 2000), updatedAt: serverTimestamp() });
+export async function setAdminNotes(id: string, notes: string, label = '') {
+  await patch(id, { adminNotes: notes.trim().slice(0, 2000), updatedAt: serverTimestamp() });
+  await logAudit({ action: 'notes edited', targetType: 'registration', targetId: id, targetLabel: label });
+}
 
 export async function addWalkIn(climb: { id: string; title: string; dateLabel: string; location: string }, w: WalkIn, recorder: string): Promise<void> {
   if (!writesEnabled) throw new Error(readOnlyMessage);
-  await addDoc(collection(firebase().db, 'registrations'), walkInDoc(climb, w, recorder, serverTimestamp(), Timestamp.now()));
+  const ref = await addDoc(collection(firebase().db, 'registrations'), walkInDoc(climb, w, recorder, serverTimestamp(), Timestamp.now()));
+  await logAudit({ action: 'walk-in added', targetType: 'registration', targetId: ref.id, targetLabel: `${w.name} · ${climb.title}`, details: w.cash ? `cash ₱${w.cash}` : '' });
 }
 
 // Newest 300 across all climbs, for search (old app AllRegistrations).
