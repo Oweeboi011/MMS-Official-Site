@@ -6,6 +6,7 @@ What we pay and who owns it. Hard cap **₱54–₱100/month** ([ADR 0001](../ad
 |---------|--------------------|------------|
 | Hosting, CDN, TLS, DNS | Cloudflare free (MMS) | ₱0 |
 | Auth, DB, functions, storage | Firebase Blaze `mms-official-site-513809` | ≈ ₱0 (free quota) |
+| App Check (reCAPTCHA Enterprise / Fraud Defense) | same project | ₱0 up to 10k checks/month; next tier US$8 would trip the hard stop (sign-in/admin only, token 1 day) |
 | Domain `metropolitanms.org` | Namecheap (MMS; push pending) | ₱92 (US$18.98/yr); Cloudflare Registrar ₱54 later |
 | Payments | GCash / QR Ph transfer to MMS account, receipt upload ([ADR 0007](../adr/0007-PAYMENTS-MANUAL.md)) | ₱0 |
 | Albums | MMS Google Drive | ₱0 |

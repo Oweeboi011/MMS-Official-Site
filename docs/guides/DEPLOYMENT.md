@@ -53,9 +53,16 @@ npx firebase-tools@15 deploy --only functions:<name>    # one function
 |----------|---------|
 | Firestore | named DB `openclimbs`, `asia-southeast1` |
 | Storage | default bucket, `us-east1` (only no-cost locations are US; fixed once created) |
-| Auth | email/password + Google (public name "Metropolitan Mountaineering Society", support email Owee's Gmail until MMS Gmail is a project member); authorized domain `www.metropolitanms.org` |
+| Auth | email/password + Google (public name "Metropolitan Mountaineering Society", support email Owee's Gmail until MMS Gmail is a project member); authorized domains `www.metropolitanms.org`, `preview.mms-official-site-1qd.pages.dev` |
 | Functions | `asia-southeast1`, max 5 instances, 256 MiB (`shared/admin.js`) |
 | Secrets | `BREVO_API_KEY`, `BREVO_FROM_EMAIL` (placeholders until Brevo, open item 8), `GITHUB_TOKEN` (fine-grained, Contents read-only on this repo) |
+
+### Firebase web key + App Check
+
+- **Repo Variables** (not secrets; public web config) feed CD builds: `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_APP_ID`, `VITE_APP_CHECK_SITE_KEY`. Missing → site shows sample content, sign-in "not set up".
+- **Web API key** ("Browser key (auto created by Firebase)", Google Cloud → Credentials): Firebase's API list + website referrers `https://www.metropolitanms.org/*`, `https://metropolitanms.org/*`, `https://mms-official-site-1qd.pages.dev/*`, `https://*.mms-official-site-1qd.pages.dev/*`, `https://mms-official-site-513809.firebaseapp.com/*`, `http://localhost:5173/*`, `http://localhost:4173/*`. Auth enforces it; Firestore ignores key restrictions (rules guard data).
+- **App Check**: reCAPTCHA Enterprise key "MMS site App Check (web)" (Google Cloud → Fraud Defense; domains `metropolitanms.org`, `mms-official-site-1qd.pages.dev`, `localhost`, subdomains included), registered for the web app, token TTL 1 day, **monitor mode** (APIs not enforced). Client: `services/firebase.ts` (sign-in/admin only).
+- **New host** (custom domain, new Pages project): add it to Auth authorized domains, the key's referrers, and the reCAPTCHA key's domains, or sign-in breaks there.
 
 Set a secret in **your own terminal** (it prompts; never paste the value into a command or chat): `npx firebase-tools@15 functions:secrets:set NAME --project mms-official-site-513809`, then redeploy the functions that use it.
 
