@@ -12,6 +12,11 @@ vi.mock('../../src/frontend/services/registrations', () => ({
   updateMyDetails: async (id: string, x: unknown) => { svc.details.push([id, x]); },
   setMyPledge: async (id: string, p: unknown) => { svc.details.push(['pledge', id, p]); },
 }));
+vi.mock('../../src/frontend/services/notifications', () => ({
+  myNotifications: async () => [{ id: 'n1', title: 'Payment verified', message: '₱800 for Mt. Pulag', link: '/climbs/soon', read: false, createdAt: 0 },
+    { id: 'n2', title: 'Registration received', message: '', link: '/account/climbs', read: true, createdAt: 0 }],
+  markRead: async (ids: string[]) => { svc.details.push(['read', ids]); },
+}));
 vi.mock('../../src/frontend/services/feedback', () => ({
   myRating: async () => null,
   rateClimb: async (r: unknown) => { svc.details.push(['rating', r]); },
@@ -88,6 +93,14 @@ describe('My Climbs (switch on)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Resend the link' }));
     expect(await screen.findByText(/Sent\. Check your inbox/)).toBeInTheDocument();
     expect(svc.resent).toBe(1);
+  });
+
+  it('lists notifications and marks them read', async () => {
+    renderAt('/account/climbs');
+    expect(await screen.findByText('Notifications (1 new)', {}, { timeout: 5000 })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Payment verified' })).toHaveAttribute('href', '/climbs/soon');
+    fireEvent.click(screen.getByRole('button', { name: 'Mark all read' }));
+    await vi.waitFor(() => expect(svc.details).toContainEqual(['read', ['n1']]));
   });
 
   it('rates a climb after it is over, once', async () => {
