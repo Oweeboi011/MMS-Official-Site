@@ -1,5 +1,6 @@
 // Feature parity with mms-open-climbs.web.app (source: github.com/Oweeboi011/mms-open-climbs README).
 // Each todo becomes a real test in its migration phase (docs/solution-plan/SOLUTION-PLAN.md). Count = remaining gap.
+import { existsSync, readFileSync } from 'node:fs';
 
 describe('Open Climbs parity: auth + users', () => {
   it.todo('sign in with email + Google; all old accounts work (hashes migrated)');
@@ -42,8 +43,16 @@ describe('Open Climbs parity: found in plan review 2026-11-09', () => {
   it.todo('registrant-only section: participants, resources, pre-climb meetings, officer contacts');
   it.todo('admin audit log of sensitive actions');
   it.todo('help and privacy pages');
-  it.todo('installable app: web manifest + icons');
-  it.todo('accessibility checks (axe) on key pages');
+  it('installable app: web manifest + icons', () => {
+    const manifest = JSON.parse(readFileSync('public/manifest.webmanifest', 'utf8')) as { display: string; start_url: string; icons: { src: string; sizes: string; purpose?: string }[] };
+    expect(manifest.display).toBe('standalone');
+    expect(manifest.start_url).toBe('/');
+    expect(manifest.icons.map((i) => i.sizes)).toEqual(expect.arrayContaining(['192x192', '512x512']));
+    expect(manifest.icons.some((i) => i.purpose === 'maskable')).toBe(true);
+    for (const icon of manifest.icons) expect(existsSync(`public${icon.src}`)).toBe(true);
+    expect(readFileSync('index.html', 'utf8')).toContain('rel="manifest"');
+  });
+  // accessibility checks (axe) on key pages: tests/e2e/a11y.spec.ts
   it.todo('verify-email banner after sign-up');
   it.todo('edit registration details after submitting');
   it.todo('view an uploaded receipt (receipt modal)');
