@@ -1,4 +1,4 @@
-import { CSV_HEADERS, derivePaymentStatus, emptyWalkIn, expensesTotal, matches, noShowPatch, refundPatch, refundedTotal, reviewPayment, summary, toAdminReg, toCsv, walkInDoc, walkInProblem } from '../../src/frontend/data/adminRegistrations';
+import { CSV_HEADERS, NO_FILTER, derivePaymentStatus, emptyWalkIn, expensesTotal, filterRegs, matches, missingDocs, noShowPatch, refundPatch, refundedTotal, reviewPayment, summary, toAdminReg, type RegFilter, toCsv, walkInDoc, walkInProblem } from '../../src/frontend/data/adminRegistrations';
 
 const pay = (amount: number, status = 'submitted', extra = {}) => ({ amount, proofs: [{ url: 'https://x/r.jpg', fileName: 'r.jpg' }], status, submittedAt: 1, ...extra });
 const reg = toAdminReg('r1', {
@@ -73,5 +73,34 @@ describe('refunds, no-shows, expenses', () => {
     expect(noShowPatch(true, 'tl', 'NOW')).toEqual({ noShow: true, noShowMarkedBy: 'tl', noShowMarkedAt: 'NOW', updatedAt: 'NOW' });
     expect(noShowPatch(false, 'tl', 'NOW')).toEqual({ noShow: false, noShowMarkedBy: null, noShowMarkedAt: null, updatedAt: 'NOW' });
     expect(expensesTotal([{ label: 'Permit', amount: 300 }, { label: 'Van', amount: 4500 }])).toBe(4800);
+  });
+});
+
+describe('registration filters', () => {
+  const climbs = new Map([['c1', { requires: { requiresMedicalCert: true } }]]);
+  const make = (id: string, d: Record<string, unknown>) => toAdminReg(id, { climbId: 'c1', climbTitle: 'Mt. A', name: id, status: 'pending', paymentStatus: 'unpaid', ...d });
+  const regs = [
+    make('a', { paymentStatus: 'verified', medicalCertUpload: { url: 'https://x/m', fileName: 'm' } }),
+    make('b', { climbId: 'c2' }),
+    make('c', { paymentStatus: 'submitted', feeBreakdown: [{ label: 'Guide', amount: '500', selected: true }], amountPaid: 100 }),
+    make('d', { status: 'cancelled' }),
+  ];
+  const ids = (f: Partial<RegFilter>) => filterRegs(regs, { ...NO_FILTER, ...f }, climbs).map((r) => r.id);
+
+  it('narrows by climb, payment state and status together', () => {
+    expect(ids({})).toEqual(['a', 'b', 'c', 'd']);
+    expect(ids({ climb: 'c2' })).toEqual(['b']);
+    expect(ids({ payment: 'submitted' })).toEqual(['c']);
+    expect(ids({ payment: 'balance_due' })).toEqual(['c']);
+    expect(ids({ status: 'cancelled' })).toEqual(['d']);
+    expect(ids({ text: 'a', payment: 'verified' })).toEqual(['a']);
+  });
+
+  it('finds registrants who still owe a required document', () => {
+    expect(missingDocs(regs[0], climbs.get('c1'))).toEqual([]);
+    expect(missingDocs(regs[2], climbs.get('c1'))).toEqual(['Medical certificate']);
+    expect(missingDocs(regs[3], climbs.get('c1'))).toEqual([]);
+    expect(missingDocs(regs[1], undefined)).toEqual([]);
+    expect(ids({ docs: 'missing' })).toEqual(['c']);
   });
 });

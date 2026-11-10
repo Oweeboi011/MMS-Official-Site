@@ -789,3 +789,10 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .climb-payments > summary { cursor: pointer; }
 .climb-payments[open] > summary { margin-bottom: 12px; }
 .climb-payments .panel { margin-top: 12px; }
+/* Registrations: a filter bar of labelled fields. */
+.admin-filterbar { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); align-items: end; margin-bottom: 14px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: #fff; }
+.admin-filterbar .filter-wide { grid-column: 1 / -1; }
+.admin-filterbar .editor-field { display: grid; gap: 6px; }
+.admin-filterbar select, .admin-filterbar input { width: 100%; }
+.filter-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
+.doc-missing { color: var(--red); font-weight: 800; }

@@ -4,14 +4,22 @@ import { REQUIRED_DOCS } from './requiredDocs';
 // Figures for the admin Insights page, ported from the old app's App Insights (mms-open-climbs). Pure: the page loads
 // the documents, these count them.
 const DAY = 86400000;
+const millis = (v: unknown) => (v && typeof v === 'object' && 'toMillis' in v ? (v as { toMillis: () => number }).toMillis() : 0);
 const day = (ms: number) => new Date(ms + 8 * 3600_000).toISOString().slice(0, 10); // Manila calendar day
 
 export interface ClimbFacts { id: string; title: string; status: string; createdAt: number; requires: Record<string, boolean> }
+// A climb reduced to what the admin figures need: its status, when it was made, and which documents it requires.
+export function toClimbFacts(id: string, d: Record<string, unknown>): ClimbFacts {
+  return {
+    id, title: String(d.title ?? ''), status: String(d.status ?? ''), createdAt: millis(d.createdAt),
+    requires: Object.fromEntries(REQUIRED_DOCS.map((t) => [t.requiresField, d[t.requiresField] === true])),
+  };
+}
+
 export interface Failure { source: string; message: string; createdAt: number }
 
 const active = (regs: AdminReg[]) => regs.filter((r) => r.status !== 'cancelled');
 const paymentStatus = (r: AdminReg) => String(r.raw.paymentStatus ?? 'unpaid');
-const millis = (v: unknown) => (v && typeof v === 'object' && 'toMillis' in v ? (v as { toMillis: () => number }).toMillis() : 0);
 
 export const waiverRate = (regs: AdminReg[]): number => {
   const live = active(regs);
