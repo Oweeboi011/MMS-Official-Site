@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import Footer from './components/Footer';
 import BottomNav from './components/BottomNav';
 import Nav from './components/Nav';
+import NotificationsHost from './components/NotificationsHost';
 import RouteErrorBoundary from './components/RouteErrorBoundary';
 import { lazyPage, preloadPages } from './components/lazyPage';
 import ScrollManager from './components/ScrollManager';
@@ -145,6 +146,7 @@ export default function App() {
         <Route path="*" element={<HomePage />} />
       </Routes>
       <Footer />
+      <NotificationsHost />
       <BottomNav />
     </>
   );

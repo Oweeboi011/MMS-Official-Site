@@ -98,7 +98,8 @@ describe('My Climbs (switch on)', () => {
 
   it('lists notifications and marks them read', async () => {
     renderAt('/account/climbs');
-    expect(await screen.findByText('Notifications (1 new)', {}, { timeout: 5000 })).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('button', { name: 'Notifications' }, { timeout: 5000 }));
+    expect(await screen.findByText('1 new', {}, { timeout: 5000 })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Payment verified' })).toHaveAttribute('href', '/climbs/soon');
     fireEvent.click(screen.getByRole('button', { name: 'Mark all read' }));
     await vi.waitFor(() => expect(svc.details).toContainEqual(['read', ['n1']]));
