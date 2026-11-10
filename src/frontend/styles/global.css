@@ -749,3 +749,21 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .admin-pager { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 18px 0; color: var(--muted); font-weight: 700; }
 .admin-notes textarea { min-height: 34px; }
 .admin-table td .chip { margin-top: 6px; }
+
+/* Insights: panels, bars and lists. */
+.insights-shell { display: grid; gap: 18px; }
+.insight-head { margin: 22px 0 0; font-size: clamp(1.3rem, 2.6vw, 1.7rem); letter-spacing: -.02em; }
+.panel-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: start; }
+.panel { padding: 18px 20px; border: 1px solid var(--line); border-radius: 18px; background: #fff; box-shadow: 0 8px 24px rgba(16, 26, 36, .06); }
+.panel h3 { margin: 0 0 12px; color: var(--muted); font-size: .74rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+.panel p { margin: 0 0 8px; }
+.bar-rows { list-style: none; margin: 0 0 6px; padding: 0; display: grid; gap: 8px; }
+.bar-rows li { display: grid; grid-template-columns: minmax(90px, 40%) 1fr auto; align-items: center; gap: 10px; font-size: .88rem; }
+.bar-label { overflow-wrap: anywhere; }
+.bar-track { height: 10px; border-radius: 999px; background: var(--paper); overflow: hidden; }
+.bar-fill { display: block; height: 100%; border-radius: 999px; background: var(--navy); }
+.bar-fill.is-good { background: #2f7d4f; }
+.bar-fill.is-warn { background: var(--gold); }
+.bar-fill.is-bad { background: var(--red); }
+.plain-list { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: .9rem; }
+.plain-list small { color: var(--muted); }
