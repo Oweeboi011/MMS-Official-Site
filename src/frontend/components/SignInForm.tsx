@@ -20,7 +20,8 @@ const MESSAGES: Record<string, string> = {
 const friendly = (e: unknown, context: 'signIn' | 'reset' = 'signIn'): string => {
   const code = (e as { code?: string }).code ?? '';
   if (code === 'auth/user-not-found') return context === 'reset' ? 'No account uses that email.' : 'Wrong email or password.';
-  return MESSAGES[code] ?? 'Something went wrong. Try again.';
+  const tag = code ? ' (' + code + ')' : '';
+  return MESSAGES[code] ?? `Something went wrong${tag}. Try again; if it keeps happening, tell an officer this code.`;
 };
 
 export default function SignInForm() {
