@@ -5,6 +5,7 @@ import { tplReleaseNote } from "../email/templates.js";
 import { logFailedRequest } from "../shared/registrationOps.js";
 import { requireAdmin } from "../callables/users.js";
 import { db } from "../shared/admin.js";
+import { groupCommitsIntoChangelog } from "../shared/changelog.js";
 
 // ── Emailing every member about a published release note ─────────────────────
 // Sending is a job: the callable queues releaseNoteEmailJobs/{id} and returns
@@ -158,21 +159,6 @@ const GITHUB_REPO_NAME = "MMS-Official-Site";
 const GITHUB_DEFAULT_BRANCH = "main";
 const SOURCE_REPO = `${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}`;
 
-const RELEASE_NOTE_TYPE_LABELS = {
-  feat: "New Features",
-  fix: "Fixes",
-  perf: "Performance",
-  refactor: "Improvements",
-};
-const RELEASE_NOTE_NOISE_TYPES = new Set([
-  "docs",
-  "style",
-  "test",
-  "chore",
-  "ci",
-  "build",
-  "revert",
-]);
 
 async function githubApi(path) {
   const token = process.env.GITHUB_TOKEN;
@@ -265,45 +251,6 @@ async function commitsSince(since, head) {
   throw new HttpsError("failed-precondition", `More than ${COMPARE_PAGE * COMPARE_MAX_PAGES} commits since the last note.`);
 }
 
-function groupCommitsIntoChangelog(commits) {
-  const groups = {
-    "New Features": [],
-    Fixes: [],
-    Performance: [],
-    Improvements: [],
-  };
-  let dropped = 0;
-
-  for (const { subject } of commits) {
-    if (/coverage/i.test(subject)) {
-      dropped++;
-      continue;
-    }
-    // eslint-disable-next-line sonarjs/super-linear-regex -- one commit subject (GitHub, short), not user input
-    const match = subject.match(/^(\w+)(\([^)]*\))?:\s*(.+)$/);
-    if (match) {
-      const [, type, , rest] = match;
-      if (RELEASE_NOTE_NOISE_TYPES.has(type)) {
-        dropped++;
-        continue;
-      }
-      const label = RELEASE_NOTE_TYPE_LABELS[type];
-      if (label) {
-        groups[label].push(rest.charAt(0).toUpperCase() + rest.slice(1));
-        continue;
-      }
-    }
-    groups["Improvements"].push(
-      subject.charAt(0).toUpperCase() + subject.slice(1),
-    );
-  }
-
-  const sections = Object.entries(groups).filter(([, items]) => items.length > 0);
-  const body = sections
-    .map(([label, items]) => `${label}\n${items.map((i) => `- ${i}`).join("\n")}`)
-    .join("\n\n");
-  return { body, dropped };
-}
 
 // ── Callable: list recent commits + last checkpoint for the admin's picker ────
 export const getReleaseNoteCommitOptions = onCall(
