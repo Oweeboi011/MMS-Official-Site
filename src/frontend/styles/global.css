@@ -575,6 +575,61 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .admin-tiles a:hover, .admin-tiles a:focus-visible { border-color: var(--navy); }
 .admin-tiles strong { display: block; color: var(--navy); }
 .admin-tiles span { display: block; margin-top: 4px; font-size: .88rem; color: var(--muted); }
+/* Climb page: a summary column beside the story, one rhythm throughout. */
+.climb-page { padding: 56px 0 80px; }
+.climb-layout { display: grid; gap: 28px; align-items: start; }
+.climb-aside { display: grid; gap: 16px; }
+.climb-main { display: grid; gap: 28px; min-width: 0; }
+.climb-main .section, .climb-main .climb-block { padding: 0; margin: 0; }
+.climb-main .shell { width: 100%; margin: 0; }
+.climb-main .section-head { margin-bottom: 14px; }
+.climb-main h2 { font-size: clamp(1.4rem, 2.6vw, 1.9rem); line-height: 1.15; letter-spacing: -.02em; }
+.climb-main .eyebrow { margin-bottom: 6px; }
+.climb-main .climb-notice, .climb-main .climb-notices { margin: 0; }
+.climb-profile { display: grid; gap: 24px; }
+@media (min-width: 980px) {
+  .climb-layout { grid-template-columns: minmax(0, 1fr) 340px; gap: 40px; }
+  .climb-aside { position: sticky; top: 96px; order: 2; }
+}
+.aside-card { padding: 20px 22px; border: 1px solid var(--line); border-radius: 20px; background: #fff; box-shadow: 0 10px 30px rgba(16,26,36,.07); }
+.aside-card.is-primary { border-top: 6px solid var(--gold); }
+.aside-card h2 { margin: 0 0 10px; color: var(--muted); font-size: .74rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+.aside-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+.aside-tag { padding: 4px 11px; border-radius: 999px; background: var(--navy); color: #fff; font-size: .7rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.aside-tag.type-major { background: var(--gold); color: #171913; }
+.aside-tag.type-special { background: var(--green, #2f7d4f); }
+.aside-tag.is-muted { background: var(--paper); color: var(--muted); border: 1px solid var(--line); }
+.aside-when { display: grid; gap: 2px; margin: 0 0 16px; }
+.aside-when strong { color: var(--navy); font-size: 1.25rem; line-height: 1.2; }
+.aside-when span { color: var(--muted); }
+.aside-actions { display: grid; gap: 10px; }
+.aside-actions .btn, .aside-actions button { width: 100%; justify-content: center; text-align: center; }
+.aside-actions p { margin: 0; }
+.fact-list { margin: 0; }
+.fact-list div { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-top: 1px solid var(--line); }
+.fact-list div:first-child { border-top: 0; padding-top: 0; }
+.fact-list dt { flex: none; color: var(--muted); font-size: .86rem; font-weight: 700; white-space: nowrap; }
+.fact-list dd { margin: 0; color: var(--navy); font-weight: 800; text-align: right; overflow-wrap: anywhere; }
+.fee-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+.fee-table th { padding: 0 0 6px; color: var(--muted); font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-align: left; text-transform: uppercase; }
+.fee-table td { padding: 8px 8px 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.fee-table td:nth-child(2) { font-weight: 800; color: var(--navy); white-space: nowrap; }
+.fee-table td:nth-child(3) { color: var(--muted); font-size: .8rem; }
+.officer-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.officer-list li { display: grid; }
+.officer-list strong { color: var(--navy); }
+.officer-list span { color: var(--muted); font-size: .85rem; }
+.aside-card .share-climb { margin: 0; }
+.aside-card .share-label { display: block; margin-bottom: 10px; color: var(--muted); font-size: .74rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+
+/* Admin home */
+.admin-jump { margin: 0 0 24px; font-weight: 700; }
+#open-climbs, #site-content, #people, #health { margin-top: 40px; scroll-margin-top: 90px; }
+.admin-tiles { list-style: none; margin: 20px 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.admin-tiles a { display: block; height: 100%; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: #fff; text-decoration: none; color: inherit; }
+.admin-tiles a:hover, .admin-tiles a:focus-visible { border-color: var(--navy); }
+.admin-tiles strong { display: block; color: var(--navy); }
+.admin-tiles span { display: block; margin-top: 4px; font-size: .88rem; color: var(--muted); }
 /* Climb page: profile facts are reference data, not hero numbers. */
 .climb-profile .stats { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 18px; }
 .climb-profile .stat { min-height: 0; padding: 14px 16px; border-radius: 14px; }
