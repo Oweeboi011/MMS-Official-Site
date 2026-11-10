@@ -23,7 +23,7 @@ const HERO_IMAGE = '/images/page-open-climbs.webp';
 const active = (climb: ClimbDetail) => !climb.over && !climb.cancelled;
 
 function notice(climb: ClimbDetail): string {
-  if (climb.cancelled) return 'This climb was cancelled.';
+  if (climb.cancelled) return climb.cancellationReason ? 'This climb was cancelled. Reason: ' + climb.cancellationReason : 'This climb was cancelled.';
   if (climb.postponed) return 'This climb is postponed. New dates will be posted here.';
   if (climb.over) return 'This climb is completed.';
   if (climb.status === 'Closed') return 'Registration for this climb is closed.';

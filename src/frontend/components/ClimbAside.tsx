@@ -52,6 +52,7 @@ function Facts({ climb }: { climb: ClimbDetail }) {
       <dl className="fact-list">
         {climb.stats.map((s) => <div key={s.label}><dt>{s.label}</dt><dd>{s.value}</dd></div>)}
       </dl>
+      <p className="fee-help"><Link to="/activities/open-climbs/guide">What do difficulty and trail class mean?</Link></p>
     </section>
   );
 }
