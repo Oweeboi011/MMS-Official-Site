@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import AdminStats from '../components/admin/AdminStats';
+import ClimbPayments from '../components/admin/ClimbPayments';
 import PageHero from '../components/PageHero';
 import RegistrationTable, { AdminGate } from '../components/admin/RegistrationTable';
 import ExpensesPanel from '../components/admin/ExpensesPanel';
@@ -29,6 +30,7 @@ function Registrations({ climbId, climb, admin }: { climbId: string; climb: Clim
         <button type="button" className="btn" disabled={!rows.length} onClick={() => downloadCsv(ref.title, toCsv(rows))}>Download CSV (LGU / jump-off)</button>
         <Link className="btn" to={`/admin/climbs/${climbId}/sheet`}>Climb-day sheet (print)</Link>
       </p>
+      <ClimbPayments climb={climb} regs={rows} />
       <WalkInForm busy={busy} onAdd={(w) => run(() => addWalkIn(ref, w, admin.email))} />
       <MeetingsEditor climbId={climbId} run={run} busy={busy} />
       <ExpensesPanel climbId={climbId} regs={rows} run={run} busy={busy} />

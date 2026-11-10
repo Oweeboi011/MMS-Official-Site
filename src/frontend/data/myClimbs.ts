@@ -22,6 +22,10 @@ export interface MyClimb {
   pledge: Pledge | null;
   details: Details;
   name: string; // as registered
+  paymentStatus: string;
+  fees: FeeLine[]; // the fee lines this registration owes (selected ones)
+  refunded: number;
+  verifiedAt: number;
   payments: { amount: number; status: string; note: string }[];
 }
 
@@ -66,6 +70,8 @@ export function toMyClimb(id: string, d: Doc): MyClimb {
   return {
     id, climbId: str(d.climbId), title: str(d.climbTitle) || 'Climb', date: str(d.climbDate),
     status, statusLabel: STATUS[status] ?? status, paymentLabel: PAYMENT[str(d.paymentStatus)] ?? 'Not paid yet',
+    paymentStatus: str(d.paymentStatus) || 'unpaid', fees: lines(d.feeBreakdown).filter((l) => l.selected), verifiedAt: millis(d.verifiedAt),
+    refunded: (Array.isArray(d.refunds) ? d.refunds : []).reduce((t: number, r) => t + (Number(((r ?? {}) as Doc).amount) || 0), 0),
     pledge, total, tba, paid: typeof d.amountPaid === 'number' ? d.amountPaid : 0, createdAt: millis(d.createdAt),
     uploaded: REQUIRED_DOCS.map((t) => t.uploadField).filter((f) => d[f] && typeof d[f] === 'object'),
     receipts: receiptsOf(d.paymentProofs),

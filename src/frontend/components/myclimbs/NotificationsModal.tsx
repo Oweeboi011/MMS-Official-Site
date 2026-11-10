@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Notice } from '../../data/notifications';
 import { markRead, myNotifications } from '../../services/notifications';
 import { useAccount } from '../../services/useAccount';
+import Modal from '../Modal';
 
 const when = (ms: number) => (ms ? new Date(ms).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', timeZone: 'Asia/Manila' }) : '');
 
@@ -37,28 +38,13 @@ function Items({ uid, onNavigate }: { uid: string; onNavigate: () => void }) {
   );
 }
 
-// A native <dialog>: focus stays inside, Escape closes, the page behind is inert.
 export default function NotificationsModal({ onClose }: { onClose: () => void }) {
-  const ref = useRef<HTMLDialogElement>(null);
   const state = useAccount();
-  useEffect(() => {
-    const dialog = ref.current;
-    if (!dialog) return;
-    if (typeof dialog.showModal === 'function') dialog.showModal();
-    else dialog.setAttribute('open', '');
-  }, []);
-  const close = () => ref.current?.close();
   return (
-    <dialog ref={ref} className="modal" aria-labelledby="notify-title" onClose={onClose} onClick={(e) => { if (e.target === ref.current) close(); }}>
-      <header className="modal-head">
-        <h2 id="notify-title">Notifications</h2>
-        <button type="button" className="chip" onClick={close}>Close</button>
-      </header>
-      <div className="modal-body">
-        {state.status === 'signedIn' && <Items uid={state.account.uid} onNavigate={close} />}
-        {state.status === 'loading' && <p role="status">Checking your sign-in…</p>}
-        {(state.status === 'signedOut' || state.status === 'unconfigured' || state.status === 'error') && <p>Sign in to see your notifications. <Link to="/account/sign-in" onClick={close}>Sign in</Link></p>}
-      </div>
-    </dialog>
+    <Modal title="Notifications" onClose={onClose}>
+      {state.status === 'signedIn' && <Items uid={state.account.uid} onNavigate={onClose} />}
+      {state.status === 'loading' && <p role="status">Checking your sign-in…</p>}
+      {(state.status === 'signedOut' || state.status === 'unconfigured' || state.status === 'error') && <p>Sign in to see your notifications. <Link to="/account/sign-in" onClick={onClose}>Sign in</Link></p>}
+    </Modal>
   );
 }

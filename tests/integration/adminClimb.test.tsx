@@ -35,7 +35,7 @@ describe('admin: registrations', () => {
 
   it('lists a climb’s registrants, verifies a payment, changes status, saves notes', async () => {
     renderAt('/admin/climbs/c1');
-    expect(await screen.findByText('Ana Cruz', {}, wait)).toBeInTheDocument();
+    expect((await screen.findAllByText('Ana Cruz', {}, wait))[0]).toBeInTheDocument(); // also listed under balances due
     expect(screen.getByText('To review').closest('li')).toHaveTextContent('1');
     expect(screen.getByRole('link', { name: 'receipt 1' })).toHaveAttribute('href', 'https://x/r.jpg');
     fireEvent.click(screen.getByRole('button', { name: 'Verify' }));
@@ -70,10 +70,10 @@ describe('admin: registrations', () => {
     expect(await screen.findByText('Ben Reyes', {}, wait)).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Search name, email, mobile or climb'), { target: { value: 'pulag' } });
     expect(screen.queryByText('Ben Reyes')).not.toBeInTheDocument();
-    expect(screen.getByText('Ana Cruz')).toBeInTheDocument();
+    expect(screen.getAllByText('Ana Cruz')[0]).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Search name, email, mobile or climb'), { target: { value: '' } });
     fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'confirmed' } });
-    expect(screen.queryByText('Ana Cruz')).not.toBeInTheDocument();
+    expect(screen.queryAllByText('Ana Cruz')).toHaveLength(0);
     expect(screen.getByRole('button', { name: 'Download CSV (1)' })).toBeEnabled();
   });
 
@@ -81,7 +81,7 @@ describe('admin: registrations', () => {
     svc.role = 'member';
     renderAt('/admin/climbs/c1');
     expect(await screen.findByText(/Admins only/, {}, wait)).toBeInTheDocument();
-    expect(screen.queryByText('Ana Cruz')).not.toBeInTheDocument();
+    expect(screen.queryAllByText('Ana Cruz')).toHaveLength(0);
   });
 
   it('records a refund, flags a no-show, and shows net funds after expenses', async () => {
