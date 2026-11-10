@@ -38,8 +38,9 @@ function dateRange(start: Date, end: Date | undefined): string {
 
 // A bare number (typed or saved as text) is metres; anything with its own unit stays as written.
 const elevationOf = (v: unknown) => {
-  const raw = typeof v === 'number' ? String(v) : str(v);
-  if (!/^\d+(\.\d+)?$/.test(raw)) return raw || undefined;
+  const typed = typeof v === 'number' ? String(v) : str(v);
+  const raw = typed.replaceAll(',', '');
+  if (!/^\d+(\.\d+)?$/.test(raw)) return typed || undefined;
   return `${Number(raw).toLocaleString('en-US')}m`;
 };
 
