@@ -1,15 +1,15 @@
 import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import type { AdminReg } from '../../data/adminRegistrations';
+import { missingDocs, type AdminReg } from '../../data/adminRegistrations';
 import type { Account } from '../../services/auth';
 import { useAccount } from '../../services/useAccount';
 import RegistrationRow from './RegistrationRow';
 
-interface Props { regs: AdminReg[]; admin: Account; run: (a: () => Promise<void>) => Promise<boolean>; busy: boolean; showClimb?: boolean }
+interface Props { regs: AdminReg[]; admin: Account; run: (a: () => Promise<void>) => Promise<boolean>; busy: boolean; showClimb?: boolean; flags?: Map<string, { requires: Record<string, boolean> }> }
 
 const PAGE = 25;
 
-export default function RegistrationTable({ regs, admin, run, busy, showClimb }: Props) {
+export default function RegistrationTable({ regs, admin, run, busy, showClimb, flags }: Props) {
   const [page, setPage] = useState(0);
   if (!regs.length) return <p>No registrations.</p>;
   const pages = Math.ceil(regs.length / PAGE);
@@ -20,7 +20,7 @@ export default function RegistrationTable({ regs, admin, run, busy, showClimb }:
     <div className="admin-table">
       <table>
         <thead><tr><th scope="col">Registrant</th><th scope="col">Status</th><th scope="col">Payments</th><th scope="col">Documents · notes</th></tr></thead>
-        <tbody>{shown.map((r) => <RegistrationRow key={r.id} reg={r} admin={admin} run={(a) => void run(a)} busy={busy} showClimb={showClimb} others={showClimb ? undefined : regs} />)}</tbody>
+        <tbody>{shown.map((r) => <RegistrationRow key={r.id} reg={r} admin={admin} run={(a) => void run(a)} busy={busy} showClimb={showClimb} others={showClimb ? undefined : regs} missing={missingDocs(r, flags?.get(r.climbId))} />)}</tbody>
       </table>
     </div>
     {pages > 1 && (
