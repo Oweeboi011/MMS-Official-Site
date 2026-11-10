@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import PageHero from '../components/PageHero';
 import { AdminGate } from '../components/admin/RegistrationTable';
 import { INSIGHTS, callInsight, recentErrors, topPaths } from '../services/insights';
@@ -51,7 +50,7 @@ function Errors() {
 export default function AdminInsightsPage() {
   return (
     <>
-      <PageHero compact eyebrow="Admin" title="Insights" intro="Function health, storage, cost, email, page views and errors." image="/images/page-surveys.webp" />
+      <PageHero compact crumb={{ to: '/admin', label: 'Admin' }} eyebrow="Admin" title="Insights" intro="Function health, storage, cost, email, page views and errors." image="/images/page-surveys.webp" />
       <main><section className="section page-section"><div className="shell register-shell">
         <AdminGate>{() => (
           <>
@@ -60,7 +59,7 @@ export default function AdminInsightsPage() {
             <section className="register-section"><h2>Recent errors</h2><Errors /></section>
           </>
         )}</AdminGate>
-        <p><Link to="/admin">Back to admin</Link></p>
+        
       </div></section></main>
     </>
   );

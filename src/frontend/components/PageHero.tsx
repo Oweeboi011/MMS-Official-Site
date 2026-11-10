@@ -8,6 +8,7 @@ interface Props {
   title: string;
   intro: string;
   image: string;
+  crumb?: { to: string; label: string }; // admin pages: a way back
   compact?: boolean; // tool pages (account, admin): the work comes first, the photo stays as a banner
 }
 
@@ -27,11 +28,12 @@ function Breadcrumbs({ title }: { title: string }) {
   );
 }
 
-export default function PageHero({ eyebrow, title, intro, image, compact }: Props) {
+export default function PageHero({ eyebrow, title, intro, image, compact, crumb }: Props) {
   return (
     <header className={`hero page-hero${compact ? ' page-hero--compact' : ''}`} style={{ '--hero-image': `url("${asset(image)}")` } as CSSProperties}>
       <div className="shell hero-content">
         <Breadcrumbs title={title} />
+        {crumb && <Link className="hero-back" to={crumb.to}><span aria-hidden="true">←</span> {crumb.label}</Link>}
         <div className="eyebrow">{eyebrow}</div>
         <h1>{title}</h1>
         <p className="hero-copy">{intro}</p>

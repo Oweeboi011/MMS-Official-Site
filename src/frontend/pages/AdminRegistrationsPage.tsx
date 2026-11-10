@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import PageHero from '../components/PageHero';
 import RegistrationTable, { AdminGate } from '../components/admin/RegistrationTable';
 import { useAdminList } from '../components/admin/useAdminList';
@@ -37,10 +36,10 @@ function Search({ admin }: { admin: Account }) {
 export default function AdminRegistrationsPage() {
   return (
     <>
-      <PageHero compact eyebrow="Admin" title="All registrations" intro="Find anyone across every climb." image="/images/page-surveys.webp" />
+      <PageHero compact crumb={{ to: '/admin', label: 'Admin' }} eyebrow="Admin" title="All registrations" intro="Find anyone across every climb." image="/images/page-surveys.webp" />
       <main><section className="section page-section"><div className="shell">
         <AdminGate>{(admin) => <Search admin={admin} />}</AdminGate>
-        <p><Link to="/admin">Back to admin</Link></p>
+        
       </div></section></main>
     </>
   );
