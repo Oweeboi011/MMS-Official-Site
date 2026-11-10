@@ -1,6 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { asset } from '../lib/asset';
+import { openNotifications } from '../lib/notificationsModal';
 import { readAdminHint, readSignedInHint, subscribeSignedInHint } from '../lib/signedInHint';
 import { sectionPath, sitemap } from '../data/sitemap';
 import { useSiteSettings } from '../services/useSiteData';
@@ -62,6 +63,7 @@ export default function Nav() {
           ))}
         </ul>
         <Link className="nav-search" to="/search" aria-label="Search the site" aria-current={pathname === '/search' ? 'page' : undefined}>Search</Link>
+        {signedIn && <button type="button" className="nav-search nav-account nav-bell" aria-label="Notifications" onClick={openNotifications}><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 0 1-3.4 0" /></svg></button>}
         {isAdmin && <Link className="nav-search nav-account" to="/admin" aria-current={pathname.startsWith('/admin') ? 'page' : undefined}>Admin</Link>}
         <Link className="nav-search nav-account" to={signedIn ? '/account/climbs' : '/account/sign-in'} aria-current={pathname.startsWith('/account') ? 'page' : undefined}>{signedIn ? 'My account' : 'Sign in'}</Link>
       </div>
