@@ -568,7 +568,9 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .waiver-signature { margin-top: 28px; padding-top: 12px; border-top: 1px solid var(--ink); }
 
 /* Admin home */
-.admin-jump { margin: 0 0 24px; font-weight: 700; }
+.admin-jump { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 28px; }
+.admin-jump a { padding: 7px 14px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--navy); font-size: .88rem; font-weight: 800; text-decoration: none; }
+.admin-jump a:hover, .admin-jump a:focus-visible { border-color: var(--navy); }
 #open-climbs, #site-content, #people, #health { margin-top: 40px; scroll-margin-top: 90px; }
 .admin-tiles { list-style: none; margin: 20px 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
 .admin-tiles a { display: block; height: 100%; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: #fff; text-decoration: none; color: inherit; }
@@ -581,3 +583,16 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .climb-profile .stat strong { font-size: clamp(1.1rem, 2.4vw, 1.5rem); line-height: 1.2; letter-spacing: -.02em; overflow-wrap: anywhere; }
 .climb-profile .stat span { margin-top: 6px; font-size: .72rem; }
 .climb-profile h2 { font-size: clamp(1.5rem, 3.2vw, 2.2rem); }
+
+/* Admin home polish */
+#open-climbs > h2, #site-content > h2, #people > h2, #health > h2 { margin: 0 0 6px; font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -.02em; }
+#open-climbs > .climb-muted, #site-content > .climb-muted { margin: 0 0 18px; }
+.admin-subhead { margin: 28px 0 12px; color: var(--muted); font-size: .76rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+.admin-table { border: 1px solid var(--line); border-radius: 16px; background: #fff; overflow-x: auto; box-shadow: 0 8px 24px rgba(16,26,36,.06); }
+.admin-table table { width: 100%; border-collapse: collapse; }
+.admin-table th { padding: 12px 14px; border-bottom: 0; background: var(--paper); color: var(--muted); font-size: .72rem; font-weight: 850; letter-spacing: .08em; text-align: left; text-transform: uppercase; }
+.admin-table td { padding: 12px 14px; border-top: 1px solid var(--line); border-bottom: 0; vertical-align: top; }
+.admin-table tbody tr:hover { background: rgba(247, 244, 236, .6); }
+.status-chip { display: inline-block; padding: 3px 10px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); color: var(--muted); font-size: .72rem; font-weight: 850; letter-spacing: .06em; text-transform: uppercase; }
+.status-chip.is-open { background: rgba(47, 125, 79, .12); border-color: rgba(47, 125, 79, .3); color: #1f6a3e; }
+.status-chip.is-closed { background: rgba(169, 46, 42, .1); border-color: rgba(169, 46, 42, .25); color: var(--red); }

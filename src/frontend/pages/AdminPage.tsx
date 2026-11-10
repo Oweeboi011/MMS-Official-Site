@@ -34,17 +34,19 @@ function Home() {
   return (
     <>
       {!writesEnabled && <p className="preview-banner" role="note">{readOnlyMessage}</p>}
-      <p className="admin-jump"><a href="#open-climbs">Open Climbs</a> · <a href="#site-content">Site content</a> · <a href="#people">People and records</a> · <a href="#health">Health and help</a></p>
+      <nav className="admin-jump" aria-label="Sections"><a href="#open-climbs">Open Climbs</a><a href="#site-content">Site content</a><a href="#people">People and records</a><a href="#health">Health and help</a></nav>
       <section id="open-climbs">
         <h2>Open Climbs</h2>
         <p className="climb-muted">Upcoming climbs with slots and payments waiting for review. Open a climb for its registrants, payments, walk-ins and climb-day sheet.</p>
         <Dashboard />
         <AdminTiles tiles={climbTiles} />
+        <h3 className="admin-subhead">Edit climbs and release notes</h3>
         <Editors specs={[climbsSpec, releaseNotesSpec]} label="Open Climbs collections" />
       </section>
       <section id="site-content">
         <h2>Site content</h2>
         <p className="climb-muted">What visitors read on the website: announcements, leadership, committees, surveys, FAQs and more.</p>
+        <h3 className="admin-subhead">Edit site content</h3>
         <Editors specs={siteCollections} label="Site content collections" />
       </section>
       <section id="people">
