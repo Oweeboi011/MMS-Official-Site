@@ -670,6 +670,16 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .page-hero--compact h1 { font-size: clamp(2rem, 6vw, 3.4rem); line-height: 1; }
 .page-hero--compact .hero-copy { margin-top: 10px; font-size: 1.02rem; }
 
+/* Schedule rows: the whole row opens the climb. */
+.event { position: relative; margin: 0 -14px; padding-left: 14px; padding-right: 14px; border-radius: 14px; transition: background .16s ease; }
+.event h3 a::after { content: ''; position: absolute; inset: 0; border-radius: 14px; }
+.event:hover { background: rgba(255, 255, 255, .06); }
+.event h3 a { text-decoration: none; }
+.event:hover h3 a { text-decoration: underline; }
+.event h3 a:focus-visible { outline: 0; }
+.event h3 a:focus-visible::after { outline: 3px solid #fff; outline-offset: -3px; }
+.event-arrow { font-size: 1rem; transition: background .16s ease, color .16s ease, border-color .16s ease, transform .16s ease; }
+.event:hover .event-arrow { background: var(--gold); border-color: var(--gold); color: #171913; transform: translateX(3px); }
 /* Modal panel (notifications): a native <dialog>. */
 .nav-bell { display: inline-grid; place-items: center; width: 38px; height: 38px; padding: 0; background: transparent; color: inherit; cursor: pointer; }
 .modal { width: min(560px, calc(100vw - 32px)); max-height: min(78vh, 640px); padding: 0; border: 0; border-radius: 22px; background: #fff; color: var(--ink); box-shadow: 0 30px 80px rgba(16, 26, 36, .35); overflow: hidden; }
