@@ -1,6 +1,7 @@
 // One climb's page data (/climbs/:id). Own module so it loads with the climb page, not the home page.
 import type { Doc } from '../lib/firestoreRest';
 import { fromManilaDay, manilaDay } from '../lib/manila';
+import { difficultyText, trailClassText } from './scales';
 import type { Coords } from '../lib/trailEmbeds';
 import { isPublic, mapClimb, type ScheduleClimb } from './climbs';
 import type { Stat } from './content';
@@ -35,6 +36,7 @@ export const dueLabel = (day: string) => fromManilaDay(day).toLocaleDateString('
 
 export interface ClimbDetail extends ScheduleClimb {
   cancelled: boolean;
+  cancellationReason: string;
   description: string;
   stats: Stat[];
   thingsToBring: string[]; // empty → default packing list
@@ -112,10 +114,12 @@ const text = (v: unknown) => (typeof v === 'number' ? String(v) : str(v));
 export function toClimbDetail(d: Doc, now: Date): ClimbDetail | null {
   if (str(d.status) === 'draft') return null;
   const climb = mapClimb(d, now);
-  const stats = STAT_FIELDS.map(([key, label]) => ({ value: text(d[key]), label })).filter((s) => s.value);
+  const worded: Record<string, (v: string) => string> = { difficulty: difficultyText, trailClass: trailClassText };
+  const stats = STAT_FIELDS.map(([key, label]) => ({ value: (worded[key] ?? ((v: string) => v))(text(d[key])), label })).filter((s) => s.value);
   return {
     ...climb,
     cancelled: !isPublic(d),
+    cancellationReason: str(d.cancellationReason),
     description: str(d.description),
     stats: climb.elevation ? [{ value: climb.elevation, label: 'Elevation' }, ...stats] : stats,
     thingsToBring: strings(d.thingsToBring),
