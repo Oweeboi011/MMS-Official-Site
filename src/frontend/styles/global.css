@@ -636,3 +636,10 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .climb-profile .stat strong { font-size: clamp(1.1rem, 2.4vw, 1.5rem); line-height: 1.2; letter-spacing: -.02em; overflow-wrap: anywhere; }
 .climb-profile .stat span { margin-top: 6px; font-size: .72rem; }
 .climb-profile h2 { font-size: clamp(1.5rem, 3.2vw, 2.2rem); }
+
+/* My Climbs: the registrations lead; the rest is tucked away until wanted. */
+.card-manage { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.card-manage > summary { cursor: pointer; color: var(--navy); font-weight: 800; }
+.card-manage[open] > summary { margin-bottom: 12px; }
+.notifications ul { max-height: 320px; overflow-y: auto; }
+.notifications > summary, .climb-log > summary { cursor: pointer; }
