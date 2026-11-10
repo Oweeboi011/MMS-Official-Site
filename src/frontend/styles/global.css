@@ -639,6 +639,12 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .climb-profile .stat span { margin-top: 6px; font-size: .72rem; }
 .climb-profile h2 { font-size: clamp(1.5rem, 3.2vw, 2.2rem); }
 
+/* Forms: fields stack label over input, sections read as cards. */
+.register-section .editor-field { display: grid; gap: 6px; }
+.register-section .editor-field select, .register-section .editor-field textarea { width: 100%; }
+.register-section .editor-field input { width: 100%; }
+.register-section .editor-field textarea { min-height: 96px; resize: vertical; }
+.form-saved { color: #1f6a3e; font-weight: 800; }
 /* Admin home polish */
 #open-climbs > h2, #site-content > h2, #people > h2, #health > h2 { margin: 0 0 6px; font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -.02em; }
 #open-climbs > .climb-muted, #site-content > .climb-muted { margin: 0 0 18px; }
