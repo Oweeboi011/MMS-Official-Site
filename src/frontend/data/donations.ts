@@ -34,3 +34,18 @@ export function toPledge(cash: string, inKind: string, payWithFees: boolean): Pl
 
 // The part of a pledge added to what the member pays by GCash.
 export const pledgeInBalance = (p: Pledge | null) => (p?.payWithFees && p.cashPledge ? p.cashPledge : 0);
+
+interface PledgeRow { name: string; cash: number; inKind: string; withFees: boolean }
+export interface DonationTotals { cash: number; withFees: number; donors: number; rows: PledgeRow[] }
+
+// What registrants pledged to the drive (cancelled registrations excluded); cash is the beneficiary's, never the club's.
+export function donationTotals(regs: { name: string; status: string; pledge: Pledge | null }[]): DonationTotals {
+  const rows = regs.filter((r) => r.status !== 'cancelled' && r.pledge)
+    .map((r) => ({ name: r.name, cash: r.pledge?.cashPledge ?? 0, inKind: r.pledge?.inKind ?? '', withFees: Boolean(r.pledge?.payWithFees) }));
+  return {
+    cash: rows.reduce((t, r) => t + r.cash, 0),
+    withFees: rows.filter((r) => r.withFees).reduce((t, r) => t + r.cash, 0),
+    donors: rows.length,
+    rows,
+  };
+}

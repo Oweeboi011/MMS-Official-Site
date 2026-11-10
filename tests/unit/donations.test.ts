@@ -1,5 +1,5 @@
 import { toClimbDetail } from '../../src/frontend/data/climbDetail';
-import { driveOf, pledgeInBalance, toPledge } from '../../src/frontend/data/donations';
+import { donationTotals, driveOf, pledgeInBalance, toPledge } from '../../src/frontend/data/donations';
 import { toMyClimb } from '../../src/frontend/data/myClimbs';
 
 describe('donation drives and pledges', () => {
@@ -23,5 +23,16 @@ describe('donation drives and pledges', () => {
     expect(toMyClimb('a', { ...fees, donation: { cashPledge: 200, inKind: '', payWithFees: true } }).total).toBe(1700);
     expect(toMyClimb('b', { ...fees, donation: { cashPledge: 200, inKind: '', payWithFees: false } }).total).toBe(1500);
     expect(pledgeInBalance(null)).toBe(0);
+  });
+});
+
+describe('donationTotals', () => {
+  it('sums live pledges and skips cancelled ones', () => {
+    const pl = (cashPledge: number | null, payWithFees = false) => ({ cashPledge, inKind: '', payWithFees });
+    const t = donationTotals([
+      { name: 'A', status: 'confirmed', pledge: pl(200, true) }, { name: 'B', status: 'pending', pledge: { cashPledge: null, inKind: 'rice', payWithFees: false } },
+      { name: 'C', status: 'cancelled', pledge: pl(500) }, { name: 'D', status: 'confirmed', pledge: null },
+    ]);
+    expect(t).toMatchObject({ cash: 200, withFees: 200, donors: 2 });
   });
 });

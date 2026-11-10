@@ -4,6 +4,7 @@ import AdminStats from '../components/admin/AdminStats';
 import ClimbPayments from '../components/admin/ClimbPayments';
 import PageHero from '../components/PageHero';
 import RegistrationTable, { AdminGate } from '../components/admin/RegistrationTable';
+import DonationsPanel from '../components/admin/DonationsPanel';
 import ExpensesPanel from '../components/admin/ExpensesPanel';
 import MeetingsEditor from '../components/admin/MeetingsEditor';
 import WalkInForm from '../components/admin/WalkInForm';
@@ -31,6 +32,7 @@ function Registrations({ climbId, climb, admin }: { climbId: string; climb: Clim
         <Link className="btn" to={`/admin/climbs/${climbId}/sheet`}>Climb-day sheet (print)</Link>
       </p>
       <ClimbPayments climb={climb} regs={rows} />
+      <DonationsPanel drive={climb?.drive} regs={rows} />
       <WalkInForm busy={busy} onAdd={(w) => run(() => addWalkIn(ref, w, admin.email))} />
       <MeetingsEditor climbId={climbId} run={run} busy={busy} />
       <ExpensesPanel climbId={climbId} regs={rows} run={run} busy={busy} />
