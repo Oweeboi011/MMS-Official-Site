@@ -14,7 +14,7 @@ export default function Notifications({ uid }: { uid: string }) {
   const unread = items.filter((n) => !n.read);
   const readAll = () => void markRead(unread.map((n) => n.id)).then(load, () => undefined);
   return (
-    <details className="register-section notifications" open={unread.length > 0}>
+    <details className="register-section notifications">
       <summary><strong>Notifications{unread.length ? ` (${unread.length} new)` : ''}</strong></summary>
       <ul>
         {items.map((n) => (

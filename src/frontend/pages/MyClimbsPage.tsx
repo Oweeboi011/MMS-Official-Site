@@ -103,7 +103,12 @@ function CardActions({ row, climb, uid, owes, onChange }: { row: MyClimb; climb:
       <NextSteps steps={nextSteps(row, climb.requiredDocs.map((t) => t.uploadField))} />
       <PaymentLog row={row} />
       <Records row={row} />
-      {live && <LiveActions row={row} climb={climb} uid={uid} owes={owes} onChange={onChange} />}
+      {live && (
+        <details className="card-manage" open={owes}>
+          <summary>Manage this registration</summary>
+          <LiveActions row={row} climb={climb} uid={uid} owes={owes} onChange={onChange} />
+        </details>
+      )}
       <Closing row={row} over={climb.over} uid={uid} onChange={onChange} />
     </>
   );
@@ -150,13 +155,13 @@ function List({ uid, readOnly }: { uid: string; readOnly: boolean }) {
   if (error) return <p role="alert">{error}</p>;
   if (!rows) return <p role="status">Loading your climbs…</p>;
   if (!rows.length) return <><p>No registrations yet.</p><Link className="btn btn-primary" to="/activities/open-climbs">Find a climb</Link></>;
-  return <><ClimbLog rows={rows} /><ul className="my-climbs">{rows.map((r) => <Card key={r.id} row={r} uid={uid} onChange={load} readOnly={readOnly} />)}</ul></>;
+  return <><ul className="my-climbs">{rows.map((r) => <Card key={r.id} row={r} uid={uid} onChange={load} readOnly={readOnly} />)}</ul><ClimbLog rows={rows} /></>;
 }
 
 function Body() {
   const state = useAccount();
   if (state.status === 'loading') return <p role="status">Checking your sign-in…</p>;
-  if (state.status === 'signedIn') return <><VerifyEmailBanner account={state.account} /><Welcome /><p><Link to="/account/details">My details</Link> · <Link to="/account/whats-new">What’s new</Link></p><WhatsNewBanner />{!registrationEnabled && <p className="climb-notice" role="note">This is a read-only copy of your registrations. To pay, upload documents or cancel, keep using the <a href="https://mms-open-climbs.web.app" target="_blank" rel="noopener noreferrer">Open Climbs app</a> until MMS switches over to this site.</p>}<Notifications uid={state.account.uid} /><List uid={state.account.uid} readOnly={!registrationEnabled} /></>;
+  if (state.status === 'signedIn') return <><VerifyEmailBanner account={state.account} /><Welcome /><p><Link to="/account/details">My details</Link> · <Link to="/account/whats-new">What’s new</Link></p><WhatsNewBanner />{!registrationEnabled && <p className="climb-notice" role="note">This is a read-only copy of your registrations. To pay, upload documents or cancel, keep using the <a href="https://mms-open-climbs.web.app" target="_blank" rel="noopener noreferrer">Open Climbs app</a> until MMS switches over to this site.</p>}<List uid={state.account.uid} readOnly={!registrationEnabled} /><Notifications uid={state.account.uid} /></>;
   if (state.status === 'error') return <p role="alert">Couldn’t check your sign-in: {state.error}</p>;
   return <><p>Sign in to see your climbs.</p><SignInForm /></>;
 }
