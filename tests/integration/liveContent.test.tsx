@@ -135,6 +135,22 @@ describe('pages read site content from Firestore', () => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
+    it('offers a calendar file for an upcoming climb, and not for a cancelled one', async () => {
+      const made: Blob[] = [];
+      URL.createObjectURL = vi.fn((b: Blob | MediaSource) => { made.push(b as Blob); return 'blob:ics'; });
+      URL.revokeObjectURL = vi.fn();
+      live.climb = { id: 'cal', title: 'Mt. Pulag', status: 'open', startDate: soon, location: 'Benguet' };
+      const { unmount } = renderAt('/climbs/cal');
+      fireEvent.click(await screen.findByRole('button', { name: 'Add to calendar' }));
+      expect(made[0].type).toContain('text/calendar');
+      expect(await made[0].text()).toContain('SUMMARY:Mt. Pulag');
+      unmount();
+      live.climb = { id: 'gone', title: 'Mt. Gone', status: 'cancelled', startDate: soon };
+      renderAt('/climbs/gone');
+      expect(await screen.findByText('This climb was cancelled.')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Add to calendar' })).not.toBeInTheDocument();
+    });
+
     it('explains a cancelled climb instead of hiding the shared link', async () => {
       live.climb = { id: 'x', title: 'Mt. Gone', status: 'cancelled', startDate: soon };
       renderAt('/climbs/x');

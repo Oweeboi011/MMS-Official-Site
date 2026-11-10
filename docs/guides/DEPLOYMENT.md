@@ -52,7 +52,7 @@ Never test data in prod. Rules still guard writes; the flag stops honest mistake
 
 AI in the loop (₱0): Claude Code `/code-review` + done gate before every commit (`.claude/CLAUDE.md`); PR template repeats the gate. No paid AI review in Quality Gates (cost cap).
 
-GitHub setup (repo settings, owner): protect `development` + `main` (PR required; `Code Quality & Security`, `End-to-End Tests`, `Security Rules Tests` required; no force push); environment `production` with required reviewer; secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`. **Until those secrets exist, CD passes but skips the deploy** (Release Guard warning): after merging to `main`, run `npm run deploy:prod` locally ([open item 5](../solution-plan/SOLUTION-PLAN.md#open-items)).
+GitHub setup (repo settings, owner): protect `development` + `main` (PR required; `Code Quality & Security`, `End-to-End Tests`, `Security Rules Tests` required; no force push); environment `production` with required reviewer; secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`. Both secrets are set (2026-11-10; the token is Account → Cloudflare Pages → Edit, MMS account only), so CD deploys preview on every push to `development` and production on `main`. If a secret is missing or empty, CD still passes but skips the deploy (Release Guard warning): check the run log, then deploy locally with `npm run deploy:prod`.
 
 **GitHub Releases:** every merge to `main` creates the next release automatically (CD job `release`: v1.1.0, v1.2.0, …, notes = merged PRs grouped by label via `.github/release.yml`), whether the Cloudflare step deployed or was skipped. v1.0.0 was the manual first release.
 

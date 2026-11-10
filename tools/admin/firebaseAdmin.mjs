@@ -6,8 +6,8 @@ import { createRequire } from 'node:module';
 const require = createRequire(new URL('../../src/backend/functions/package.json', import.meta.url));
 const { initializeApp, getApps } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
-const { getFirestore, FieldValue } = require('firebase-admin/firestore');
-export { FieldValue };
+const { getFirestore, FieldValue, Timestamp } = require('firebase-admin/firestore');
+export { FieldValue, Timestamp };
 
 function envProject() {
   if (process.env.VITE_FIREBASE_PROJECT_ID) return process.env.VITE_FIREBASE_PROJECT_ID;
@@ -31,6 +31,12 @@ export function connect(project) {
   const db = getFirestore();
   db.settings({ databaseId: 'openclimbs' });
   return { db, auth: getAuth() };
+}
+
+// A second project in the same run (copy scripts): its own named app, same `openclimbs` database id.
+export function connectNamed(name, project) {
+  const app = getApps().find((a) => a.name === name) ?? initializeApp({ projectId: project }, name);
+  return getFirestore(app, 'openclimbs');
 }
 
 // By uid or email; the users/ profile's email is admin-editable, so Auth is the source of truth.

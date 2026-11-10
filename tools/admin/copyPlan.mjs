@@ -1,0 +1,81 @@
+// Decide what a one-way copy does with each source doc: create it, overwrite it (only with --overwrite), or leave it.
+export function planCopy(source, existingIds, overwrite) {
+  const plan = { create: [], overwrite: [], skip: [] };
+  for (const doc of source) {
+    if (!existingIds.has(doc.id)) plan.create.push(doc);
+    else if (overwrite) plan.overwrite.push(doc);
+    else plan.skip.push(doc);
+  }
+  return plan;
+}
+
+export const describe = (doc) => {
+  const date = doc.data.startDate?.toDate?.().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' }) ?? 'no date';
+  return `${doc.id}  ${date}  ${doc.data.title ?? '(untitled)'}`;
+};
+
+// The old app stored some start/end dates as "YYYY-MM-DD" text; this site and its functions read Timestamps.
+// A bare date means that day in Manila (UTC+8). Other fields (paymentDueDate stays text) are untouched.
+const DATE_FIELDS = ['startDate', 'endDate'];
+export function normalizeDates(data, toTimestamp) {
+  const out = { ...data };
+  for (const field of DATE_FIELDS) {
+    const value = out[field];
+    if (typeof value !== 'string') continue;
+    const when = new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00+08:00` : value);
+    if (Number.isNaN(when.getTime())) throw new Error(`Unreadable ${field}: ${value}`);
+    out[field] = toTimestamp(when);
+  }
+  return out;
+}
+
+// Old Auth user → importUsers record. The Google link, verified flag and sign-in times come across. Email/password
+// people keep their password only when `withPassword` (hash params supplied); "password" is not a linkable provider.
+export function toImportRecord(user, withPassword = false) {
+  const providerData = (user.providerData ?? [])
+    .filter((p) => p.providerId !== 'password')
+    .map((p) => ({ uid: p.uid, providerId: p.providerId, email: p.email, displayName: p.displayName, photoURL: p.photoURL }));
+  const record = {
+    uid: user.uid,
+    email: user.email,
+    emailVerified: user.emailVerified,
+    displayName: user.displayName,
+    photoURL: user.photoURL,
+    disabled: user.disabled,
+    metadata: { creationTime: user.metadata?.creationTime, lastSignInTime: user.metadata?.lastSignInTime },
+    providerData,
+    customClaims: user.customClaims, // an upsert would otherwise clear the admin claim
+  };
+  if (withPassword && user.passwordHash) {
+    record.passwordHash = Buffer.from(user.passwordHash, 'base64');
+    if (user.passwordSalt) record.passwordSalt = Buffer.from(user.passwordSalt, 'base64');
+  }
+  return record;
+}
+
+// The console's "Password hash parameters" come as text (`key: value` lines inside `hash_config { }`); JSON also works.
+export function parseHashParams(text) {
+  let raw;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    raw = Object.fromEntries(text.split(String.fromCharCode(10)).flatMap((line) => {
+      const at = line.indexOf(':');
+      return at < 0 ? [] : [[line.slice(0, at).trim(), line.slice(at + 1).trim().replace(/,$/, '')]];
+    }));
+  }
+  const missing = ['base64_signer_key', 'base64_salt_separator', 'rounds', 'mem_cost'].filter((k) => raw[k] === undefined || raw[k] === '');
+  if (missing.length) throw new Error(`hash parameters are missing: ${missing.join(', ')}`);
+  return { signerKey: raw.base64_signer_key, saltSeparator: raw.base64_salt_separator, rounds: Number(raw.rounds), memCost: Number(raw.mem_cost) };
+}
+
+// Download links stored in records point at the old bucket. Copied objects keep their token, so only the bucket
+// segment changes. Plain objects and arrays are walked; Timestamps and other class instances are left alone.
+export function rewriteLinks(value, from, to) {
+  if (typeof value === 'string') return value.replaceAll(`/v0/b/${from}/`, `/v0/b/${to}/`);
+  if (Array.isArray(value)) return value.map((v) => rewriteLinks(v, from, to));
+  if (value && Object.getPrototypeOf(value) === Object.prototype) {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, rewriteLinks(v, from, to)]));
+  }
+  return value;
+}
