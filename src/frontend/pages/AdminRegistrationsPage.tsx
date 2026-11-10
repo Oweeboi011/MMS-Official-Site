@@ -37,7 +37,7 @@ function Search({ admin }: { admin: Account }) {
 export default function AdminRegistrationsPage() {
   return (
     <>
-      <PageHero eyebrow="Admin" title="All registrations" intro="Find anyone across every climb." image="/images/page-surveys.webp" />
+      <PageHero compact eyebrow="Admin" title="All registrations" intro="Find anyone across every climb." image="/images/page-surveys.webp" />
       <main><section className="section page-section"><div className="shell">
         <AdminGate>{(admin) => <Search admin={admin} />}</AdminGate>
         <p><Link to="/admin">Back to admin</Link></p>

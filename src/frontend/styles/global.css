@@ -506,7 +506,7 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .nav-search { margin-left: auto; padding: 8px 14px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; font-size: .8rem; font-weight: 800; transition: background .2s ease; }
 .nav-search:hover, .nav-search[aria-current] { background: rgba(255,255,255,.18); }
 .nav-search:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-.nav-account { margin-left: 8px; }
+.nav-account { margin-left: 8px; white-space: nowrap; }
 .search-form { display: grid; gap: 8px; max-width: 640px; }
 .search-form label { font-weight: 800; }
 .search-form input { padding: 14px 18px; border: 1px solid var(--line); border-radius: 999px; font: inherit; font-size: 1rem; }
@@ -568,6 +568,63 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .waiver-signature { margin-top: 28px; padding-top: 12px; border-top: 1px solid var(--ink); }
 
 /* Admin home */
+.admin-jump { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 28px; }
+.admin-jump a { padding: 7px 14px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--navy); font-size: .88rem; font-weight: 800; text-decoration: none; }
+.admin-jump a:hover, .admin-jump a:focus-visible { border-color: var(--navy); }
+#open-climbs, #site-content, #people, #health { margin-top: 40px; scroll-margin-top: 90px; }
+.admin-tiles { list-style: none; margin: 20px 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.admin-tiles a { display: block; height: 100%; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: #fff; text-decoration: none; color: inherit; }
+.admin-tiles a:hover, .admin-tiles a:focus-visible { border-color: var(--navy); }
+.admin-tiles strong { display: block; color: var(--navy); }
+.admin-tiles span { display: block; margin-top: 4px; font-size: .88rem; color: var(--muted); }
+/* Climb page: a summary column beside the story, one rhythm throughout. */
+.climb-page { padding: 56px 0 80px; }
+.climb-layout { display: grid; gap: 28px; align-items: start; }
+.climb-aside { display: grid; gap: 16px; }
+.climb-main { display: grid; gap: 28px; min-width: 0; }
+.climb-main .section, .climb-main .climb-block { padding: 0; margin: 0; }
+.climb-main .shell { width: 100%; margin: 0; }
+.climb-main .section-head { margin-bottom: 14px; }
+.climb-main h2 { font-size: clamp(1.4rem, 2.6vw, 1.9rem); line-height: 1.15; letter-spacing: -.02em; }
+.climb-main .eyebrow { margin-bottom: 6px; }
+.climb-main .climb-notice, .climb-main .climb-notices { margin: 0; }
+.climb-profile { display: grid; gap: 24px; }
+@media (min-width: 980px) {
+  .climb-layout { grid-template-columns: minmax(0, 1fr) 340px; gap: 40px; }
+  .climb-aside { position: sticky; top: 96px; order: 2; }
+}
+.aside-card { padding: 20px 22px; border: 1px solid var(--line); border-radius: 20px; background: #fff; box-shadow: 0 10px 30px rgba(16,26,36,.07); }
+.aside-card.is-primary { border-top: 6px solid var(--gold); }
+.aside-card h2 { margin: 0 0 10px; color: var(--muted); font-size: .74rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+.aside-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+.aside-tag { padding: 4px 11px; border-radius: 999px; background: var(--navy); color: #fff; font-size: .7rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.aside-tag.type-major { background: var(--gold); color: #171913; }
+.aside-tag.type-special { background: var(--green, #2f7d4f); }
+.aside-tag.is-muted { background: var(--paper); color: var(--muted); border: 1px solid var(--line); }
+.aside-when { display: grid; gap: 2px; margin: 0 0 16px; }
+.aside-when strong { color: var(--navy); font-size: 1.25rem; line-height: 1.2; }
+.aside-when span { color: var(--muted); }
+.aside-actions { display: grid; gap: 10px; }
+.aside-actions .btn, .aside-actions button { width: 100%; justify-content: center; text-align: center; }
+.aside-actions p { margin: 0; }
+.fact-list { margin: 0; }
+.fact-list div { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-top: 1px solid var(--line); }
+.fact-list div:first-child { border-top: 0; padding-top: 0; }
+.fact-list dt { flex: none; color: var(--muted); font-size: .86rem; font-weight: 700; white-space: nowrap; }
+.fact-list dd { margin: 0; color: var(--navy); font-weight: 800; text-align: right; overflow-wrap: anywhere; }
+.fee-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+.fee-table th { padding: 0 0 6px; color: var(--muted); font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-align: left; text-transform: uppercase; }
+.fee-table td { padding: 8px 8px 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.fee-table td:nth-child(2) { font-weight: 800; color: var(--navy); white-space: nowrap; }
+.fee-table td:nth-child(3) { color: var(--muted); font-size: .8rem; }
+.officer-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.officer-list li { display: grid; }
+.officer-list strong { color: var(--navy); }
+.officer-list span { color: var(--muted); font-size: .85rem; }
+.aside-card .share-climb { margin: 0; }
+.aside-card .share-label { display: block; margin-bottom: 10px; color: var(--muted); font-size: .74rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+
+/* Admin home */
 .admin-jump { margin: 0 0 24px; font-weight: 700; }
 #open-climbs, #site-content, #people, #health { margin-top: 40px; scroll-margin-top: 90px; }
 .admin-tiles { list-style: none; margin: 20px 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
@@ -581,3 +638,102 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .climb-profile .stat strong { font-size: clamp(1.1rem, 2.4vw, 1.5rem); line-height: 1.2; letter-spacing: -.02em; overflow-wrap: anywhere; }
 .climb-profile .stat span { margin-top: 6px; font-size: .72rem; }
 .climb-profile h2 { font-size: clamp(1.5rem, 3.2vw, 2.2rem); }
+
+/* Forms: fields stack label over input, sections read as cards. */
+.register-section .editor-field { display: grid; gap: 6px; }
+.register-section .editor-field select, .register-section .editor-field textarea { width: 100%; }
+.register-section .editor-field input { width: 100%; }
+.register-section .editor-field textarea { min-height: 96px; resize: vertical; }
+.form-saved { color: #1f6a3e; font-weight: 800; }
+/* Admin home polish */
+#open-climbs > h2, #site-content > h2, #people > h2, #health > h2 { margin: 0 0 6px; font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -.02em; }
+#open-climbs > .climb-muted, #site-content > .climb-muted { margin: 0 0 18px; }
+.admin-subhead { margin: 28px 0 12px; color: var(--muted); font-size: .76rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+.admin-table { border: 1px solid var(--line); border-radius: 16px; background: #fff; overflow-x: auto; box-shadow: 0 8px 24px rgba(16,26,36,.06); }
+.admin-table table { width: 100%; border-collapse: collapse; }
+.admin-table th { padding: 12px 14px; border-bottom: 0; background: var(--paper); color: var(--muted); font-size: .72rem; font-weight: 850; letter-spacing: .08em; text-align: left; text-transform: uppercase; }
+.admin-table td { padding: 12px 14px; border-top: 1px solid var(--line); border-bottom: 0; vertical-align: top; }
+.admin-table tbody tr:hover { background: rgba(247, 244, 236, .6); }
+.status-chip { display: inline-block; padding: 3px 10px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); color: var(--muted); font-size: .72rem; font-weight: 850; letter-spacing: .06em; text-transform: uppercase; }
+.status-chip.is-open { background: rgba(47, 125, 79, .12); border-color: rgba(47, 125, 79, .3); color: #1f6a3e; }
+.status-chip.is-closed { background: rgba(169, 46, 42, .1); border-color: rgba(169, 46, 42, .25); color: var(--red); }
+/* My Climbs: the registrations lead; the rest is tucked away until wanted. */
+.card-manage { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.card-manage > summary { cursor: pointer; color: var(--navy); font-weight: 800; }
+.card-manage[open] > summary { margin-bottom: 12px; }
+.notifications ul { max-height: 320px; overflow-y: auto; }
+.notifications > summary, .climb-log > summary { cursor: pointer; }
+
+/* Compact hero for tool pages: a banner, not a billboard. */
+.page-hero--compact { min-height: 0; }
+.page-hero--compact .hero-content { padding-top: 156px; padding-bottom: 40px; }
+.page-hero--compact h1 { font-size: clamp(2rem, 6vw, 3.4rem); line-height: 1; }
+.page-hero--compact .hero-copy { margin-top: 10px; font-size: 1.02rem; }
+
+/* Schedule rows: the whole row opens the climb. */
+.event { position: relative; margin: 0 -14px; padding-left: 14px; padding-right: 14px; border-radius: 14px; transition: background .16s ease; }
+.event h3 a::after { content: ''; position: absolute; inset: 0; border-radius: 14px; }
+.event:hover { background: rgba(255, 255, 255, .06); }
+.event h3 a { text-decoration: none; }
+.event:hover h3 a { text-decoration: underline; }
+.event h3 a:focus-visible { outline: 0; }
+.event h3 a:focus-visible::after { outline: 3px solid #fff; outline-offset: -3px; }
+.event-arrow { font-size: 1rem; transition: background .16s ease, color .16s ease, border-color .16s ease, transform .16s ease; }
+.event:hover .event-arrow { background: var(--gold); border-color: var(--gold); color: #171913; transform: translateX(3px); }
+/* Modal panel (notifications): a native <dialog>. */
+.nav-bell { display: inline-grid; place-items: center; width: 38px; height: 38px; padding: 0; background: transparent; color: inherit; cursor: pointer; }
+.modal { width: min(560px, calc(100vw - 32px)); max-height: min(78vh, 640px); padding: 0; border: 0; border-radius: 22px; background: #fff; color: var(--ink); box-shadow: 0 30px 80px rgba(16, 26, 36, .35); overflow: hidden; }
+.modal[open] { display: flex; flex-direction: column; }
+.modal::backdrop { background: rgba(16, 26, 36, .55); backdrop-filter: blur(3px); }
+.modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; border-bottom: 1px solid var(--line); }
+.modal-head h2 { margin: 0; font-size: 1.2rem; }
+.modal-body { overflow-y: auto; padding: 18px 22px 24px; }
+.notify-summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px; }
+.notify-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.notify-list li { display: grid; gap: 2px; padding: 12px 0 12px 16px; border-top: 1px solid var(--line); position: relative; }
+.notify-list li.is-unread::before { content: ''; position: absolute; left: 0; top: 18px; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+.notify-list a { color: var(--navy); font-weight: 800; }
+.notify-list span { font-size: .92rem; color: var(--ink); }
+.notify-list small { font-size: .78rem; }
+/* Fees: compact lines, a member total, optional and guest lines apart. */
+.fee-lines { list-style: none; margin: 0; padding: 0; display: grid; }
+.fee-lines li { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; padding: 8px 0; border-top: 1px solid var(--line); font-size: .92rem; }
+.fee-lines li:first-child { border-top: 0; padding-top: 0; }
+.fee-lines small { display: block; color: var(--muted); font-size: .78rem; }
+.fee-lines b { color: var(--navy); white-space: nowrap; }
+.fee-total { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; margin: 10px 0 0; padding: 10px 14px; border-radius: 12px; background: rgba(225, 184, 39, .18); font-weight: 800; }
+.fee-total small { font-weight: 600; color: var(--muted); }
+.fee-total strong { color: var(--navy); font-size: 1.15rem; }
+.aside-card h3.fee-group { margin: 16px 0 8px; color: var(--muted); font-size: .72rem; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+.fee-guest { margin: 12px 0 0; font-size: .9rem; color: var(--muted); }
+.fee-help { margin: 12px 0 0; font-size: .82rem; color: var(--muted); }
+.requirement-list { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: .92rem; }
+/* Button system: one shape, three weights (primary gold, default outlined, dark), clear states. */
+.btn { min-height: 46px; padding: 0 22px; border: 1.5px solid transparent; font-size: .95rem; line-height: 1.1; text-decoration: none; transition: transform .16s ease, background .16s ease, border-color .16s ease, box-shadow .16s ease, color .16s ease; }
+.btn:not(.btn-primary):not(.btn-dark):not(.btn-ghost) { background: #fff; border-color: rgba(16, 26, 36, .22); color: var(--ink); }
+.btn:not(.btn-primary):not(.btn-dark):not(.btn-ghost):hover { background: var(--paper); border-color: var(--ink); }
+.btn-primary { border-color: var(--gold); box-shadow: 0 6px 18px rgba(225, 184, 39, .32); }
+.btn-primary:hover { background: #d3aa1d; border-color: #d3aa1d; box-shadow: 0 8px 22px rgba(225, 184, 39, .42); }
+.btn-dark { border-color: var(--ink); }
+.btn-dark:hover { background: var(--navy); border-color: var(--navy); }
+.btn:active { transform: translateY(0); box-shadow: none; }
+.btn:disabled, .btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn:focus-visible, .chip:focus-visible, .link-button:focus-visible, .admin-tabs button:focus-visible { outline: 3px solid var(--navy); outline-offset: 3px; }
+.page-hero .btn:focus-visible, .hero .btn:focus-visible, .cta .btn:focus-visible, .journey .btn:focus-visible { outline-color: #fff; }
+.my-climb .btn, .card-manage .btn, .editor-actions .btn, .aside-card .btn, .admin-tiles + .btn { min-height: 42px; padding: 0 18px; font-size: .9rem; }
+.chip { transition: background .16s ease, border-color .16s ease, color .16s ease; }
+.chip:hover:not(:disabled) { border-color: var(--ink); background: var(--paper); }
+.chip.is-active:hover { background: var(--ink); }
+.chip:disabled { opacity: .5; cursor: not-allowed; }
+.link-button:hover { color: var(--navy); }
+.link-button:disabled { opacity: .5; cursor: not-allowed; }
+.account-form input, .editor-field input, .editor-field select, .editor-field textarea { min-height: 44px; background: #fff; transition: border-color .16s ease, box-shadow .16s ease; }
+.account-form input:hover, .editor-field input:hover, .editor-field select:hover, .editor-field textarea:hover { border-color: rgba(16, 26, 36, .35); }
+.account-form input:focus-visible, .editor-field input:focus-visible, .editor-field select:focus-visible, .editor-field textarea:focus-visible { outline: 0; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(37, 43, 115, .18); }
+.editor-actions { flex-wrap: wrap; align-items: center; }
+@media (prefers-reduced-motion: reduce) { .btn, .chip { transition: none; } .btn:hover { transform: none; } }
+
+.aside-registered { display: grid; gap: 2px; padding: 12px 14px; border-radius: 12px; background: rgba(47, 125, 79, .12); border: 1px solid rgba(47, 125, 79, .3); }
+.aside-registered strong { color: #1f6a3e; }
+.aside-registered span { color: var(--muted); font-size: .88rem; }
+.form-hint { margin: 0; padding: 10px 14px; border-radius: 12px; background: rgba(225, 184, 39, .18); color: var(--ink); font-size: .92rem; font-weight: 700; }

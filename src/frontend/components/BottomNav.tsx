@@ -1,6 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { sectionPath, sitemap, subpagePath } from '../data/sitemap';
+import { openNotifications } from '../lib/notificationsModal';
 import { readAdminHint, readSignedInHint, subscribeSignedInHint } from '../lib/signedInHint';
 
 export default function BottomNav() {
@@ -30,6 +31,7 @@ export default function BottomNav() {
           <div className="menu-group">
             <Link className="menu-heading" to="/" onClick={() => setOpen(false)}>Home</Link>
           </div>
+          {signedIn && <div className="menu-group"><button type="button" className="menu-heading link-button" onClick={() => { setOpen(false); openNotifications(); }}>Notifications</button></div>}
           {isAdmin && <div className="menu-group"><Link className="menu-heading" to="/admin" onClick={() => setOpen(false)}>Admin</Link></div>}
           <div className="menu-group">
             <Link className="menu-heading" to={signedIn ? '/account/climbs' : '/account/sign-in'} onClick={() => setOpen(false)}>{signedIn ? 'My account' : 'Sign in'}</Link>

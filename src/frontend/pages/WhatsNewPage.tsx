@@ -37,7 +37,7 @@ export default function WhatsNewPage() {
   else if (state.status !== 'loading') body = <><p>Sign in to see what’s new.</p><SignInForm /></>;
   return (
     <>
-      <PageHero eyebrow="Account" title="What’s new" intro="Updates to the site and Open Climbs." image="/images/page-surveys.webp" />
+      <PageHero compact eyebrow="Account" title="What’s new" intro="Updates to the site and Open Climbs." image="/images/page-surveys.webp" />
       <main><section className="section page-section"><div className="shell register-shell legal-page">{body}<p><Link to="/account/climbs">My Climbs</Link></p></div></section></main>
     </>
   );

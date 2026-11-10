@@ -14,13 +14,13 @@ const TEXT_FIELDS: [Text, string][] = [
 
 function Choice({ id, label, value, options, onChange }: { id: string; label: string; value: string; options: readonly (readonly [string, string])[]; onChange: (v: string) => void }) {
   return (
-    <>
+    <div className="editor-field">
       <label htmlFor={id}>{label}</label>
       <select id={id} value={value} onChange={(e) => onChange(e.target.value)}>
         <option value="">Not set</option>
         {options.map(([k, name]) => <option key={k} value={k}>{name}</option>)}
       </select>
-    </>
+    </div>
   );
 }
 
@@ -44,24 +44,40 @@ function Form({ uid }: { uid: string }) {
       setState({ busy: false, ok: false, message: `Not saved: ${(err as Error).message}` });
     }
   };
+  const text = (k: Text) => {
+    const label = TEXT_FIELDS.find(([key]) => key === k)?.[1] ?? k;
+    return (
+      <div className="editor-field">
+        <label htmlFor={`d-${k}`}>{label}</label>
+        <input id={`d-${k}`} maxLength={MAX[k]} value={d[k]} onChange={(e) => set(k)(e.target.value)} />
+      </div>
+    );
+  };
   return (
-    <form className="pay-form" onSubmit={(e) => void save(e)} noValidate>
+    <form className="register-form" onSubmit={(e) => void save(e)} noValidate>
       <p className="climb-muted">Only you and the officers running your climbs can see this.</p>
       {missingEmergency(d) && <p className="climb-notice" role="note">Add an emergency contact so officers can reach someone if needed.</p>}
-      {TEXT_FIELDS.map(([k, label]) => (
-        <div key={k}>
-          <label htmlFor={`d-${k}`}>{label}</label>
-          <input id={`d-${k}`} maxLength={MAX[k]} value={d[k]} onChange={(e) => set(k)(e.target.value)} />
+      <fieldset className="register-section"><legend>Contact</legend>
+        {text('mobile')}{text('dateOfBirth')}{text('address')}
+      </fieldset>
+      <fieldset className="register-section"><legend>Emergency contact</legend>
+        {text('ecName')}{text('ecMobile')}{text('ecRelationship')}
+      </fieldset>
+      <fieldset className="register-section"><legend>Climbing and health</legend>
+        <Choice id="d-level" label="Climbing experience" value={d.experienceLevel} options={LEVELS} onChange={set('experienceLevel')} />
+        <div className="editor-field">
+          <label htmlFor="d-medical">Medical conditions or allergies</label>
+          <textarea id="d-medical" maxLength={MAX.medicalConditions} value={d.medicalConditions} onChange={(e) => set('medicalConditions')(e.target.value)} />
         </div>
-      ))}
-      <Choice id="d-level" label="Climbing experience" value={d.experienceLevel} options={LEVELS} onChange={set('experienceLevel')} />
-      <label htmlFor="d-medical">Medical conditions or allergies</label>
-      <textarea id="d-medical" maxLength={MAX.medicalConditions} value={d.medicalConditions} onChange={(e) => set('medicalConditions')(e.target.value)} />
-      <h2>MMS profile (optional)</h2>
-      <label htmlFor="d-batch">BMC batch</label>
-      <input id="d-batch" maxLength={MAX.batch} value={d.batch} onChange={(e) => set('batch')(e.target.value)} />
-      <Choice id="d-tribe" label="Sportsfest tribe" value={d.tribe} options={TRIBES} onChange={set('tribe')} />
-      {state.message && <p role={state.ok ? 'status' : 'alert'} className={state.ok ? undefined : 'field-error'}>{state.message}</p>}
+      </fieldset>
+      <fieldset className="register-section"><legend>MMS profile (optional)</legend>
+        <div className="editor-field">
+          <label htmlFor="d-batch">BMC batch</label>
+          <input id="d-batch" maxLength={MAX.batch} value={d.batch} onChange={(e) => set('batch')(e.target.value)} />
+        </div>
+        <Choice id="d-tribe" label="Sportsfest tribe" value={d.tribe} options={TRIBES} onChange={set('tribe')} />
+      </fieldset>
+      {state.message && <p role={state.ok ? 'status' : 'alert'} className={state.ok ? 'form-saved' : 'field-error'}>{state.message}</p>}
       <div className="editor-actions"><button type="submit" className="btn btn-primary" disabled={state.busy}>Save details</button></div>
     </form>
   );
@@ -75,7 +91,7 @@ export default function MyDetailsPage() {
   else if (state.status !== 'loading') body = <><p>Sign in to edit your details.</p><SignInForm /></>;
   return (
     <>
-      <PageHero eyebrow="Account" title="My details" intro="Contact, emergency and health details, and your MMS profile." image="/images/page-open-climbs.webp" />
+      <PageHero compact eyebrow="Account" title="My details" intro="Contact, emergency and health details, and your MMS profile." image="/images/page-open-climbs.webp" />
       <main><section className="section page-section"><div className="shell register-shell">{body}<p><Link to="/account/climbs">My Climbs</Link></p></div></section></main>
     </>
   );

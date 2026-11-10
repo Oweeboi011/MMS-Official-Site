@@ -4,7 +4,6 @@ import PageHero from '../components/PageHero';
 import SignInForm from '../components/SignInForm';
 import DocUploads from '../components/myclimbs/DocUploads';
 import EditDetails from '../components/myclimbs/EditDetails';
-import Notifications from '../components/myclimbs/Notifications';
 import ClimbLog from '../components/myclimbs/ClimbLog';
 import PayForm from '../components/myclimbs/PayForm';
 import Welcome from '../components/myclimbs/Welcome';
@@ -14,6 +13,7 @@ import PledgeForm from '../components/myclimbs/PledgeForm';
 import VerifyEmailBanner from '../components/VerifyEmailBanner';
 import { dueLabel, type ClimbDetail } from '../data/climbDetail';
 import { canCancel, draftCancellationPolicy, nextSteps, type MyClimb } from '../data/myClimbs';
+import { openNotifications } from '../lib/notificationsModal';
 import { registrationEnabled } from '../services/firebaseEnv';
 import { cancelRegistration, myRegistrations } from '../services/registrations';
 import { useAccount } from '../services/useAccount';
@@ -103,7 +103,12 @@ function CardActions({ row, climb, uid, owes, onChange }: { row: MyClimb; climb:
       <NextSteps steps={nextSteps(row, climb.requiredDocs.map((t) => t.uploadField))} />
       <PaymentLog row={row} />
       <Records row={row} />
-      {live && <LiveActions row={row} climb={climb} uid={uid} owes={owes} onChange={onChange} />}
+      {live && (
+        <details className="card-manage" open={owes}>
+          <summary>Manage this registration</summary>
+          <LiveActions row={row} climb={climb} uid={uid} owes={owes} onChange={onChange} />
+        </details>
+      )}
       <Closing row={row} over={climb.over} uid={uid} onChange={onChange} />
     </>
   );
@@ -150,13 +155,13 @@ function List({ uid, readOnly }: { uid: string; readOnly: boolean }) {
   if (error) return <p role="alert">{error}</p>;
   if (!rows) return <p role="status">Loading your climbs…</p>;
   if (!rows.length) return <><p>No registrations yet.</p><Link className="btn btn-primary" to="/activities/open-climbs">Find a climb</Link></>;
-  return <><ClimbLog rows={rows} /><ul className="my-climbs">{rows.map((r) => <Card key={r.id} row={r} uid={uid} onChange={load} readOnly={readOnly} />)}</ul></>;
+  return <><ul className="my-climbs">{rows.map((r) => <Card key={r.id} row={r} uid={uid} onChange={load} readOnly={readOnly} />)}</ul><ClimbLog rows={rows} /></>;
 }
 
 function Body() {
   const state = useAccount();
   if (state.status === 'loading') return <p role="status">Checking your sign-in…</p>;
-  if (state.status === 'signedIn') return <><VerifyEmailBanner account={state.account} /><Welcome /><p><Link to="/account/details">My details</Link> · <Link to="/account/whats-new">What’s new</Link></p><WhatsNewBanner />{!registrationEnabled && <p className="climb-notice" role="note">This is a read-only copy of your registrations. To pay, upload documents or cancel, keep using the <a href="https://mms-open-climbs.web.app" target="_blank" rel="noopener noreferrer">Open Climbs app</a> until MMS switches over to this site.</p>}<Notifications uid={state.account.uid} /><List uid={state.account.uid} readOnly={!registrationEnabled} /></>;
+  if (state.status === 'signedIn') return <><VerifyEmailBanner account={state.account} /><Welcome /><p><Link to="/account/details">My details</Link> · <Link to="/account/whats-new">What’s new</Link> · <button type="button" className="link-button" onClick={openNotifications}>Notifications</button></p><WhatsNewBanner />{!registrationEnabled && <p className="climb-notice" role="note">This is a read-only copy of your registrations. To pay, upload documents or cancel, keep using the <a href="https://mms-open-climbs.web.app" target="_blank" rel="noopener noreferrer">Open Climbs app</a> until MMS switches over to this site.</p>}<List uid={state.account.uid} readOnly={!registrationEnabled} /></>;
   if (state.status === 'error') return <p role="alert">Couldn’t check your sign-in: {state.error}</p>;
   return <><p>Sign in to see your climbs.</p><SignInForm /></>;
 }
@@ -164,7 +169,7 @@ function Body() {
 export default function MyClimbsPage() {
   return (
     <>
-      <PageHero eyebrow="Account" title="My Climbs" intro="Your registrations, what you owe, and cancellations." image="/images/page-open-climbs.webp" />
+      <PageHero compact eyebrow="Account" title="My Climbs" intro="Your registrations, what you owe, and cancellations." image="/images/page-open-climbs.webp" />
       <main><section className="section page-section"><div className="shell register-shell"><Body /></div></section></main>
     </>
   );

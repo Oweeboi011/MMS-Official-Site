@@ -33,6 +33,7 @@ function ClimbRow({ climb }: { climb: ScheduleClimb }) {
         {/* Completed cards: date + trail class only (owner decision 2026-11-09, #191). */}
         <p>{(climb.over ? [climb.dates, difficulty] : [climb.dates, climb.location, difficulty, climb.elevation, climb.distance]).filter(Boolean).join(' · ')}</p>
       </div>
+      {climb.id && <span className="event-arrow" aria-hidden="true">→</span>}
     </div>
   );
 }

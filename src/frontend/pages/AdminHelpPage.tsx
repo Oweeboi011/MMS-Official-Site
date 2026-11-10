@@ -7,7 +7,7 @@ import { adminHelpTopics } from '../data/adminHelp';
 export default function AdminHelpPage() {
   return (
     <>
-      <PageHero eyebrow="Admin" title="Officer guide" intro="Setting up a climb, running registrations, climb day, and site content." image="/images/page-surveys.webp" />
+      <PageHero compact eyebrow="Admin" title="Officer guide" intro="Setting up a climb, running registrations, climb day, and site content." image="/images/page-surveys.webp" />
       <main>
         <section className="section page-section">
           <div className="shell register-shell legal-page">

@@ -10,7 +10,7 @@ export default function SignInPage() {
   const [error, setError] = useState<string | null>(null);
   return (
     <>
-      <PageHero eyebrow="Account" title="Sign in" intro="Guests, members and officers: sign in with Google or your email. A free account; joining a climb doesn't need MMS membership." image="/images/page-surveys.webp" />
+      <PageHero compact eyebrow="Account" title="Sign in" intro="Guests, members and officers: sign in with Google or your email. A free account; joining a climb doesn't need MMS membership." image="/images/page-surveys.webp" />
       <main>
         <section className="section">
           <div className="shell">

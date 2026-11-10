@@ -8,6 +8,7 @@ interface Props {
   title: string;
   intro: string;
   image: string;
+  compact?: boolean; // tool pages (account, admin): the work comes first, the photo stays as a banner
 }
 
 // Home › Section › Page, for any page under a sitemap section.
@@ -26,9 +27,9 @@ function Breadcrumbs({ title }: { title: string }) {
   );
 }
 
-export default function PageHero({ eyebrow, title, intro, image }: Props) {
+export default function PageHero({ eyebrow, title, intro, image, compact }: Props) {
   return (
-    <header className="hero page-hero" style={{ '--hero-image': `url("${asset(image)}")` } as CSSProperties}>
+    <header className={`hero page-hero${compact ? ' page-hero--compact' : ''}`} style={{ '--hero-image': `url("${asset(image)}")` } as CSSProperties}>
       <div className="shell hero-content">
         <Breadcrumbs title={title} />
         <div className="eyebrow">{eyebrow}</div>

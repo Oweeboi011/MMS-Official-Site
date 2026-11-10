@@ -143,6 +143,12 @@ export const sendReminderNotifications = onSchedule(
     secrets: ["BREVO_API_KEY", "BREVO_FROM_EMAIL"],
   },
   async () => {
+    // Off until the switch (like EMAILS_ENABLED): until then the old site runs reminders, and this copy of the data
+    // would only produce stale in-app notices.
+    if (process.env.REMINDERS_ENABLED !== "true") {
+      logger.info("[sendReminderNotifications] skipped: REMINDERS_ENABLED is off");
+      return;
+    }
     const regsSnap = await db.collection("registrations").where("status", "in", ["pending", "confirmed"]).get();
     const regs = regsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
     const climbIds = [...new Set(regs.map((r) => r.climbId).filter(Boolean))];

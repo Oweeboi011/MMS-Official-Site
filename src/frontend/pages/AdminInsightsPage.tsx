@@ -51,7 +51,7 @@ function Errors() {
 export default function AdminInsightsPage() {
   return (
     <>
-      <PageHero eyebrow="Admin" title="Insights" intro="Function health, storage, cost, email, page views and errors." image="/images/page-surveys.webp" />
+      <PageHero compact eyebrow="Admin" title="Insights" intro="Function health, storage, cost, email, page views and errors." image="/images/page-surveys.webp" />
       <main><section className="section page-section"><div className="shell register-shell">
         <AdminGate>{() => (
           <>

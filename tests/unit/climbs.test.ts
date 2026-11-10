@@ -14,6 +14,14 @@ describe('Manila dates', () => {
 });
 
 describe('toClimb', () => {
+  it('reads a bare elevation as metres, with or without a thousands comma, and keeps typed units', () => {
+    const elevation = (v: unknown) => toClimb({ title: 'T', elevation: v }, now)?.elevation;
+    expect(elevation('2087')).toBe('2,087m');
+    expect(elevation('2,926')).toBe('2,926m');
+    expect(elevation('633m')).toBe('633m');
+    expect(elevation('')).toBeUndefined();
+  });
+
   it('maps the old Open Climbs shape', () => {
     const c = toClimb({ id: 'x', title: 'Mt. Pulag', location: 'Benguet', type: 'major', status: 'closed', difficulty: '7/9', elevation: 2926,
       startDate: new Date('2026-11-19T16:00:00Z'), endDate: new Date('2026-11-21T16:00:00Z') }, now);
@@ -55,7 +63,7 @@ describe('splitSchedule', () => {
 describe('toClimbDetail', () => {
   it('collects stats, hides drafts, keeps cancelled with a flag', () => {
     const d = toClimbDetail({ title: 'T', elevation: '633m', difficulty: '3/9', trailClass: 2, roundTripDistance: '8 km', thingsToBring: ['Water', '', 4] }, now)!;
-    expect(d.stats).toEqual([{ value: '633m', label: 'Elevation' }, { value: '3/9', label: 'Difficulty' }, { value: '2', label: 'Trail class' }, { value: '8 km', label: 'Round trip' }]);
+    expect(d.stats).toEqual([{ value: '633m', label: 'Elevation' }, { value: '3/9 · Beginner-friendly', label: 'Difficulty' }, { value: 'Class 2 · Simple hiking', label: 'Trail class' }, { value: '8 km', label: 'Round trip' }]);
     expect(d.thingsToBring).toEqual(['Water']);
     expect(toClimbDetail({ status: 'draft' }, now)).toBeNull();
     expect(toClimbDetail({ status: 'cancelled' }, now)?.cancelled).toBe(true);

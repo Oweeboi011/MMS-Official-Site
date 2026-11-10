@@ -52,7 +52,7 @@ function Users({ admin }: { admin: Account }) {
 export default function AdminUsersPage() {
   return (
     <>
-      <PageHero eyebrow="Admin" title="Accounts and roles" intro="Everyone with a site account, and who can manage the site." image="/images/page-surveys.webp" />
+      <PageHero compact eyebrow="Admin" title="Accounts and roles" intro="Everyone with a site account, and who can manage the site." image="/images/page-surveys.webp" />
       <main><section className="section page-section"><div className="shell">
         <AdminGate>{(admin) => <Users admin={admin} />}</AdminGate>
         <p><Link to="/admin">Back to admin</Link></p>

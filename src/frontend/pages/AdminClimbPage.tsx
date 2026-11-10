@@ -43,7 +43,7 @@ export default function AdminClimbPage() {
   const climb = useClimb(id);
   return (
     <>
-      <PageHero eyebrow="Admin · Registrations" title={climb?.title ?? 'Climb'} intro={climb ? [climb.dates, climb.location].filter(Boolean).join(' · ') : ''} image="/images/page-surveys.webp" />
+      <PageHero compact eyebrow="Admin · Registrations" title={climb?.title ?? 'Climb'} intro={climb ? [climb.dates, climb.location].filter(Boolean).join(' · ') : ''} image="/images/page-surveys.webp" />
       <main><section className="section page-section"><div className="shell">
         <AdminGate>{(admin) => <Registrations climbId={id} climb={climb} admin={admin} />}</AdminGate>
         <p><Link to="/admin/registrations">All registrations</Link> · <Link to="/admin">Back to admin</Link></p>
