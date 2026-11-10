@@ -23,7 +23,7 @@ export default function SearchPage() {
 
   return (
     <>
-      <PageHero eyebrow="Search" title="Find a page" intro="Search climbs, courses, programs, news, and MMS terms." image="/images/page-surveys.webp" />
+      <PageHero compact eyebrow="Search" title="Find a page" intro="Search climbs, courses, programs, news, and MMS terms." image="/images/page-surveys.webp" />
       <main>
         <section className="section">
           <div className="shell">

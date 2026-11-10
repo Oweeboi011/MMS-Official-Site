@@ -73,7 +73,7 @@ export default function AdminPage() {
   else body = <p><Link to="/account/sign-in">Sign in</Link> to manage site content.</p>;
   return (
     <>
-      <PageHero eyebrow="Admin" title="Admin" intro="Run Open Climbs and keep the website’s content up to date." image="/images/page-surveys.webp" />
+      <PageHero compact eyebrow="Admin" title="Admin" intro="Run Open Climbs and keep the website’s content up to date." image="/images/page-surveys.webp" />
       <main>
         <section className="section">
           <div className="shell">{body}</div>

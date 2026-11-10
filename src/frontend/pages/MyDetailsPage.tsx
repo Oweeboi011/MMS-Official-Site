@@ -91,7 +91,7 @@ export default function MyDetailsPage() {
   else if (state.status !== 'loading') body = <><p>Sign in to edit your details.</p><SignInForm /></>;
   return (
     <>
-      <PageHero eyebrow="Account" title="My details" intro="Contact, emergency and health details, and your MMS profile." image="/images/page-open-climbs.webp" />
+      <PageHero compact eyebrow="Account" title="My details" intro="Contact, emergency and health details, and your MMS profile." image="/images/page-open-climbs.webp" />
       <main><section className="section page-section"><div className="shell register-shell">{body}<p><Link to="/account/climbs">My Climbs</Link></p></div></section></main>
     </>
   );

@@ -663,3 +663,9 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .card-manage[open] > summary { margin-bottom: 12px; }
 .notifications ul { max-height: 320px; overflow-y: auto; }
 .notifications > summary, .climb-log > summary { cursor: pointer; }
+
+/* Compact hero for tool pages: a banner, not a billboard. */
+.page-hero--compact { min-height: 0; }
+.page-hero--compact .hero-content { padding-top: 156px; padding-bottom: 40px; }
+.page-hero--compact h1 { font-size: clamp(2rem, 6vw, 3.4rem); line-height: 1; }
+.page-hero--compact .hero-copy { margin-top: 10px; font-size: 1.02rem; }
