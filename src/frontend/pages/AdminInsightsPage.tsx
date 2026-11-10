@@ -1,11 +1,13 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import PageHero from '../components/PageHero';
-import { Attention, Compliance, Failures, Money, Overview, Panel } from '../components/admin/InsightPanels';
+import AdminStats from '../components/admin/AdminStats';
+import { trafficSummary } from '../data/insightStats';
+import { Attention, Bars, Compliance, Failures, Money, Overview, Panel } from '../components/admin/InsightPanels';
 import { AdminGate } from '../components/admin/RegistrationTable';
 import { loadInsightData } from '../services/insightData';
 import { recentAudit } from '../services/auditLog';
-import { INSIGHTS, callInsight, recentErrors, topPaths } from '../services/insights';
+import { INSIGHTS, callInsight, recentErrors, recentViews } from '../services/insights';
 
 type Load<T> = { ok: true; value: T } | { ok: false; error: string } | null;
 
@@ -42,11 +44,18 @@ function ServiceCard({ name, title }: { name: string; title: string }) {
 
 function Traffic() {
   return (
-    <Panel title="Most viewed pages (7 days)">
-      <Loaded load={topPaths} what="views">
-        {(rows) => (rows.length ? <ol className="plain-list">{rows.map(([path, n]) => <li key={path}>{path} <small>{n} views</small></li>)}</ol> : <p className="climb-muted">No page views logged in the last 7 days.</p>)}
-      </Loaded>
-    </Panel>
+    <Loaded load={() => recentViews().then((v) => trafficSummary(v, Date.now()))} what="views">
+      {(t) => {
+        if (!t.views) return <p className="climb-muted">No page views logged in the last 30 days.</p>;
+        return (
+          <>
+            <AdminStats items={[['Views (30 days)', String(t.views)], ['Visits', String(t.sessions)], ['Views per day', String(Math.round(t.views / 30))]]} />
+            <Panel title="Views per day, last 30 days"><Bars rows={t.perDay.map(([d, n]) => [d.slice(5), n])} /></Panel>
+            <Panel title="Most viewed pages"><ol className="plain-list">{t.top.map(([path, n]) => <li key={path}>{path} <small>{n} views</small></li>)}</ol></Panel>
+          </>
+        );
+      }}
+    </Loaded>
   );
 }
 

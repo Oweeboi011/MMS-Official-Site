@@ -18,7 +18,7 @@ vi.mock('../../src/frontend/services/insights', () => ({
     if (name === 'getEmailStats') throw new Error('Brevo not set up');
     return { configured: true, executionCount: 120, errorCount: 2 };
   },
-  topPaths: async () => [['/activities/open-climbs', 40], ['/climbs/c1', 12]],
+  recentViews: async () => [{ at: Date.now(), path: '/activities/open-climbs', session: 's1' }, { at: Date.now(), path: '/climbs/c1', session: 's2' }],
   recentErrors: async () => [{ id: 'e', type: 'client', source: 'route', message: 'Loading chunk failed', path: '/admin', at: 0 }],
 }));
 

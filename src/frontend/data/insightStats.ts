@@ -114,3 +114,23 @@ export function oldestPending(regs: AdminReg[]): AdminReg | null {
   const pending = active(regs).filter((r) => r.status === 'pending' && r.createdAt > 0);
   return pending.length ? pending.reduce((o, r) => (r.createdAt < o.createdAt ? r : o)) : null;
 }
+
+export interface PageView { at: number; path: string; session: string }
+
+// Daily views over the window (Manila days, oldest first), plus totals; sessions are distinct visits, not people.
+export function trafficSummary(views: PageView[], now: number, days = 30) {
+  const perDay = new Map<string, number>();
+  for (let i = days - 1; i >= 0; i -= 1) perDay.set(day(now - i * DAY), 0);
+  const paths = new Map<string, number>();
+  for (const v of views) {
+    const key = day(v.at);
+    if (perDay.has(key)) perDay.set(key, (perDay.get(key) ?? 0) + 1);
+    paths.set(v.path, (paths.get(v.path) ?? 0) + 1);
+  }
+  return {
+    perDay: [...perDay.entries()] as [string, number][],
+    top: [...paths].sort((a, b) => b[1] - a[1]).slice(0, 15),
+    views: views.length,
+    sessions: new Set(views.map((v) => v.session).filter(Boolean)).size,
+  };
+}
