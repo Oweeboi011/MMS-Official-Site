@@ -30,10 +30,10 @@ function Log() {
 export default function AdminAuditPage() {
   return (
     <>
-      <PageHero compact eyebrow="Admin" title="Audit log" intro="Sensitive admin actions, newest first. Entries can’t be edited or deleted." image="/images/page-surveys.webp" />
+      <PageHero compact crumb={{ to: '/admin', label: 'Admin' }} eyebrow="Admin" title="Audit log" intro="Sensitive admin actions, newest first. Entries can’t be edited or deleted." image="/images/page-surveys.webp" />
       <main><section className="section page-section"><div className="shell">
         <AdminGate>{() => <Log />}</AdminGate>
-        <p><Link to="/admin">Back to admin</Link></p>
+        
       </div></section></main>
     </>
   );

@@ -10,6 +10,7 @@ function Refund({ reg, admin, run, busy }: RowProps) {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
+  if (!open && reg.paid <= 0) return null; // nothing to refund
   if (!open) return <button type="button" className="chip" disabled={busy} onClick={() => setOpen(true)}>Record refund</button>;
   const n = Number(amount.replace(/[^0-9.]/g, ''));
   return (

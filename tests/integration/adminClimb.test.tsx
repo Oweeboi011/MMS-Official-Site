@@ -36,7 +36,7 @@ describe('admin: registrations', () => {
   it('lists a climb’s registrants, verifies a payment, changes status, saves notes', async () => {
     renderAt('/admin/climbs/c1');
     expect(await screen.findByText('Ana Cruz', {}, wait)).toBeInTheDocument();
-    expect(screen.getByText(/1 payment\(s\) to review/)).toBeInTheDocument();
+    expect(screen.getByText('To review').closest('li')).toHaveTextContent('1');
     expect(screen.getByRole('link', { name: 'receipt 1' })).toHaveAttribute('href', 'https://x/r.jpg');
     fireEvent.click(screen.getByRole('button', { name: 'Verify' }));
     await vi.waitFor(() => expect(svc.reviews).toEqual([['r1', 0, 'verified']]));

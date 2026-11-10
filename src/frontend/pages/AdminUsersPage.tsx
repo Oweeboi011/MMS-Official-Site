@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import PageHero from '../components/PageHero';
 import { AdminGate } from '../components/admin/RegistrationTable';
 import { AddAccount, DeleteAccount } from '../components/admin/AccountForms';
@@ -52,10 +51,10 @@ function Users({ admin }: { admin: Account }) {
 export default function AdminUsersPage() {
   return (
     <>
-      <PageHero compact eyebrow="Admin" title="Accounts and roles" intro="Everyone with a site account, and who can manage the site." image="/images/page-surveys.webp" />
+      <PageHero compact crumb={{ to: '/admin', label: 'Admin' }} eyebrow="Admin" title="Accounts and roles" intro="Everyone with a site account, and who can manage the site." image="/images/page-surveys.webp" />
       <main><section className="section page-section"><div className="shell">
         <AdminGate>{(admin) => <Users admin={admin} />}</AdminGate>
-        <p><Link to="/admin">Back to admin</Link></p>
+        
       </div></section></main>
     </>
   );

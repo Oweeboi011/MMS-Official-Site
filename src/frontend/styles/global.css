@@ -737,3 +737,15 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .aside-registered strong { color: #1f6a3e; }
 .aside-registered span { color: var(--muted); font-size: .88rem; }
 .form-hint { margin: 0; padding: 10px 14px; border-radius: 12px; background: rgba(225, 184, 39, .18); color: var(--ink); font-size: .92rem; font-weight: 700; }
+
+/* Admin pages: a way back, a stat strip, paging. */
+.hero-back { display: inline-block; margin-bottom: 10px; color: rgba(255, 255, 255, .85); font-size: .88rem; font-weight: 800; text-decoration: none; }
+.hero-back:hover, .hero-back:focus-visible { color: var(--gold); }
+.admin-stats { list-style: none; margin: 0 0 18px; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.admin-stats li { padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: #fff; box-shadow: 0 6px 18px rgba(16, 26, 36, .05); }
+.admin-stats strong { display: block; color: var(--navy); font-size: 1.35rem; line-height: 1.1; }
+.admin-stats span { color: var(--muted); font-size: .72rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.admin-stats li.is-alert { border-color: var(--gold); background: rgba(225, 184, 39, .14); }
+.admin-pager { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 18px 0; color: var(--muted); font-weight: 700; }
+.admin-notes textarea { min-height: 34px; }
+.admin-table td .chip { margin-top: 6px; }
