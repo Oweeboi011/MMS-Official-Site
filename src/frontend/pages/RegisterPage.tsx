@@ -7,9 +7,10 @@ import FeeBreakdown from '../components/register/FeeBreakdown';
 import RegisterFields from '../components/register/RegisterFields';
 import WaiverConsent from '../components/register/WaiverConsent';
 import type { ClimbDetail } from '../data/climbDetail';
-import { initialForm, validateRegistration, type FormErrors, type RegistrationForm } from '../data/registration';
+import { initialForm, prefillForm, validateRegistration, type FormErrors, type RegistrationForm } from '../data/registration';
 import type { Account } from '../services/auth';
 import { registrationEnabled } from '../services/firebaseEnv';
+import { savedForRegistration } from '../services/memberDetails';
 import { hasRegistered, register } from '../services/registrations';
 import { useAccount } from '../services/useAccount';
 import { useClimb } from '../services/useClimb';
@@ -45,6 +46,16 @@ function Form({ climb, account }: { climb: ClimbDetail; account: Account }) {
   const [errors, setErrors] = useState<FormErrors>({});
   const [status, setStatus] = useState<'idle' | 'saving' | 'done' | 'error'>('idle');
   const [message, setMessage] = useState('');
+  const [filled, setFilled] = useState(false);
+  useEffect(() => {
+    let live = true;
+    savedForRegistration(account.uid).then((saved) => {
+      if (!live) return;
+      setForm((f) => prefillForm(f, saved, account.name).form);
+      setFilled(prefillForm(initialForm(), saved).filled);
+    }, () => undefined); // no saved details (or no connection): a blank form is fine
+    return () => { live = false; };
+  }, [account.uid, account.name]);
   const set = <K extends keyof RegistrationForm>(key: K, value: RegistrationForm[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
     setErrors((e) => ({ ...e, [key]: undefined }));
@@ -77,6 +88,7 @@ function Form({ climb, account }: { climb: ClimbDetail; account: Account }) {
     <form className="register-form" onSubmit={(e) => void submit(e)} noValidate>
       {message && <p className="climb-notice" role="alert">{message}</p>}
       <p className="climb-muted">Signed in as {account.email}. Fields marked * are required.</p>
+      {filled && <p className="form-hint" role="note">We filled in your details from your last registration. Check they’re still right.</p>}
       {climb.slotsLeft === 0 && <p className="climb-notice" role="note">This climb is full: you’ll join the waitlist and move up if a slot opens.</p>}
       <RegisterFields {...props} />
       <FeeBreakdown {...props} fees={climb.feeItems} />

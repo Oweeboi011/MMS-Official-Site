@@ -96,3 +96,25 @@ export function buildRegistrationDoc(climb: ClimbRef, user: { uid: string; email
     status: 'pending', createdAt: now,
   };
 }
+
+// Starts a registration from what the member gave last time (memberDetails, kept by the details trigger). Only blank
+// answers are filled, and the two choices only while still at their default, so nothing the member typed is replaced.
+export function prefillForm(form: RegistrationForm, saved: Record<string, unknown>, name = ''): { form: RegistrationForm; filled: boolean } {
+  const text = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
+  const next = { ...form };
+  let filled = false;
+  const fill = (key: 'mobile' | 'dateOfBirth' | 'address' | 'ecName' | 'ecMobile' | 'ecRelationship' | 'medicalConditions') => {
+    if (next[key] || !text(saved[key])) return;
+    next[key] = text(saved[key]);
+    filled = true;
+  };
+  (['mobile', 'dateOfBirth', 'address', 'ecName', 'ecMobile', 'ecRelationship', 'medicalConditions'] as const).forEach(fill);
+  const initial = initialForm();
+  if (next.experienceLevel === initial.experienceLevel && EXPERIENCE_LEVELS.some(([k]) => k === saved.experienceLevel)) {
+    next.experienceLevel = saved.experienceLevel as string;
+    filled = true;
+  }
+  if (next.memberType === initial.memberType && (saved.memberType === 'member' || saved.memberType === 'joiner')) next.memberType = saved.memberType;
+  if (!next.fullName && name.trim()) next.fullName = name.trim();
+  return { form: next, filled };
+}

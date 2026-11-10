@@ -732,3 +732,5 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .account-form input:focus-visible, .editor-field input:focus-visible, .editor-field select:focus-visible, .editor-field textarea:focus-visible { outline: 0; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(37, 43, 115, .18); }
 .editor-actions { flex-wrap: wrap; align-items: center; }
 @media (prefers-reduced-motion: reduce) { .btn, .chip { transition: none; } .btn:hover { transform: none; } }
+
+.form-hint { margin: 0; padding: 10px 14px; border-radius: 12px; background: rgba(225, 184, 39, .18); color: var(--ink); font-size: .92rem; font-weight: 700; }
