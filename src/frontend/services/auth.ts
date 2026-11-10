@@ -18,6 +18,7 @@ export interface Account {
   email: string;
   role: string;
   emailVerified: boolean;
+  name?: string; // the sign-in profile's display name, used to start a registration
 }
 
 // First sign-in creates users/{uid}, role 'member' = any account (old-app value), not MMS membership.
@@ -49,7 +50,7 @@ export function watchAccount(onChange: (account: Account | null) => void, onErro
       .then((role) => {
         if (call !== latest) return;
         setSignedInHint(true, role);
-        onChange({ uid: user.uid, email: user.email ?? '', role, emailVerified: user.emailVerified });
+        onChange({ uid: user.uid, email: user.email ?? '', role, emailVerified: user.emailVerified, name: user.displayName ?? '' });
       })
       .catch((e: Error) => { if (call === latest) onError(e); });
   });

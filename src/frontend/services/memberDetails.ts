@@ -12,3 +12,8 @@ export async function saveMyDetails(uid: string, details: Details): Promise<void
   if (!writesEnabled) throw new Error(readOnlyMessage);
   await setDoc(doc(firebase().db, 'memberDetails', uid), { ...Object.fromEntries(Object.entries(toPatch(details)).map(([k, v]) => [k, v ?? deleteField()])), updatedAt: serverTimestamp() }, { merge: true });
 }
+
+// The raw saved record, for starting a registration (it also carries memberType, which My details leaves alone).
+export async function savedForRegistration(uid: string): Promise<Record<string, unknown>> {
+  return (await getDoc(doc(firebase().db, 'memberDetails', uid))).data() ?? {};
+}

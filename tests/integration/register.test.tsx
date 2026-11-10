@@ -1,7 +1,8 @@
 import { fireEvent, screen } from '@testing-library/react';
 import { renderAt } from '../helpers';
 
-const reg = vi.hoisted(() => ({ calls: [] as unknown[][], already: false }));
+const reg = vi.hoisted(() => ({ calls: [] as unknown[][], already: false, saved: {} as Record<string, unknown> }));
+vi.mock('../../src/frontend/services/memberDetails', () => ({ savedForRegistration: async () => reg.saved }));
 vi.mock('../../src/frontend/services/firebaseEnv', async (original) => ({ ...(await original<object>()), registrationEnabled: true }));
 vi.mock('../../src/frontend/services/useAccount', () => ({ useAccount: () => ({ status: 'signedIn', account: { uid: 'u1', email: 'ana@x.com', role: 'member' } }) }));
 vi.mock('../../src/frontend/services/registrations', () => ({
@@ -19,7 +20,7 @@ vi.mock('../../src/frontend/services/publicData', () => ({
 const type = (id: string, value: string) => fireEvent.change(document.getElementById(id)!, { target: { value } });
 
 describe('climb registration (switch on)', () => {
-  beforeEach(() => { reg.calls = []; reg.already = false; });
+  beforeEach(() => { reg.calls = []; reg.already = false; reg.saved = {}; });
 
   it('blocks an incomplete form, then registers a guest with the guest fee', async () => {
     renderAt('/climbs/c1/register');
@@ -50,5 +51,16 @@ describe('climb registration (switch on)', () => {
     reg.already = true;
     renderAt('/climbs/c1/register');
     expect(await screen.findByText('You’re already registered for this climb.')).toBeInTheDocument();
+  });
+
+  it('starts from the details given on the last registration, without overriding typing', async () => {
+    reg.saved = { mobile: '0917 111', ecName: 'Ben', ecMobile: '0918 222', ecRelationship: 'Brother', medicalConditions: 'Asthma', experienceLevel: 'experienced', memberType: 'member' };
+    renderAt('/climbs/c1/register');
+    expect(await screen.findByText(/We filled in your details from your last registration/)).toBeInTheDocument();
+    expect(document.getElementById('reg-mobile')).toHaveValue('0917 111');
+    expect(document.getElementById('reg-ecName')).toHaveValue('Ben');
+    expect(document.getElementById('reg-ecRelationship')).toHaveValue('Brother');
+    expect(document.getElementById('reg-experience')).toHaveValue('experienced');
+    expect(screen.getByLabelText('MMS member')).toBeChecked();
   });
 });
