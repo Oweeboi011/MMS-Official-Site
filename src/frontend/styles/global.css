@@ -669,3 +669,14 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .page-hero--compact .hero-content { padding-top: 156px; padding-bottom: 40px; }
 .page-hero--compact h1 { font-size: clamp(2rem, 6vw, 3.4rem); line-height: 1; }
 .page-hero--compact .hero-copy { margin-top: 10px; font-size: 1.02rem; }
+
+/* Schedule rows: the whole row opens the climb. */
+.event { position: relative; margin: 0 -14px; padding-left: 14px; padding-right: 14px; border-radius: 14px; transition: background .16s ease; }
+.event h3 a::after { content: ''; position: absolute; inset: 0; border-radius: 14px; }
+.event:hover { background: rgba(255, 255, 255, .06); }
+.event h3 a { text-decoration: none; }
+.event:hover h3 a { text-decoration: underline; }
+.event h3 a:focus-visible { outline: 0; }
+.event h3 a:focus-visible::after { outline: 3px solid #fff; outline-offset: -3px; }
+.event-arrow { font-size: 1rem; transition: background .16s ease, color .16s ease, border-color .16s ease, transform .16s ease; }
+.event:hover .event-arrow { background: var(--gold); border-color: var(--gold); color: #171913; transform: translateX(3px); }

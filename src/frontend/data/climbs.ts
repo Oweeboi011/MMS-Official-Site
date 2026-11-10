@@ -36,7 +36,12 @@ function dateRange(start: Date, end: Date | undefined): string {
   return s.m === e.m ? `${s.m} ${s.d}–${e.d}` : `${s.m} ${s.d} – ${e.m} ${e.d}`;
 }
 
-const elevationOf = (v: unknown) => (typeof v === 'number' ? `${v.toLocaleString('en-US')}m` : str(v) || undefined);
+// A bare number (typed or saved as text) is metres; anything with its own unit stays as written.
+const elevationOf = (v: unknown) => {
+  const raw = typeof v === 'number' ? String(v) : str(v);
+  if (!/^\d+(\.\d+)?$/.test(raw)) return raw || undefined;
+  return `${Number(raw).toLocaleString('en-US')}m`;
+};
 
 // Drafts and cancelled climbs never reach the public schedule.
 export const isPublic = (d: Doc) => !['draft', 'cancelled'].includes(str(d.status)) && str(d.cancellationStatus) !== 'cancelled';
