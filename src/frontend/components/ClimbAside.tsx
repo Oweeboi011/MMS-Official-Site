@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { ClimbDetail } from '../data/climbDetail';
+import { feeModel, pesoLabel } from '../data/feeModel';
 import { registrationEnabled } from '../services/firebaseEnv';
 import AddToCalendar from './AddToCalendar';
 import ShareClimb from './ShareClimb';
@@ -51,19 +52,47 @@ function Facts({ climb }: { climb: ClimbDetail }) {
       <dl className="fact-list">
         {climb.stats.map((s) => <div key={s.label}><dt>{s.label}</dt><dd>{s.value}</dd></div>)}
       </dl>
+      <p className="fee-help"><Link to="/activities/open-climbs/guide">What do difficulty and trail class mean?</Link></p>
     </section>
   );
 }
 
+function FeeList({ items }: { items: ClimbDetail['feeItems'] }) {
+  return (
+    <ul className="fee-lines">
+      {items.map((f) => <li key={f.label + f.amount}><span>{f.label}{f.note && <small>{f.note}</small>}</span><b>{pesoLabel(f.amount)}</b></li>)}
+    </ul>
+  );
+}
+
 function Fees({ climb }: { climb: ClimbDetail }) {
-  if (!climb.fees.length || climb.over || climb.cancelled) return null;
+  if (climb.over || climb.cancelled) return null;
+  const { required, optional, guest, total, hasTba, hasAmount } = feeModel(climb.feeItems);
   return (
     <section className="aside-card" aria-labelledby="fees-title">
       <h2 id="fees-title">What it costs</h2>
-      <table className="fee-table">
-        <thead><tr><th scope="col">Fee</th><th scope="col">Amount</th><th scope="col">Who pays</th></tr></thead>
-        <tbody>{climb.fees.map(([fee, amount, who]) => <tr key={fee + amount}><td>{fee}</td><td>{amount}</td><td>{who}</td></tr>)}</tbody>
-      </table>
+      {!climb.feeItems.length && <p className="climb-muted">Fees will be posted soon.</p>}
+      {required.length > 0 && <FeeList items={required} />}
+      {hasAmount && (
+        <p className="fee-total"><span>Member total{hasTba && <small> (excl. TBA items)</small>}</span><strong>{pesoLabel(String(total))}</strong></p>
+      )}
+      {optional.length > 0 && <><h3 className="fee-group">Optional, only if availed</h3><FeeList items={optional} /></>}
+      {guest && <p className="fee-guest">+ {pesoLabel(guest.amount)} {guest.label} for non-members</p>}
+      {climb.feeItems.length > 0 && <p className="fee-help">Not sure if you’re a member or a guest? <Link to="/activities/open-climbs/guide">Read the guide</Link>.</p>}
+    </section>
+  );
+}
+
+function Requirements({ climb }: { climb: ClimbDetail }) {
+  if (!climb.requiredDocs.length || climb.over || climb.cancelled) return null;
+  return (
+    <section className="aside-card" aria-labelledby="requirements-title">
+      <h2 id="requirements-title">Required before climb day</h2>
+      <ul className="requirement-list">
+        {climb.requiredDocs.map((d) => (
+          <li key={d.key}>{d.label}{d.sampleUrl && <> · <a href={d.sampleUrl} target="_blank" rel="noopener noreferrer">Download template</a></>}</li>
+        ))}
+      </ul>
     </section>
   );
 }
@@ -91,6 +120,7 @@ export default function ClimbAside({ climb, id }: { climb: ClimbDetail; id: stri
       </div>
       <Facts climb={climb} />
       <Fees climb={climb} />
+      <Requirements climb={climb} />
       <Officers climb={climb} />
       {!climb.cancelled && <div className="aside-card"><ShareClimb climb={climb} /></div>}
     </aside>
