@@ -804,3 +804,12 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .status-chip.is-pending { background: rgba(225, 184, 39, .2); border-color: rgba(225, 184, 39, .5); color: #6b5300; }
 .status-chip.is-confirmed { background: rgba(47, 125, 79, .12); border-color: rgba(47, 125, 79, .3); color: #1f6a3e; }
 .status-chip.is-cancelled, .status-chip.is-rejected { background: rgba(169, 46, 42, .1); border-color: rgba(169, 46, 42, .25); color: var(--red); }
+
+/* Accounts */
+.avatar { display: inline-grid; place-items: center; width: 34px; height: 34px; margin-right: 10px; border-radius: 50%; background: var(--navy); color: #fff; font-size: .78rem; font-weight: 850; vertical-align: middle; }
+.user-cell { display: inline-grid; vertical-align: middle; }
+.user-cell small { color: var(--muted); }
+.you-tag { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--gold); color: #171913; font-size: .66rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.user-sub { margin: 0 0 12px; color: var(--muted); }
+.user-edit { display: grid; gap: 10px; margin: 14px 0; }
+.user-edit .editor-field { display: grid; gap: 6px; }
