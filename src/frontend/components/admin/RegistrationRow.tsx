@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { REG_STATUSES } from '../../data/adminRegistrations';
 import { reviewRegistrationPayment, setAdminNotes, setRegistrationStatus } from '../../services/adminRegistrations';
+import ReceiptButton from '../ReceiptModal';
 import RowExtras from './RowExtras';
 import SplitForm from './SplitForm';
 import type { RowProps } from './rowProps';
@@ -58,7 +59,7 @@ export default function RegistrationRow(props: RowProps) {
           {REG_STATUSES.map((s) => <option key={s}>{s}</option>)}
         </select>
       </td>
-      <td>{peso(reg.paid)} of {peso(reg.total)}{reg.tba ? ' + TBA' : ''}<Payments {...props} /><RowExtras {...props} /></td>
+      <td>{peso(reg.paid)} of {peso(reg.total)}{reg.tba ? ' + TBA' : ''}<Payments {...props} /><ReceiptButton row={reg} /><RowExtras {...props} /></td>
       <td>{reg.uploaded.length ? `${reg.uploaded.length} doc(s)` : '—'}{reg.waiver && <><br /><small>Waiver: {reg.waiver.name}</small></>}<Notes {...props} /></td>
     </tr>
   );

@@ -767,3 +767,25 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .bar-fill.is-bad { background: var(--red); }
 .plain-list { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: .9rem; }
 .plain-list small { color: var(--muted); }
+
+/* Receipt and GCash modals; the payments panel. */
+.modal-narrow { width: min(420px, calc(100vw - 32px)); }
+.receipt { display: grid; gap: 14px; }
+.receipt-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; }
+.receipt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 0; }
+.receipt-grid dt { color: var(--muted); font-size: .72rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.receipt-grid dd { margin: 2px 0 0; font-weight: 800; color: var(--navy); }
+.receipt-grid .is-owed { color: #b45309; }
+.receipt-grid .is-settled { color: #1f6a3e; }
+.receipt-fees { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.receipt-fees caption { text-align: left; margin-bottom: 6px; color: var(--muted); font-size: .72rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.receipt-fees td, .receipt-fees th { padding: 7px 0; border-top: 1px solid var(--line); text-align: left; }
+.receipt-fees td:last-child, .receipt-fees tfoot th + td { text-align: right; font-weight: 800; white-space: nowrap; }
+.receipt-fees tfoot th { font-weight: 850; }
+.gcash { display: grid; gap: 14px; justify-items: center; text-align: center; }
+.gcash-account { display: grid; margin: 0; }
+.gcash-account span { color: var(--muted); }
+.gcash-qr { width: min(300px, 100%); height: auto; border-radius: 12px; border: 1px solid var(--line); }
+.climb-payments > summary { cursor: pointer; }
+.climb-payments[open] > summary { margin-bottom: 12px; }
+.climb-payments .panel { margin-top: 12px; }

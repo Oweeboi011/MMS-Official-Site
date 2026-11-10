@@ -13,6 +13,7 @@ import PledgeForm from '../components/myclimbs/PledgeForm';
 import VerifyEmailBanner from '../components/VerifyEmailBanner';
 import { dueLabel, type ClimbDetail } from '../data/climbDetail';
 import { canCancel, draftCancellationPolicy, nextSteps, type MyClimb } from '../data/myClimbs';
+import ReceiptButton from '../components/ReceiptModal';
 import { openNotifications } from '../lib/notificationsModal';
 import { registrationEnabled } from '../services/firebaseEnv';
 import { cancelRegistration, myRegistrations } from '../services/registrations';
@@ -74,11 +75,11 @@ function Money({ row, balance }: { row: MyClimb; balance: number }) {
 
 // #169 sent receipts + #141 printable waiver.
 function Records({ row }: { row: MyClimb }) {
-  if (!row.receipts.length && !row.waiver) return null;
   return (
     <p className="climb-links">
       {row.receipts.map((r, i) => <a key={r.url} href={r.url} target="_blank" rel="noopener noreferrer">Receipt {i + 1}: {r.fileName}</a>)}
       {row.waiver && <Link to={`/account/climbs/${row.id}/waiver`}>Signed waiver (print)</Link>}
+      <ReceiptButton row={row} />
     </p>
   );
 }
