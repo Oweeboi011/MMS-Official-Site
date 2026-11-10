@@ -16,7 +16,7 @@ Needs Project Billing Manager on the compute service account ([open items](../so
 
 ### Open Climbs (ported from mms-open-climbs, phase 1; all deployed 2026-11-08)
 
-Firestore database `openclimbs`. Emails only when `EMAILS_ENABLED=true` (off until the switch). Tests: `tests/unit/functions`.
+Firestore database `openclimbs`. Emails only when `EMAILS_ENABLED=true`, and the daily reminder job (`sendReminderNotifications`: payment, paperwork and climb reminders, officer summaries, thank-yous) only when `REMINDERS_ENABLED=true`; both off until the switch. Tests: `tests/unit/functions`.
 
 | Group | Functions | Code |
 |-------|-----------|------|
