@@ -169,7 +169,7 @@ function Body() {
 export default function MyClimbsPage() {
   return (
     <>
-      <PageHero eyebrow="Account" title="My Climbs" intro="Your registrations, what you owe, and cancellations." image="/images/page-open-climbs.webp" />
+      <PageHero compact eyebrow="Account" title="My Climbs" intro="Your registrations, what you owe, and cancellations." image="/images/page-open-climbs.webp" />
       <main><section className="section page-section"><div className="shell register-shell"><Body /></div></section></main>
     </>
   );

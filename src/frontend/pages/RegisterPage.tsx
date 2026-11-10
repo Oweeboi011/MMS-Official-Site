@@ -19,7 +19,7 @@ const HERO_IMAGE = '/images/page-open-climbs.webp';
 function Shell({ climb, children }: { climb?: ClimbDetail; children: ReactNode }) {
   return (
     <>
-      <PageHero eyebrow="Register" title={climb?.title ?? 'Climb registration'} intro={climb ? [climb.dates, climb.location].filter(Boolean).join(' · ') : ''} image={HERO_IMAGE} />
+      <PageHero compact eyebrow="Register" title={climb?.title ?? 'Climb registration'} intro={climb ? [climb.dates, climb.location].filter(Boolean).join(' · ') : ''} image={HERO_IMAGE} />
       <main><section className="section page-section"><div className="shell register-shell">{children}</div></section></main>
     </>
   );
