@@ -24,3 +24,10 @@ export function feeModel(items: FeeItem[]) {
     hasAmount: amounts.some((n) => n !== null),
   };
 }
+
+// A climb document's `fees` array as fee items (label required; a blank amount is TBA).
+export function feeItemsFromDoc(fees: unknown): FeeItem[] {
+  return (Array.isArray(fees) ? fees : []).map((f) => (f ?? {}) as Record<string, unknown>).filter((f) => typeof f.label === 'string' && f.label).map((f) => ({
+    label: String(f.label), amount: String(f.amount ?? '').trim() || 'TBA', note: typeof f.note === 'string' ? f.note : '', optional: f.optional === true, isGuestFee: f.isGuestFee === true,
+  }));
+}

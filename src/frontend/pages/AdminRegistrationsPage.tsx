@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import AdminStats from '../components/admin/AdminStats';
 import PageHero from '../components/PageHero';
 import RegistrationTable, { AdminGate } from '../components/admin/RegistrationTable';
@@ -12,6 +13,9 @@ import { loadClimbFlags } from '../services/climbFlags';
 
 const PAYMENTS = [['', 'All payments'], ['balance_due', 'Has balance due'], ['unpaid', 'Unpaid'], ['submitted', 'Payment submitted'], ['verified', 'Payment verified'], ['rejected', 'Payment rejected']] as const;
 
+// A filter value from a dashboard link, only if it is one the page offers.
+const allowed = (value: string | null, options: readonly string[]) => (value && options.includes(value) ? value : '');
+
 function useClimbFlags() {
   const [flags, setFlags] = useState<ClimbFacts[]>([]);
   useEffect(() => { loadClimbFlags().then(setFlags, () => undefined); }, []); // without them, "missing documents" simply finds nothing
@@ -21,7 +25,13 @@ function useClimbFlags() {
 function Search({ admin }: { admin: Account }) {
   const { rows, message, busy, run } = useAdminList(recentRegistrations);
   const flags = useClimbFlags();
-  const [f, setF] = useState<RegFilter>(NO_FILTER);
+  const [params] = useSearchParams();
+  const [f, setF] = useState<RegFilter>(() => ({
+    ...NO_FILTER,
+    payment: allowed(params.get('payment'), PAYMENTS.map(([v]) => v)),
+    status: allowed(params.get('status'), REG_STATUSES),
+    climb: params.get('climb') ?? '',
+  }));
   const set = (key: keyof RegFilter) => (value: string) => setF((cur) => ({ ...cur, [key]: value }));
   const climbs = useMemo(() => [...new Map((rows ?? []).map((r) => [r.climbId, r.title])).entries()].sort((a, b) => a[1].localeCompare(b[1])), [rows]);
   if (!rows) return <p role="status">{message || 'Loading registrations…'}</p>;
