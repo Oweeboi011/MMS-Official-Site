@@ -506,7 +506,7 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .nav-search { margin-left: auto; padding: 8px 14px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; font-size: .8rem; font-weight: 800; transition: background .2s ease; }
 .nav-search:hover, .nav-search[aria-current] { background: rgba(255,255,255,.18); }
 .nav-search:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-.nav-account { margin-left: 8px; }
+.nav-account { margin-left: 8px; white-space: nowrap; }
 .search-form { display: grid; gap: 8px; max-width: 640px; }
 .search-form label { font-weight: 800; }
 .search-form input { padding: 14px 18px; border: 1px solid var(--line); border-radius: 999px; font: inherit; font-size: 1rem; }
