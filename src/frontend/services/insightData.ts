@@ -2,8 +2,7 @@
 // Admins read all of these (rules); each read is independent so one denied collection doesn't blank the page.
 import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore/lite';
 import { toAdminReg, type AdminReg } from '../data/adminRegistrations';
-import { REQUIRED_DOCS } from '../data/requiredDocs';
-import type { ClimbFacts, Failure } from '../data/insightStats';
+import { toClimbFacts, type ClimbFacts, type Failure } from '../data/insightStats';
 import { firebase } from './firebase';
 import { listUsers } from './users';
 
@@ -23,10 +22,7 @@ export async function loadInsightData(): Promise<InsightData> {
   ]);
   return {
     regs: regSnap.docs.map((d) => toAdminReg(d.id, d.data())),
-    climbs: climbSnap.docs.map((d) => ({
-      id: d.id, title: String(d.data().title ?? ''), status: String(d.data().status ?? ''), createdAt: millis(d.data().createdAt),
-      requires: Object.fromEntries(REQUIRED_DOCS.map((t) => [t.requiresField, d.data()[t.requiresField] === true])),
-    })),
+    climbs: climbSnap.docs.map((d) => toClimbFacts(d.id, d.data())),
     failures: (failSnap?.docs ?? []).map((d) => ({ source: String(d.data().source ?? ''), message: String(d.data().message ?? ''), createdAt: millis(d.data().createdAt) })),
     noticeTypes: (noticeSnap?.docs ?? []).map((d) => String(d.data().type ?? '')),
     users: users.length,

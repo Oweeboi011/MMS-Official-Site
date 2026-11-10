@@ -5,6 +5,8 @@ import { toMyClimb, type MyClimb } from './myClimbs';
 export type EntryStatus = 'submitted' | 'verified' | 'rejected';
 interface PaymentEntry { amount: number; proofs: { url: string; fileName: string }[]; status: EntryStatus; note: string; submittedAt: unknown; raw: Doc }
 
+import { REQUIRED_DOCS } from './requiredDocs';
+
 export interface AdminReg extends MyClimb {
   name: string;
   email: string;
@@ -174,4 +176,28 @@ export function splitPatches(payer: AdminReg, index: number, shares: { reg: Admi
     }]),
   }));
   return { payer: rollUp(payerPayments), recipients, moved };
+}
+
+// Required documents (per the climb) this registrant hasn't uploaded yet. Unknown climb: nothing is called missing.
+export function missingDocs(reg: AdminReg, climb: { requires: Record<string, boolean> } | undefined): string[] {
+  if (!climb || reg.status === 'cancelled') return [];
+  return REQUIRED_DOCS.filter((d) => climb.requires[d.requiresField] && !reg.uploaded.includes(d.uploadField)).map((d) => d.label);
+}
+
+export interface RegFilter { text: string; status: string; climb: string; payment: string; docs: string }
+export const NO_FILTER: RegFilter = { text: '', status: '', climb: '', payment: '', docs: '' };
+
+const owes = (r: AdminReg) => r.status !== 'cancelled' && (r.total > r.paid || r.tba);
+function paymentMatches(r: AdminReg, payment: string): boolean {
+  if (!payment) return true;
+  if (payment === 'balance_due') return owes(r);
+  return String(r.raw.paymentStatus ?? 'unpaid') === payment;
+}
+
+// Search + status (as before) + climb, payment state and "missing required documents" (old app AllRegistrations).
+export function filterRegs(regs: AdminReg[], f: RegFilter, climbs: Map<string, { requires: Record<string, boolean> }>): AdminReg[] {
+  return regs.filter((r) => matches(r, f.text, f.status)
+    && (!f.climb || r.climbId === f.climb)
+    && paymentMatches(r, f.payment)
+    && (f.docs !== 'missing' || missingDocs(r, climbs.get(r.climbId)).length > 0));
 }
