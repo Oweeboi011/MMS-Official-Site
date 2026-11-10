@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
-import { createAccount, deleteAccount, type UserRow } from '../../services/users';
+import type { UserRow } from '../../data/users';
+import { createAccount, deleteAccount } from '../../services/users';
 
 type Run = (a: () => Promise<void>) => Promise<boolean>;
 

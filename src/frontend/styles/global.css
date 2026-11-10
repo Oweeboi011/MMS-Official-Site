@@ -796,3 +796,12 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .admin-filterbar select, .admin-filterbar input { width: 100%; }
 .filter-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
 .doc-missing { color: var(--red); font-weight: 800; }
+
+/* Accounts */
+.avatar { display: inline-grid; place-items: center; width: 34px; height: 34px; margin-right: 10px; border-radius: 50%; background: var(--navy); color: #fff; font-size: .78rem; font-weight: 850; vertical-align: middle; }
+.user-cell { display: inline-grid; vertical-align: middle; }
+.user-cell small { color: var(--muted); }
+.you-tag { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--gold); color: #171913; font-size: .66rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.user-sub { margin: 0 0 12px; color: var(--muted); }
+.user-edit { display: grid; gap: 10px; margin: 14px 0; }
+.user-edit .editor-field { display: grid; gap: 6px; }
