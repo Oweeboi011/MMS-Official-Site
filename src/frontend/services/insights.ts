@@ -1,6 +1,7 @@
 // #157 / #156 admin insights: the ported insight callables + recent errors and page views (admin reads).
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { collection, getDocs, limit, orderBy, query, where } from 'firebase/firestore/lite';
+import type { PageView } from '../data/insightStats';
 import { firebase } from './firebase';
 
 export const INSIGHTS = [
@@ -22,11 +23,9 @@ export async function recentErrors(max = 50) {
   return snap.docs.map((d) => ({ id: d.id, type: String(d.data().type ?? ''), source: String(d.data().source ?? ''), message: String(d.data().message ?? ''), path: String(d.data().path ?? ''), at: millis(d.data().createdAt) }));
 }
 
-// Page views in the last 7 days, counted per path (max 2,000 reads).
-export async function topPaths(days = 7): Promise<[string, number][]> {
+// Page views in the window (max 2,000 reads), newest first.
+export async function recentViews(days = 30): Promise<PageView[]> {
   const since = new Date(Date.now() - days * 86400_000);
-  const snap = await getDocs(query(collection(firebase().db, 'pageViews'), where('timestamp', '>=', since), limit(2000)));
-  const counts = new Map<string, number>();
-  for (const d of snap.docs) counts.set(String(d.data().path ?? ''), (counts.get(String(d.data().path ?? '')) ?? 0) + 1);
-  return [...counts].sort((a, b) => b[1] - a[1]).slice(0, 20);
+  const snap = await getDocs(query(collection(firebase().db, 'pageViews'), where('timestamp', '>=', since), orderBy('timestamp', 'desc'), limit(2000)));
+  return snap.docs.map((d) => ({ at: millis(d.data().timestamp), path: String(d.data().path ?? ''), session: String(d.data().sessionId ?? '') }));
 }

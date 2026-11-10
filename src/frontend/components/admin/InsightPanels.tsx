@@ -7,7 +7,7 @@ import AdminStats from './AdminStats';
 
 const when = (ms: number) => (ms ? new Date(ms).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Manila' }) : '—');
 
-function Bars({ rows, tone }: { rows: [string, number][]; tone?: 'good' | 'warn' | 'bad' }) {
+export function Bars({ rows, tone }: { rows: [string, number][]; tone?: 'good' | 'warn' | 'bad' }) {
   const max = Math.max(...rows.map(([, n]) => n), 1);
   return (
     <ul className="bar-rows">

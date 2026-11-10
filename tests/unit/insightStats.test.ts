@@ -1,5 +1,5 @@
 import { toAdminReg } from '../../src/frontend/data/adminRegistrations';
-import { docCompliance, failuresByDay, noticeVolume, oldestPending, overdueUnpaid, paymentBreakdown, paymentTurnaround, repeatedFailures, staleDrafts, waiverRate, weeklyRegistrations } from '../../src/frontend/data/insightStats';
+import { docCompliance, failuresByDay, noticeVolume, oldestPending, overdueUnpaid, paymentBreakdown, paymentTurnaround, repeatedFailures, staleDrafts, trafficSummary, waiverRate, weeklyRegistrations } from '../../src/frontend/data/insightStats';
 
 const NOW = Date.UTC(2026, 10, 10, 4); // Nov 10 noon, Manila
 const DAY = 86400000;
@@ -48,5 +48,20 @@ describe('insight stats', () => {
     expect(overdueUnpaid(regs, NOW).map((o) => [o.reg.id, o.ageDays])).toEqual([['b', 20], ['c', 9]]);
     expect(staleDrafts([{ id: 'd', title: 'D', status: 'draft', createdAt: NOW - 45 * DAY, requires: {} }, { id: 'e', title: 'E', status: 'draft', createdAt: NOW - DAY, requires: {} }], NOW).map((s) => s.climb.id)).toEqual(['d']);
     expect(oldestPending(regs)?.id).toBe('b');
+  });
+});
+
+describe('trafficSummary', () => {
+  const views = [
+    { at: NOW, path: '/a', session: 's1' }, { at: NOW - 1000, path: '/a', session: 's1' },
+    { at: NOW - DAY, path: '/b', session: 's2' }, { at: NOW - 40 * DAY, path: '/old', session: 's3' },
+  ];
+  it('counts views per day, visits and top pages inside the window', () => {
+    const t = trafficSummary(views, NOW, 30);
+    expect(t.perDay).toHaveLength(30);
+    expect(t.perDay.at(-1)).toEqual(['2026-11-10', 2]);
+    expect(t.perDay.at(-2)?.[1]).toBe(1);
+    expect(t.sessions).toBe(3);
+    expect(t.top[0]).toEqual(['/a', 2]);
   });
 });
