@@ -23,7 +23,7 @@ export default function Dashboard() {
           {rows.map(({ climb, status, confirmed, pending, waitlisted, toReview }) => (
             <tr key={climb.id}>
               <td><Link to={`/admin/climbs/${climb.id}`}>{climb.title || 'Untitled'}</Link><br /><small>{[climb.dates, climb.type].filter(Boolean).join(' · ')}</small></td>
-              <td>{status}</td>
+              <td><span className={`status-chip is-${status}`}>{status}</span></td>
               <td>{climb.slotsLeft === undefined ? '—' : `${climb.slotsLeft} left`}</td>
               <td>{confirmed}</td>
               <td>{pending}</td>
