@@ -1,4 +1,4 @@
-import { Suspense, lazy, useSyncExternalStore } from 'react';
+import { Suspense, lazy, useState, useSyncExternalStore } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ClimbAside from '../components/ClimbAside';
 import ClimbItinerary from '../components/ClimbItinerary';
@@ -9,6 +9,7 @@ import PageHero from '../components/PageHero';
 import RichText from '../components/RichText';
 import TrailMaps from '../components/TrailMaps';
 import { defaultPacking, type ClimbDetail } from '../data/climbDetail';
+import type { MyClimb } from '../data/myClimbs';
 import { leaveNoTrace, type ContentBlock } from '../data/subpages';
 import { readSignedInHint, subscribeSignedInHint } from '../lib/signedInHint';
 import { registrationEnabled } from '../services/firebaseEnv';
@@ -16,6 +17,7 @@ import { useClimb } from '../services/useClimb';
 
 // Registrants-only section needs the Firebase SDK: its own chunk, only when registration is on.
 const RegistrantArea = lazy(() => import('../components/RegistrantArea'));
+const RegistrationProbe = lazy(() => import('../components/RegistrationProbe'));
 
 const SCHEDULE = '/activities/open-climbs';
 const HERO_IMAGE = '/images/page-open-climbs.webp';
@@ -72,6 +74,7 @@ export default function ClimbPage() {
   // Signed-in members get the registrants-only section (meetings, resources, who's joining) even before the switch;
   // visitors who aren't signed in never load the Firebase SDK here.
   const signedIn = useSyncExternalStore(subscribeSignedInHint, readSignedInHint, () => false);
+  const [registered, setRegistered] = useState<MyClimb | null>(null);
   if (!climb) return <Missing loading={climb === undefined} />;
   const note = notice(climb);
   return (
@@ -80,7 +83,8 @@ export default function ClimbPage() {
       <main>
         <section className="section page-section climb-page">
           <div className="shell climb-layout">
-            <ClimbAside climb={climb} id={id} />
+            <ClimbAside climb={climb} id={id} registered={registered} />
+            {signedIn && !climb.cancelled && !climb.over && <Suspense fallback={null}><RegistrationProbe climbId={id} onFound={setRegistered} /></Suspense>}
             <div className="climb-main">
               {note && <p className="climb-notice" role="note">{note}</p>}
               {climb.notices.length > 0 && <ul className="climb-notices" aria-label="Announcements">{climb.notices.map((n) => <li key={n.message} className={n.pinned ? 'is-pinned' : undefined}>{n.pinned && <strong>Reminder: </strong>}<RichText text={n.message} />{n.date && <small className="climb-muted"> · {n.date}</small>}</li>)}</ul>}
