@@ -2,6 +2,7 @@
 import { beforeEach, vi } from "vitest";
 // Ported from mms-open-climbs (jest → vitest). Emails on here: tests exercise the send path.
 process.env.EMAILS_ENABLED = "true";
+process.env.REMINDERS_ENABLED = "true";
 // jest config had resetMocks: reset before every test, ahead of the file's own beforeEach.
 beforeEach(() => { vi.resetAllMocks(); });
 /**
