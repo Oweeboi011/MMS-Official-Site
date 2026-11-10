@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { ClimbDetail } from '../data/climbDetail';
+import type { MyClimb } from '../data/myClimbs';
 import { feeModel, pesoLabel } from '../data/feeModel';
 import { registrationEnabled } from '../services/firebaseEnv';
 import AddToCalendar from './AddToCalendar';
@@ -32,12 +33,29 @@ function Tags({ climb }: { climb: ClimbDetail }) {
   );
 }
 
-function Actions({ climb, id }: { climb: ClimbDetail; id: string }) {
-  const open = !climb.over && !climb.cancelled && climb.status === 'Open';
+// Already registered: say so, with where it stands, and point at My Climbs instead of offering to register again.
+function Registered({ row }: { row: MyClimb }) {
+  return (
+    <>
+      <div className="aside-registered" role="status">
+        <strong>You’re registered</strong>
+        <span>{[row.statusLabel, row.paymentLabel].filter(Boolean).join(' · ')}</span>
+      </div>
+      <Link className="btn btn-primary" to="/account/climbs">View in My Climbs</Link>
+    </>
+  );
+}
+
+function JoinButton({ climb, id }: { climb: ClimbDetail; id: string }) {
+  if (climb.over || climb.cancelled || climb.status !== 'Open') return null;
+  if (registrationEnabled) return <Link className="btn btn-primary" to={`/climbs/${id}/register`}>Register <span aria-hidden="true">→</span></Link>;
+  return <Link className="btn btn-primary" to="/#join">Ask to join this climb <span aria-hidden="true">→</span></Link>;
+}
+
+function Actions({ climb, id, registered }: { climb: ClimbDetail; id: string; registered: MyClimb | null }) {
   return (
     <div className="aside-actions">
-      {open && registrationEnabled && <Link className="btn btn-primary" to={`/climbs/${id}/register`}>Register <span aria-hidden="true">→</span></Link>}
-      {open && !registrationEnabled && <Link className="btn btn-primary" to="/#join">Ask to join this climb <span aria-hidden="true">→</span></Link>}
+      {registered ? <Registered row={registered} /> : <JoinButton climb={climb} id={id} />}
       {!climb.over && !climb.cancelled && <AddToCalendar climb={climb} />}
       <Link className="btn" to={SCHEDULE}>All open climbs</Link>
     </div>
@@ -110,13 +128,13 @@ function Officers({ climb }: { climb: ClimbDetail }) {
 }
 
 // The climb's summary card column: what to do, the numbers that matter, the cost and who to ask.
-export default function ClimbAside({ climb, id }: { climb: ClimbDetail; id: string }) {
+export default function ClimbAside({ climb, id, registered }: { climb: ClimbDetail; id: string; registered: MyClimb | null }) {
   return (
     <aside className="climb-aside" aria-label="Climb summary">
       <div className="aside-card is-primary">
         <Tags climb={climb} />
         <p className="aside-when"><strong>{climb.dates}</strong>{climb.location && <span>{climb.location}</span>}</p>
-        <Actions climb={climb} id={id} />
+        <Actions climb={climb} id={id} registered={registered} />
       </div>
       <Facts climb={climb} />
       <Fees climb={climb} />
