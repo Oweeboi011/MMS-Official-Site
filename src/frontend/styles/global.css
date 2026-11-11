@@ -825,8 +825,9 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .status-chip.is-site-sample { background: rgba(37, 43, 115, .08); border-color: rgba(37, 43, 115, .25); color: var(--navy); }
 .status-chip.is-site-off { background: rgba(169, 46, 42, .1); border-color: rgba(169, 46, 42, .25); color: var(--red); }
 
-/* Links read as links: plain anchors inside text and tables are underlined; styled ones (buttons, tabs, tiles, nav) have a class and keep their own look. */
-main :is(p, td, dd, small, .climb-muted, .plain-list) a:not([class]) { color: var(--navy); font-weight: 700; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
-main :is(p, td, dd, small, .climb-muted, .plain-list) a:not([class]):hover { text-decoration-thickness: 2px; }
+/* Links read as links (low specificity so dark sections and styled contexts win): plain anchors inside text and tables are underlined; styled ones (buttons, tabs, tiles, nav) have a class and keep their own look. */
+main :where(p, td, dd, small, .climb-muted, .plain-list) a:where(:not([class])) { color: var(--navy); font-weight: 700; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+main :where(p, td, dd, small, .climb-muted, .plain-list) a:where(:not([class])):hover { text-decoration-thickness: 2px; }
 a:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; border-radius: 4px; }
 a[target='_blank']:not([class])::after { content: ' ↗'; font-size: .85em; }
+:is(.journey, .open-climbs, .passport, .cta) a:where(:not([class])) { color: #f2d65d; text-decoration: underline; text-underline-offset: 3px; }
