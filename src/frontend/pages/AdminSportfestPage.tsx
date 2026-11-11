@@ -38,7 +38,7 @@ function Games() {
             {shown.map(({ game, scores }) => (
               <tr key={game.id}>
                 <td><strong>{game.name}</strong><small>{game.category}{game.date && ` · ${game.date}`}</small></td>
-                <td>{game.gameClass === 'A' ? `A · ${game.maxPoints}` : 'B · 20'}</td>
+                <td>{`${game.gameClass} · ${game.maxPoints}`}</td>
                 <td>{game.status}</td>
                 <td>{scores.length ? `${scores.length} of 4 placed` : 'None yet'}</td>
                 <td>

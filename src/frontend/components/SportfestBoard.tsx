@@ -52,7 +52,7 @@ function ScoringSystem() {
   return (
     <>
       <h2>Scoring system</h2>
-      <p className="climb-muted">Class A pays 5 : 3 : 2 : 1 of the game’s top points. Class B pays fixed points.</p>
+      <p className="climb-muted">Class A pays 5 : 3 : 2 : 1 of the game’s top points, Class B pays fixed points, and Classes C and D pay 100, 75, 50 and 25 percent. Tied tribes share a place.</p>
       <div className="sf-scoring">
         {SCORING_TABLE.map((row) => (
           <div key={row.label} className="my-climb">
