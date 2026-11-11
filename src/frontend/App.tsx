@@ -13,6 +13,7 @@ import Faq from './components/Faq';
 import Gallery from './components/Gallery';
 import Journey from './components/Journey';
 import HowToJoin from './components/HowToJoin';
+import InquiryForm from './components/InquiryForm';
 import JoinCta from './components/JoinCta';
 import Mountains from './components/Mountains';
 import OpenClimbs from './components/OpenClimbs';
@@ -73,7 +74,7 @@ const pageBodies: Record<string, ReactNode> = {
   '/activities/upcoming': <OpenClimbs />,
   '/media/photos': <Gallery />,
   '/media/videos': <Videos />,
-  '/membership/join': <><HowToJoin /><Faq /><JoinCta /></>,
+  '/membership/join': <><HowToJoin /><Faq /><InquiryForm /><JoinCta /></>,
   '/membership/login': <Passport />,
 };
 
