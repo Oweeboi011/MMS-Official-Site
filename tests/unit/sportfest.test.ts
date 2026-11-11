@@ -1,5 +1,5 @@
 import {
-  computeTribeTotals, emptyPlacements, placementProblem, placementsOf, pointsFromPlacement, scoreRows, toGame, toScore, years, type Placement, type Score,
+  computeTribeTotals, emptyPlacements, placementsOf, pointsFromPlacement, scoreRows, toGame, toScore, years, type Placement, type Score,
 } from '../../src/frontend/data/sportfest';
 
 const score = (tribe: Score['tribe'], placement: Placement, points: number, gameId = 'g1'): Score => ({ id: `${gameId}${tribe}`, gameId, tribe, placement, points });
@@ -10,6 +10,8 @@ describe('pointsFromPlacement', () => {
     expect(places.map((p) => pointsFromPlacement(p, 20, 'B'))).toEqual([20, 15, 10, 5]);
     expect(places.map((p) => pointsFromPlacement(p, 10, 'A'))).toEqual([10, 6, 4, 2]);
     expect(places.map((p) => pointsFromPlacement(p, 5, 'A'))).toEqual([5, 3, 2, 1]);
+    expect(places.map((p) => pointsFromPlacement(p, 40, 'C'))).toEqual([40, 30, 20, 10]);
+    expect(places.map((p) => pointsFromPlacement(p, 60, 'D'))).toEqual([60, 45, 30, 15]);
   });
 });
 
@@ -28,9 +30,9 @@ describe('computeTribeTotals', () => {
 });
 
 describe('placements', () => {
-  it('rejects two tribes in the same place and allows gaps', () => {
-    expect(placementProblem({ ...emptyPlacements(), Aeta: 1, Badjao: 1 })).toMatch(/different/);
-    expect(placementProblem({ ...emptyPlacements(), Aeta: 1, Badjao: 3 })).toBe('');
+  it('lets tied tribes share a place', () => {
+    const rows = scoreRows({ gameClass: 'C', maxPoints: 20 }, { ...emptyPlacements(), Aeta: 1, Badjao: 1, Tasaday: 3 });
+    expect(rows.map((r) => r.points)).toEqual([20, 20, 10]);
   });
 
   it('turns placements into priced score rows and back', () => {
@@ -43,6 +45,8 @@ describe('placements', () => {
 describe('reading stored docs', () => {
   it('fills safe defaults for a game and drops a score with an unknown tribe', () => {
     expect(toGame('g1', { name: 'Tug of war', category: 'Sports', gameClass: 'A', maxPoints: 7, status: 'weird', year: 2026 })).toMatchObject({ gameClass: 'A', maxPoints: 10, status: 'upcoming', year: 2026 });
+    expect(toGame('g2', { gameClass: 'D', maxPoints: 60 })).toMatchObject({ gameClass: 'D', maxPoints: 60 });
+    expect(toGame('g3', { gameClass: 'Z', maxPoints: 5 })).toMatchObject({ gameClass: 'B', maxPoints: 20 });
     expect(toScore('s1', { gameId: 'g1', tribe: 'Vikings', placement: 1, points: 20 })).toBeNull();
     expect(toScore('s1', { gameId: 'g1', tribe: 'Aeta', placement: 1, points: 20 })).toMatchObject({ tribe: 'Aeta', placement: 1 });
   });

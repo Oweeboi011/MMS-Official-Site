@@ -7,9 +7,8 @@ const TRIBES = ['Aeta', 'Badjao', 'Mangyan', 'Tasaday'];
 const text = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 
 export function toGameDoc(g, year) {
-  const gameClass = g.gameClass === 'A' ? 'A' : 'B';
-  const fallback = gameClass === 'A' ? 10 : 20;
-  const maxPoints = [5, 10, 20].includes(g.maxPoints) ? g.maxPoints : fallback;
+  const gameClass = ['A', 'B', 'C', 'D'].includes(g.gameClass) ? g.gameClass : 'B';
+  const maxPoints = [5, 10, 20, 40, 60].includes(g.maxPoints) ? g.maxPoints : 20;
   const status = ['upcoming', 'ongoing', 'completed'].includes(g.status) ? g.status : 'upcoming';
   return { name: text(g.name, 120), category: text(g.category, 60), date: text(g.date, 30), status, gameClass, maxPoints, year };
 }

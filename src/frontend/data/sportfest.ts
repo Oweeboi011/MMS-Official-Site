@@ -1,14 +1,14 @@
 // Sportfest and Beachineering scoreboard: games, per-tribe placements and tribe totals. Plain data: no Firebase here.
-// Rules mirror the Executive Order: Class B pays 20/15/10/5; Class A pays 5:3:2:1 scaled to the game's top points.
+// Classes as used on the live scoreboard: A pays 5:3:2:1 of the top points, B pays 20/15/10/5, C and D pay 100/75/50/25 percent.
 export const TRIBES = ['Aeta', 'Badjao', 'Mangyan', 'Tasaday'] as const;
 export type Tribe = (typeof TRIBES)[number];
 
 export const TRIBE_COLORS: Record<Tribe, string> = { Aeta: '#1a7a72', Badjao: '#c4692a', Mangyan: '#6a7c30', Tasaday: '#7c5293' };
 
-export type GameClass = 'A' | 'B';
+export type GameClass = 'A' | 'B' | 'C' | 'D';
 export type GameStatus = 'upcoming' | 'ongoing' | 'completed';
 export type Placement = 1 | 2 | 3 | 4;
-export type MaxPoints = 5 | 10 | 20;
+export type MaxPoints = 5 | 10 | 20 | 40 | 60;
 
 export interface Game { id: string; name: string; category: string; date: string; status: GameStatus; gameClass: GameClass; maxPoints: MaxPoints; year: number }
 export interface Score { id: string; gameId: string; tribe: Tribe; placement: Placement; points: number }
@@ -16,9 +16,12 @@ export interface TribeTotals { tribe: Tribe; totalPoints: number; gamesPlayed: n
 export type Placements = Record<Tribe, Placement | null>;
 
 export const PLACEMENTS: readonly Placement[] = [1, 2, 3, 4];
-export const MAX_POINTS: readonly MaxPoints[] = [5, 10, 20];
+// Top points a class may carry (what the live scoreboard uses).
+export const CLASS_POINTS: Record<GameClass, readonly MaxPoints[]> = { A: [5, 10], B: [20], C: [20, 40], D: [60] };
+export const GAME_CLASSES: readonly GameClass[] = ['A', 'B', 'C', 'D'];
 const CLASS_B: Record<Placement, number> = { 1: 20, 2: 15, 3: 10, 4: 5 };
 const CLASS_A_RATIO: Record<Placement, number> = { 1: 5, 2: 3, 3: 2, 4: 1 };
+const CLASS_CD_SHARE: Record<Placement, number> = { 1: 1, 2: 0.75, 3: 0.5, 4: 0.25 };
 
 export type GameFields = Pick<Game, 'name' | 'category' | 'date' | 'status' | 'gameClass' | 'maxPoints' | 'year'>;
 
@@ -32,18 +35,20 @@ export function newGameFields(game: Game | undefined, year: number): GameFields 
 
 export const gameProblem = (f: GameFields) => (f.name.trim() && f.category.trim() ? '' : 'Add the game name and its category.');
 
-export const defaultMaxPoints = (gameClass: GameClass): MaxPoints => (gameClass === 'A' ? 10 : 20);
+export const defaultMaxPoints = (gameClass: GameClass): MaxPoints => CLASS_POINTS[gameClass][CLASS_POINTS[gameClass].length - 1];
 
 export function pointsFromPlacement(placement: Placement, maxPoints: number, gameClass: GameClass): number {
-  return gameClass === 'B' ? CLASS_B[placement] : CLASS_A_RATIO[placement] * (maxPoints / 5);
+  if (gameClass === 'B') return CLASS_B[placement];
+  if (gameClass === 'A') return CLASS_A_RATIO[placement] * (maxPoints / 5);
+  return CLASS_CD_SHARE[placement] * maxPoints;
 }
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
 const STATUSES: GameStatus[] = ['upcoming', 'ongoing', 'completed'];
 
 export function toGame(id: string, d: Record<string, unknown>): Game {
-  const gameClass: GameClass = d.gameClass === 'A' ? 'A' : 'B';
-  const maxPoints = MAX_POINTS.find((m) => m === d.maxPoints) ?? defaultMaxPoints(gameClass);
+  const gameClass = GAME_CLASSES.find((c) => c === d.gameClass) ?? 'B';
+  const maxPoints = CLASS_POINTS[gameClass].find((m) => m === d.maxPoints) ?? defaultMaxPoints(gameClass);
   return {
     id, name: str(d.name), category: str(d.category), date: str(d.date), gameClass, maxPoints,
     status: STATUSES.find((s) => s === d.status) ?? 'upcoming', year: typeof d.year === 'number' ? d.year : 0,
@@ -72,12 +77,7 @@ export function computeTribeTotals(scores: Score[]): TribeTotals[] {
 
 export const emptyPlacements = (): Placements => ({ Aeta: null, Badjao: null, Mangyan: null, Tasaday: null });
 
-// Each placed tribe needs its own place (two tribes cannot both be 1st).
-export function placementProblem(p: Placements): string {
-  const placed = TRIBES.map((t) => p[t]).filter((v): v is Placement => v !== null);
-  return new Set(placed).size === placed.length ? '' : 'Each tribe must have a different placement.';
-}
-
+// Ties are allowed (two tribes can share a place), as on the live scoreboard.
 export function placementsOf(scores: Score[]): Placements {
   const p = emptyPlacements();
   for (const s of scores) p[s.tribe] = s.placement;
@@ -98,4 +98,7 @@ export const SCORING_TABLE: { label: string; gameClass: GameClass; maxPoints: Ma
   { label: 'Class A, 5 points', gameClass: 'A', maxPoints: 5 },
   { label: 'Class A, 10 points', gameClass: 'A', maxPoints: 10 },
   { label: 'Class B, 20 points', gameClass: 'B', maxPoints: 20 },
+  { label: 'Class C, 20 points', gameClass: 'C', maxPoints: 20 },
+  { label: 'Class C, 40 points', gameClass: 'C', maxPoints: 40 },
+  { label: 'Class D, 60 points', gameClass: 'D', maxPoints: 60 },
 ];

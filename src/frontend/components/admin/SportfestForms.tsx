@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import {
-  MAX_POINTS, PLACEMENTS, TRIBES, defaultMaxPoints, emptyPlacements, gameProblem, newGameFields, placementProblem, placementsOf,
+  CLASS_POINTS, GAME_CLASSES, PLACEMENTS, TRIBES, defaultMaxPoints, emptyPlacements, gameProblem, newGameFields, placementsOf,
   type Game, type GameClass, type GameStatus, type MaxPoints, type Placement, type Placements, type Score,
 } from '../../data/sportfest';
 import type { GameInput } from '../../services/sportfest';
@@ -25,12 +25,12 @@ export function GameForm({ game, year, busy, onSave, onCancel }: { game?: Game; 
       <div className="editor-field"><label htmlFor="sf-date">Date</label><input id="sf-date" maxLength={30} value={form.date} onChange={(e) => set('date', e.target.value)} /></div>
       <div className="editor-field"><label htmlFor="sf-class">Class</label>
         <select id="sf-class" value={form.gameClass} onChange={(e) => { const c = e.target.value as GameClass; setForm({ ...form, gameClass: c, maxPoints: defaultMaxPoints(c) }); }}>
-          <option value="A">A (5 : 3 : 2 : 1)</option><option value="B">B (20, 15, 10, 5)</option>
+          {GAME_CLASSES.map((c) => <option key={c} value={c}>Class {c}</option>)}
         </select>
       </div>
-      {form.gameClass === 'A' && (
+      {CLASS_POINTS[form.gameClass].length > 1 && (
         <div className="editor-field"><label htmlFor="sf-max">Points for 1st</label>
-          <select id="sf-max" value={form.maxPoints} onChange={(e) => set('maxPoints', Number(e.target.value) as MaxPoints)}>{MAX_POINTS.filter((m) => m !== 20).map((m) => <option key={m} value={m}>{m}</option>)}</select>
+          <select id="sf-max" value={form.maxPoints} onChange={(e) => set('maxPoints', Number(e.target.value) as MaxPoints)}>{CLASS_POINTS[form.gameClass].map((m) => <option key={m} value={m}>{m}</option>)}</select>
         </div>
       )}
       <div className="editor-field"><label htmlFor="sf-status">Status</label>
@@ -47,14 +47,13 @@ const ORDINAL: Record<Placement, string> = { 1: '1st', 2: '2nd', 3: '3rd', 4: '4
 
 export function ResultsForm({ game, scores, busy, onSave, onCancel }: { game: Game; scores: Score[]; busy: boolean; onSave: (p: Placements) => Promise<boolean>; onCancel: () => void }) {
   const [placements, setPlacements] = useState<Placements>(() => (scores.length ? placementsOf(scores) : emptyPlacements()));
-  const problem = placementProblem(placements);
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!problem && (await onSave(placements))) onCancel();
+    if (await onSave(placements)) onCancel();
   };
   return (
     <form className="register-form" onSubmit={(e) => void submit(e)}>
-      <p><strong>{game.name}</strong> · {game.gameClass === 'A' ? `Class A, ${game.maxPoints} points for 1st` : 'Class B, 20 points for 1st'}</p>
+      <p><strong>{game.name}</strong> · Class {game.gameClass}, {game.maxPoints} points for 1st</p>
       {TRIBES.map((tribe) => (
         <div key={tribe} className="editor-field"><label htmlFor={`sf-${tribe}`}>{tribe}</label>
           <select id={`sf-${tribe}`} value={placements[tribe] ?? ''} onChange={(e) => setPlacements({ ...placements, [tribe]: e.target.value ? (Number(e.target.value) as Placement) : null })}>
@@ -62,8 +61,7 @@ export function ResultsForm({ game, scores, busy, onSave, onCancel }: { game: Ga
           </select>
         </div>
       ))}
-      {problem && <p role="alert" className="field-error">{problem}</p>}
-      <div className="editor-actions"><button type="submit" className="btn btn-primary" disabled={busy || Boolean(problem)}>Save results</button><button type="button" className="link-button" onClick={onCancel}>Cancel</button></div>
+      <div className="editor-actions"><button type="submit" className="btn btn-primary" disabled={busy}>Save results</button><button type="button" className="link-button" onClick={onCancel}>Cancel</button></div>
     </form>
   );
 }
