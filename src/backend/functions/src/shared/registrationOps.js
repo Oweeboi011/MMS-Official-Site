@@ -76,14 +76,14 @@ async function syncParticipantList(climbId) {
 // The climb's own due date, else 5 days before it starts ("YYYY-MM-DD" in
 // Manila time). Mirrors getPaymentDueDate in src/utils/registrationPolicy.js.
 const DEFAULT_DUE_DAYS_BEFORE = 5;
+function startDateOf(raw) {
+  if (raw?.toDate) return raw.toDate();
+  if (typeof raw === "string" && /^\d{4}-\d{2}-\d{2}$/.test(raw)) return new Date(`${raw}T00:00:00+08:00`);
+  return null;
+}
 function getPaymentDueDate(climb) {
   if (climb?.paymentDueDate) return climb.paymentDueDate;
-  const raw = climb?.startDate;
-  const start = raw?.toDate
-    ? raw.toDate()
-    : typeof raw === "string" && /^\d{4}-\d{2}-\d{2}$/.test(raw)
-      ? new Date(`${raw}T00:00:00+08:00`)
-      : null;
+  const start = startDateOf(climb?.startDate);
   if (!start || isNaN(start.getTime())) return "";
   const due = new Date(start.getTime() - DEFAULT_DUE_DAYS_BEFORE * 86400000);
   return due.toLocaleDateString("en-CA", { timeZone: "Asia/Manila" });
@@ -113,7 +113,8 @@ async function isClimbFull(climb, climbId, regId) {
 // and never for a cancelled, postponed or finished climb.
 function createdMillis(reg) {
   const t = reg.createdAt;
-  return t?.toMillis ? t.toMillis() : t?.toDate ? t.toDate().getTime() : 0;
+  if (t?.toMillis) return t.toMillis();
+  return t?.toDate ? t.toDate().getTime() : 0;
 }
 
 async function promoteFromWaitlist(climbId) {

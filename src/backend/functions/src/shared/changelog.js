@@ -51,7 +51,7 @@ export function groupCommitsIntoChangelog(commits) {
 
   const sections = Object.entries(groups).filter(([, items]) => items.length > 0);
   const body = sections
-    .map(([label, items]) => `${label}\n${items.map((i) => `- ${i}`).join("\n")}`)
+    .map(([label, items]) => [label, ...items.map((i) => "- " + i)].join("\n"))
     .join("\n\n");
   return { body, dropped };
 }
