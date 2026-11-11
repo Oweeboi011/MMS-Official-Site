@@ -21,6 +21,10 @@ vi.mock('../../src/frontend/services/adminRegistrations', () => ({
   splitPayment: async (payer: { id: string }, _index: number, shares: { reg: { id: string }; amount: number }[]) => { svc.notes.push(['split', payer.id, shares[0].reg.id, String(shares[0].amount)]); },
   saveExpenses: async (id: string, items: unknown[]) => { svc.notes.push(['expenses', id, JSON.stringify(items)]); },
 }));
+vi.mock('../../src/frontend/services/reviewsFromFeedback', () => ({
+  climbFeedback: async () => [{ id: 'c1_u1', name: 'Ana', rating: 5, comments: 'Great climb', published: false }, { id: 'c1_u2', name: 'Ben', rating: 3, comments: '', published: false }],
+  setReviewPublished: async (f: { id: string }, _c: string, _t: string, published: boolean) => { svc.notes.push(['review', f.id, String(published)]); },
+}));
 vi.mock('../../src/frontend/services/publicData', () => ({
   publicReadsEnabled: true,
   climbLoader: async (id: string) => ({ id, title: 'Mt. Pulag', status: 'open', location: 'Benguet', startDate: new Date(Date.now() + 864e6) }),
@@ -48,6 +52,15 @@ describe('admin: registrations', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save notes' }));
     await vi.waitFor(() => expect(svc.notes).toEqual([['r1', 'Paid cash balance']]));
     expect(screen.getByRole('button', { name: /Download CSV/ })).toBeEnabled();
+  });
+
+  it('lists member ratings and publishes one with comments as a review', async () => {
+    svc.notes = [];
+    renderAt('/admin/climbs/c1');
+    expect(await screen.findByText(/average 4 of 5/, {}, { timeout: 5000 })).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Publish as review' })).toHaveLength(1); // Ben left no comment
+    fireEvent.click(screen.getByRole('button', { name: 'Publish as review' }));
+    await vi.waitFor(() => expect(svc.notes).toContainEqual(['review', 'c1_u1', 'true']));
   });
 
   it('adds a walk-in with cash received', async () => {
