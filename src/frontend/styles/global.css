@@ -208,6 +208,8 @@ button { font: inherit; }
 .profile-photo { display: flex; gap: 18px; align-items: center; margin-bottom: 14px; }
 .profile-photo img, .profile-photo-empty { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 1px solid var(--line); }
 .profile-photo-empty { display: grid; place-items: center; font-size: .8rem; color: var(--muted, #5b6672); background: #f3f4f6; }
+.group-boxes { display: flex; gap: 10px; border: 0; margin: 0; padding: 0; flex-wrap: wrap; }
+.group-boxes label { display: inline-flex; gap: 4px; align-items: center; }
 .consent-check { display: flex; gap: 10px; align-items: flex-start; }
 .consent-check input { margin-top: 4px; }
 .my-climbs { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }

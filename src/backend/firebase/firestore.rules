@@ -17,6 +17,22 @@ service cloud.firestore {
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
+    // Groups (BOT, ExeCom, TCom) live on users/{uid}.groups and are never written by their owner.
+    function hasGroup(g) {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        g in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('groups', []);
+    }
+    function groupsAreValid(d) {
+      return !('groups' in d) || (d.groups is list && d.groups.hasOnly(['bot', 'execom', 'tcom']));
+    }
+    // ADR 0010: admins, BOT and ExeCom review every page; TCom handles its own pages.
+    function isContentReviewer() {
+      return isAdmin() || hasGroup('bot') || hasGroup('execom');
+    }
+    function isTcomPage(page) {
+      return page in ['calendar', 'media', 'trails', 'destinations'];
+    }
     function climbIsOpen(climbId) {
       return get(/databases/$(database)/documents/climbs/$(climbId)).data.status == 'open';
     }
@@ -69,7 +85,7 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isAdmin() || isOwner(userId);
       allow create: if isOwner(userId) && request.resource.data.role == 'member' &&
-        !('canEmailMembers' in request.resource.data);
+        !('canEmailMembers' in request.resource.data) && !('groups' in request.resource.data);
       // Owners may maintain their own profile but never their own role —
       // `create` pins it to 'member', and without this an update could hand
       // the whole admin surface to anyone with a browser console.
@@ -77,8 +93,10 @@ service cloud.firestore {
       // any admin can mint admins, so an in-app grant could be self-served.
       // The project owner sets it: tools/admin/grant-email-members.mjs.
       // createdAt is fixed for life: it orders the all-member email send.
-      allow update: if (isAdmin() && !affected().hasAny(['canEmailMembers', 'createdAt'])) ||
-        (isOwner(userId) && !affected().hasAny(['role', 'canEmailMembers', 'createdAt']));
+      // Groups: admins and BOT set them; BOT may touch nothing else.
+      allow update: if (isAdmin() && !affected().hasAny(['canEmailMembers', 'createdAt']) && groupsAreValid(request.resource.data)) ||
+        (hasGroup('bot') && affected().hasOnly(['groups', 'updatedAt']) && groupsAreValid(request.resource.data)) ||
+        (isOwner(userId) && !affected().hasAny(['role', 'groups', 'canEmailMembers', 'createdAt']));
       allow delete: if isAdmin();
     }
 
@@ -113,6 +131,30 @@ service cloud.firestore {
       allow create, update: if (isAdmin() || isOwner(userId)) &&
         memberDetailsAreValid(request.resource.data);
       allow delete: if isAdmin();
+    }
+
+    // Page data submitted by officers and published after review (ADR 0010).
+    function contentEntryIsValid(d) {
+      return d.keys().hasOnly(['page', 'title', 'data', 'status', 'submittedBy', 'submittedByName', 'reviewedBy', 'note', 'createdAt', 'updatedAt', 'publishedAt']) &&
+        d.page in ['calendar', 'media', 'membership', 'trails', 'destinations'] &&
+        d.status in ['draft', 'pending', 'published', 'rejected'] &&
+        d.data is map && text(d, 'title', 1, 200) && shortText(d, 'note', 500);
+    }
+    match /contentEntries/{entryId} {
+      allow read: if resource.data.status == 'published' || isContentReviewer() ||
+        (isSignedIn() && resource.data.submittedBy == request.auth.uid);
+      allow create: if isSignedIn() && contentEntryIsValid(request.resource.data) &&
+        request.resource.data.submittedBy == request.auth.uid &&
+        request.resource.data.status != 'rejected' &&
+        (isContentReviewer() || (hasGroup('tcom') && isTcomPage(request.resource.data.page)));
+      allow update: if contentEntryIsValid(request.resource.data) &&
+        request.resource.data.page == resource.data.page &&
+        !affected().hasAny(['submittedBy', 'createdAt']) &&
+        (isContentReviewer() ||
+          (hasGroup('tcom') && isTcomPage(resource.data.page) && resource.data.submittedBy == request.auth.uid &&
+            request.resource.data.status != 'rejected' && !affected().hasAny(['reviewedBy'])));
+      allow delete: if isContentReviewer() ||
+        (isSignedIn() && resource.data.submittedBy == request.auth.uid && resource.data.status in ['draft', 'pending']);
     }
 
     match /climbs/{climbId} {
