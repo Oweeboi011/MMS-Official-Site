@@ -322,6 +322,7 @@ await no("admin cannot set an unknown group", () => admin().doc("users/m2").upda
 await ok("BOT member changes someone's groups", () => as("bot1").doc("users/m2").update({ groups: ["execom"], updatedAt: FV.serverTimestamp() }));
 await no("BOT member cannot change a role", () => as("bot1").doc("users/m2").update({ role: "admin" }));
 await no("ExeCom cannot change groups", () => as("exec1").doc("users/m2").update({ groups: ["bot"] }));
+await seed();
 await ok("TCom submits a trails entry", () => as("tcom1").collection("contentEntries").add(entry("tcom1", "trails")));
 await ok("TCom publishes its own calendar entry", () => as("tcom1").collection("contentEntries").add(entry("tcom1", "calendar", { status: "published" })));
 await no("TCom cannot submit membership", () => as("tcom1").collection("contentEntries").add(entry("tcom1", "membership")));
@@ -338,6 +339,7 @@ await env.withSecurityRulesDisabled(async (c) => {
   await db.doc("contentEntries/pub").set(entry("tcom1", "calendar", { status: "published" }));
   await db.doc("contentEntries/pend").set(entry("tcom1", "calendar"));
   await db.doc("contentEntries/memb").set(entry("exec1", "membership"));
+  await db.doc("contentEntries/mine").set(entry("tcom1", "media"));
 });
 await ok("guest reads a published entry", () => anon().doc("contentEntries/pub").get());
 await no("guest cannot read a pending entry", () => anon().doc("contentEntries/pend").get());
@@ -351,7 +353,7 @@ await ok("TCom edits its own entry", () => as("tcom1").doc("contentEntries/pub")
 await no("TCom cannot touch reviewedBy", () => as("tcom1").doc("contentEntries/pub").update({ reviewedBy: "tcom1" }));
 await no("TCom cannot edit a membership entry", () => as("tcom1").doc("contentEntries/memb").update({ title: "Changed" }));
 await no("member cannot delete a published entry", () => as("tcom1").doc("contentEntries/pub").delete());
-await ok("submitter deletes their pending entry", () => as("tcom1").doc("contentEntries/pend").delete());
+await ok("submitter deletes their pending entry", () => as("tcom1").doc("contentEntries/mine").delete());
 await ok("admin deletes any entry", () => admin().doc("contentEntries/pub").delete());
 
 console.log(`\n${pass} passed, ${fail} failed`);
