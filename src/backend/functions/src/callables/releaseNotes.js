@@ -44,10 +44,14 @@ function isAfter(u, cursor) {
   const k = cursorOf(u);
   return k.at > cursor.at || (k.at === cursor.at && k.id > cursor.id);
 }
+const compareIds = (a, b) => {
+  if (a === b) return 0;
+  return a < b ? -1 : 1;
+};
 const byCursor = (a, b) => {
   const x = cursorOf(a);
   const y = cursorOf(b);
-  return x.at - y.at || (x.id < y.id ? -1 : x.id > y.id ? 1 : 0);
+  return x.at - y.at || compareIds(x.id, y.id);
 };
 
 async function emailRecipients() {
@@ -72,8 +76,10 @@ function renderReleaseNoteEmail(note) {
 const QUEUED_LIMIT_MS = 60 * 60 * 1000;
 const SILENT_LIMIT_MS = 15 * 60 * 1000;
 
+const queuedSince = (job) => job?.queuedAt || job?.createdAt?.toMillis?.() || 0;
+
 function isLocked(job, now = Date.now()) {
-  const since = job?.queuedAt || job?.createdAt?.toMillis?.() || 0;
+  const since = queuedSince(job);
   if (job?.status === "queued") return now - since < QUEUED_LIMIT_MS;
   if (job?.status === "sending") return now - (job.heartbeatAt || since) < SILENT_LIMIT_MS;
   return false;
