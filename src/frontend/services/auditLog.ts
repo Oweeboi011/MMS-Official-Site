@@ -2,7 +2,7 @@
 import { addDoc, collection, getDocs, limit, orderBy, query, serverTimestamp } from 'firebase/firestore/lite';
 import { firebase } from './firebase';
 
-export interface AuditEvent { action: string; targetType: 'registration' | 'climb' | 'user'; targetId: string; targetLabel?: string; details?: string }
+export interface AuditEvent { action: string; targetType: 'registration' | 'climb' | 'user' | 'content'; targetId: string; targetLabel?: string; details?: string }
 export interface AuditEntry extends AuditEvent { id: string; actorName: string; createdAt: number }
 
 // Best effort: a logging failure must never block the action it describes.

@@ -454,7 +454,9 @@ service cloud.firestore {
 
     match /auditLog/{id} {
       allow read: if isAdmin();
-      allow create: if isAdmin();
+      // Content officers log their own submissions and decisions; admins log everything.
+      allow create: if isAdmin() ||
+        ((isContentReviewer() || hasGroup('tcom')) && request.resource.data.targetType == 'content');
       allow update, delete: if false;
     }
 

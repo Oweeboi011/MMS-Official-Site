@@ -354,6 +354,12 @@ await no("TCom cannot touch reviewedBy", () => as("tcom1").doc("contentEntries/p
 await no("TCom cannot edit a membership entry", () => as("tcom1").doc("contentEntries/memb").update({ title: "Changed" }));
 await no("member cannot delete a published entry", () => as("tcom1").doc("contentEntries/pub").delete());
 await ok("submitter deletes their pending entry", () => as("tcom1").doc("contentEntries/mine").delete());
+const logEntry = (uid, type) => ({ actorUid: uid, actorName: uid, action: "content published", targetType: type, targetId: "e1", createdAt: FV.serverTimestamp() });
+await ok("TCom logs a content action", () => as("tcom1").collection("auditLog").add(logEntry("tcom1", "content")));
+await ok("ExeCom logs a content action", () => as("exec1").collection("auditLog").add(logEntry("exec1", "content")));
+await no("TCom cannot log a non-content action", () => as("tcom1").collection("auditLog").add(logEntry("tcom1", "user")));
+await no("plain member cannot log a content action", () => m2().collection("auditLog").add(logEntry("m2", "content")));
+await no("TCom cannot read the audit log", () => as("tcom1").collection("auditLog").limit(1).get());
 await ok("admin deletes any entry", () => admin().doc("contentEntries/pub").delete());
 
 console.log(`\n${pass} passed, ${fail} failed`);

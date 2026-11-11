@@ -8,6 +8,7 @@ export const climbTiles: AdminTile[] = [
 
 export const recordTiles: AdminTile[] = [
   { to: '/admin/users', title: 'Accounts and roles', text: 'Create, correct and delete accounts; give or remove admin.' },
+  { to: '/account/content', title: 'Page content', text: 'Submit, review and publish the data behind calendar, media, membership and trails.' },
   { to: '/admin/audit', title: 'Audit log', text: 'Who changed what: payments, roles, deletions.' },
 ];
 

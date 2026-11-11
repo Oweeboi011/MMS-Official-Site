@@ -2,7 +2,7 @@
 export const GROUPS = [['bot', 'BOT'], ['execom', 'ExeCom'], ['tcom', 'TCom']] as const;
 export type Group = (typeof GROUPS)[number][0];
 
-const CONTENT_PAGES = [
+export const CONTENT_PAGES = [
   ['calendar', 'Calendar of Activities'], ['media', 'Media'], ['membership', 'Membership'],
   ['trails', 'Trails'], ['destinations', 'Destinations'],
 ] as const;
@@ -15,14 +15,16 @@ const REVIEWER_GROUPS: readonly Group[] = ['bot', 'execom'];
 export interface Rights { submit: boolean; publish: boolean }
 interface Person { role: string; groups: readonly string[] }
 
-const isReviewer = (p: Person) => p.role === 'admin' || p.groups.some((g) => REVIEWER_GROUPS.includes(g as Group));
+export const isContentReviewer = (p: Person) => p.role === 'admin' || p.groups.some((g) => REVIEWER_GROUPS.includes(g as Group));
 
 export function rightsFor(person: Person, page: ContentPage): Rights {
-  const allowed = isReviewer(person) || (person.groups.includes('tcom') && TCOM_PAGES.includes(page));
+  const allowed = isContentReviewer(person) || (person.groups.includes('tcom') && TCOM_PAGES.includes(page));
   return { submit: allowed, publish: allowed };
 }
 
 const pagesWithRights = (person: Person) => CONTENT_PAGES.filter(([page]) => rightsFor(person, page).submit);
+
+export const hasContentRights = (person: Person) => pagesWithRights(person).length > 0;
 
 export function rightsLabel(person: Person): string {
   const pages = pagesWithRights(person);
