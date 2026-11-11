@@ -69,7 +69,9 @@ jobs:
         run: npx playwright install chromium
       # System libraries usually ship on the runner image; an apt mirror outage must not fail the build.
       - name: Install Browser Libraries
-        run: npx playwright install-deps chromium || echo "apt unavailable, using the runner's libraries"
+        timeout-minutes: 3
+        continue-on-error: true
+        run: timeout 150 npx playwright install-deps chromium
       - name: Playwright Smoke Suite
         run: npm run test:e2e
       - name: Upload Test Results
