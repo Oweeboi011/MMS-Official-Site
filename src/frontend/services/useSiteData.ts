@@ -8,8 +8,9 @@ import { splitSchedule, toClimb, type ScheduleClimb } from '../data/climbs';
 import type { ContentBlock } from '../data/subpages';
 import type { Doc } from '../lib/firestoreRest';
 import { manilaYear } from '../lib/manila';
+import { climbLogBlocks, climbLogPath } from '../data/climbLog';
 import { entryBlocks, entryPageOf } from '../data/entryBlocks';
-import { announcementsLoader, climbsLoader, entriesLoader, loadCurrentOfficers, loadOfficers, loadReviews, loadSettings, loadSurveys, publicReadsEnabled } from './publicData';
+import { announcementsLoader, climbsLoader, entriesLoader, loadClimbLog, loadCurrentOfficers, loadOfficers, loadReviews, loadSettings, loadSurveys, publicReadsEnabled } from './publicData';
 
 // undefined = loading or failed (show nothing); null = nothing there (not configured, no doc). `load` must be module-level.
 export function useLoaded<T>(load: (() => Promise<T | null | undefined>) | null): T | null | undefined {
@@ -60,9 +61,11 @@ export function useLiveBlocks(path: string, blocks: ContentBlock[] | undefined):
   const entryDocs = useLoaded(entryPage ? entriesLoader(entryPage) : null);
   const officerDocs = useLoaded(path === leadershipPath ? loadOfficers : null);
   const reviewDocs = useLoaded(path === storiesPath ? loadReviews : null);
+  const logDocs = useLoaded(path === climbLogPath ? loadClimbLog : null);
   if (entryPage) return fromEntries(path, blocks, entryDocs);
   if (!blocks) return blocks;
   if (path === leadershipPath) return swapIn(blocks, officerDocs, leadershipBlocks);
+  if (path === climbLogPath) return swapIn(blocks, logDocs, (b, d) => climbLogBlocks(b, d, new Date()));
   return path === storiesPath ? swapIn(blocks, reviewDocs, storiesBlocks) : blocks;
 }
 

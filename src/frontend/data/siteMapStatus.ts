@@ -29,6 +29,7 @@ const hasSocial = (f: PageFacts) => Object.keys(f.settings).some((k) => k.starts
 
 // Pages whose content comes from admin-edited data, by path; every other page is sample copy.
 const RULES: Record<string, Rule> = {
+  '/explore/climb-log': (f) => needs(f.openClimbs > 0, sample('No climbs published: the sample log is shown.', '/admin')),
   '/activities/calendar': (f) => needs(has(f, 'entries:calendar'), sample('No calendar entries published: the sample calendar is shown.', SUBMIT)),
   '/media/videos': (f) => needs(has(f, 'entries:media'), sample('No videos published yet.', SUBMIT)),
   '/media/publications': (f) => needs(has(f, 'entries:media'), sample('No publications published yet.', SUBMIT)),

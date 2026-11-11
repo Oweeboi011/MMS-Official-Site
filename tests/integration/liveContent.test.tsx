@@ -9,6 +9,7 @@ vi.mock('../../src/frontend/services/publicData', () => ({
   loadSettings: async () => live.settings,
   announcementsLoader: () => async () => live.announcements,
   entriesLoader: () => async () => live.entries,
+  loadClimbLog: async () => live.climbs,
   climbsLoader: () => async () => live.climbs,
   climbLoader: async () => live.climb,
   loadSurveys: async () => null,
@@ -54,6 +55,14 @@ describe('pages read site content from Firestore', () => {
     live.entries = [{ title: 'Pulag highlights', data: { kind: 'video', url: 'https://youtu.be/x' } }];
     renderAt('/media/videos');
     expect(await screen.findByRole('heading', { name: 'Pulag highlights' })).toBeInTheDocument();
+  });
+
+  it('lists completed open climbs in the climb log instead of the sample log', async () => {
+    live.climbs = [{ title: 'Mt. Livetest', type: 'minor', status: 'completed', startDate: new Date('2026-10-03T00:00:00Z'), endDate: new Date('2026-10-04T00:00:00Z'), registrationCount: 22 }];
+    renderAt('/explore/climb-log');
+    expect(await screen.findByText('Mt. Livetest')).toBeInTheDocument();
+    expect(screen.getByText('Oct 3–4, 2026')).toBeInTheDocument();
+    expect(screen.queryByText('Mt. Apo (Kidapawan)')).not.toBeInTheDocument(); // sample row
   });
 
   it('shows published announcements and the saved settings', async () => {
