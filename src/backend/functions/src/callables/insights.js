@@ -1,52 +1,26 @@
 import * as logger from "firebase-functions/logger";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { requireAdmin } from "../callables/users.js";
+import { clampDays, statsUrl, summarizeStats } from "../shared/emailStats.js";
 
 // ── Callable: App Insights — Brevo email delivery stats ───────────────────────
-export const getEmailStats = onCall(
-  { secrets: ["BREVO_API_KEY"] },
-  async (request) => {
-    await requireAdmin(request.auth?.uid);
+async function fetchBrevoStats(apiKey, days) {
+  const res = await fetch(statsUrl(days), { headers: { "api-key": apiKey } });
+  if (!res.ok) throw new HttpsError("internal", `Brevo API error ${res.status}: ${await res.text()}`);
+  return summarizeStats(await res.json(), days);
+}
 
-    const apiKey = process.env.BREVO_API_KEY;
-    if (!apiKey) {
-      throw new HttpsError("failed-precondition", "Brevo API key is not configured.");
-    }
+export const getEmailStats = onCall({ secrets: ["BREVO_API_KEY"] }, async (request) => {
+  await requireAdmin(request.auth?.uid);
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) throw new HttpsError("failed-precondition", "Brevo API key is not configured.");
 
-    // Client-supplied: keep it a whole number of days, 1–90 (Brevo stats range).
-    const days = Math.min(90, Math.max(1, Math.trunc(Number(request.data?.days ?? 30)) || 30));
-    const endDate = new Date();
-    const startDate = new Date(endDate.getTime() - days * 86400000);
-    const fmt = (d) => d.toISOString().slice(0, 10);
-
-    try {
-      const res = await fetch(
-        `https://api.brevo.com/v3/smtp/statistics/aggregatedReport?startDate=${fmt(startDate)}&endDate=${fmt(endDate)}`,
-        { headers: { "api-key": apiKey } },
-      );
-      if (!res.ok) {
-        const body = await res.text();
-        throw new HttpsError("internal", `Brevo API error ${res.status}: ${body}`);
-      }
-      const data = await res.json();
-      return {
-        requests: data.requests || 0,
-        delivered: data.delivered || 0,
-        hardBounces: data.hardBounces || 0,
-        softBounces: data.softBounces || 0,
-        blocked: data.blocked || 0,
-        opens: data.opens || 0,
-        uniqueOpens: data.uniqueOpens || 0,
-        clicks: data.clicks || 0,
-        spamReports: data.spamReports || 0,
-        rangeDays: days,
-      };
-    } catch (err) {
-      if (err instanceof HttpsError) throw err;
-      throw new HttpsError("internal", err.message);
-    }
-  },
-);
+  try {
+    return await fetchBrevoStats(apiKey, clampDays(request.data?.days));
+  } catch (err) {
+    throw err instanceof HttpsError ? err : new HttpsError("internal", err.message);
+  }
+});
 
 // ── Callable: App Insights — Storage usage by folder ──────────────────────────
 const STORAGE_FOLDERS = [
