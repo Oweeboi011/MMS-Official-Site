@@ -5,6 +5,7 @@ import { sendEmail } from "../email/sendEmail.js";
 import { tplWelcome } from "../email/templates.js";
 import { logFailedRequest } from "../shared/registrationOps.js";
 import { db, adminAuth } from "../shared/admin.js";
+import { authUpdateError, profileChanges, validateNewUser } from "../shared/userInput.js";
 
 // ── Callable: issue the caller's admin claim from their users/ role ─────────
 // syncAdminClaim only fires on users/ writes, so an admin promoted before it
@@ -29,146 +30,95 @@ export const ensureAdminClaim = onCall(async (request) => {
 });
 
 // ── Callable: admin creates a user account and sends welcome email ─────────────
-export const createUser = onCall(
-  { secrets: ["BREVO_API_KEY", "BREVO_FROM_EMAIL"] },
-  async (request) => {
-    const callerUid = request.auth?.uid;
-    if (!callerUid)
-      throw new HttpsError("unauthenticated", "You must be signed in.");
+// An Auth account can be an orphan from an earlier invite that failed before its profile was written: reuse it.
+async function claimAuthAccount(email, displayName) {
+  try {
+    return { userRecord: await adminAuth.createUser({ email, displayName }), isFreshAccount: true };
+  } catch (err) {
+    if (err.code !== "auth/email-already-exists") throw new HttpsError("internal", err.message);
+  }
+  let existing;
+  try {
+    existing = await adminAuth.getUserByEmail(email);
+  } catch (lookupErr) {
+    throw new HttpsError("internal", lookupErr.message);
+  }
+  if ((await db.doc(`users/${existing.uid}`).get()).exists) {
+    throw new HttpsError("already-exists", "An account with this email already exists.");
+  }
+  return { userRecord: existing, isFreshAccount: false };
+}
 
-    // Everything below can throw a plain (non-HttpsError) exception — e.g. a
-    // transient Firestore/Auth error. onCall silently discards the message of
-    // any non-HttpsError it catches, so without this net the client would
-    // just see a bare, undiagnosable "internal" error.
-    try {
-      const callerSnap = await db.doc(`users/${callerUid}`).get();
-      if (!callerSnap.exists || callerSnap.data().role !== "admin") {
-        throw new HttpsError(
-          "permission-denied",
-          "Only admins can create users.",
-        );
-      }
-
-      const { email, displayName, role = "member" } = request.data;
-      if (!email || !displayName) {
-        throw new HttpsError(
-          "invalid-argument",
-          "email and displayName are required.",
-        );
-      }
-      if (!["member", "admin"].includes(role)) {
-        throw new HttpsError(
-          "invalid-argument",
-          'role must be "member" or "admin".',
-        );
-      }
-
-      let userRecord;
-      let isFreshAccount = false;
-      try {
-        userRecord = await adminAuth.createUser({ email, displayName });
-        isFreshAccount = true;
-      } catch (err) {
-        if (err.code === "auth/email-already-exists") {
-          // The Auth account may be a real existing user, or it may be an
-          // orphan left behind by a previous invite that failed after the
-          // Auth user was created but before the Firestore profile was
-          // written. Self-heal the latter case instead of dead-ending.
-          let existingUser;
-          try {
-            existingUser = await adminAuth.getUserByEmail(email);
-          } catch (lookupErr) {
-            throw new HttpsError("internal", lookupErr.message);
-          }
-          const existingProfileSnap = await db
-            .doc(`users/${existingUser.uid}`)
-            .get();
-          if (existingProfileSnap.exists) {
-            throw new HttpsError(
-              "already-exists",
-              "An account with this email already exists.",
-            );
-          }
-          userRecord = existingUser;
-        } else {
-          throw new HttpsError("internal", err.message);
-        }
-      }
-
-      let setupLink;
-      try {
-        // Create Firestore user profile
-        await db.doc(`users/${userRecord.uid}`).set({
-          displayName,
-          email,
-          role,
-          createdAt: FieldValue.serverTimestamp(),
-          addedBy: callerUid,
-        });
-
-        // Generate password setup link (user sets their own password)
-        const appUrl =
-          process.env.APP_URL || "https://mms-open-climbs.web.app";
-        setupLink = await adminAuth.generatePasswordResetLink(email, {
-          url: `${appUrl}/login`,
-        });
-      } catch (err) {
-        if (isFreshAccount) {
-          try {
-            await adminAuth.deleteUser(userRecord.uid);
-          } catch (deleteErr) {
-            logger.error("[createUser] Failed to roll back orphaned Auth user", {
-              uid: userRecord.uid,
-              err: deleteErr.message,
-            });
-          }
-        }
-        if (err instanceof HttpsError) throw err;
-        throw new HttpsError("internal", err.message);
-      }
-
-      let emailSent = true;
-      try {
-        await sendEmail({
-          to: email,
-          toName: displayName,
-          subject: "Welcome to MMS Open Climbs — Set Up Your Account",
-          html: tplWelcome({ displayName, setupLink }),
-        });
-      } catch (emailErr) {
-        emailSent = false;
-        logger.error("[createUser] Welcome email failed", {
-          email,
-          err: emailErr.message,
-        });
-        await logFailedRequest({
-          type: "email",
-          source: "createUser",
-          message: emailErr.message,
-          userId: userRecord.uid,
-        });
-      }
-
-      logger.info("[createUser] Created user", { email, role, emailSent });
-      return { uid: userRecord.uid, emailSent };
-    } catch (err) {
-      if (err instanceof HttpsError) throw err;
-      const refId =
-        // eslint-disable-next-line sonarjs/pseudo-random -- log correlation id, not a secret
-        Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-      logger.error("[createUser] Unexpected error", { refId, err: err.message });
-      throw new HttpsError(
-        "internal",
-        `Unexpected error (ref ${refId}): ${err.message || String(err)}`,
+// Profile doc plus a password-setup link; a freshly created Auth user is rolled back if either fails.
+async function provisionProfile({ userRecord, isFreshAccount }, { email, displayName, role }, callerUid) {
+  try {
+    await db.doc(`users/${userRecord.uid}`).set({
+      displayName,
+      email,
+      role,
+      createdAt: FieldValue.serverTimestamp(),
+      addedBy: callerUid,
+    });
+    const appUrl = process.env.APP_URL || "https://mms-open-climbs.web.app";
+    return await adminAuth.generatePasswordResetLink(email, { url: `${appUrl}/login` });
+  } catch (err) {
+    if (isFreshAccount) {
+      await adminAuth.deleteUser(userRecord.uid).catch((deleteErr) =>
+        logger.error("[createUser] Failed to roll back orphaned Auth user", { uid: userRecord.uid, err: deleteErr.message }),
       );
     }
-  },
-);
+    throw err instanceof HttpsError ? err : new HttpsError("internal", err.message);
+  }
+}
+
+async function sendWelcome({ email, displayName }, setupLink, uid) {
+  try {
+    await sendEmail({
+      to: email,
+      toName: displayName,
+      subject: "Welcome to MMS Open Climbs — Set Up Your Account",
+      html: tplWelcome({ displayName, setupLink }),
+    });
+    return true;
+  } catch (emailErr) {
+    logger.error("[createUser] Welcome email failed", { email, err: emailErr.message });
+    await logFailedRequest({ type: "email", source: "createUser", message: emailErr.message, userId: uid });
+    return false;
+  }
+}
+
+// onCall discards the message of a non-HttpsError, so unexpected failures get a reference id the admin can quote.
+function unexpectedError(err) {
+  // eslint-disable-next-line sonarjs/pseudo-random -- log correlation id, not a secret
+  const refId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  logger.error("[createUser] Unexpected error", { refId, err: err.message });
+  return new HttpsError("internal", `Unexpected error (ref ${refId}): ${err.message || String(err)}`);
+}
+
+export const createUser = onCall({ secrets: ["BREVO_API_KEY", "BREVO_FROM_EMAIL"] }, async (request) => {
+  const callerUid = request.auth?.uid;
+  if (!callerUid) throw new HttpsError("unauthenticated", "You must be signed in.");
+
+  try {
+    const callerSnap = await db.doc(`users/${callerUid}`).get();
+    if (!callerSnap.exists || callerSnap.data().role !== "admin") {
+      throw new HttpsError("permission-denied", "Only admins can create users.");
+    }
+    const input = validateNewUser(request.data);
+    const account = await claimAuthAccount(input.email, input.displayName);
+    const setupLink = await provisionProfile(account, input, callerUid);
+    const emailSent = await sendWelcome(input, setupLink, account.userRecord.uid);
+
+    logger.info("[createUser] Created user", { email: input.email, role: input.role, emailSent });
+    return { uid: account.userRecord.uid, emailSent };
+  } catch (err) {
+    throw err instanceof HttpsError ? err : unexpectedError(err);
+  }
+});
 
 // ── Helper: verify the caller is a signed-in admin, or throw ──────────────────
 async function requireAdmin(callerUid) {
-  if (!callerUid)
-    throw new HttpsError("unauthenticated", "You must be signed in.");
+  if (!callerUid) throw new HttpsError("unauthenticated", "You must be signed in.");
   const callerSnap = await db.doc(`users/${callerUid}`).get();
   if (!callerSnap.exists || callerSnap.data().role !== "admin") {
     throw new HttpsError("permission-denied", "Only admins can do this.");
@@ -180,47 +130,19 @@ async function requireAdmin(callerUid) {
 export const updateUserProfile = onCall(async (request) => {
   try {
     await requireAdmin(request.auth?.uid);
-
-    const { uid, email, displayName } = request.data;
+    const { uid } = request.data;
     if (!uid) throw new HttpsError("invalid-argument", "uid is required.");
-    if (!email && !displayName) {
-      throw new HttpsError(
-        "invalid-argument",
-        "Provide an email and/or displayName to update.",
-      );
-    }
+    const changes = profileChanges(request.data);
 
-    const authUpdate = {};
-    if (email) authUpdate.email = email;
-    if (displayName) authUpdate.displayName = displayName;
-    try {
-      await adminAuth.updateUser(uid, authUpdate);
-    } catch (err) {
-      if (err.code === "auth/email-already-exists") {
-        throw new HttpsError(
-          "already-exists",
-          "Another account already uses this email address.",
-        );
-      }
-      if (err.code === "auth/user-not-found") {
-        throw new HttpsError(
-          "not-found",
-          "This user's login account no longer exists.",
-        );
-      }
-      throw new HttpsError("internal", err.message);
-    }
+    await adminAuth.updateUser(uid, changes).catch((err) => {
+      throw authUpdateError(err);
+    });
+    await db.doc(`users/${uid}`).update({ updatedAt: FieldValue.serverTimestamp(), ...changes });
 
-    const firestoreUpdate = { updatedAt: FieldValue.serverTimestamp() };
-    if (email) firestoreUpdate.email = email;
-    if (displayName) firestoreUpdate.displayName = displayName;
-    await db.doc(`users/${uid}`).update(firestoreUpdate);
-
-    logger.info("[updateUserProfile] Updated", { uid, email: !!email, displayName: !!displayName });
+    logger.info("[updateUserProfile] Updated", { uid, email: !!changes.email, displayName: !!changes.displayName });
     return { success: true };
   } catch (err) {
-    if (err instanceof HttpsError) throw err;
-    throw new HttpsError("internal", err.message);
+    throw err instanceof HttpsError ? err : new HttpsError("internal", err.message);
   }
 });
 
@@ -277,6 +199,15 @@ async function purgeUserPersonalData(uid) {
   }
 }
 
+// If the Auth record is already gone, the Firestore profile is still cleaned up rather than dead-ending on a stale account.
+async function deleteAuthUser(uid) {
+  try {
+    await adminAuth.deleteUser(uid);
+  } catch (err) {
+    if (err.code !== "auth/user-not-found") throw new HttpsError("internal", err.message);
+  }
+}
+
 // ── Callable: admin deletes a user's login account and profile ────────────────
 export const deleteUserAccount = onCall(async (request) => {
   try {
@@ -292,15 +223,7 @@ export const deleteUserAccount = onCall(async (request) => {
       );
     }
 
-    try {
-      await adminAuth.deleteUser(uid);
-    } catch (err) {
-      // If the Auth record is already gone, still clean up the Firestore
-      // profile below instead of dead-ending on a stale account.
-      if (err.code !== "auth/user-not-found") {
-        throw new HttpsError("internal", err.message);
-      }
-    }
+    await deleteAuthUser(uid);
     await db.doc(`users/${uid}`).delete();
     await purgeUserPersonalData(uid);
 
