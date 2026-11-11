@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageHero from '../components/PageHero';
 import AdminStats from '../components/admin/AdminStats';
 import { AdminGate } from '../components/admin/RegistrationTable';
-import { STATE_LABEL, siteMapPages, stateCounts, type MapPage, type PageState } from '../data/siteMapStatus';
+import { STATE_LABEL, siteMapPages, stateCounts, type MapPage, type PageFacts, type PageState } from '../data/siteMapStatus';
 import { loadSiteFacts } from '../services/siteFacts';
 
+const SiteFlow = lazy(() => import('../components/admin/SiteFlow'));
 const FILTERS: (PageState | 'all')[] = ['all', 'partial', 'sample', 'off', 'live'];
 const linkable = (path: string) => path.startsWith('/') && !path.includes(':') && !path.includes('#');
 
@@ -33,14 +34,16 @@ function SiteMap() {
   const [pages, setPages] = useState<MapPage[] | null>(null);
   const [error, setError] = useState('');
   const [unreadable, setUnreadable] = useState<string[]>([]);
+  const [facts, setFacts] = useState<PageFacts | null>(null);
+  const [view, setView] = useState<'diagram' | 'table'>('diagram');
   const [filter, setFilter] = useState<PageState | 'all'>('all');
   useEffect(() => {
     let current = true;
-    loadSiteFacts().then((f) => { if (current) { setPages(siteMapPages(f)); setUnreadable(f.unreadable ?? []); } }, (e: Error) => { if (current) setError(e.message); });
+    loadSiteFacts().then((f) => { if (current) { setFacts(f); setPages(siteMapPages(f)); setUnreadable(f.unreadable ?? []); } }, (e: Error) => { if (current) setError(e.message); });
     return () => { current = false; };
   }, []);
   if (error) return <p role="alert">Couldn’t read the site content: {error}</p>;
-  if (!pages) return <p role="status">Checking every page…</p>;
+  if (!pages || !facts) return <p role="status">Checking every page…</p>;
   const counts = stateCounts(pages);
   const shown = pages.filter((p) => filter === 'all' || p.state === filter);
   const areas = [...new Set(shown.map((p) => p.area))];
@@ -49,10 +52,18 @@ function SiteMap() {
       <AdminStats items={[['Pages and features', String(pages.length)], ['Live', String(counts.live)], ['Partial', String(counts.partial), counts.partial > 0], ['Sample copy', String(counts.sample), counts.sample > 0], ['Off', String(counts.off)]]} />
       {unreadable.length > 0 && <p role="alert">Couldn’t read: {unreadable.join(', ')} (permissions or network). Pages that depend on them are shown as if empty.</p>}
       <p className="climb-muted">Live shows real data. Partial is missing some data. Sample copy is placeholder text not yet confirmed by officers. Off is a feature not switched on yet.</p>
-      <nav className="admin-tabs" aria-label="Filter by status">
-        {FILTERS.map((s) => <button key={s} type="button" className={`chip${s === filter ? ' is-active' : ''}`} onClick={() => setFilter(s)}>{s === 'all' ? 'All' : STATE_LABEL[s]}</button>)}
+      <nav className="admin-tabs" aria-label="View">
+        {(['diagram', 'table'] as const).map((v) => <button key={v} type="button" className={`chip${v === view ? ' is-active' : ''}`} onClick={() => setView(v)}>{v === 'diagram' ? 'Diagram' : 'List'}</button>)}
       </nav>
-      {areas.map((a) => <section key={a}><h3 className="admin-subhead">{a}</h3><Rows pages={shown.filter((p) => p.area === a)} /></section>)}
+      {view === 'diagram' && <Suspense fallback={<p role="status">Loading diagram…</p>}><SiteFlow pages={pages} facts={facts} /></Suspense>}
+      {view === 'table' && (
+        <>
+          <nav className="admin-tabs" aria-label="Filter by status">
+            {FILTERS.map((s) => <button key={s} type="button" className={`chip${s === filter ? ' is-active' : ''}`} onClick={() => setFilter(s)}>{s === 'all' ? 'All' : STATE_LABEL[s]}</button>)}
+          </nav>
+          {areas.map((a) => <section key={a}><h3 className="admin-subhead">{a}</h3><Rows pages={shown.filter((p) => p.area === a)} /></section>)}
+        </>
+      )}
     </>
   );
 }
