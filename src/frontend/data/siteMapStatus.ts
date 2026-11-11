@@ -9,6 +9,7 @@ export interface PageFacts {
   settings: Record<string, string>; // siteSettings/site fields (blank when unset)
   openClimbs: number; // climbs people can see
   registrationOpen: boolean; // VITE_REGISTRATION_ENABLED
+  unreadable?: string[]; // reads the rules or network refused: those pages are judged without that data
 }
 export interface MapPage { path: string; label: string; area: string; state: PageState; note: string; fix?: string }
 
