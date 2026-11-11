@@ -32,10 +32,11 @@ function Rows({ pages }: { pages: MapPage[] }) {
 function SiteMap() {
   const [pages, setPages] = useState<MapPage[] | null>(null);
   const [error, setError] = useState('');
+  const [unreadable, setUnreadable] = useState<string[]>([]);
   const [filter, setFilter] = useState<PageState | 'all'>('all');
   useEffect(() => {
     let current = true;
-    loadSiteFacts().then((f) => { if (current) setPages(siteMapPages(f)); }, (e: Error) => { if (current) setError(e.message); });
+    loadSiteFacts().then((f) => { if (current) { setPages(siteMapPages(f)); setUnreadable(f.unreadable ?? []); } }, (e: Error) => { if (current) setError(e.message); });
     return () => { current = false; };
   }, []);
   if (error) return <p role="alert">Couldn’t read the site content: {error}</p>;
@@ -46,6 +47,7 @@ function SiteMap() {
   return (
     <>
       <AdminStats items={[['Pages and features', String(pages.length)], ['Live', String(counts.live)], ['Partial', String(counts.partial), counts.partial > 0], ['Sample copy', String(counts.sample), counts.sample > 0], ['Off', String(counts.off)]]} />
+      {unreadable.length > 0 && <p role="alert">Couldn’t read: {unreadable.join(', ')} (permissions or network). Pages that depend on them are shown as if empty.</p>}
       <p className="climb-muted">Live shows real data. Partial is missing some data. Sample copy is placeholder text not yet confirmed by officers. Off is a feature not switched on yet.</p>
       <nav className="admin-tabs" aria-label="Filter by status">
         {FILTERS.map((s) => <button key={s} type="button" className={`chip${s === filter ? ' is-active' : ''}`} onClick={() => setFilter(s)}>{s === 'all' ? 'All' : STATE_LABEL[s]}</button>)}

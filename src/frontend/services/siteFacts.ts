@@ -18,13 +18,23 @@ function flatten(data: Record<string, unknown>): Record<string, string> {
   return out;
 }
 
+// Each read stands alone: one refused collection is reported, it doesn't blank the whole map.
 export async function loadSiteFacts(): Promise<PageFacts> {
   const { db } = firebase();
+  const unreadable: string[] = [];
+  const attempt = async <T>(what: string, run: () => Promise<T>, fallback: T): Promise<T> => {
+    try {
+      return await run();
+    } catch {
+      unreadable.push(what);
+      return fallback;
+    }
+  };
   const count = async (name: string, ...w: ReturnType<typeof where>[]) => (await getCount(query(collection(db, name), ...w))).data().count;
   const [counts, openClimbs, settings] = await Promise.all([
-    Promise.all(COLLECTIONS.map(async (c) => [c, await count(c)] as const)),
-    count('climbs', where('status', '==', 'open')),
-    getDoc(doc(db, 'siteSettings', 'site')),
+    Promise.all(COLLECTIONS.map(async (c) => [c, await attempt(c, () => count(c), 0)] as const)),
+    attempt('climbs', () => count('climbs', where('status', '==', 'open')), 0),
+    attempt('siteSettings', () => getDoc(doc(db, 'siteSettings', 'site')), null),
   ]);
-  return { counts: Object.fromEntries(counts), settings: settings.exists() ? flatten(settings.data()) : {}, openClimbs, registrationOpen: registrationEnabled };
+  return { counts: Object.fromEntries(counts), settings: settings?.exists() ? flatten(settings.data()) : {}, openClimbs, registrationOpen: registrationEnabled, unreadable };
 }
