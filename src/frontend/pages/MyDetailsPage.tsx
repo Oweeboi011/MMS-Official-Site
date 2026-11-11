@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import AccountTabs from '../components/AccountTabs';
 import PageHero from '../components/PageHero';
 import SignInForm from '../components/SignInForm';
 import { EMPTY, LEVELS, MAX, TRIBES, missingEmergency, validate, type Details } from '../data/memberDetails';
@@ -92,7 +92,7 @@ export default function MyDetailsPage() {
   return (
     <>
       <PageHero compact eyebrow="Account" title="My details" intro="Contact, emergency and health details, and your MMS profile." image="/images/page-open-climbs.webp" />
-      <main><section className="section page-section"><div className="shell register-shell">{body}<p><Link to="/account/climbs">My Climbs</Link></p></div></section></main>
+      <main><section className="section page-section"><div className="shell register-shell"><AccountTabs />{body}</div></section></main>
     </>
   );
 }
