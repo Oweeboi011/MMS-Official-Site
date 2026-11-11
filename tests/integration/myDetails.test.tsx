@@ -16,6 +16,7 @@ describe('my details', () => {
     expect(await screen.findByDisplayValue('0917', {}, { timeout: 5000 })).toBeInTheDocument();
     expect(screen.getByText(/Add an emergency contact/)).toBeInTheDocument();
     expect(screen.getByLabelText('Add photo')).toBeInTheDocument();
+    expect(screen.getByText('a@x.com')).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Ana Reyes' } });
     fireEvent.change(screen.getByLabelText('Nickname'), { target: { value: 'Annie' } });
     fireEvent.change(screen.getByLabelText('BMC batch'), { target: { value: 'Pulag 1995' } });
