@@ -66,6 +66,15 @@ service firebase.storage {
       allow update, delete: if isAdmin();
     }
 
+    // ── Private: a member's own profile photo ──
+    // One image at a fixed path, so a new upload replaces the old one. Only the
+    // member and admins can read it; nothing here is public.
+    match /profile-photos/{userId}/{fileName} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create, update: if isOwner(userId) && request.resource.size < 5 * 1024 * 1024 && request.resource.contentType.matches('image/.*');
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
     // ── Public, admin-maintained assets ──
     // Shown on public event pages, so anyone reads; only admins write. The
     // GCash QR in particular is where members send money — an open write

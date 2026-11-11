@@ -6,7 +6,7 @@ import { firebase } from './firebase';
 import { readOnlyMessage, storageBucket, useEmulators, writesEnabled } from './firebaseEnv';
 
 let storage: FirebaseStorage | null = null;
-function bucket(): FirebaseStorage {
+export function bucket(): FirebaseStorage {
   if (storage) return storage;
   storage = getStorage(firebase().app, `gs://${storageBucket}`);
   if (useEmulators) connectStorageEmulator(storage, '127.0.0.1', 9199);

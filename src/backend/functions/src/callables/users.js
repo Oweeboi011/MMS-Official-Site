@@ -183,6 +183,7 @@ async function purgeUserPersonalData(uid) {
 
     const { getStorage } = await import("firebase-admin/storage");
     const bucket = getStorage().bucket();
+    await bucket.deleteFiles({ prefix: `profile-photos/${uid}/` });
     const climbIds = [...new Set(regs.docs.map((d) => d.data().climbId).filter(Boolean))];
     await Promise.all(
       climbIds.flatMap((climbId) =>
