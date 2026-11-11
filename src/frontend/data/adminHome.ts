@@ -13,5 +13,6 @@ export const recordTiles: AdminTile[] = [
 
 export const healthTiles: AdminTile[] = [
   { to: '/admin/insights', title: 'Insights', text: 'Function health, storage, cost, page views and recent errors.' },
+  { to: '/admin/sitemap', title: 'Site map', text: 'Every page and feature: which still have sample copy, missing data or are off.' },
   { to: '/admin/help', title: 'Officer guide', text: 'How each admin task works, step by step.' },
 ];

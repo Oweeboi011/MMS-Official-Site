@@ -818,3 +818,9 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .inquiry { padding-block: 40px; }
 .inquiry form { display: grid; gap: 8px; max-width: 560px; }
 .inquiry .check { display: flex; gap: 8px; align-items: flex-start; font-weight: 500; }
+
+/* Admin site map status */
+.status-chip.is-site-live { background: rgba(47, 125, 79, .12); border-color: rgba(47, 125, 79, .3); color: #1f6a3e; }
+.status-chip.is-site-partial { background: rgba(225, 184, 39, .2); border-color: rgba(225, 184, 39, .5); color: #6b5300; }
+.status-chip.is-site-sample { background: rgba(37, 43, 115, .08); border-color: rgba(37, 43, 115, .25); color: var(--navy); }
+.status-chip.is-site-off { background: rgba(169, 46, 42, .1); border-color: rgba(169, 46, 42, .25); color: var(--red); }
