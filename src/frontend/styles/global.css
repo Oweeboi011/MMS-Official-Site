@@ -813,3 +813,8 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .user-sub { margin: 0 0 12px; color: var(--muted); }
 .user-edit { display: grid; gap: 10px; margin: 14px 0; }
 .user-edit .editor-field { display: grid; gap: 6px; }
+
+/* Membership inquiry form */
+.inquiry { padding-block: 40px; }
+.inquiry form { display: grid; gap: 8px; max-width: 560px; }
+.inquiry .check { display: flex; gap: 8px; align-items: flex-start; font-weight: 500; }
