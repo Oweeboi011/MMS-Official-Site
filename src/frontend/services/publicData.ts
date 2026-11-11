@@ -72,6 +72,8 @@ export const loadSurveys = () => once('surveys', () => query('surveys', { limit:
 export const loadCurrentOfficers = () => once('officers:current', () => query('officers', { where: [{ field: 'current', op: 'EQUAL', value: true }], limit: 50 }));
 // Leadership lists every term; current officers sort first so the cap never drops them.
 export const loadOfficers = () => once('officers', () => query('officers', { orderBy: { field: 'current', desc: true }, limit: 300 }));
+// Every climb, newest first, for the Climb/Hike Log (the page keeps only the completed ones).
+export const loadClimbLog = () => once('climbs:log', () => query('climbs', { where: [{ field: 'startDate', op: 'GREATER_THAN_OR_EQUAL', value: manilaYearStart(1990) }], orderBy: { field: 'startDate', desc: true }, limit: 300 }));
 // Climbs by start date (needs `startDate` as a Timestamp). Current view: this Manila year onward. Archive: one year.
 const climbsLoaders = new Map<string, () => Promise<Doc[] | null | undefined>>();
 export function climbsLoader(fromYear: number, onlyThatYear: boolean) { // stable per key, for useLoaded
