@@ -3,11 +3,12 @@ import PageHero from '../components/PageHero';
 import { AdminGate } from '../components/admin/RegistrationTable';
 import AdminStats from '../components/admin/AdminStats';
 import { AddAccount, DeleteAccount } from '../components/admin/AccountForms';
+import GroupBoxes from '../components/admin/GroupBoxes';
 import UserDetail from '../components/admin/UserDetail';
 import { useAdminList } from '../components/admin/useAdminList';
 import { addedByLabel, initials, joinedLabel, type UserRow } from '../data/users';
 import type { Account } from '../services/auth';
-import { listUsers, setRole } from '../services/users';
+import { listUsers, setGroups, setRole } from '../services/users';
 
 function Users({ admin }: { admin: Account }) {
   const { rows, message, busy, run } = useAdminList(listUsers);
@@ -30,7 +31,7 @@ function Users({ admin }: { admin: Account }) {
       {message && <p role="status">{message}</p>}
       <div className="admin-table">
         <table>
-          <thead><tr><th scope="col">Account</th><th scope="col">Role</th><th scope="col">Added by</th><th scope="col">Joined</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead>
+          <thead><tr><th scope="col">Account</th><th scope="col">Role</th><th scope="col">Groups and content rights</th><th scope="col">Added by</th><th scope="col">Joined</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead>
           <tbody>
             {shown.map((u) => (
               <tr key={u.uid}>
@@ -44,6 +45,7 @@ function Users({ admin }: { admin: Account }) {
                     <option value="admin">admin</option>
                   </select>
                 </td>
+                <td><GroupBoxes user={u} busy={busy} onChange={(groups) => void run(() => setGroups(u.uid, groups, u.email))} /></td>
                 <td>{addedByLabel(u, rows)}</td>
                 <td>{joinedLabel(u.createdAt)}</td>
                 <td><button type="button" className="chip" onClick={() => setOpenUid(u.uid)}>Details</button>{u.uid !== admin.uid && <> <DeleteAccount user={u} run={run} busy={busy} /></>}</td>

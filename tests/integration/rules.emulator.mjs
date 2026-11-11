@@ -33,6 +33,9 @@ async function seed() {
     await db.doc("releaseNoteEmailJobs/j1").set({ releaseNoteId: "rn1", status: "sending" });
     await db.doc("users/m1").set({ role: "member" });
     await db.doc("users/m2").set({ role: "member" });
+    await db.doc("users/bot1").set({ role: "member", groups: ["bot"] });
+    await db.doc("users/exec1").set({ role: "member", groups: ["execom"] });
+    await db.doc("users/tcom1").set({ role: "member", groups: ["tcom"] });
     await db.doc("climbs/c1").set({ status: "open", title: "Pulag" });
     await db.doc("climbInternal/c1").set({ registeredUserIds: ["m1"], officerEmails: [{ email: "o@x.com" }] });
     await db.doc("climbPrivate/c1").set({ resources: [] });
@@ -49,6 +52,7 @@ async function seed() {
 const m1 = () => env.authenticatedContext("m1", { email: "m1@x.com" }).firestore();
 const m2 = () => env.authenticatedContext("m2", { email: "m2@x.com" }).firestore();
 const admin = () => env.authenticatedContext("admin", { email: "a@x.com", admin: true }).firestore();
+const as = (uid) => env.authenticatedContext(uid, { email: `${uid}@x.com` }).firestore();
 const anon = () => env.unauthenticatedContext().firestore();
 const baseReg = { userId: "m1", climbId: "c1", email: "m1@x.com", name: "Juan", status: "pending", memberType: "joiner",
   waiverSigned: true, waiverSignedName: "Juan Cruz", paymentStatus: "unpaid", amountPaid: null, payments: [], paymentProofs: [] };
@@ -307,6 +311,50 @@ await no("member cannot replace GCash QR", () => sm1().ref("gcash-qr/c1/qr.png")
 await ok("admin sets GCash QR", () => sad().ref("gcash-qr/c1/qr.png").put(png, { contentType: "image/png" }));
 await ok("public reads GCash QR", () => env.unauthenticatedContext().storage().ref("gcash-qr/c1/qr.png").getMetadata());
 await ok("admin uploads then deletes template", async () => { await sad().ref("permit-templates/c1/t.pdf").put(png, { contentType: "application/pdf" }); await sad().ref("permit-templates/c1/t.pdf").delete(); });
+
+console.log("Firestore: groups and content entries (ADR 0010)");
+await seed();
+const entry = (uid, page, extra = {}) => ({ page, title: "Pulag climb", data: { date: "2026-12-05" }, status: "pending", submittedBy: uid, createdAt: FV.serverTimestamp(), ...extra });
+await no("member cannot set their own groups", () => m1().doc("users/m1").update({ groups: ["bot"] }));
+await no("member cannot create a profile with groups", () => as("newbie").doc("users/newbie").set({ role: "member", groups: ["bot"] }));
+await ok("admin sets groups", () => admin().doc("users/m1").update({ groups: ["tcom"] }));
+await no("admin cannot set an unknown group", () => admin().doc("users/m2").update({ groups: ["king"] }));
+await ok("BOT member changes someone's groups", () => as("bot1").doc("users/m2").update({ groups: ["execom"], updatedAt: FV.serverTimestamp() }));
+await no("BOT member cannot change a role", () => as("bot1").doc("users/m2").update({ role: "admin" }));
+await no("ExeCom cannot change groups", () => as("exec1").doc("users/m2").update({ groups: ["bot"] }));
+await seed();
+await ok("TCom submits a trails entry", () => as("tcom1").collection("contentEntries").add(entry("tcom1", "trails")));
+await ok("TCom publishes its own calendar entry", () => as("tcom1").collection("contentEntries").add(entry("tcom1", "calendar", { status: "published" })));
+await no("TCom cannot submit membership", () => as("tcom1").collection("contentEntries").add(entry("tcom1", "membership")));
+await no("TCom cannot submit as someone else", () => as("tcom1").collection("contentEntries").add(entry("bot1", "calendar")));
+await ok("ExeCom submits membership", () => as("exec1").collection("contentEntries").add(entry("exec1", "membership")));
+await ok("BOT submits any page", () => as("bot1").collection("contentEntries").add(entry("bot1", "media")));
+await no("plain member cannot submit", () => m2().collection("contentEntries").add(entry("m2", "calendar")));
+await no("guest cannot submit", () => anon().collection("contentEntries").add(entry("x", "calendar")));
+await no("entry rejects a made-up page", () => admin().collection("contentEntries").add(entry("admin", "secrets")));
+await no("entry rejects an empty title", () => admin().collection("contentEntries").add(entry("admin", "calendar", { title: "" })));
+await no("entry rejects unknown fields", () => admin().collection("contentEntries").add(entry("admin", "calendar", { extra: 1 })));
+await env.withSecurityRulesDisabled(async (c) => {
+  const db = c.firestore();
+  await db.doc("contentEntries/pub").set(entry("tcom1", "calendar", { status: "published" }));
+  await db.doc("contentEntries/pend").set(entry("tcom1", "calendar"));
+  await db.doc("contentEntries/memb").set(entry("exec1", "membership"));
+  await db.doc("contentEntries/mine").set(entry("tcom1", "media"));
+});
+await ok("guest reads a published entry", () => anon().doc("contentEntries/pub").get());
+await no("guest cannot read a pending entry", () => anon().doc("contentEntries/pend").get());
+await ok("submitter reads their pending entry", () => as("tcom1").doc("contentEntries/pend").get());
+await no("another member cannot read a pending entry", () => m2().doc("contentEntries/pend").get());
+await ok("ExeCom reads a pending entry", () => as("exec1").doc("contentEntries/pend").get());
+await ok("ExeCom approves a TCom entry", () => as("exec1").doc("contentEntries/pend").update({ status: "published", reviewedBy: "exec1", publishedAt: FV.serverTimestamp() }));
+await ok("BOT rejects with a note", () => as("bot1").doc("contentEntries/memb").update({ status: "rejected", reviewedBy: "bot1", note: "Check the fee" }));
+await no("reviewer cannot change who submitted", () => as("bot1").doc("contentEntries/pub").update({ submittedBy: "bot1" }));
+await ok("TCom edits its own entry", () => as("tcom1").doc("contentEntries/pub").update({ title: "Pulag climb (moved)" }));
+await no("TCom cannot touch reviewedBy", () => as("tcom1").doc("contentEntries/pub").update({ reviewedBy: "tcom1" }));
+await no("TCom cannot edit a membership entry", () => as("tcom1").doc("contentEntries/memb").update({ title: "Changed" }));
+await no("member cannot delete a published entry", () => as("tcom1").doc("contentEntries/pub").delete());
+await ok("submitter deletes their pending entry", () => as("tcom1").doc("contentEntries/mine").delete());
+await ok("admin deletes any entry", () => admin().doc("contentEntries/pub").delete());
 
 console.log(`\n${pass} passed, ${fail} failed`);
 await env.cleanup();
