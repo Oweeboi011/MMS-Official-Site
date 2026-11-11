@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import AccountTabs from '../components/AccountTabs';
 import PageHero from '../components/PageHero';
+import ProfilePhoto from '../components/ProfilePhoto';
 import SignInForm from '../components/SignInForm';
 import { EMPTY, LEVELS, MAX, TRIBES, missingEmergency, validate, type Details } from '../data/memberDetails';
 import { myDetails, saveMyDetails } from '../services/memberDetails';
@@ -8,7 +9,7 @@ import { useAccount } from '../services/useAccount';
 
 type Text = Exclude<keyof Details, 'experienceLevel' | 'tribe' | 'medicalConditions'>;
 const TEXT_FIELDS: [Text, string][] = [
-  ['mobile', 'Mobile number'], ['dateOfBirth', 'Date of birth'], ['address', 'Address'],
+  ['fullName', 'Full name'], ['nickname', 'Nickname'], ['mobile', 'Mobile number'], ['dateOfBirth', 'Date of birth'], ['address', 'Address'],
   ['ecName', 'Emergency contact name'], ['ecMobile', 'Emergency contact mobile'], ['ecRelationship', 'Emergency contact relationship'],
 ];
 
@@ -24,7 +25,7 @@ function Choice({ id, label, value, options, onChange }: { id: string; label: st
   );
 }
 
-function Form({ uid }: { uid: string }) {
+function Form({ uid, email }: { uid: string; email: string }) {
   const [d, setD] = useState<Details | null>(null);
   const [state, setState] = useState({ busy: false, message: '', ok: false });
   useEffect(() => {
@@ -57,6 +58,11 @@ function Form({ uid }: { uid: string }) {
     <form className="register-form" onSubmit={(e) => void save(e)} noValidate>
       <p className="climb-muted">Only you and the officers running your climbs can see this.</p>
       {missingEmergency(d) && <p className="climb-notice" role="note">Add an emergency contact so officers can reach someone if needed.</p>}
+      <fieldset className="register-section"><legend>About you</legend>
+        <ProfilePhoto uid={uid} />
+        {text('fullName')}{text('nickname')}
+        <div className="editor-field"><span id="d-email-label">Email</span><p aria-labelledby="d-email-label" className="profile-email">{email}</p></div>
+      </fieldset>
       <fieldset className="register-section"><legend>Contact</legend>
         {text('mobile')}{text('dateOfBirth')}{text('address')}
       </fieldset>
@@ -87,7 +93,7 @@ function Form({ uid }: { uid: string }) {
 export default function MyDetailsPage() {
   const state = useAccount();
   let body = <p role="status">Checking your sign-in…</p>;
-  if (state.status === 'signedIn') body = <Form uid={state.account.uid} />;
+  if (state.status === 'signedIn') body = <Form uid={state.account.uid} email={state.account.email} />;
   else if (state.status !== 'loading') body = <><p>Sign in to edit your details.</p><SignInForm /></>;
   return (
     <>

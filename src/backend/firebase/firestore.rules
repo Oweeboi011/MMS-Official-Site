@@ -88,12 +88,15 @@ service cloud.firestore {
     // trigger keeps it current; the member edits it on My Details.
     function memberDetailsAreValid(d) {
       return d.keys().hasOnly([
-          'mobile', 'dateOfBirth', 'address', 'medicalConditions', 'experienceLevel',
+          'fullName', 'nickname', 'hasPhoto', 'mobile', 'dateOfBirth', 'address', 'medicalConditions', 'experienceLevel',
           'memberType', 'ecName', 'ecMobile', 'ecRelationship', 'sourceClimbTitle', 'batch', 'tribe', 'updatedAt'
         ]) &&
         (!('memberType' in d) || d.memberType in ['member', 'joiner']) &&
         (!('experienceLevel' in d) || d.experienceLevel in ['beginner', 'intermediate', 'experienced']) &&
         (!('medicalConditions' in d) || (d.medicalConditions is string && d.medicalConditions.size() <= 2000)) &&
+        (!('fullName' in d) || (d.fullName is string && d.fullName.size() <= 120)) &&
+        (!('nickname' in d) || (d.nickname is string && d.nickname.size() <= 60)) &&
+        (!('hasPhoto' in d) || d.hasPhoto is bool) &&
         (!('address' in d) || (d.address is string && d.address.size() <= 300)) &&
         (!('mobile' in d) || (d.mobile is string && d.mobile.size() <= 40)) &&
         (!('dateOfBirth' in d) || (d.dateOfBirth is string && d.dateOfBirth.size() <= 20)) &&

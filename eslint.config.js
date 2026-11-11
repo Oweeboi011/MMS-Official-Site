@@ -55,14 +55,4 @@ export default tseslint.config(
     rules: { 'sonarjs/no-nested-functions': 'off', 'no-console': 'off' },
   },
   { files: ['tests/**/*.js'], languageOptions: { globals: globals.vitest } },
-  // Ported Open Climbs functions (verbatim port): size/style rules warn until refactored (SOLUTION-PLAN open item 18).
-  {
-    files: ['src/backend/functions/src/{callables,scheduled,shared,triggers}/**', 'src/backend/functions/src/paymentMath.js'],
-    rules: {
-      complexity: 'warn',
-      'sonarjs/cognitive-complexity': 'warn',
-      'sonarjs/no-nested-conditional': 'warn',
-      'sonarjs/no-nested-template-literals': 'warn',
-    },
-  },
 );
