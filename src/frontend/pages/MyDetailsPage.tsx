@@ -25,7 +25,7 @@ function Choice({ id, label, value, options, onChange }: { id: string; label: st
   );
 }
 
-function Form({ uid }: { uid: string }) {
+function Form({ uid, email }: { uid: string; email: string }) {
   const [d, setD] = useState<Details | null>(null);
   const [state, setState] = useState({ busy: false, message: '', ok: false });
   useEffect(() => {
@@ -61,6 +61,7 @@ function Form({ uid }: { uid: string }) {
       <fieldset className="register-section"><legend>About you</legend>
         <ProfilePhoto uid={uid} />
         {text('fullName')}{text('nickname')}
+        <div className="editor-field"><span id="d-email-label">Email</span><p aria-labelledby="d-email-label" className="profile-email">{email}</p></div>
       </fieldset>
       <fieldset className="register-section"><legend>Contact</legend>
         {text('mobile')}{text('dateOfBirth')}{text('address')}
@@ -92,7 +93,7 @@ function Form({ uid }: { uid: string }) {
 export default function MyDetailsPage() {
   const state = useAccount();
   let body = <p role="status">Checking your sign-in…</p>;
-  if (state.status === 'signedIn') body = <Form uid={state.account.uid} />;
+  if (state.status === 'signedIn') body = <Form uid={state.account.uid} email={state.account.email} />;
   else if (state.status !== 'loading') body = <><p>Sign in to edit your details.</p><SignInForm /></>;
   return (
     <>
