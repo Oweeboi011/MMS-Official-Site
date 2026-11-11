@@ -64,6 +64,7 @@ export const sitemap: SiteSection[] = [
       { slug: 'upcoming', label: 'Upcoming Climbs/Hikes', summary: 'The next climbs and hikes on the schedule.' },
       { slug: 'calendar', label: 'Calendar of Activities', summary: 'The full-year view of climbs, trainings, and club events.' },
       { slug: 'open-climbs', label: 'Open Climbs/Hikes', summary: 'Climbs open to members and guests alike. No membership needed.' },
+      { slug: 'sportfest', label: 'Sportfest Scoreboard', summary: 'Tribe standings and game results for Sportfest and Beachineering. Members only.' },
       { slug: 'special-events', label: 'Special Events', summary: 'Anniversary climbs, expeditions abroad, and signature events.' },
     ],
   },

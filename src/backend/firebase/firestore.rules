@@ -157,6 +157,30 @@ service cloud.firestore {
         (isSignedIn() && resource.data.submittedBy == request.auth.uid && resource.data.status in ['draft', 'pending']);
     }
 
+    // Sportfest and Beachineering scoreboard: signed-in members read, admins write (placements 1-4, four tribes).
+    function sportfestGameIsValid(d) {
+      return d.keys().hasOnly(['name', 'category', 'date', 'status', 'gameClass', 'maxPoints', 'year']) &&
+        text(d, 'name', 1, 120) && text(d, 'category', 1, 60) && shortText(d, 'date', 30) &&
+        d.status in ['upcoming', 'ongoing', 'completed'] && d.gameClass in ['A', 'B'] &&
+        d.maxPoints in [5, 10, 20] && d.year is int && d.year >= 2000 && d.year <= 2100;
+    }
+    function sportfestScoreIsValid(d) {
+      return d.keys().hasOnly(['gameId', 'year', 'tribe', 'placement', 'points']) &&
+        d.gameId is string && d.year is int &&
+        d.tribe in ['Aeta', 'Badjao', 'Mangyan', 'Tasaday'] &&
+        d.placement in [1, 2, 3, 4] && d.points is number && d.points >= 0 && d.points <= 20;
+    }
+    match /sportfestGames/{gameId} {
+      allow read: if isSignedIn();
+      allow create, update: if isAdmin() && sportfestGameIsValid(request.resource.data);
+      allow delete: if isAdmin();
+    }
+    match /sportfestScores/{scoreId} {
+      allow read: if isSignedIn();
+      allow create, update: if isAdmin() && sportfestScoreIsValid(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
     match /climbs/{climbId} {
       allow read: if true;
       allow write: if isAdmin();
