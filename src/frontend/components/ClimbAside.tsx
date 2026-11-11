@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import type { ClimbDetail } from '../data/climbDetail';
 import type { MyClimb } from '../data/myClimbs';
-import { feeModel, pesoLabel } from '../data/feeModel';
 import { registrationEnabled } from '../services/firebaseEnv';
 import AddToCalendar from './AddToCalendar';
+import FeeSchedule from './FeeSchedule';
 import ShareClimb from './ShareClimb';
 
 const SCHEDULE = '/activities/open-climbs';
@@ -75,27 +75,12 @@ function Facts({ climb }: { climb: ClimbDetail }) {
   );
 }
 
-function FeeList({ items }: { items: ClimbDetail['feeItems'] }) {
-  return (
-    <ul className="fee-lines">
-      {items.map((f) => <li key={f.label + f.amount}><span>{f.label}{f.note && <small>{f.note}</small>}</span><b>{pesoLabel(f.amount)}</b></li>)}
-    </ul>
-  );
-}
-
 function Fees({ climb }: { climb: ClimbDetail }) {
   if (climb.over || climb.cancelled) return null;
-  const { required, optional, guest, total, hasTba, hasAmount } = feeModel(climb.feeItems);
   return (
     <section className="aside-card" aria-labelledby="fees-title">
       <h2 id="fees-title">What it costs</h2>
-      {!climb.feeItems.length && <p className="climb-muted">Fees will be posted soon.</p>}
-      {required.length > 0 && <FeeList items={required} />}
-      {hasAmount && (
-        <p className="fee-total"><span>Member total{hasTba && <small> (excl. TBA items)</small>}</span><strong>{pesoLabel(String(total))}</strong></p>
-      )}
-      {optional.length > 0 && <><h3 className="fee-group">Optional, only if availed</h3><FeeList items={optional} /></>}
-      {guest && <p className="fee-guest">+ {pesoLabel(guest.amount)} {guest.label} for non-members</p>}
+      {climb.feeItems.length ? <FeeSchedule items={climb.feeItems} /> : <p className="climb-muted">Fees will be posted soon.</p>}
       {climb.feeItems.length > 0 && <p className="fee-help">Not sure if you’re a member or a guest? <Link to="/activities/open-climbs/guide">Read the guide</Link>.</p>}
     </section>
   );

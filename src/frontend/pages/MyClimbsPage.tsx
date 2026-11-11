@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import AccountTabs from '../components/AccountTabs';
 import PageHero from '../components/PageHero';
 import SignInForm from '../components/SignInForm';
 import DocUploads from '../components/myclimbs/DocUploads';
@@ -13,6 +14,7 @@ import PledgeForm from '../components/myclimbs/PledgeForm';
 import VerifyEmailBanner from '../components/VerifyEmailBanner';
 import { dueLabel, type ClimbDetail } from '../data/climbDetail';
 import { canCancel, draftCancellationPolicy, nextSteps, type MyClimb } from '../data/myClimbs';
+import ReceiptButton from '../components/ReceiptModal';
 import { openNotifications } from '../lib/notificationsModal';
 import { registrationEnabled } from '../services/firebaseEnv';
 import { cancelRegistration, myRegistrations } from '../services/registrations';
@@ -74,11 +76,11 @@ function Money({ row, balance }: { row: MyClimb; balance: number }) {
 
 // #169 sent receipts + #141 printable waiver.
 function Records({ row }: { row: MyClimb }) {
-  if (!row.receipts.length && !row.waiver) return null;
   return (
     <p className="climb-links">
       {row.receipts.map((r, i) => <a key={r.url} href={r.url} target="_blank" rel="noopener noreferrer">Receipt {i + 1}: {r.fileName}</a>)}
       {row.waiver && <Link to={`/account/climbs/${row.id}/waiver`}>Signed waiver (print)</Link>}
+      <ReceiptButton row={row} />
     </p>
   );
 }
@@ -161,7 +163,7 @@ function List({ uid, readOnly }: { uid: string; readOnly: boolean }) {
 function Body() {
   const state = useAccount();
   if (state.status === 'loading') return <p role="status">Checking your sign-in…</p>;
-  if (state.status === 'signedIn') return <><VerifyEmailBanner account={state.account} /><Welcome /><p><Link to="/account/details">My details</Link> · <Link to="/account/whats-new">What’s new</Link> · <button type="button" className="link-button" onClick={openNotifications}>Notifications</button></p><WhatsNewBanner />{!registrationEnabled && <p className="climb-notice" role="note">This is a read-only copy of your registrations. To pay, upload documents or cancel, keep using the <a href="https://mms-open-climbs.web.app" target="_blank" rel="noopener noreferrer">Open Climbs app</a> until MMS switches over to this site.</p>}<List uid={state.account.uid} readOnly={!registrationEnabled} /></>;
+  if (state.status === 'signedIn') return <><VerifyEmailBanner account={state.account} /><Welcome /><p><Link to="/account/whats-new">What’s new</Link> · <button type="button" className="link-button" onClick={openNotifications}>Notifications</button></p><WhatsNewBanner />{!registrationEnabled && <p className="climb-notice" role="note">This is a read-only copy of your registrations. To pay, upload documents or cancel, keep using the <a href="https://mms-open-climbs.web.app" target="_blank" rel="noopener noreferrer">Open Climbs app</a> until MMS switches over to this site.</p>}<List uid={state.account.uid} readOnly={!registrationEnabled} /></>;
   if (state.status === 'error') return <p role="alert">Couldn’t check your sign-in: {state.error}</p>;
   return <><p>Sign in to see your climbs.</p><SignInForm /></>;
 }
@@ -170,7 +172,7 @@ export default function MyClimbsPage() {
   return (
     <>
       <PageHero compact eyebrow="Account" title="My Climbs" intro="Your registrations, what you owe, and cancellations." image="/images/page-open-climbs.webp" />
-      <main><section className="section page-section"><div className="shell register-shell"><Body /></div></section></main>
+      <main><section className="section page-section"><div className="shell register-shell"><AccountTabs /><Body /></div></section></main>
     </>
   );
 }

@@ -52,4 +52,13 @@ function latestDetails(regs) {
   return { ...details, sourceClimbTitle: source.climbTitle || "" };
 }
 
-export { detailsFromRegistration, sameDetails, latestDetails };
+// Details worth saving from a registration write: none for guests, deleted accounts, blanks or unchanged answers.
+function detailsToSave(before, after) {
+  if (!after?.userId || after.accountDeletedAt) return null;
+  const details = detailsFromRegistration(after);
+  if (Object.keys(details).length === 0) return null;
+  if (before && sameDetails(detailsFromRegistration(before), details)) return null;
+  return details;
+}
+
+export { detailsFromRegistration, detailsToSave, latestDetails };

@@ -57,6 +57,8 @@ export function announcementsLoader(limit: number) { // stable per limit, for us
   }
   return announcementsLoaders.get(limit)!;
 }
+// Approved reviews only (rules: published == true), newest first.
+export const loadReviews = () => once('reviews', () => query('reviews', { where: [{ field: 'published', op: 'EQUAL', value: true }], orderBy: { field: 'publishedAt', desc: true }, limit: 12 }));
 export const loadSurveys = () => once('surveys', () => query('surveys', { limit: 50 }));
 export const loadCurrentOfficers = () => once('officers:current', () => query('officers', { where: [{ field: 'current', op: 'EQUAL', value: true }], limit: 50 }));
 // Leadership lists every term; current officers sort first so the cap never drops them.

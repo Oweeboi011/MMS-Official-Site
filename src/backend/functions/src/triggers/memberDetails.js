@@ -2,7 +2,7 @@ import * as logger from "firebase-functions/logger";
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
 import { FieldValue } from "firebase-admin/firestore";
 import { db } from "../shared/admin.js";
-import { detailsFromRegistration, sameDetails } from "../shared/memberDetails.js";
+import { detailsToSave } from "../shared/memberDetails.js";
 
 // ── Trigger: registration details given or edited → member's saved details ───
 // Runs for self-registration, Update Details on My Climbs and officer edits
@@ -12,11 +12,8 @@ export const onRegistrationDetailsWritten = onDocumentWritten(
   { document: "registrations/{regId}", database: "openclimbs" },
   async (event) => {
     const after = event.data?.after?.data?.();
-    if (!after?.userId || after.accountDeletedAt) return;
-    const details = detailsFromRegistration(after);
-    if (Object.keys(details).length === 0) return;
-    const before = event.data?.before?.data?.();
-    if (before && sameDetails(detailsFromRegistration(before), details)) return;
+    const details = detailsToSave(event.data?.before?.data?.(), after);
+    if (!details) return;
 
     try {
       await db.doc(`memberDetails/${after.userId}`).set(

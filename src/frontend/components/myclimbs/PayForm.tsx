@@ -3,6 +3,7 @@ import type { ClimbDetail } from '../../data/climbDetail';
 import type { MyClimb } from '../../data/myClimbs';
 import { RECEIPT_TYPES, amountProblem, parseAmount, uploadProblem } from '../../data/requiredDocs';
 import { submitPayment } from '../../services/uploads';
+import GcashButton from '../GcashModal';
 
 interface Props { row: MyClimb; climb: ClimbDetail; uid: string; onDone: () => void }
 
@@ -34,6 +35,7 @@ export default function PayForm({ row, climb, uid, onDone }: Props) {
           {pay.qrUrl && <img src={pay.qrUrl} alt="MMS GCash / QR Ph code for this climb" width={180} height={180} />}
           <p>{pay.name && <>Account name: <strong>{pay.name}</strong><br /></>}{pay.number && <>GCash number: <strong>{pay.number}</strong></>}</p>
           <p className="climb-muted">Scan with GCash, Maya or any bank app (QR Ph), then upload the receipt here.</p>
+          {pay.qrUrl && <p><GcashButton payTo={pay} label="Enlarge the QR code" /></p>}
         </div>
       ) : <p className="climb-muted">Payment details for this climb aren’t posted yet. The climb officers will share them.</p>}
       <label htmlFor={`amt-${row.id}`}>Amount paid (₱)</label>

@@ -1,6 +1,6 @@
 [
   {
-    "origin": ["https://www.metropolitanms.org", "http://localhost:5173"],
+    "origin": ["https://www.metropolitanms.org", "https://metropolitanms.org", "https://preview.mms-official-site-1qd.pages.dev", "http://localhost:5173"],
     "method": ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"],
     "responseHeader": [
       "Content-Type",

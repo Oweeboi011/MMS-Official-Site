@@ -3,8 +3,8 @@ import { FieldValue } from "firebase-admin/firestore";
 import { REQUIRED_DOC_TYPES } from "../requiredDocTypes.js";
 import { sendEmail } from "../email/sendEmail.js";
 import { tplOfficerStatusUpdate, tplWaitlistPromoted } from "../email/templates.js";
-import { isClimbCancelled, isClimbPostponed } from "../shared/climbStatus.js";
 import { db } from "../shared/admin.js";
+import { SEAT_HOLDING_STATUSES, pickPromotions, waitlistOpen } from "./waitlist.js";
 
 // ── Helper: registrant roster ─────────────────────────────────────────────────
 // The uids of a climb's active registrants, kept in admin-only
@@ -76,14 +76,14 @@ async function syncParticipantList(climbId) {
 // The climb's own due date, else 5 days before it starts ("YYYY-MM-DD" in
 // Manila time). Mirrors getPaymentDueDate in src/utils/registrationPolicy.js.
 const DEFAULT_DUE_DAYS_BEFORE = 5;
+function startDateOf(raw) {
+  if (raw?.toDate) return raw.toDate();
+  if (typeof raw === "string" && /^\d{4}-\d{2}-\d{2}$/.test(raw)) return new Date(`${raw}T00:00:00+08:00`);
+  return null;
+}
 function getPaymentDueDate(climb) {
   if (climb?.paymentDueDate) return climb.paymentDueDate;
-  const raw = climb?.startDate;
-  const start = raw?.toDate
-    ? raw.toDate()
-    : typeof raw === "string" && /^\d{4}-\d{2}-\d{2}$/.test(raw)
-      ? new Date(`${raw}T00:00:00+08:00`)
-      : null;
+  const start = startDateOf(climb?.startDate);
   if (!start || isNaN(start.getTime())) return "";
   const due = new Date(start.getTime() - DEFAULT_DUE_DAYS_BEFORE * 86400000);
   return due.toLocaleDateString("en-CA", { timeZone: "Asia/Manila" });
@@ -91,7 +91,6 @@ function getPaymentDueDate(climb) {
 
 // Whether every seat is taken: pending + confirmed registrations (other than
 // `regId`) at or above the climb's maxParticipants. No limit set = never full.
-const SEAT_HOLDING_STATUSES = ["pending", "confirmed"];
 async function isClimbFull(climb, climbId, regId) {
   const max = Number(climb?.maxParticipants);
   if (!max || max <= 0) return false;
@@ -111,9 +110,66 @@ async function isClimbFull(climb, climbId, regId) {
 // back to "pending" — still subject to an officer's confirmation — and the
 // member and officers are told. Off per climb with waitlistAutoPromote:false,
 // and never for a cancelled, postponed or finished climb.
-function createdMillis(reg) {
-  const t = reg.createdAt;
-  return t?.toMillis ? t.toMillis() : t?.toDate ? t.toDate().getTime() : 0;
+// One promoted registration: back to pending, the member told in-app and by email, the officers copied.
+async function promoteOne(reg, climb, climbId, lists) {
+  await db.doc(`registrations/${reg.id}`).update({
+    status: "pending",
+    promotedFromWaitlistAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+  logger.info("[promoteFromWaitlist] promoted", { climbId, regId: reg.id });
+  if (reg.userId) {
+    await createNotification({
+      userId: reg.userId,
+      type: "waitlist_promoted",
+      title: "You're off the waitlist",
+      message: `A slot opened on ${climb.title}. Your registration is pending confirmation — settle your fees from My Climbs.`,
+      link: "/my-registrations",
+      id: `waitlist_promoted_${reg.id}`,
+    });
+  }
+  try {
+    await emailPromotion(reg, climb, lists);
+  } catch (err) {
+    logger.error("[promoteFromWaitlist] email failed", { regId: reg.id, err: err.message });
+  }
+}
+
+const appBase = () => process.env.APP_URL || "https://mms-open-climbs.web.app";
+
+async function emailMember(reg, climb) {
+  if (!reg.email) return;
+  await sendEmail({
+    to: reg.email,
+    toName: reg.name || "",
+    subject: `A slot opened — ${climb.title} | MMS Open Climbs`,
+    html: tplWaitlistPromoted({ name: reg.name || "there", climbTitle: climb.title || "your climb", appUrl: appBase() }),
+  });
+}
+
+// The climb's officers get the notice, with admins copied; with no officers the admins are the recipients.
+async function emailOfficers(reg, climb, { officerEmails, adminEmails }) {
+  const [first, ...rest] = officerEmails.length ? officerEmails : adminEmails;
+  if (!first) return;
+  await sendEmail({
+    to: first.email,
+    toName: first.name,
+    subject: `[Off Waitlist] ${reg.name || "A participant"} — ${climb.title}`,
+    html: tplOfficerStatusUpdate({
+      registrantName: reg.name || "",
+      registrantEmail: reg.email || "",
+      climbTitle: climb.title || "",
+      newStatus: "pending",
+      reason: "Promoted from the waitlist — a seat opened. Please confirm.",
+      appUrl: appBase(),
+    }),
+    cc: officerEmails.length ? [...officerEmails.slice(1), ...adminEmails] : rest,
+  });
+}
+
+async function emailPromotion(reg, climb, lists) {
+  await emailMember(reg, climb);
+  await emailOfficers(reg, climb, lists);
 }
 
 async function promoteFromWaitlist(climbId) {
@@ -122,78 +178,15 @@ async function promoteFromWaitlist(climbId) {
     const climbSnap = await db.doc(`climbs/${climbId}`).get();
     if (!climbSnap.exists) return [];
     const climb = climbSnap.data();
-    const max = Number(climb.maxParticipants);
-    if (!max || max <= 0 || climb.waitlistAutoPromote === false) return [];
-    if (isClimbCancelled(climb) || isClimbPostponed(climb)) return [];
-    if (climb.status === "completed") return [];
-    const end = climb.endDate?.toDate ? climb.endDate.toDate() : null;
-    if (end && end.getTime() < Date.now()) return [];
+    if (!waitlistOpen(climb)) return [];
 
-    const snap = await db
-      .collection("registrations")
-      .where("climbId", "==", climbId)
-      .get();
+    const snap = await db.collection("registrations").where("climbId", "==", climbId).get();
     const regs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-    const free =
-      max - regs.filter((r) => SEAT_HOLDING_STATUSES.includes(r.status)).length;
-    if (free <= 0) return [];
-
-    const promoted = regs
-      .filter((r) => r.status === "waitlisted")
-      .sort((a, b) => createdMillis(a) - createdMillis(b) || a.id.localeCompare(b.id))
-      .slice(0, free);
+    const promoted = pickPromotions(regs, Number(climb.maxParticipants));
     if (promoted.length === 0) return [];
 
-    const appUrl = process.env.APP_URL || "https://mms-open-climbs.web.app";
-    const { officerEmails, adminEmails } = await getNotifyLists(climb, climbId);
-    for (const reg of promoted) {
-      await db.doc(`registrations/${reg.id}`).update({
-        status: "pending",
-        promotedFromWaitlistAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-      logger.info("[promoteFromWaitlist] promoted", { climbId, regId: reg.id });
-      if (reg.userId) {
-        await createNotification({
-          userId: reg.userId,
-          type: "waitlist_promoted",
-          title: "You're off the waitlist",
-          message: `A slot opened on ${climb.title}. Your registration is pending confirmation — settle your fees from My Climbs.`,
-          link: "/my-registrations",
-          id: `waitlist_promoted_${reg.id}`,
-        });
-      }
-      try {
-        if (reg.email) {
-          await sendEmail({
-            to: reg.email,
-            toName: reg.name || "",
-            subject: `A slot opened — ${climb.title} | MMS Open Climbs`,
-            html: tplWaitlistPromoted({ name: reg.name || "there", climbTitle: climb.title || "your climb", appUrl }),
-          });
-        }
-        const officerHtml = tplOfficerStatusUpdate({
-          registrantName: reg.name || "",
-          registrantEmail: reg.email || "",
-          climbTitle: climb.title || "",
-          newStatus: "pending",
-          reason: "Promoted from the waitlist — a seat opened. Please confirm.",
-          appUrl,
-        });
-        const [first, ...rest] = officerEmails.length ? officerEmails : adminEmails;
-        if (first) {
-          await sendEmail({
-            to: first.email,
-            toName: first.name,
-            subject: `[Off Waitlist] ${reg.name || "A participant"} — ${climb.title}`,
-            html: officerHtml,
-            cc: officerEmails.length ? [...officerEmails.slice(1), ...adminEmails] : rest,
-          });
-        }
-      } catch (err) {
-        logger.error("[promoteFromWaitlist] email failed", { regId: reg.id, err: err.message });
-      }
-    }
+    const lists = await getNotifyLists(climb, climbId);
+    for (const reg of promoted) await promoteOne(reg, climb, climbId, lists);
     return promoted.map((r) => r.id);
   } catch (err) {
     logger.error("[promoteFromWaitlist] failed", { climbId, err: err.message });

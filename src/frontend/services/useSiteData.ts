@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { announcements, officers, openClimbs, surveys, type Announcement, type Officer, type Survey } from '../data/content';
 import {
-  currentExecom, leadershipBlocks, leadershipPath, pendingSettings, sampleSettings, toAnnouncement, toSettings, toSurveys,
+  currentExecom, leadershipBlocks, leadershipPath, pendingSettings, sampleSettings, storiesBlocks, storiesPath, toAnnouncement, toSettings, toSurveys,
   type SiteSettings,
 } from '../data/liveContent';
 import { splitSchedule, toClimb, type ScheduleClimb } from '../data/climbs';
 import type { ContentBlock } from '../data/subpages';
 import type { Doc } from '../lib/firestoreRest';
 import { manilaYear } from '../lib/manila';
-import { announcementsLoader, climbsLoader, loadCurrentOfficers, loadOfficers, loadSettings, loadSurveys, publicReadsEnabled } from './publicData';
+import { announcementsLoader, climbsLoader, loadCurrentOfficers, loadOfficers, loadReviews, loadSettings, loadSurveys, publicReadsEnabled } from './publicData';
 
 // undefined = loading or failed (show nothing); null = nothing there (not configured, no doc). `load` must be module-level.
 export function useLoaded<T>(load: (() => Promise<T | null | undefined>) | null): T | null | undefined {
@@ -40,10 +40,18 @@ export function useSiteSettings(): SiteSettings {
   return doc ? toSettings(doc) : sampleSettings;
 }
 
-export function useLeadershipBlocks(path: string, blocks: ContentBlock[] | undefined): ContentBlock[] | undefined {
-  const docs = useLoaded(path === leadershipPath ? loadOfficers : null);
-  if (path !== leadershipPath || !blocks || docs === null || docs?.length === 0) return blocks;
-  return leadershipBlocks(blocks, docs ?? []);
+// Nothing entered (null or empty) keeps the sample blocks; still loading ([]) shows none, so sample never flashes over real data.
+function swapIn(blocks: ContentBlock[], docs: Doc[] | null | undefined, live: (b: ContentBlock[], d: Doc[]) => ContentBlock[]): ContentBlock[] {
+  return docs === null || docs?.length === 0 ? blocks : live(blocks, docs ?? []);
+}
+
+// Pages whose sample blocks give way to live data: leadership (officers) and stories (approved reviews).
+export function useLiveBlocks(path: string, blocks: ContentBlock[] | undefined): ContentBlock[] | undefined {
+  const officerDocs = useLoaded(path === leadershipPath ? loadOfficers : null);
+  const reviewDocs = useLoaded(path === storiesPath ? loadReviews : null);
+  if (!blocks) return blocks;
+  if (path === leadershipPath) return swapIn(blocks, officerDocs, leadershipBlocks);
+  return path === storiesPath ? swapIn(blocks, reviewDocs, storiesBlocks) : blocks;
 }
 
 export interface ClimbSchedule {

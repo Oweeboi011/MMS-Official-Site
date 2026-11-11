@@ -2,6 +2,7 @@ import * as logger from "firebase-functions/logger";
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
 import { logFailedRequest } from "../shared/registrationOps.js";
 import { FieldValue } from "firebase-admin/firestore";
+import { adminTransition, claimsFor } from "../shared/adminRole.js";
 import { adminAuth, db } from "../shared/admin.js";
 
 // ── Mirror the admin role onto an auth custom claim ──────────────────────────
@@ -23,31 +24,18 @@ export const syncAdminClaim = onDocumentWritten(
     const uid = event.params.uid;
     const before = event.data?.before?.exists ? event.data.before.data() : null;
     const after = event.data?.after?.exists ? event.data.after.data() : null;
-    const wasAdmin = before?.role === "admin";
-    const isAdmin = after?.role === "admin";
-    if (wasAdmin === isAdmin) return;
+    const { changed, isAdmin, clearEmailGrant } = adminTransition(before, after);
+    if (!changed) return;
 
     try {
       const user = await adminAuth.getUser(uid);
-      const claims = { ...(user.customClaims || {}) };
-      if (isAdmin) {
-        claims.admin = true;
-      } else {
-        delete claims.admin;
-      }
-      await adminAuth.setCustomUserClaims(uid, claims);
+      await adminAuth.setCustomUserClaims(uid, claimsFor(user.customClaims, isAdmin));
 
-      // A token already in the wild keeps its old claims for up to an hour.
-      // Granting can wait for the client to refresh, but a revoked admin must
-      // not keep reading members' documents for the rest of that hour, so cut
-      // the session immediately.
+      // A token already in the wild keeps its old claims for up to an hour, so a revoked admin's session is cut now.
       if (!isAdmin) await adminAuth.revokeRefreshTokens(uid);
 
-      // The owner-held email grant goes with the role, or any admin could
-      // restore it later just by re-promoting the account.
-      if (!isAdmin && after?.canEmailMembers) {
-        await db.doc(`users/${uid}`).update({ canEmailMembers: FieldValue.delete() });
-      }
+      // The email grant goes with the role, or any admin could restore it by re-promoting the account.
+      if (clearEmailGrant) await db.doc(`users/${uid}`).update({ canEmailMembers: FieldValue.delete() });
 
       logger.info("[syncAdminClaim] claim updated", { uid, admin: isAdmin });
     } catch (err) {

@@ -39,11 +39,11 @@ function Summary() {
 export default function AdminTreasurerPage() {
   return (
     <>
-      <PageHero compact eyebrow="Admin" title="Treasurer summary" intro="Expected, verified and outstanding money per climb, and who chose each optional service." image="/images/page-surveys.webp" />
+      <PageHero compact crumb={{ to: '/admin', label: 'Admin' }} eyebrow="Admin" title="Treasurer summary" intro="Expected, verified and outstanding money per climb, and who chose each optional service." image="/images/page-surveys.webp" />
       <main><section className="section page-section"><div className="shell">
         <AdminGate>{() => <Summary />}</AdminGate>
         <p className="climb-muted">Donation pledges sent with fees are included in Expected; they belong to the drive’s beneficiary, not the club.</p>
-        <p><Link to="/admin">Back to admin</Link></p>
+        
       </div></section></main>
     </>
   );

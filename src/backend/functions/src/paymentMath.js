@@ -58,18 +58,21 @@ function getRefundedTotal(reg) {
 // The fee items a registrant owes, priced at the climb's *current* amounts.
 // Required fees always count; optional ones only when they selected them,
 // with the guest fee auto-applying to joiners.
+// No fee list on the climb: what the registrant saved when they signed up.
+function savedFees(reg) {
+  return Array.isArray(reg && reg.feeBreakdown) ? reg.feeBreakdown.filter((f) => f.selected) : [];
+}
+
 function getFeeItems(reg, climb) {
-  const fees =
-    !climb || !Array.isArray(climb.fees) || climb.fees.length === 0
-      ? Array.isArray(reg && reg.feeBreakdown)
-        ? reg.feeBreakdown.filter((f) => f.selected)
-        : []
-      : climb.fees.filter((fee) => {
-          if (!fee.optional) return true;
-          const stored = (reg.feeBreakdown || []).find((f) => f.label === fee.label);
-          if (stored) return !!stored.selected;
-          return fee.isGuestFee && reg.memberType === "joiner";
-        });
+  const hasFees = climb && Array.isArray(climb.fees) && climb.fees.length > 0;
+  const fees = hasFees
+    ? climb.fees.filter((fee) => {
+        if (!fee.optional) return true;
+        const stored = (reg.feeBreakdown || []).find((f) => f.label === fee.label);
+        if (stored) return !!stored.selected;
+        return fee.isGuestFee && reg.memberType === "joiner";
+      })
+    : savedFees(reg);
   const donation = getDonationFeeItem(reg, climb);
   return donation ? [...fees, donation] : fees;
 }

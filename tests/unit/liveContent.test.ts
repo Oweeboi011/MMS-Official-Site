@@ -1,5 +1,5 @@
 import { decodeFields, decodeQuery, runQueryBody } from '../../src/frontend/lib/firestoreRest';
-import { leadershipBlocks, leadershipPath, toAnnouncement, toSettings, toSurveys } from '../../src/frontend/data/liveContent';
+import { leadershipBlocks, leadershipPath, storiesBlocks, storiesPath, toAnnouncement, toSettings, toSurveys } from '../../src/frontend/data/liveContent';
 import { subpageContent } from '../../src/frontend/data/subpages';
 
 describe('Firestore REST decoding', () => {
@@ -81,5 +81,14 @@ describe('live content mapping', () => {
     expect(blocks.find((b) => b.eyebrow === 'Training Committee')).toBeUndefined();
     const past = blocks.find((b) => b.eyebrow === 'Past officers');
     expect(past?.type === 'table' && past.rows).toEqual([['2018–2020', 'Execom', 'President', 'Old'], ['2016–2018', 'BOT', 'Trustee', 'Older']]);
+  });
+});
+
+describe('stories with approved reviews', () => {
+  it('replaces the sample testimonials with live reviews and keeps the other blocks', () => {
+    const blocks = storiesBlocks(subpageContent[storiesPath], [{ quote: 'Great climb', name: 'Ana', climbTitle: 'Mt. Pulag' }, { quote: '', name: 'Skip' }]);
+    const quotes = blocks.find((b) => b.type === 'quotes');
+    expect(quotes && 'items' in quotes ? quotes.items : []).toEqual([{ quote: 'Great climb', name: 'Ana', meta: 'Mt. Pulag' }]);
+    expect(blocks.some((b) => b.type === 'cards')).toBe(true);
   });
 });

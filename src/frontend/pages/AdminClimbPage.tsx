@@ -1,7 +1,10 @@
 import { useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import AdminStats from '../components/admin/AdminStats';
+import ClimbPayments from '../components/admin/ClimbPayments';
 import PageHero from '../components/PageHero';
 import RegistrationTable, { AdminGate } from '../components/admin/RegistrationTable';
+import DonationsPanel from '../components/admin/DonationsPanel';
 import ExpensesPanel from '../components/admin/ExpensesPanel';
 import MeetingsEditor from '../components/admin/MeetingsEditor';
 import WalkInForm from '../components/admin/WalkInForm';
@@ -23,11 +26,13 @@ function Registrations({ climbId, climb, admin }: { climbId: string; climb: Clim
   const ref = { id: climbId, title: climb?.title ?? climbId, dateLabel: climb?.dates ?? '', location: climb?.location ?? '' };
   return (
     <>
-      <p>{s.confirmed} confirmed · {s.pending} pending · {s.waitlisted} waitlisted · {s.cancelled} cancelled · <strong>{s.toReview} payment(s) to review</strong> · {peso(s.collected)} recorded</p>
+      <AdminStats items={[['Confirmed', String(s.confirmed)], ['Pending', String(s.pending)], ['Waitlisted', String(s.waitlisted)], ['Cancelled', String(s.cancelled)], ['To review', String(s.toReview), s.toReview > 0], ['Recorded', peso(s.collected)]]} />
       <p className="editor-actions">
         <button type="button" className="btn" disabled={!rows.length} onClick={() => downloadCsv(ref.title, toCsv(rows))}>Download CSV (LGU / jump-off)</button>
         <Link className="btn" to={`/admin/climbs/${climbId}/sheet`}>Climb-day sheet (print)</Link>
       </p>
+      <ClimbPayments climb={climb} regs={rows} />
+      <DonationsPanel drive={climb?.drive} regs={rows} />
       <WalkInForm busy={busy} onAdd={(w) => run(() => addWalkIn(ref, w, admin.email))} />
       <MeetingsEditor climbId={climbId} run={run} busy={busy} />
       <ExpensesPanel climbId={climbId} regs={rows} run={run} busy={busy} />
@@ -43,10 +48,10 @@ export default function AdminClimbPage() {
   const climb = useClimb(id);
   return (
     <>
-      <PageHero compact eyebrow="Admin · Registrations" title={climb?.title ?? 'Climb'} intro={climb ? [climb.dates, climb.location].filter(Boolean).join(' · ') : ''} image="/images/page-surveys.webp" />
+      <PageHero compact crumb={{ to: '/admin', label: 'Admin' }} eyebrow="Admin · Registrations" title={climb?.title ?? 'Climb'} intro={climb ? [climb.dates, climb.location].filter(Boolean).join(' · ') : ''} image="/images/page-surveys.webp" />
       <main><section className="section page-section"><div className="shell">
         <AdminGate>{(admin) => <Registrations climbId={id} climb={climb} admin={admin} />}</AdminGate>
-        <p><Link to="/admin/registrations">All registrations</Link> · <Link to="/admin">Back to admin</Link></p>
+        <p><Link className="btn" to="/admin/registrations">All registrations →</Link></p>
       </div></section></main>
     </>
   );

@@ -202,6 +202,9 @@ button { font: inherit; }
 .fee-lines small { flex-basis: 100%; color: var(--muted); }
 .legal-box { max-height: 260px; overflow-y: auto; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; font-size: .9rem; }
 .legal-box h4 { margin: 12px 0 4px; }
+.account-tabs { display: flex; gap: 6px; margin: 0 0 22px; border-bottom: 2px solid var(--line); }
+.account-tabs a { padding: 10px 16px; font-weight: 700; text-decoration: none; color: var(--navy); border-bottom: 3px solid transparent; margin-bottom: -2px; }
+.account-tabs a[aria-current='page'] { border-bottom-color: var(--gold); }
 .consent-check { display: flex; gap: 10px; align-items: flex-start; }
 .consent-check input { margin-top: 4px; }
 .my-climbs { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
@@ -737,3 +740,111 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .aside-registered strong { color: #1f6a3e; }
 .aside-registered span { color: var(--muted); font-size: .88rem; }
 .form-hint { margin: 0; padding: 10px 14px; border-radius: 12px; background: rgba(225, 184, 39, .18); color: var(--ink); font-size: .92rem; font-weight: 700; }
+
+/* Admin pages: a way back, a stat strip, paging. */
+.hero-back { display: inline-block; margin-bottom: 10px; color: rgba(255, 255, 255, .85); font-size: .88rem; font-weight: 800; text-decoration: none; }
+.hero-back:hover, .hero-back:focus-visible { color: var(--gold); }
+.admin-stats { list-style: none; margin: 0 0 18px; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.admin-stats li { padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: #fff; box-shadow: 0 6px 18px rgba(16, 26, 36, .05); }
+.admin-stats strong { display: block; color: var(--navy); font-size: 1.35rem; line-height: 1.1; }
+.admin-stats span { color: var(--muted); font-size: .72rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.admin-stats li.is-alert { border-color: var(--gold); background: rgba(225, 184, 39, .14); }
+.admin-pager { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 18px 0; color: var(--muted); font-weight: 700; }
+.admin-notes textarea { min-height: 34px; }
+.admin-table td .chip { margin-top: 6px; }
+
+/* Insights: panels, bars and lists. */
+.insights-shell { display: grid; gap: 18px; }
+.insight-head { margin: 22px 0 0; font-size: clamp(1.3rem, 2.6vw, 1.7rem); letter-spacing: -.02em; }
+.panel-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: start; }
+.panel { padding: 18px 20px; border: 1px solid var(--line); border-radius: 18px; background: #fff; box-shadow: 0 8px 24px rgba(16, 26, 36, .06); }
+.panel h3 { margin: 0 0 12px; color: var(--muted); font-size: .74rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+.panel p { margin: 0 0 8px; }
+.bar-rows { list-style: none; margin: 0 0 6px; padding: 0; display: grid; gap: 8px; }
+.bar-rows li { display: grid; grid-template-columns: minmax(90px, 40%) 1fr auto; align-items: center; gap: 10px; font-size: .88rem; }
+.bar-label { overflow-wrap: anywhere; }
+.bar-track { height: 10px; border-radius: 999px; background: var(--paper); overflow: hidden; }
+.bar-fill { display: block; height: 100%; border-radius: 999px; background: var(--navy); }
+.bar-fill.is-good { background: #2f7d4f; }
+.bar-fill.is-warn { background: var(--gold); }
+.bar-fill.is-bad { background: var(--red); }
+.plain-list { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: .9rem; }
+.plain-list small { color: var(--muted); }
+
+/* Receipt and GCash modals; the payments panel. */
+.modal-narrow { width: min(420px, calc(100vw - 32px)); }
+.receipt { display: grid; gap: 14px; }
+.receipt-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; }
+.receipt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 0; }
+.receipt-grid dt { color: var(--muted); font-size: .72rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.receipt-grid dd { margin: 2px 0 0; font-weight: 800; color: var(--navy); }
+.receipt-grid .is-owed { color: #b45309; }
+.receipt-grid .is-settled { color: #1f6a3e; }
+.receipt-fees { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.receipt-fees caption { text-align: left; margin-bottom: 6px; color: var(--muted); font-size: .72rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.receipt-fees td, .receipt-fees th { padding: 7px 0; border-top: 1px solid var(--line); text-align: left; }
+.receipt-fees td:last-child, .receipt-fees tfoot th + td { text-align: right; font-weight: 800; white-space: nowrap; }
+.receipt-fees tfoot th { font-weight: 850; }
+.gcash { display: grid; gap: 14px; justify-items: center; text-align: center; }
+.gcash-account { display: grid; margin: 0; }
+.gcash-account span { color: var(--muted); }
+.gcash-qr { width: min(300px, 100%); height: auto; border-radius: 12px; border: 1px solid var(--line); }
+.climb-payments > summary { cursor: pointer; }
+.climb-payments[open] > summary { margin-bottom: 12px; }
+.climb-payments .panel { margin-top: 12px; }
+/* Registrations: a filter bar of labelled fields. */
+.admin-filterbar { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); align-items: end; margin-bottom: 14px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: #fff; }
+.admin-filterbar .filter-wide { grid-column: 1 / -1; }
+.admin-filterbar .editor-field { display: grid; gap: 6px; }
+.admin-filterbar select, .admin-filterbar input { width: 100%; }
+.filter-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
+.doc-missing { color: var(--red); font-weight: 800; }
+
+/* Dashboard: linked stat tiles and row links. */
+.admin-stats li a { display: block; margin: -12px -14px; padding: 12px 14px; color: inherit; text-decoration: none; border-radius: 14px; }
+.admin-stats li a:hover, .admin-stats li a:focus-visible { background: rgba(37, 43, 115, .05); }
+.row-links { display: grid; gap: 4px; white-space: nowrap; }
+.status-chip.is-pending { background: rgba(225, 184, 39, .2); border-color: rgba(225, 184, 39, .5); color: #6b5300; }
+.status-chip.is-confirmed { background: rgba(47, 125, 79, .12); border-color: rgba(47, 125, 79, .3); color: #1f6a3e; }
+.status-chip.is-cancelled, .status-chip.is-rejected { background: rgba(169, 46, 42, .1); border-color: rgba(169, 46, 42, .25); color: var(--red); }
+
+/* Accounts */
+.avatar { display: inline-grid; place-items: center; width: 34px; height: 34px; margin-right: 10px; border-radius: 50%; background: var(--navy); color: #fff; font-size: .78rem; font-weight: 850; vertical-align: middle; }
+.user-cell { display: inline-grid; vertical-align: middle; }
+.user-cell small { color: var(--muted); }
+.you-tag { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--gold); color: #171913; font-size: .66rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.user-sub { margin: 0 0 12px; color: var(--muted); }
+.user-edit { display: grid; gap: 10px; margin: 14px 0; }
+.user-edit .editor-field { display: grid; gap: 6px; }
+
+/* Membership inquiry form */
+.inquiry { padding-block: 40px; }
+.inquiry form { display: grid; gap: 8px; max-width: 560px; }
+.inquiry .check { display: flex; gap: 8px; align-items: flex-start; font-weight: 500; }
+
+/* Admin site map status */
+.status-chip.is-site-live { background: rgba(47, 125, 79, .12); border-color: rgba(47, 125, 79, .3); color: #1f6a3e; }
+.status-chip.is-site-partial { background: rgba(225, 184, 39, .2); border-color: rgba(225, 184, 39, .5); color: #6b5300; }
+.status-chip.is-site-sample { background: rgba(37, 43, 115, .08); border-color: rgba(37, 43, 115, .25); color: var(--navy); }
+.status-chip.is-site-off { background: rgba(169, 46, 42, .1); border-color: rgba(169, 46, 42, .25); color: var(--red); }
+
+/* Links read as links (low specificity so dark sections and styled contexts win): plain anchors inside text and tables are underlined; styled ones (buttons, tabs, tiles, nav) have a class and keep their own look. */
+main :where(p, td, dd, small, .climb-muted, .plain-list) a:where(:not([class])) { color: var(--navy); font-weight: 700; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+main :where(p, td, dd, small, .climb-muted, .plain-list) a:where(:not([class])):hover { text-decoration-thickness: 2px; }
+a:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; border-radius: 4px; }
+a[target='_blank']:not([class])::after { content: ' ↗'; font-size: .85em; }
+:is(.journey, .open-climbs, .passport, .cta) a:where(:not([class])) { color: #f2d65d; text-decoration: underline; text-underline-offset: 3px; }
+
+/* Admin site map diagram (React Flow) */
+.site-flow-canvas { height: 640px; border: 1px solid var(--line); border-radius: 14px; background: #fff; overflow: hidden; }
+.flow-legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 0 0 8px; padding: 0; list-style: none; font-weight: 700; font-size: .88rem; }
+.flow-dot { display: inline-block; width: 12px; height: 12px; margin-right: 6px; border-radius: 50%; vertical-align: -1px; }
+.flow-dot.flow-live { background: #2f7d4f; } .flow-dot.flow-partial { background: #c99a00; } .flow-dot.flow-sample { background: #252b73; } .flow-dot.flow-off { background: #a92e2a; }
+.react-flow__node.flow-node { padding: 10px 12px; border-radius: 12px; border: 2px solid; background: #fff; text-align: left; font-size: .8rem; line-height: 1.3; }
+.flow-node strong { display: block; font-size: .86rem; }
+.flow-node small { display: block; margin-top: 2px; color: var(--muted); font-size: .74rem; }
+.react-flow__node.flow-live { border-color: #2f7d4f; background: rgba(47, 125, 79, .08); }
+.react-flow__node.flow-partial { border-color: #c99a00; background: rgba(225, 184, 39, .14); }
+.react-flow__node.flow-sample { border-color: #252b73; background: rgba(37, 43, 115, .06); }
+.react-flow__node.flow-off { border-color: #a92e2a; background: rgba(169, 46, 42, .07); }
+.react-flow__node.flow-info { border-color: #6b7280; border-style: dashed; }

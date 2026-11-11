@@ -13,6 +13,7 @@ import Faq from './components/Faq';
 import Gallery from './components/Gallery';
 import Journey from './components/Journey';
 import HowToJoin from './components/HowToJoin';
+import InquiryForm from './components/InquiryForm';
 import JoinCta from './components/JoinCta';
 import Mountains from './components/Mountains';
 import OpenClimbs from './components/OpenClimbs';
@@ -44,10 +45,12 @@ const GuidePage = lazy(() => import('./pages/GuidePage'));
 const HelpPage = lazy(() => import('./pages/HelpPage'));
 const AdminHelpPage = lazy(() => import('./pages/AdminHelpPage'));
 const MyDetailsPage = lazy(() => import('./pages/MyDetailsPage'));
+const MyActivitiesPage = lazy(() => import('./pages/MyActivitiesPage'));
 const WhatsNewPage = lazy(() => import('./pages/WhatsNewPage'));
 const AdminRegistrationsPage = lazy(() => import('./pages/AdminRegistrationsPage'));
 const AdminAuditPage = lazy(() => import('./pages/AdminAuditPage'));
 const AdminInsightsPage = lazy(() => import('./pages/AdminInsightsPage'));
+const AdminSitemapPage = lazy(() => import('./pages/AdminSitemapPage'));
 const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
 const AdminTreasurerPage = lazy(() => import('./pages/AdminTreasurerPage'));
 const loading = <main className="section"><div className="shell"><p>Loading…</p></div></main>;
@@ -73,7 +76,7 @@ const pageBodies: Record<string, ReactNode> = {
   '/activities/upcoming': <OpenClimbs />,
   '/media/photos': <Gallery />,
   '/media/videos': <Videos />,
-  '/membership/join': <><HowToJoin /><Faq /><JoinCta /></>,
+  '/membership/join': <><HowToJoin /><Faq /><InquiryForm /><JoinCta /></>,
   '/membership/login': <Passport />,
 };
 
@@ -121,7 +124,8 @@ export default function App() {
         <Route path="/activities/open-climbs/guide" element={<RouteErrorBoundary key="guide"><Suspense fallback={loading}><GuidePage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/help" element={<RouteErrorBoundary key="admin-help"><Suspense fallback={loading}><AdminHelpPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/details" element={<RouteErrorBoundary key="my-details"><Suspense fallback={loading}><MyDetailsPage /></Suspense></RouteErrorBoundary>} />
-        <Route path="/account/whats-new" element={<RouteErrorBoundary key="whats-new"><Suspense fallback={loading}><WhatsNewPage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/account/activities" element={<RouteErrorBoundary key="my-activities"><Suspense fallback={loading}><MyActivitiesPage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/account/whats-new"element={<RouteErrorBoundary key="whats-new"><Suspense fallback={loading}><WhatsNewPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/help" element={<RouteErrorBoundary key="help"><Suspense fallback={loading}><HelpPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/privacy" element={<RouteErrorBoundary key="privacy"><Suspense fallback={loading}><PrivacyPage /></Suspense></RouteErrorBoundary>} />
         {/* Old Open Climbs app paths: the functions' account emails still link here. */}
@@ -136,6 +140,7 @@ export default function App() {
         <Route path="/account/climbs/:regId/waiver" element={<RouteErrorBoundary key="waiver"><Suspense fallback={loading}><WaiverPrintPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/climbs" element={<RouteErrorBoundary key="my-climbs"><Suspense fallback={loading}><MyClimbsPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/insights" element={<RouteErrorBoundary key="admin-insights"><Suspense fallback={loading}><AdminInsightsPage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/admin/sitemap" element={<RouteErrorBoundary key="admin-sitemap"><Suspense fallback={loading}><AdminSitemapPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/audit" element={<RouteErrorBoundary key="admin-audit"><Suspense fallback={loading}><AdminAuditPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/users" element={<RouteErrorBoundary key="admin-users"><Suspense fallback={loading}><AdminUsersPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/treasurer" element={<RouteErrorBoundary key="admin-treasurer"><Suspense fallback={loading}><AdminTreasurerPage /></Suspense></RouteErrorBoundary>} />
