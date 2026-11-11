@@ -51,7 +51,7 @@ export default function AdminClimbPage() {
       <PageHero compact crumb={{ to: '/admin', label: 'Admin' }} eyebrow="Admin · Registrations" title={climb?.title ?? 'Climb'} intro={climb ? [climb.dates, climb.location].filter(Boolean).join(' · ') : ''} image="/images/page-surveys.webp" />
       <main><section className="section page-section"><div className="shell">
         <AdminGate>{(admin) => <Registrations climbId={id} climb={climb} admin={admin} />}</AdminGate>
-        <p><Link to="/admin/registrations">All registrations</Link></p>
+        <p><Link className="btn" to="/admin/registrations">All registrations →</Link></p>
       </div></section></main>
     </>
   );
