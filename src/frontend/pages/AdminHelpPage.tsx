@@ -21,7 +21,7 @@ export default function AdminHelpPage() {
                 </ol>
               </section>
             ))}
-            <p><Link to="/help">Member help</Link></p>
+            <p><Link className="btn" to="/help">Member help →</Link></p>
           </div>
         </section>
       </main>

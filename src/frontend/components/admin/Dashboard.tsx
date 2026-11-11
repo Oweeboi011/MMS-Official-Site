@@ -48,7 +48,7 @@ function Recent({ regs }: { regs: AdminReg[] }) {
           </tbody>
         </table>
       </div>
-      <p><Link to="/admin/registrations">See all registrations</Link></p>
+      <p><Link className="btn" to="/admin/registrations">See all registrations →</Link></p>
     </>
   );
 }

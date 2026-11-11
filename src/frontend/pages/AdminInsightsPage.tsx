@@ -82,7 +82,7 @@ function Activity() {
           </table></div>
         ) : <p className="climb-muted">No admin actions logged yet.</p>)}
       </Loaded>
-      <p><Link to="/admin/audit">Open the full audit log</Link></p>
+      <p><Link className="btn" to="/admin/audit">Open the full audit log →</Link></p>
     </Panel>
   );
 }
