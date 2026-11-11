@@ -51,6 +51,17 @@ function currentOf(docs: Doc[], body: string): Officer[] {
 
 export const currentExecom = (docs: Doc[]) => currentOf(docs, 'execom');
 
+export const storiesPath = '/media/stories';
+
+// Stories page with approved reviews: they replace the sample testimonials (never mixed); the rest of the page stays.
+export function storiesBlocks(blocks: ContentBlock[], docs: Doc[]): ContentBlock[] {
+  const items = docs.filter((d) => str(d.quote) && str(d.name)).map((d) => ({ quote: str(d.quote), name: str(d.name), meta: str(d.climbTitle) }));
+  return blocks.flatMap((b): ContentBlock[] => {
+    if (b.type !== 'quotes') return [b];
+    return items.length ? [{ ...b, items }] : [];
+  });
+}
+
 export const leadershipPath = '/about/leadership';
 const bodyByEyebrow: Record<string, string> = { 'Executive Committee': 'execom', 'Training Committee': 'tcomm', 'Board of Trustees': 'bot' };
 const bodyLabel: Record<string, string> = { execom: 'Execom', tcomm: 'TComm', bot: 'BOT' };
