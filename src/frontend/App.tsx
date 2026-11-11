@@ -45,6 +45,7 @@ const GuidePage = lazy(() => import('./pages/GuidePage'));
 const HelpPage = lazy(() => import('./pages/HelpPage'));
 const AdminHelpPage = lazy(() => import('./pages/AdminHelpPage'));
 const MyDetailsPage = lazy(() => import('./pages/MyDetailsPage'));
+const MyActivitiesPage = lazy(() => import('./pages/MyActivitiesPage'));
 const WhatsNewPage = lazy(() => import('./pages/WhatsNewPage'));
 const AdminRegistrationsPage = lazy(() => import('./pages/AdminRegistrationsPage'));
 const AdminAuditPage = lazy(() => import('./pages/AdminAuditPage'));
@@ -123,7 +124,8 @@ export default function App() {
         <Route path="/activities/open-climbs/guide" element={<RouteErrorBoundary key="guide"><Suspense fallback={loading}><GuidePage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/help" element={<RouteErrorBoundary key="admin-help"><Suspense fallback={loading}><AdminHelpPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/details" element={<RouteErrorBoundary key="my-details"><Suspense fallback={loading}><MyDetailsPage /></Suspense></RouteErrorBoundary>} />
-        <Route path="/account/whats-new" element={<RouteErrorBoundary key="whats-new"><Suspense fallback={loading}><WhatsNewPage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/account/activities" element={<RouteErrorBoundary key="my-activities"><Suspense fallback={loading}><MyActivitiesPage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/account/whats-new"element={<RouteErrorBoundary key="whats-new"><Suspense fallback={loading}><WhatsNewPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/help" element={<RouteErrorBoundary key="help"><Suspense fallback={loading}><HelpPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/privacy" element={<RouteErrorBoundary key="privacy"><Suspense fallback={loading}><PrivacyPage /></Suspense></RouteErrorBoundary>} />
         {/* Old Open Climbs app paths: the functions' account emails still link here. */}
