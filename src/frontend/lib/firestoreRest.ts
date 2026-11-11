@@ -24,7 +24,7 @@ export function decodeFields(fields: Record<string, Value> = {}): Doc {
 export interface Filter {
   field: string;
   op: 'EQUAL' | 'GREATER_THAN_OR_EQUAL' | 'LESS_THAN';
-  value: boolean | Date;
+  value: boolean | Date | string;
 }
 
 export interface QueryOptions {
@@ -33,7 +33,10 @@ export interface QueryOptions {
   limit: number;
 }
 
-const encode = (v: boolean | Date) => (v instanceof Date ? { timestampValue: v.toISOString() } : { booleanValue: v });
+const encode = (v: boolean | Date | string) => {
+  if (v instanceof Date) return { timestampValue: v.toISOString() };
+  return typeof v === 'string' ? { stringValue: v } : { booleanValue: v };
+};
 const fieldFilter = ({ field, op, value }: Filter) => ({ fieldFilter: { field: { fieldPath: field }, op, value: encode(value) } });
 
 export function runQueryBody(collection: string, { where = [], orderBy, limit }: QueryOptions) {

@@ -48,6 +48,15 @@ async function query(collection: string, options: QueryOptions): Promise<Doc[] |
   return Array.isArray(rows) ? decodeQuery(rows) : null;
 }
 
+// Published page data (contentEntries, ADR 0010): one read per page. Rules allow a list only when it asks for published.
+const entryLoaders = new Map<string, () => Promise<Doc[] | null | undefined>>();
+export function entriesLoader(page: string) { // stable per page, for useLoaded
+  if (!entryLoaders.has(page)) {
+    entryLoaders.set(page, () => once(`entries:${page}`, () => query('contentEntries', { where: [{ field: 'page', op: 'EQUAL', value: page }, { field: 'status', op: 'EQUAL', value: 'published' }], limit: 200 })));
+  }
+  return entryLoaders.get(page)!;
+}
+
 // Each page reads only what it shows (Firestore bills per document returned; free quota 50k/day).
 const announcementsLoaders = new Map<number, () => Promise<Doc[] | null | undefined>>();
 export function announcementsLoader(limit: number) { // stable per limit, for useLoaded

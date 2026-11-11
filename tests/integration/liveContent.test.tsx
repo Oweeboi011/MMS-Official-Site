@@ -3,11 +3,12 @@ import { renderAt } from '../helpers';
 import { previewNotice } from '../../src/frontend/data/content';
 
 // Firestore answers are injected; the REST client itself is covered in unit/liveContent.
-const live = vi.hoisted(() => ({ settings: null as Record<string, unknown> | null, announcements: null as Record<string, unknown>[] | null, climbs: null as Record<string, unknown>[] | null, climb: null as Record<string, unknown> | null }));
+const live = vi.hoisted(() => ({ entries: null as Record<string, unknown>[] | null, settings: null as Record<string, unknown> | null, announcements: null as Record<string, unknown>[] | null, climbs: null as Record<string, unknown>[] | null, climb: null as Record<string, unknown> | null }));
 vi.mock('../../src/frontend/services/publicData', () => ({
   publicReadsEnabled: true,
   loadSettings: async () => live.settings,
   announcementsLoader: () => async () => live.announcements,
+  entriesLoader: () => async () => live.entries,
   climbsLoader: () => async () => live.climbs,
   climbLoader: async () => live.climb,
   loadSurveys: async () => null,
@@ -22,6 +23,7 @@ vi.mock('../../src/frontend/services/weather', () => ({
 describe('pages read site content from Firestore', () => {
   beforeEach(() => {
     live.settings = null;
+    live.entries = null;
     live.announcements = null;
     live.climbs = null;
     live.climb = null;
@@ -30,6 +32,28 @@ describe('pages read site content from Firestore', () => {
   it('keeps sample content while Firestore has nothing', async () => {
     renderAt('/media/news');
     expect(await screen.findByText(previewNotice)).toBeInTheDocument();
+  });
+
+  it('keeps the sample calendar while nothing is published', async () => {
+    renderAt('/activities/calendar');
+    expect(await screen.findByText('Mt. Marami open climb')).toBeInTheDocument(); // sample while nothing is published
+  });
+
+  it('replaces the sample calendar when entries are published', async () => {
+    live.entries = [
+      { title: 'Pulag climb', data: { date: '2026-12-12', endDate: '2026-12-13', kind: 'climb', place: 'Benguet' } },
+      { title: 'Training day', data: { date: '2026-12-05', kind: 'training' } },
+    ];
+    renderAt('/activities/calendar');
+    expect(await screen.findByText('Pulag climb')).toBeInTheDocument();
+    expect(screen.getByText('Dec 12–13')).toBeInTheDocument();
+    expect(screen.queryByText('Mt. Marami open climb')).not.toBeInTheDocument();
+  });
+
+  it('shows published video entries on a page that has no sample content', async () => {
+    live.entries = [{ title: 'Pulag highlights', data: { kind: 'video', url: 'https://youtu.be/x' } }];
+    renderAt('/media/videos');
+    expect(await screen.findByRole('heading', { name: 'Pulag highlights' })).toBeInTheDocument();
   });
 
   it('shows published announcements and the saved settings', async () => {

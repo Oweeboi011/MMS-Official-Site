@@ -19,7 +19,7 @@ export const FIELDS: Record<ContentPage, FieldDef[]> = {
     DETAILS,
   ],
   media: [
-    { key: 'kind', label: 'Type', type: 'select', max: 20, required: true, options: [['album', 'Photo album'], ['video', 'Video'], ['news', 'News item']] },
+    { key: 'kind', label: 'Type', type: 'select', max: 20, required: true, options: [['album', 'Photo album'], ['video', 'Video'], ['publication', 'Publication']] },
     { ...LINK, required: true },
     DETAILS,
   ],

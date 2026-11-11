@@ -6,6 +6,9 @@ import { registrationEnabled } from './firebaseEnv';
 
 const COLLECTIONS = ['announcements', 'officers', 'committees', 'surveys', 'faqs', 'glossary', 'media', 'reviews'];
 
+// Pages fed by officer-submitted entries (ADR 0010).
+const ENTRY_PAGES = ['calendar', 'media', 'membership', 'trails', 'destinations'];
+
 const text = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
 
 // One level of nesting is enough for siteSettings (socials.facebook).
@@ -31,10 +34,12 @@ export async function loadSiteFacts(): Promise<PageFacts> {
     }
   };
   const count = async (name: string, ...w: ReturnType<typeof where>[]) => (await getCount(query(collection(db, name), ...w))).data().count;
-  const [counts, openClimbs, settings] = await Promise.all([
+  const published = async (page: string) => count('contentEntries', where('page', '==', page), where('status', '==', 'published'));
+  const [counts, entryCounts, openClimbs, settings] = await Promise.all([
     Promise.all(COLLECTIONS.map(async (c) => [c, await attempt(c, () => count(c), 0)] as const)),
+    Promise.all(ENTRY_PAGES.map(async (p) => [`entries:${p}`, await attempt(`contentEntries (${p})`, () => published(p), 0)] as const)),
     attempt('climbs', () => count('climbs', where('status', '==', 'open')), 0),
     attempt('siteSettings', () => getDoc(doc(db, 'siteSettings', 'site')), null),
   ]);
-  return { counts: Object.fromEntries(counts), settings: settings?.exists() ? flatten(settings.data()) : {}, openClimbs, registrationOpen: registrationEnabled, unreadable };
+  return { counts: Object.fromEntries([...counts, ...entryCounts]), settings: settings?.exists() ? flatten(settings.data()) : {}, openClimbs, registrationOpen: registrationEnabled, unreadable };
 }
