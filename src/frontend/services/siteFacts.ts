@@ -4,7 +4,7 @@ import type { PageFacts } from '../data/siteMapStatus';
 import { firebase } from './firebase';
 import { registrationEnabled } from './firebaseEnv';
 
-const COLLECTIONS = ['announcements', 'officers', 'committees', 'surveys', 'faqs', 'glossary', 'media', 'reviews'];
+const COLLECTIONS = ['announcements', 'officers', 'committees', 'surveys', 'faqs', 'glossary', 'media', 'reviews', 'sportfestGames'];
 
 // Pages fed by officer-submitted entries (ADR 0010).
 const ENTRY_PAGES = ['calendar', 'media', 'membership', 'trails', 'destinations'];

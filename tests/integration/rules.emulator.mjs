@@ -362,6 +362,30 @@ await no("plain member cannot log a content action", () => m2().collection("audi
 await no("TCom cannot read the audit log", () => as("tcom1").collection("auditLog").limit(1).get());
 await ok("admin deletes any entry", () => admin().doc("contentEntries/pub").delete());
 
+console.log("Firestore: sportfest scoreboard (signed-in read, admin write)");
+await seed();
+const game = { name: "Tug of war", category: "Sports", date: "May 9", status: "completed", gameClass: "B", maxPoints: 20, year: 2026 };
+const sfScore = { gameId: "g1", year: 2026, tribe: "Aeta", placement: 1, points: 20 };
+await env.withSecurityRulesDisabled(async (c) => {
+  await c.firestore().doc("sportfestGames/g1").set(game);
+  await c.firestore().doc("sportfestScores/s1").set(sfScore);
+});
+await no("guest cannot read games", () => anon().doc("sportfestGames/g1").get());
+await no("guest cannot read scores", () => anon().collection("sportfestScores").get());
+await ok("signed-in member reads games", () => m1().doc("sportfestGames/g1").get());
+await ok("signed-in member reads scores", () => m1().collection("sportfestScores").get());
+await no("member cannot add a game", () => m1().collection("sportfestGames").add(game));
+await no("member cannot change a score", () => m1().doc("sportfestScores/s1").update({ points: 5 }));
+await ok("admin adds a game", () => admin().collection("sportfestGames").add(game));
+await ok("admin adds a score", () => admin().collection("sportfestScores").add({ ...sfScore, tribe: "Badjao", placement: 2, points: 15 }));
+await no("game rejects an unknown class", () => admin().collection("sportfestGames").add({ ...game, gameClass: "C" }));
+await no("game rejects odd top points", () => admin().collection("sportfestGames").add({ ...game, maxPoints: 7 }));
+await no("game rejects a missing name", () => admin().collection("sportfestGames").add({ ...game, name: "" }));
+await no("score rejects an unknown tribe", () => admin().collection("sportfestScores").add({ ...sfScore, tribe: "Vikings" }));
+await no("score rejects fifth place", () => admin().collection("sportfestScores").add({ ...sfScore, placement: 5 }));
+await no("score rejects unknown fields", () => admin().collection("sportfestScores").add({ ...sfScore, extra: 1 }));
+await ok("admin deletes a score", () => admin().doc("sportfestScores/s1").delete());
+
 console.log(`\n${pass} passed, ${fail} failed`);
 await env.cleanup();
 process.exit(fail ? 1 : 0);
