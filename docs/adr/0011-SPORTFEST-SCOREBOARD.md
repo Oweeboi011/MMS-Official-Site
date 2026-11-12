@@ -21,4 +21,5 @@ The scoreboard ran as a separate Next.js app on Vercel (`mms-sagupaan`). It is a
 
 - No new cost: same Firebase project, same free tier.
 - The old Vercel app is retired only on the owner's word.
-- The old data has duplicate "upcoming" stub games; the public board hides upcoming games, the admin list shows them.
+- The old data has duplicate "upcoming" stub games; the public board hides upcoming games, and the admin list marks them "safe to delete".
+- A new year starts from the previous year's games: the admin page offers "Copy N games from <year-1>" (name, class and points; back to upcoming, no results).

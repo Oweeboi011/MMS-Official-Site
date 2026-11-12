@@ -92,6 +92,22 @@ export function scoreRows(game: Pick<Game, 'gameClass' | 'maxPoints'>, p: Placem
   });
 }
 
+const sameGame = (a: Game, b: Game) => a.year === b.year && a.name.trim().toLowerCase() === b.name.trim().toLowerCase();
+
+// Upcoming games with no results that repeat a played game of the same name and year (left over from the old app).
+export function duplicateIds(games: Game[], scored: ReadonlySet<string>): Set<string> {
+  const stubs = games.filter((g) => g.status === 'upcoming' && !scored.has(g.id));
+  return new Set(stubs.filter((s) => games.some((g) => g.id !== s.id && sameGame(g, s) && (g.status !== 'upcoming' || scored.has(g.id)))).map((s) => s.id));
+}
+
+// Next year's list starts from this year's games: same name, class and points, back to upcoming with no date.
+export function gamesForYear(games: Game[], from: number, to: number): GameFields[] {
+  const have = games.filter((g) => g.year === to);
+  return games
+    .filter((g) => g.year === from && !have.some((h) => sameGame(h, { ...g, year: to })))
+    .map(({ name, category, gameClass, maxPoints }) => ({ name, category, date: '', status: 'upcoming' as const, gameClass, maxPoints, year: to }));
+}
+
 export const years = (games: Game[]) => [...new Set(games.map((g) => g.year))].sort((a, b) => b - a);
 
 export const SCORING_TABLE: { label: string; gameClass: GameClass; maxPoints: MaxPoints }[] = [
