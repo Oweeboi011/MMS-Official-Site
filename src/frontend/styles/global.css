@@ -556,9 +556,11 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .admin-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
 .chip { padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: #fff; font: inherit; font-weight: 700; cursor: pointer; }
 .chip.is-active { background: var(--ink); color: #fff; }
-.editor { display: grid; gap: 24px; grid-template-columns: minmax(180px, 260px) 1fr; align-items: start; }
-.editor.is-single { grid-template-columns: 1fr; }
-.editor-list ul { display: grid; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+.editor { display: grid; gap: 24px; grid-template-columns: 1fr; align-items: start; }
+.editor-list { display: grid; gap: 12px; justify-items: start; }
+.editor-list .admin-table { width: 100%; max-height: 420px; overflow-y: auto; }
+.editor-list tr.is-active { background: rgba(37, 43, 115, .08); }
+.editor-list th[scope="row"] { text-align: left; }
 .editor-form { display: grid; gap: 14px; max-width: 640px; }
 .editor-field { display: grid; gap: 6px; }
 .records { display: grid; gap: 8px; overflow-x: auto; }
