@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom';
+import PageHero from '../components/PageHero';
 import { asset } from '../lib/asset';
 import { photoCredits } from '../data/credits';
 
 export default function CreditsPage() {
   return (
     <>
-      <header className="simple-header">
-      </header>
+      <PageHero eyebrow="Credits" title="Credits" intro="Where the photos and data on this site come from." image="/images/page-surveys.webp" />
       <main>
         <section className="section">
           <div className="shell">

@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import AccountTabs from '../components/AccountTabs';
 import ContentEntryForm from '../components/admin/ContentEntryForm';
+import DataTable from '../components/DataTable';
 import { useAdminList } from '../components/admin/useAdminList';
 import PageHero from '../components/PageHero';
 import SignInForm from '../components/SignInForm';
@@ -16,19 +17,19 @@ function Row({ entry, account, busy, canReview, onEdit, run }: { entry: Entry; a
   const person = { role: account.role, groups: account.groups ?? [] };
   const can = entryActions(entry.status, { mine: entry.submittedBy === account.uid, canReview, canPublish: rightsFor(person, entry.page).publish });
   return (
-    <li className="my-climb">
-      <h2>{entry.title}</h2>
-      <p className="my-climb-meta"><span className="my-climb-chip">{pageLabel(entry.page)}</span><span className="my-climb-chip">{STATUS_LABEL[entry.status]}</span></p>
-      <p className="climb-muted">{entrySummary(entry)}{entry.submittedByName && ` · by ${entry.submittedByName}`}</p>
-      {entry.note && <p className="climb-notice" role="note">Reviewer note: {entry.note}</p>}
-      <div className="editor-actions">
+    <tr>
+      <th scope="row">{entry.title}{entry.note && <small className="cell-note">Reviewer note: {entry.note}</small>}</th>
+      <td>{pageLabel(entry.page)}</td>
+      <td>{STATUS_LABEL[entry.status]}</td>
+      <td>{entrySummary(entry)}{entry.submittedByName && ` · by ${entry.submittedByName}`}</td>
+      <td><div className="editor-actions">
         {can.edit && <button type="button" className="chip" disabled={busy} onClick={onEdit}>Edit</button>}
         {can.publish && <button type="button" className="chip" disabled={busy} onClick={() => void run(() => reviewEntry(account, entry, 'published'))}>Publish</button>}
         {can.reject && <button type="button" className="chip" disabled={busy} onClick={() => void run(() => reviewEntry(account, entry, 'rejected', window.prompt('Why is it rejected? The submitter sees this.') ?? ''))}>Reject</button>}
         {can.unpublish && <button type="button" className="chip" disabled={busy} onClick={() => void run(() => reviewEntry(account, entry, 'draft'))}>Unpublish</button>}
         {can.remove && <button type="button" className="chip" disabled={busy} onClick={() => void run(() => removeEntry(entry))}>Delete</button>}
-      </div>
-    </li>
+      </div></td>
+    </tr>
   );
 }
 
@@ -51,9 +52,9 @@ function Entries({ account }: { account: Account }) {
       {message && <p role="status">{message}</p>}
       {canReview && <p className="climb-muted">{waiting.length === 0 ? 'Nothing is waiting for review.' : `${waiting.length} waiting for review.`}</p>}
       {rows.length === 0 ? <p>No entries yet.</p> : (
-        <ul className="my-climbs">
+        <DataTable caption="Your page content entries" head={['Entry', 'Page', 'Status', 'Details', 'Actions']}>
           {rows.map((e) => <Row key={e.id} entry={e} account={account} busy={busy} canReview={canReview} onEdit={() => setEditing(e)} run={run} />)}
-        </ul>
+        </DataTable>
       )}
       <p className="climb-muted">Published entries show on the public pages. Drafts and entries waiting for review are seen only by you and the reviewers (admins, BOT and ExeCom).</p>
     </>

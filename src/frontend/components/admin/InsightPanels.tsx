@@ -1,3 +1,4 @@
+import DataTable from '../DataTable';
 import { Link } from 'react-router-dom';
 import {
   docCompliance, failuresByDay, noticeVolume, oldestPending, overdueUnpaid, paymentBreakdown, paymentTurnaround, repeatedFailures, staleDrafts, waiverRate, weeklyRegistrations,
@@ -80,13 +81,13 @@ export function Attention({ data, now }: { data: InsightData; now: number }) {
     <div className="panel-grid">
       <Panel title="Oldest unpaid or rejected">
         {overdue.length === 0 ? none('Nothing overdue.') : (
-          <ul className="plain-list">
-            {overdue.map(({ reg, ageDays }) => <li key={reg.id}><Link to={`/admin/climbs/${reg.climbId}`}>{reg.name}</Link> · {reg.title} <small>{ageDays} days</small></li>)}
-          </ul>
+          <DataTable caption="Oldest unpaid or rejected" head={['Name', 'Climb', 'Days']}>
+            {overdue.map(({ reg, ageDays }) => <tr key={reg.id}><th scope="row"><Link to={`/admin/climbs/${reg.climbId}`}>{reg.name}</Link></th><td>{reg.title}</td><td className="num">{ageDays}</td></tr>)}
+          </DataTable>
         )}
       </Panel>
       <Panel title="Stale draft climbs (30+ days)">
-        {drafts.length === 0 ? none('No stale drafts.') : <ul className="plain-list">{drafts.map(({ climb, ageDays }) => <li key={climb.id}>{climb.title || 'Untitled'} <small>{ageDays} days</small></li>)}</ul>}
+        {drafts.length === 0 ? none('No stale drafts.') : <DataTable caption="Stale draft climbs" head={['Climb', 'Days']}>{drafts.map(({ climb, ageDays }) => <tr key={climb.id}><th scope="row">{climb.title || 'Untitled'}</th><td className="num">{ageDays}</td></tr>)}</DataTable>}
       </Panel>
       <Panel title="Oldest pending registration">
         {oldest ? <p><strong>{oldest.name}</strong> for <strong>{oldest.title}</strong>, waiting since {when(oldest.createdAt)}.</p> : none('No pending registrations awaiting action.')}

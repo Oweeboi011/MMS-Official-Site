@@ -197,9 +197,6 @@ button { font: inherit; }
 .register-section { display: grid; gap: 14px; margin: 0; padding: 20px; border: 1px solid var(--line); border-radius: 18px; }
 .register-section legend { padding: 0 6px; font-weight: 850; }
 .field-error { color: var(--red); font-weight: 700; }
-.fee-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.fee-lines li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; }
-.fee-lines small { flex-basis: 100%; color: var(--muted); }
 .legal-box { max-height: 260px; overflow-y: auto; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; font-size: .9rem; }
 .legal-box h4 { margin: 12px 0 4px; }
 .account-tabs { display: flex; gap: 6px; margin: 0 0 22px; border-bottom: 2px solid var(--line); }
@@ -210,16 +207,6 @@ button { font: inherit; }
 .profile-photo-empty { display: grid; place-items: center; font-size: .8rem; color: var(--muted, #5b6672); background: #f3f4f6; }
 .group-boxes { display: flex; gap: 10px; border: 0; margin: 0; padding: 0; flex-wrap: wrap; }
 .group-boxes label { display: inline-flex; gap: 4px; align-items: center; }
-.sf-standings { list-style: none; margin: 0 0 24px; padding: 0; display: grid; gap: 10px; }
-.sf-tribe { display: grid; grid-template-columns: 3rem 1fr auto auto; gap: 12px; align-items: center; padding: 14px 18px; border: 1px solid var(--line); border-left: 8px solid var(--tribe); border-radius: 16px; background: #fff; }
-.sf-rank { font-weight: 800; }
-.sf-name { font-weight: 700; }
-.sf-medals { font-size: .85rem; color: var(--muted, #5b6672); }
-.sf-pts strong { font-size: 1.4rem; }
-.sf-rows { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
-.sf-rows li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-bottom: 1px solid var(--line); }
-.sf-scoring { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-@media (max-width: 640px) { .sf-tribe { grid-template-columns: 2.5rem 1fr auto; } .sf-medals { grid-column: 1 / -1; } }
 .consent-check { display: flex; gap: 10px; align-items: flex-start; }
 .consent-check input { margin-top: 4px; }
 .my-climbs { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
@@ -276,7 +263,7 @@ button { font: inherit; }
 .insight dt { font-weight: 800; }
 .insight dd { margin: 0; overflow-wrap: anywhere; }
 .year-picker { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 40px; }
-.year-picker select { margin-left: 8px; padding: 8px 10px; border-radius: 10px; font: inherit; }
+
 .motto { margin: 10px 0 0; color: var(--gold); font-weight: 850; font-style: italic; }
 
 .passport { position: relative; overflow: hidden; padding: 30px; border-radius: 32px; color: #fff; background: var(--navy); box-shadow: var(--shadow); }
@@ -439,7 +426,6 @@ footer { padding: 44px 0 95px; color: rgba(255,255,255,.72); background: #09121b
 }
 
 /* Credits */
-.simple-header { position: relative; background: var(--ink); color: #fff; min-height: 112px; }
 .credits { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
 .credits li { display: flex; gap: 16px; align-items: center; padding: 12px; border-radius: 18px; background: #fff; border: 1px solid var(--line); font-size: .85rem; }
 .credits img { width: 96px; height: 64px; flex: none; object-fit: cover; border-radius: 10px; }
@@ -557,9 +543,11 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .admin-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
 .chip { padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: #fff; font: inherit; font-weight: 700; cursor: pointer; }
 .chip.is-active { background: var(--ink); color: #fff; }
-.editor { display: grid; gap: 24px; grid-template-columns: minmax(180px, 260px) 1fr; align-items: start; }
-.editor.is-single { grid-template-columns: 1fr; }
-.editor-list ul { display: grid; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+.editor { display: grid; gap: 24px; grid-template-columns: 1fr; align-items: start; }
+.editor-list { display: grid; gap: 12px; justify-items: start; }
+.editor-list .admin-table { width: 100%; max-height: 420px; overflow-y: auto; }
+.editor-list tr.is-active { background: rgba(37, 43, 115, .08); }
+.editor-list th[scope="row"] { text-align: left; }
 .editor-form { display: grid; gap: 14px; max-width: 640px; }
 .editor-field { display: grid; gap: 6px; }
 .records { display: grid; gap: 8px; overflow-x: auto; }
@@ -714,11 +702,6 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .notify-list span { font-size: .92rem; color: var(--ink); }
 .notify-list small { font-size: .78rem; }
 /* Fees: compact lines, a member total, optional and guest lines apart. */
-.fee-lines { list-style: none; margin: 0; padding: 0; display: grid; }
-.fee-lines li { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; padding: 8px 0; border-top: 1px solid var(--line); font-size: .92rem; }
-.fee-lines li:first-child { border-top: 0; padding-top: 0; }
-.fee-lines small { display: block; color: var(--muted); font-size: .78rem; }
-.fee-lines b { color: var(--navy); white-space: nowrap; }
 .fee-total { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; margin: 10px 0 0; padding: 10px 14px; border-radius: 12px; background: rgba(225, 184, 39, .18); font-weight: 800; }
 .fee-total small { font-weight: 600; color: var(--muted); }
 .fee-total strong { color: var(--navy); font-size: 1.15rem; }
@@ -745,7 +728,7 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .chip:disabled { opacity: .5; cursor: not-allowed; }
 .link-button:hover { color: var(--navy); }
 .link-button:disabled { opacity: .5; cursor: not-allowed; }
-.account-form input, .editor-field input, .editor-field select, .editor-field textarea { min-height: 44px; background: #fff; transition: border-color .16s ease, box-shadow .16s ease; }
+.account-form input, .editor-field input, .editor-field select, .editor-field textarea { min-height: 44px; background-color: #fff; transition: border-color .16s ease, box-shadow .16s ease; }
 .account-form input:hover, .editor-field input:hover, .editor-field select:hover, .editor-field textarea:hover { border-color: rgba(16, 26, 36, .35); }
 .account-form input:focus-visible, .editor-field input:focus-visible, .editor-field select:focus-visible, .editor-field textarea:focus-visible { outline: 0; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(37, 43, 115, .18); }
 .editor-actions { flex-wrap: wrap; align-items: center; }
@@ -851,15 +834,42 @@ a[target='_blank']:not([class])::after { content: ' ↗'; font-size: .85em; }
 :is(.journey, .open-climbs, .passport, .cta) a:where(:not([class])) { color: #f2d65d; text-decoration: underline; text-underline-offset: 3px; }
 
 /* Admin site map diagram (React Flow) */
-.site-flow-canvas { height: 640px; border: 1px solid var(--line); border-radius: 14px; background: #fff; overflow: hidden; }
+.site-flow-canvas { height: clamp(640px, 88vh, 1200px); border: 1px solid var(--line); border-radius: 14px; background: #fff; overflow: hidden; }
 .flow-legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 0 0 8px; padding: 0; list-style: none; font-weight: 700; font-size: .88rem; }
 .flow-dot { display: inline-block; width: 12px; height: 12px; margin-right: 6px; border-radius: 50%; vertical-align: -1px; }
 .flow-dot.flow-live { background: #2f7d4f; } .flow-dot.flow-partial { background: #c99a00; } .flow-dot.flow-sample { background: #252b73; } .flow-dot.flow-off { background: #a92e2a; }
-.react-flow__node.flow-node { padding: 10px 12px; border-radius: 12px; border: 2px solid; background: #fff; text-align: left; font-size: .8rem; line-height: 1.3; }
-.flow-node strong { display: block; font-size: .86rem; }
-.flow-node small { display: block; margin-top: 2px; color: var(--muted); font-size: .74rem; }
+.react-flow__node.flow-node { padding: 10px 12px; border-radius: 12px; border: 2px solid; background: #fff; text-align: left; font-size: 1rem; line-height: 1.3; }
+.flow-node strong { display: block; font-size: 1.1rem; }
+.flow-node small { display: block; margin-top: 2px; color: var(--muted); font-size: .95rem; }
 .react-flow__node.flow-live { border-color: #2f7d4f; background: rgba(47, 125, 79, .08); }
 .react-flow__node.flow-partial { border-color: #c99a00; background: rgba(225, 184, 39, .14); }
 .react-flow__node.flow-sample { border-color: #252b73; background: rgba(37, 43, 115, .06); }
 .react-flow__node.flow-off { border-color: #a92e2a; background: rgba(169, 46, 42, .07); }
 .react-flow__node.flow-info { border-color: #6b7280; border-style: dashed; }
+
+/* One look for every text field, dropdown and textarea; labels sit above, bold. Low specificity so local sizing still wins. */
+:where(input:not([type="checkbox"], [type="radio"], [type="file"], [type="hidden"], [type="range"], [type="submit"], [type="button"]), select, textarea) {
+  min-height: 44px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background-color: #fff; color: inherit; font: inherit; max-width: 100%;
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+:where(select) {
+  appearance: none; padding-right: 38px; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23252b73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+}
+:where(input, select, textarea):hover { border-color: rgba(16, 26, 36, .35); }
+:where(input, select, textarea):focus-visible { outline: 0; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(37, 43, 115, .18); }
+:where(input, select, textarea):disabled { background-color: rgba(16, 26, 36, .05); cursor: not-allowed; }
+:where(input, select, textarea)[aria-invalid="true"] { border-color: var(--red); }
+.year-picker label, .admin-filterbar label, .finder label, .records label { font-weight: 800; }
+
+.year-picker { align-items: flex-end; }
+
+input[type="file"] { padding: 8px 10px; }
+input[type="file"]::file-selector-button { margin-right: 12px; padding: 8px 16px; border: 0; border-radius: 999px; background: var(--navy); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+input[type="file"]::file-selector-button:hover { background: var(--ink); }
+.admin-table td.num, .admin-table th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.admin-table .cell-note { display: block; margin-top: 2px; color: var(--muted); font-size: .78rem; font-weight: 500; text-transform: none; letter-spacing: 0; }
+.admin-table th[scope="row"] { color: inherit; background: none; font-size: .95rem; letter-spacing: 0; text-transform: none; font-weight: 700; border-top: 1px solid var(--line); }
+.admin-table tr.sf-tribe th[scope="row"] { border-left: 8px solid var(--tribe); }
+.admin-table .sf-name { font-weight: 700; }

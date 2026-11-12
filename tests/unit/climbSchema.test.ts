@@ -1,5 +1,5 @@
 import { climbsSpec } from '../../src/frontend/data/climbSchema';
-import { fromForm, lockedKeys, toForm, validate } from '../../src/frontend/data/siteSchemas';
+import { fromForm, listColumns, lockedKeys, toForm, validate } from '../../src/frontend/data/siteSchemas';
 
 const stamp = (d: Date) => ({ iso: d.toISOString() });
 const base = { ...toForm(climbsSpec), title: 'Mt. Pulag', location: 'Kabayan, Benguet', type: 'major', status: 'open', startDate: '2026-11-20' };
@@ -30,8 +30,9 @@ describe('climbs editor', () => {
     expect(validate(climbsSpec, { ...base, trailClass: '7' })).toMatch(/1 to 6/);
   });
 
-  it('labels rows with date, title and status', () => {
-    expect(climbsSpec.rowLabel?.({ title: 'Mt. Apo', status: 'draft', startDate: { toDate: () => new Date('2026-04-12T16:00:00Z') } })).toBe('2026-04-13 · Mt. Apo · draft');
+  it('lists climbs as a table of date, name, type, status and slots', () => {
+    const doc = { title: 'Mt. Apo', type: 'major', status: 'draft', maxParticipants: 30, startDate: { toDate: () => new Date('2026-04-12T16:00:00Z') } };
+    expect(listColumns(climbsSpec).map((c) => c.get(doc))).toEqual(['2026-04-13', 'Mt. Apo', 'major', 'draft', '30']);
   });
 });
 

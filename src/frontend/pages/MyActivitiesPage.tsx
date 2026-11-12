@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AccountTabs from '../components/AccountTabs';
+import DataTable from '../components/DataTable';
 import PageHero from '../components/PageHero';
 import SignInForm from '../components/SignInForm';
 import { sitemap, subpagePath } from '../data/sitemap';
@@ -17,17 +18,17 @@ function Activities({ uid }: { uid: string }) {
   }, [uid]);
   if (!section) return null;
   return (
-    <ul className="my-climbs">
+    <DataTable caption="MMS activities" head={['Activity', 'What it is', 'You']}>
       {section.pages.map((p) => (
-        <li key={p.slug} className="my-climb">
-          <h2><Link to={subpagePath(section, p)}>{p.label}</Link></h2>
-          <p className="climb-muted">{p.summary}</p>
-          {p.slug === OPEN_CLIMBS && joined !== null && (
-            <p className="my-climb-meta"><span className="my-climb-chip">{joined === 0 ? 'Not joined yet' : `You’ve joined ${joined}`}</span> <Link to="/account/climbs">My Open Climbs</Link></p>
-          )}
-        </li>
+        <tr key={p.slug}>
+          <th scope="row"><Link to={subpagePath(section, p)}>{p.label}</Link></th>
+          <td>{p.summary}</td>
+          <td>
+            {p.slug === OPEN_CLIMBS && joined !== null && <>{joined === 0 ? 'Not joined yet' : `Joined ${joined}`} · <Link to="/account/climbs">My Open Climbs</Link></>}
+          </td>
+        </tr>
       ))}
-    </ul>
+    </DataTable>
   );
 }
 

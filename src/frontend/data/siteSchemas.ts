@@ -20,6 +20,8 @@ export interface Field {
   hint?: string;
 }
 
+export interface ListColumn { label: string; get: (doc: Doc) => string }
+
 export interface CollectionSpec {
   id: string;
   label: string;
@@ -30,9 +32,24 @@ export interface CollectionSpec {
   check?: (values: FormValues) => string | null; // cross-field rules
   todo?: (values: FormValues) => string[]; // advisory checklist shown above the form (not blocking)
   orderBy?: { field: string; desc?: boolean }; // list order (default: unordered)
-  rowLabel?: (doc: Doc) => string; // list label (default: titleField)
+  columns?: ListColumn[]; // list table columns (default: just the titleField)
   rowLink?: (id: string) => { to: string; label: string }; // page for the selected row
 }
+
+const text = (key: string) => (d: Doc) => (typeof d[key] === 'string' || typeof d[key] === 'number' ? String(d[key]) : '');
+export const column = (label: string, key: string): ListColumn => ({ label, get: text(key) });
+
+const listDay = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit' });
+export const dayColumn = (label: string, key: string): ListColumn => ({
+  label,
+  get: (d) => {
+    const v = d[key];
+    if (v && typeof v === 'object' && 'toDate' in v) return listDay.format((v as { toDate: () => Date }).toDate());
+    return typeof v === 'string' ? v : '';
+  },
+});
+
+export const listColumns = (spec: CollectionSpec): ListColumn[] => spec.columns ?? [column(spec.fields.find((f) => f.key === spec.titleField)?.label ?? 'Name', spec.titleField)];
 
 const order: Field = { key: 'order', label: 'Order', kind: 'int', required: true };
 const published: Field[] = [
@@ -43,6 +60,7 @@ const published: Field[] = [
 export const siteCollections: CollectionSpec[] = [
   {
     id: 'announcements', label: 'Announcements', titleField: 'title',
+    columns: [column('Title', 'title'), column('Category', 'category'), column('Published', 'published')],
     fields: [
       { key: 'title', label: 'Title', kind: 'text', required: true, max: 200 },
       { key: 'summary', label: 'Summary (**bold** allowed)', kind: 'longText', required: true, max: 2000 },
@@ -52,6 +70,7 @@ export const siteCollections: CollectionSpec[] = [
   },
   {
     id: 'officers', label: 'Leadership', titleField: 'name',
+    columns: [column('Name', 'name'), column('Role', 'role'), column('Body', 'body'), column('Term', 'term')],
     fields: [
       { key: 'body', label: 'Body', kind: 'select', required: true, options: ['execom', 'tcomm', 'bot'] },
       { key: 'role', label: 'Role', kind: 'text', required: true, max: 120 },
@@ -64,6 +83,7 @@ export const siteCollections: CollectionSpec[] = [
   },
   {
     id: 'committees', label: 'Committees', titleField: 'title',
+    columns: [column('Committee', 'title'), column('Head', 'headName'), column('Head title', 'headTitle')],
     fields: [
       { key: 'tag', label: 'Tag', kind: 'text', required: true, max: 40 },
       { key: 'title', label: 'Title', kind: 'text', required: true, max: 120 },
@@ -75,6 +95,7 @@ export const siteCollections: CollectionSpec[] = [
   },
   {
     id: 'surveys', label: 'Surveys', titleField: 'title',
+    columns: [column('Survey', 'title'), column('Audience', 'audience'), column('Status', 'status'), column('Closes', 'closes')],
     fields: [
       { key: 'title', label: 'Title', kind: 'text', required: true, max: 200 },
       { key: 'description', label: 'Description', kind: 'longText', max: 2000, keepEmpty: true },
@@ -94,6 +115,7 @@ export const siteCollections: CollectionSpec[] = [
   },
   {
     id: 'glossary', label: 'Glossary', titleField: 'term',
+    columns: [column('Term', 'term'), column('Meaning', 'name')],
     fields: [
       { key: 'term', label: 'Term', kind: 'text', required: true, max: 20 },
       { key: 'name', label: 'Full name', kind: 'text', required: true, max: 120 },
@@ -102,6 +124,7 @@ export const siteCollections: CollectionSpec[] = [
   },
   {
     id: 'media', label: 'Media', titleField: 'title',
+    columns: [column('Title', 'title'), column('Kind', 'kind'), column('Place', 'place'), column('Credit', 'credit')],
     fields: [
       { key: 'kind', label: 'Kind', kind: 'select', required: true, options: ['video', 'photo', 'album'] },
       { key: 'title', label: 'Title', kind: 'text', required: true, max: 200 },
@@ -114,6 +137,7 @@ export const siteCollections: CollectionSpec[] = [
   },
   {
     id: 'reviews', label: 'Reviews', titleField: 'name',
+    columns: [column('Climb', 'climbTitle'), column('Name', 'name'), column('Rating', 'rating')],
     fields: [
       { key: 'climbTitle', label: 'Climb', kind: 'text', required: true, max: 200 },
       { key: 'name', label: 'Name (with consent)', kind: 'text', required: true, max: 120 },
@@ -139,6 +163,7 @@ export const siteCollections: CollectionSpec[] = [
   },
   {
     id: 'inquiries', label: 'Inquiries', titleField: 'name', readOnly: true,
+    columns: [column('Name', 'name'), column('Email', 'email'), column('Interest', 'interest')],
     fields: [
       { key: 'name', label: 'Name', kind: 'text' },
       { key: 'email', label: 'Email', kind: 'text' },
@@ -152,6 +177,7 @@ export const siteCollections: CollectionSpec[] = [
 export type FormValues = Record<string, string | boolean>;
 type RawValue = FormValues[string] | undefined;
 export type Doc = Record<string, unknown>;
+
 
 const getPath = (doc: Doc, key: string): unknown =>
   key.split('.').reduce<unknown>((v, k) => (v && typeof v === 'object' ? (v as Doc)[k] : undefined), doc);

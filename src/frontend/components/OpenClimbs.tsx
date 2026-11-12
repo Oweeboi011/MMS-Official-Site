@@ -59,7 +59,7 @@ function YearPicker({ year, thisYear }: { year: number | null; thisYear: number 
   };
   return (
     <form className="year-picker" onSubmit={submit}>
-      <label>Past years <select value={picked} onChange={(e) => setPicked(e.target.value)}>{years.map((y) => <option key={y}>{y}</option>)}</select></label>
+      <div className="editor-field"><label htmlFor="past-year">Past years</label><select id="past-year" value={picked} onChange={(e) => setPicked(e.target.value)}>{years.map((y) => <option key={y}>{y}</option>)}</select></div>
       <button className="btn" type="submit">Show</button>
     </form>
   );
