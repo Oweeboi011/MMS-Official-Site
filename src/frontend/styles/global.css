@@ -197,9 +197,6 @@ button { font: inherit; }
 .register-section { display: grid; gap: 14px; margin: 0; padding: 20px; border: 1px solid var(--line); border-radius: 18px; }
 .register-section legend { padding: 0 6px; font-weight: 850; }
 .field-error { color: var(--red); font-weight: 700; }
-.fee-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.fee-lines li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; }
-.fee-lines small { flex-basis: 100%; color: var(--muted); }
 .legal-box { max-height: 260px; overflow-y: auto; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; font-size: .9rem; }
 .legal-box h4 { margin: 12px 0 4px; }
 .account-tabs { display: flex; gap: 6px; margin: 0 0 22px; border-bottom: 2px solid var(--line); }
@@ -210,16 +207,6 @@ button { font: inherit; }
 .profile-photo-empty { display: grid; place-items: center; font-size: .8rem; color: var(--muted, #5b6672); background: #f3f4f6; }
 .group-boxes { display: flex; gap: 10px; border: 0; margin: 0; padding: 0; flex-wrap: wrap; }
 .group-boxes label { display: inline-flex; gap: 4px; align-items: center; }
-.sf-standings { list-style: none; margin: 0 0 24px; padding: 0; display: grid; gap: 10px; }
-.sf-tribe { display: grid; grid-template-columns: 3rem 1fr auto auto; gap: 12px; align-items: center; padding: 14px 18px; border: 1px solid var(--line); border-left: 8px solid var(--tribe); border-radius: 16px; background: #fff; }
-.sf-rank { font-weight: 800; }
-.sf-name { font-weight: 700; }
-.sf-medals { font-size: .85rem; color: var(--muted, #5b6672); }
-.sf-pts strong { font-size: 1.4rem; }
-.sf-rows { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
-.sf-rows li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-bottom: 1px solid var(--line); }
-.sf-scoring { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-@media (max-width: 640px) { .sf-tribe { grid-template-columns: 2.5rem 1fr auto; } .sf-medals { grid-column: 1 / -1; } }
 .consent-check { display: flex; gap: 10px; align-items: flex-start; }
 .consent-check input { margin-top: 4px; }
 .my-climbs { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
@@ -715,11 +702,6 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .notify-list span { font-size: .92rem; color: var(--ink); }
 .notify-list small { font-size: .78rem; }
 /* Fees: compact lines, a member total, optional and guest lines apart. */
-.fee-lines { list-style: none; margin: 0; padding: 0; display: grid; }
-.fee-lines li { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; padding: 8px 0; border-top: 1px solid var(--line); font-size: .92rem; }
-.fee-lines li:first-child { border-top: 0; padding-top: 0; }
-.fee-lines small { display: block; color: var(--muted); font-size: .78rem; }
-.fee-lines b { color: var(--navy); white-space: nowrap; }
 .fee-total { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; margin: 10px 0 0; padding: 10px 14px; border-radius: 12px; background: rgba(225, 184, 39, .18); font-weight: 800; }
 .fee-total small { font-weight: 600; color: var(--muted); }
 .fee-total strong { color: var(--navy); font-size: 1.15rem; }
@@ -882,3 +864,9 @@ a[target='_blank']:not([class])::after { content: ' ↗'; font-size: .85em; }
 .year-picker label, .admin-filterbar label, .finder label, .records label { font-weight: 800; }
 
 .year-picker { align-items: flex-end; }
+
+.admin-table td.num, .admin-table th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.admin-table .cell-note { display: block; margin-top: 2px; color: var(--muted); font-size: .78rem; font-weight: 500; text-transform: none; letter-spacing: 0; }
+.admin-table th[scope="row"] { color: inherit; background: none; font-size: .95rem; letter-spacing: 0; text-transform: none; font-weight: 700; border-top: 1px solid var(--line); }
+.admin-table tr.sf-tribe th[scope="row"] { border-left: 8px solid var(--tribe); }
+.admin-table .sf-name { font-weight: 700; }

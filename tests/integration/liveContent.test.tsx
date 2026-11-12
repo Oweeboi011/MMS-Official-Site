@@ -131,7 +131,7 @@ describe('pages read site content from Firestore', () => {
       expect(screen.getByText('Ranger station')).toBeInTheDocument();
       expect(screen.getByText('Sea of clouds.')).toBeInTheDocument();
       expect(screen.getByText('Head lamp')).toBeInTheDocument();
-      expect(screen.getByText('₱1,500', { selector: 'b' })).toBeInTheDocument();
+      expect(screen.getByRole('row', { name: /Guide Fee/ })).toHaveTextContent('₱1,500');
       expect(screen.getByText(/Member total/).closest('p')).toHaveTextContent('₱1,500');
       expect(screen.getByText('+ ₱450 Guest Fee for non-members')).toBeInTheDocument();
       expect(screen.getByText('Optional, only if availed')).toBeInTheDocument();
