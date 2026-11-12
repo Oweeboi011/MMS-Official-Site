@@ -865,6 +865,9 @@ a[target='_blank']:not([class])::after { content: ' ↗'; font-size: .85em; }
 
 .year-picker { align-items: flex-end; }
 
+input[type="file"] { padding: 8px 10px; }
+input[type="file"]::file-selector-button { margin-right: 12px; padding: 8px 16px; border: 0; border-radius: 999px; background: var(--navy); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+input[type="file"]::file-selector-button:hover { background: var(--ink); }
 .admin-table td.num, .admin-table th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .admin-table .cell-note { display: block; margin-top: 2px; color: var(--muted); font-size: .78rem; font-weight: 500; text-transform: none; letter-spacing: 0; }
 .admin-table th[scope="row"] { color: inherit; background: none; font-size: .95rem; letter-spacing: 0; text-transform: none; font-weight: 700; border-top: 1px solid var(--line); }
