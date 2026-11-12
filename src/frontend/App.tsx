@@ -46,6 +46,9 @@ const HelpPage = lazy(() => import('./pages/HelpPage'));
 const AdminHelpPage = lazy(() => import('./pages/AdminHelpPage'));
 const MyDetailsPage = lazy(() => import('./pages/MyDetailsPage'));
 const MyActivitiesPage = lazy(() => import('./pages/MyActivitiesPage'));
+const SportfestBoard = lazy(() => import('./components/SportfestBoard'));
+const AdminSportfestPage = lazy(() => import('./pages/AdminSportfestPage'));
+const ContentEntriesPage = lazy(() => import('./pages/ContentEntriesPage'));
 const WhatsNewPage = lazy(() => import('./pages/WhatsNewPage'));
 const AdminRegistrationsPage = lazy(() => import('./pages/AdminRegistrationsPage'));
 const AdminAuditPage = lazy(() => import('./pages/AdminAuditPage'));
@@ -78,6 +81,7 @@ const pageBodies: Record<string, ReactNode> = {
   '/media/videos': <Videos />,
   '/membership/join': <><HowToJoin /><Faq /><InquiryForm /><JoinCta /></>,
   '/membership/login': <Passport />,
+  '/activities/sportfest': <Suspense fallback={<p role="status">Loading…</p>}><SportfestBoard /></Suspense>,
 };
 
 // After the first page settles, fetch the on-demand public pages so moving between them doesn't flash "Loading…".
@@ -125,7 +129,8 @@ export default function App() {
         <Route path="/admin/help" element={<RouteErrorBoundary key="admin-help"><Suspense fallback={loading}><AdminHelpPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/details" element={<RouteErrorBoundary key="my-details"><Suspense fallback={loading}><MyDetailsPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/activities" element={<RouteErrorBoundary key="my-activities"><Suspense fallback={loading}><MyActivitiesPage /></Suspense></RouteErrorBoundary>} />
-        <Route path="/account/whats-new"element={<RouteErrorBoundary key="whats-new"><Suspense fallback={loading}><WhatsNewPage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/account/content" element={<RouteErrorBoundary key="content"><Suspense fallback={loading}><ContentEntriesPage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/account/whats-new" element={<RouteErrorBoundary key="whats-new"><Suspense fallback={loading}><WhatsNewPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/help" element={<RouteErrorBoundary key="help"><Suspense fallback={loading}><HelpPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/privacy" element={<RouteErrorBoundary key="privacy"><Suspense fallback={loading}><PrivacyPage /></Suspense></RouteErrorBoundary>} />
         {/* Old Open Climbs app paths: the functions' account emails still link here. */}
@@ -140,6 +145,7 @@ export default function App() {
         <Route path="/account/climbs/:regId/waiver" element={<RouteErrorBoundary key="waiver"><Suspense fallback={loading}><WaiverPrintPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/climbs" element={<RouteErrorBoundary key="my-climbs"><Suspense fallback={loading}><MyClimbsPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/insights" element={<RouteErrorBoundary key="admin-insights"><Suspense fallback={loading}><AdminInsightsPage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/admin/sportfest" element={<RouteErrorBoundary key="admin-sportfest"><Suspense fallback={loading}><AdminSportfestPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/sitemap" element={<RouteErrorBoundary key="admin-sitemap"><Suspense fallback={loading}><AdminSitemapPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/audit" element={<RouteErrorBoundary key="admin-audit"><Suspense fallback={loading}><AdminAuditPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/users" element={<RouteErrorBoundary key="admin-users"><Suspense fallback={loading}><AdminUsersPage /></Suspense></RouteErrorBoundary>} />

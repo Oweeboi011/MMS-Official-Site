@@ -8,7 +8,9 @@ import { splitSchedule, toClimb, type ScheduleClimb } from '../data/climbs';
 import type { ContentBlock } from '../data/subpages';
 import type { Doc } from '../lib/firestoreRest';
 import { manilaYear } from '../lib/manila';
-import { announcementsLoader, climbsLoader, loadCurrentOfficers, loadOfficers, loadReviews, loadSettings, loadSurveys, publicReadsEnabled } from './publicData';
+import { climbLogBlocks, climbLogPath } from '../data/climbLog';
+import { entryBlocks, entryPageOf } from '../data/entryBlocks';
+import { announcementsLoader, climbsLoader, entriesLoader, loadClimbLog, loadCurrentOfficers, loadOfficers, loadReviews, loadSettings, loadSurveys, publicReadsEnabled } from './publicData';
 
 // undefined = loading or failed (show nothing); null = nothing there (not configured, no doc). `load` must be module-level.
 export function useLoaded<T>(load: (() => Promise<T | null | undefined>) | null): T | null | undefined {
@@ -45,12 +47,25 @@ function swapIn(blocks: ContentBlock[], docs: Doc[] | null | undefined, live: (b
   return docs === null || docs?.length === 0 ? blocks : live(blocks, docs ?? []);
 }
 
+// Officer-submitted entries (ADR 0010): real entries replace the sample blocks, never mixed; none keeps the sample.
+// A page with no sample blocks (e.g. videos) shows only entries.
+function fromEntries(path: string, blocks: ContentBlock[] | undefined, docs: Doc[] | null | undefined): ContentBlock[] | undefined {
+  if (docs === undefined) return blocks ? [] : blocks;
+  const live = entryBlocks(path, docs ?? []);
+  return live.length ? live : blocks;
+}
+
 // Pages whose sample blocks give way to live data: leadership (officers) and stories (approved reviews).
 export function useLiveBlocks(path: string, blocks: ContentBlock[] | undefined): ContentBlock[] | undefined {
+  const entryPage = entryPageOf(path);
+  const entryDocs = useLoaded(entryPage ? entriesLoader(entryPage) : null);
   const officerDocs = useLoaded(path === leadershipPath ? loadOfficers : null);
   const reviewDocs = useLoaded(path === storiesPath ? loadReviews : null);
+  const logDocs = useLoaded(path === climbLogPath ? loadClimbLog : null);
+  if (entryPage) return fromEntries(path, blocks, entryDocs);
   if (!blocks) return blocks;
   if (path === leadershipPath) return swapIn(blocks, officerDocs, leadershipBlocks);
+  if (path === climbLogPath) return swapIn(blocks, logDocs, (b, d) => climbLogBlocks(b, d, new Date()));
   return path === storiesPath ? swapIn(blocks, reviewDocs, storiesBlocks) : blocks;
 }
 

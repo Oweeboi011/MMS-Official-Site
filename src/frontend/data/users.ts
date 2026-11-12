@@ -1,5 +1,5 @@
 // Account rows for the admin Accounts page. Plain data: no Firebase here.
-export interface UserRow { uid: string; email: string; name: string; role: string; createdAt: number; addedBy: string; canEmailMembers: boolean }
+export interface UserRow { uid: string; email: string; name: string; role: string; createdAt: number; addedBy: string; canEmailMembers: boolean; groups: string[] }
 
 export const joinedLabel = (ms: number) => (ms ? new Date(ms).toLocaleDateString('en-PH', { dateStyle: 'medium', timeZone: 'Asia/Manila' }) : '—');
 

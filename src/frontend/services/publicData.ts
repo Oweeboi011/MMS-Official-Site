@@ -48,6 +48,15 @@ async function query(collection: string, options: QueryOptions): Promise<Doc[] |
   return Array.isArray(rows) ? decodeQuery(rows) : null;
 }
 
+// Published page data (contentEntries, ADR 0010): one read per page. Rules allow a list only when it asks for published.
+const entryLoaders = new Map<string, () => Promise<Doc[] | null | undefined>>();
+export function entriesLoader(page: string) { // stable per page, for useLoaded
+  if (!entryLoaders.has(page)) {
+    entryLoaders.set(page, () => once(`entries:${page}`, () => query('contentEntries', { where: [{ field: 'page', op: 'EQUAL', value: page }, { field: 'status', op: 'EQUAL', value: 'published' }], limit: 200 })));
+  }
+  return entryLoaders.get(page)!;
+}
+
 // Each page reads only what it shows (Firestore bills per document returned; free quota 50k/day).
 const announcementsLoaders = new Map<number, () => Promise<Doc[] | null | undefined>>();
 export function announcementsLoader(limit: number) { // stable per limit, for useLoaded
@@ -63,6 +72,8 @@ export const loadSurveys = () => once('surveys', () => query('surveys', { limit:
 export const loadCurrentOfficers = () => once('officers:current', () => query('officers', { where: [{ field: 'current', op: 'EQUAL', value: true }], limit: 50 }));
 // Leadership lists every term; current officers sort first so the cap never drops them.
 export const loadOfficers = () => once('officers', () => query('officers', { orderBy: { field: 'current', desc: true }, limit: 300 }));
+// Every climb, newest first, for the Climb/Hike Log (the page keeps only the completed ones).
+export const loadClimbLog = () => once('climbs:log', () => query('climbs', { where: [{ field: 'startDate', op: 'GREATER_THAN_OR_EQUAL', value: manilaYearStart(1990) }], orderBy: { field: 'startDate', desc: true }, limit: 300 }));
 // Climbs by start date (needs `startDate` as a Timestamp). Current view: this Manila year onward. Archive: one year.
 const climbsLoaders = new Map<string, () => Promise<Doc[] | null | undefined>>();
 export function climbsLoader(fromYear: number, onlyThatYear: boolean) { // stable per key, for useLoaded

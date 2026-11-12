@@ -35,7 +35,7 @@ export const billingHardStop = onMessagePublished('billing-budget', async (event
   logger.warn('Billing DISABLED: budget reached', { name, cost: notification.costAmount, budget: notification.budgetAmount });
 });
 
-// Open Climbs (ported from mms-open-climbs). Not ported: ogPrerender, cspReport (Firebase Hosting rewrites).
+// Open Climbs (ported from mms-open-climbs). Replaced on Cloudflare, not ported: ogPrerender, cspReport (docs/guides/API.md).
 export { onRegistrationCreated, onRegistrationUpdated, onRegistrationDeleted } from './triggers/registrations.js';
 export { onRegistrationDetailsWritten } from './triggers/memberDetails.js';
 export { onClimbUpdated } from './triggers/climbs.js';

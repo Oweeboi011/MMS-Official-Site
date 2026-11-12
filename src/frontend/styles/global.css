@@ -208,6 +208,18 @@ button { font: inherit; }
 .profile-photo { display: flex; gap: 18px; align-items: center; margin-bottom: 14px; }
 .profile-photo img, .profile-photo-empty { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 1px solid var(--line); }
 .profile-photo-empty { display: grid; place-items: center; font-size: .8rem; color: var(--muted, #5b6672); background: #f3f4f6; }
+.group-boxes { display: flex; gap: 10px; border: 0; margin: 0; padding: 0; flex-wrap: wrap; }
+.group-boxes label { display: inline-flex; gap: 4px; align-items: center; }
+.sf-standings { list-style: none; margin: 0 0 24px; padding: 0; display: grid; gap: 10px; }
+.sf-tribe { display: grid; grid-template-columns: 3rem 1fr auto auto; gap: 12px; align-items: center; padding: 14px 18px; border: 1px solid var(--line); border-left: 8px solid var(--tribe); border-radius: 16px; background: #fff; }
+.sf-rank { font-weight: 800; }
+.sf-name { font-weight: 700; }
+.sf-medals { font-size: .85rem; color: var(--muted, #5b6672); }
+.sf-pts strong { font-size: 1.4rem; }
+.sf-rows { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.sf-rows li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-bottom: 1px solid var(--line); }
+.sf-scoring { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+@media (max-width: 640px) { .sf-tribe { grid-template-columns: 2.5rem 1fr auto; } .sf-medals { grid-column: 1 / -1; } }
 .consent-check { display: flex; gap: 10px; align-items: flex-start; }
 .consent-check input { margin-top: 4px; }
 .my-climbs { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }

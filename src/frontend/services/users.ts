@@ -3,6 +3,7 @@
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { collection, doc, getDocs, limit, query, serverTimestamp, updateDoc, where } from 'firebase/firestore/lite';
 import { toMyClimb, newestFirst, type MyClimb } from '../data/myClimbs';
+import { cleanGroups } from '../data/contentRights';
 import type { UserRow } from '../data/users';
 import { logAudit } from './auditLog';
 import { firebase } from './firebase';
@@ -14,7 +15,7 @@ export async function listUsers(): Promise<UserRow[]> {
   return snap.docs.map((d) => {
     const v = d.data();
     const created = v.createdAt && typeof v.createdAt === 'object' && 'toMillis' in v.createdAt ? (v.createdAt as { toMillis: () => number }).toMillis() : 0;
-    return { uid: d.id, email: String(v.email ?? ''), name: String(v.name ?? v.displayName ?? ''), role: String(v.role ?? 'member'), createdAt: created, addedBy: String(v.addedBy ?? ''), canEmailMembers: v.canEmailMembers === true };
+    return { uid: d.id, email: String(v.email ?? ''), name: String(v.name ?? v.displayName ?? ''), role: String(v.role ?? 'member'), createdAt: created, addedBy: String(v.addedBy ?? ''), canEmailMembers: v.canEmailMembers === true, groups: cleanGroups(v.groups) };
   }).sort((a, b) => a.email.localeCompare(b.email));
 }
 
@@ -22,6 +23,13 @@ export async function setRole(uid: string, role: 'member' | 'admin', label = '')
   if (!writesEnabled) throw new Error(readOnlyMessage);
   await updateDoc(doc(firebase().db, 'users', uid), { role, updatedAt: serverTimestamp() });
   await logAudit({ action: 'role changed', targetType: 'user', targetId: uid, targetLabel: label, details: role });
+}
+
+export async function setGroups(uid: string, groups: string[], label = ''): Promise<void> {
+  if (!writesEnabled) throw new Error(readOnlyMessage);
+  const clean = cleanGroups(groups);
+  await updateDoc(doc(firebase().db, 'users', uid), { groups: clean, updatedAt: serverTimestamp() });
+  await logAudit({ action: 'groups changed', targetType: 'user', targetId: uid, targetLabel: label, details: clean.join(', ') || 'none' });
 }
 
 const callable = <I, O>(name: string) => httpsCallable<I, O>(getFunctions(firebase().app, 'asia-southeast1'), name);

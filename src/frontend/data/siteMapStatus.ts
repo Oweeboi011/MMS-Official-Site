@@ -16,6 +16,7 @@ export interface MapPage { path: string; label: string; area: string; state: Pag
 export const STATE_LABEL: Record<PageState, string> = { live: 'Live', partial: 'Partial', sample: 'Sample copy', off: 'Off' };
 const SAMPLE = 'Sample copy, not confirmed by officers.';
 const EDIT = '/admin#site-content';
+const SUBMIT = '/account/content';
 
 type Verdict = Pick<MapPage, 'state' | 'note' | 'fix'>;
 type Rule = (f: PageFacts) => Verdict;
@@ -28,11 +29,19 @@ const hasSocial = (f: PageFacts) => Object.keys(f.settings).some((k) => k.starts
 
 // Pages whose content comes from admin-edited data, by path; every other page is sample copy.
 const RULES: Record<string, Rule> = {
+  '/activities/sportfest': (f) => needs(has(f, 'sportfestGames'), partial('No games entered yet. The scoreboard is for signed-in members only.', '/admin/sportfest')),
+  '/explore/climb-log': (f) => needs(f.openClimbs > 0, sample('No climbs published: the sample log is shown.', '/admin')),
+  '/activities/calendar': (f) => needs(has(f, 'entries:calendar'), sample('No calendar entries published: the sample calendar is shown.', SUBMIT)),
+  '/media/videos': (f) => needs(has(f, 'entries:media'), sample('No videos published yet.', SUBMIT)),
+  '/media/publications': (f) => needs(has(f, 'entries:media'), sample('No publications published yet.', SUBMIT)),
+  '/membership/benefits': (f) => needs(has(f, 'entries:membership'), sample('No membership entries published: sample benefits and fees are shown.', SUBMIT)),
+  '/explore/trails': (f) => needs(has(f, 'entries:trails'), sample('No trails published: sample itineraries are shown.', SUBMIT)),
+  '/explore/destinations': (f) => needs(has(f, 'entries:destinations'), sample('No destinations published: sample regions are shown.', SUBMIT)),
   '/about/leadership': (f) => needs(has(f, 'officers'), sample('No officers entered: sample names are shown.', EDIT)),
   '/about/committees': (f) => needs(has(f, 'committees'), sample('No committees entered: sample list shown.', EDIT)),
   '/about/glossary': (f) => needs(has(f, 'glossary'), sample('Glossary not entered: sample terms shown.', EDIT)),
   '/media/news': (f) => needs(has(f, 'announcements'), partial('No announcements published yet.', EDIT)),
-  '/media/photos': (f) => needs(has(f, 'media') || Boolean(f.settings.photoAlbumsUrl), sample('No MMS photos or albums added: stock photos shown.', EDIT)),
+  '/media/photos': (f) => needs(has(f, 'media') || has(f, 'entries:media') || Boolean(f.settings.photoAlbumsUrl), sample('No MMS photos or albums added: stock photos shown.', EDIT)),
   '/media/stories': (f) => needs(has(f, 'reviews'), sample('No approved reviews yet: sample quotes shown.', EDIT)),
   '/activities/upcoming': (f) => needs(f.openClimbs > 0, partial('No climbs published.', '/admin')),
   '/activities/open-climbs': (f) => needs(f.openClimbs > 0, partial('No climbs published.', '/admin')),
@@ -51,6 +60,7 @@ function features(f: PageFacts): MapPage[] {
     { path: '/account/sign-in', label: 'Sign in', area: ACCOUNTS, ...live() },
     { path: '/account/details', label: 'My details', area: ACCOUNTS, ...live() },
     { path: '/account/activities', label: 'My activities', area: ACCOUNTS, ...live() },
+    { path: '/account/content', label: 'Page content', area: ACCOUNTS, ...live() },
     { path: '/account/climbs', label: 'My climbs', area: ACCOUNTS, ...live() },
     { path: '/account/whats-new', label: 'What is new', area: ACCOUNTS, ...live() },
     { path: '/climbs/:id/register', label: 'Register for a climb', area: ACCOUNTS, ...reg },

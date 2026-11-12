@@ -10,6 +10,7 @@ import {
   type User,
 } from 'firebase/auth';
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore/lite';
+import { cleanGroups } from '../data/contentRights';
 import { firebase } from './firebase';
 import { setSignedInHint } from '../lib/signedInHint';
 
@@ -19,23 +20,26 @@ export interface Account {
   role: string;
   emailVerified: boolean;
   name?: string; // the sign-in profile's display name, used to start a registration
+  groups?: string[]; // BOT, ExeCom, TCom (users/{uid}.groups): what content they may submit
 }
+
+const fromProfile = (d: Record<string, unknown>) => ({ role: String(d.role ?? 'member'), groups: cleanGroups(d.groups) });
 
 // First sign-in creates users/{uid}, role 'member' = any account (old-app value), not MMS membership.
 // Guests and members alike; registrations.memberType sets the fee. Admins are set in the console.
-async function roleOf(user: User): Promise<string> {
+async function profileOf(user: User): Promise<{ role: string; groups: string[] }> {
   const { db } = firebase();
   const ref = doc(db, 'users', user.uid);
   const snap = await getDoc(ref);
-  if (snap.exists()) return String(snap.data().role ?? 'member');
+  if (snap.exists()) return fromProfile(snap.data());
   try {
     await setDoc(ref, { role: 'member', email: user.email ?? '', name: user.displayName ?? '', createdAt: serverTimestamp() });
-    return 'member';
+    return { role: 'member', groups: [] };
   } catch (e) {
     // Another tab created it first (rules then refuse a second createdAt): use that profile.
     if ((e as { code?: string }).code !== 'permission-denied') throw e;
     const again = await getDoc(ref);
-    if (again.exists()) return String(again.data().role ?? 'member');
+    if (again.exists()) return fromProfile(again.data());
     throw e;
   }
 }
@@ -46,11 +50,11 @@ export function watchAccount(onChange: (account: Account | null) => void, onErro
     const call = ++latest;
     setSignedInHint(Boolean(user));
     if (!user) return onChange(null);
-    roleOf(user)
-      .then((role) => {
+    profileOf(user)
+      .then(({ role, groups }) => {
         if (call !== latest) return;
         setSignedInHint(true, role);
-        onChange({ uid: user.uid, email: user.email ?? '', role, emailVerified: user.emailVerified, name: user.displayName ?? '' });
+        onChange({ uid: user.uid, email: user.email ?? '', role, emailVerified: user.emailVerified, name: user.displayName ?? '', groups });
       })
       .catch((e: Error) => { if (call === latest) onError(e); });
   });
