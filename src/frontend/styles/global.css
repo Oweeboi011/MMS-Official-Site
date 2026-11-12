@@ -439,7 +439,6 @@ footer { padding: 44px 0 95px; color: rgba(255,255,255,.72); background: #09121b
 }
 
 /* Credits */
-.simple-header { position: relative; background: var(--ink); color: #fff; min-height: 112px; }
 .credits { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
 .credits li { display: flex; gap: 16px; align-items: center; padding: 12px; border-radius: 18px; background: #fff; border: 1px solid var(--line); font-size: .85rem; }
 .credits img { width: 96px; height: 64px; flex: none; object-fit: cover; border-radius: 10px; }
