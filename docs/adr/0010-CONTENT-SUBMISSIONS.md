@@ -4,7 +4,7 @@
 > - **For:** Owner · Officers and leads · Admins · Developers
 > - **In short:** Page data (calendar, media, membership, trails) is entered by officers, not coded. Each of the three groups (BOT, ExeCom, TCom) has its own rights, and the site's admins (caretakers) come from those groups. Entries are reviewed before they go public, and each user's groups and rights are visible on their user record.
 
-- **Status:** **Proposed** 2026-11-12, owner answers below; rights marked "confirm" need a yes from MMS.
+- **Status:** **Proposed** 2026-11-12; built and live since v1.6.0 (2026-11-12) on the owner's answers below. Stays Proposed until MMS confirms the rights marked "confirm".
 - **Issues:** [#322](https://github.com/Oweeboi011/MMS-Official-Site/issues/322) and its children.
 
 ## Problem
