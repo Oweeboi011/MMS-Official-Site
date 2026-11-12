@@ -1,5 +1,5 @@
 import {
-  computeTribeTotals, emptyPlacements, placementsOf, pointsFromPlacement, scoreRows, toGame, toScore, years, type Placement, type Score,
+  computeTribeTotals, duplicateIds, emptyPlacements, gamesForYear, placementsOf, pointsFromPlacement, scoreRows, toGame, toScore, years, type Placement, type Score,
 } from '../../src/frontend/data/sportfest';
 
 const score = (tribe: Score['tribe'], placement: Placement, points: number, gameId = 'g1'): Score => ({ id: `${gameId}${tribe}`, gameId, tribe, placement, points });
@@ -53,5 +53,20 @@ describe('reading stored docs', () => {
 
   it('lists the years newest first', () => {
     expect(years([toGame('a', { year: 2025 }), toGame('b', { year: 2026 }), toGame('c', { year: 2026 })])).toEqual([2026, 2025]);
+  });
+});
+
+describe('yearly games', () => {
+  const g = (id: string, name: string, year: number, status: string) => toGame(id, { name, category: 'Sports', gameClass: 'C', maxPoints: 40, status, year });
+
+  it('flags upcoming stubs that repeat a played game', () => {
+    const games = [g('a', 'Tug of war', 2026, 'completed'), g('b', 'tug of war ', 2026, 'upcoming'), g('c', 'Fire making', 2026, 'upcoming')];
+    expect([...duplicateIds(games, new Set())]).toEqual(['b']);
+    expect([...duplicateIds([g('a', 'Relay', 2026, 'upcoming'), g('b', 'Relay', 2026, 'upcoming')], new Set(['a']))]).toEqual(['b']);
+  });
+
+  it('copies last year’s games as upcoming, skipping ones already there', () => {
+    const games = [g('a', 'Tug of war', 2026, 'completed'), g('b', 'Relay', 2026, 'completed'), g('c', 'Relay', 2027, 'upcoming')];
+    expect(gamesForYear(games, 2026, 2027)).toEqual([{ name: 'Tug of war', category: 'Sports', date: '', status: 'upcoming', gameClass: 'C', maxPoints: 40, year: 2027 }]);
   });
 });
