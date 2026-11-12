@@ -276,7 +276,7 @@ button { font: inherit; }
 .insight dt { font-weight: 800; }
 .insight dd { margin: 0; overflow-wrap: anywhere; }
 .year-picker { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 40px; }
-.year-picker select { margin-left: 8px; padding: 8px 10px; border-radius: 10px; font: inherit; }
+
 .motto { margin: 10px 0 0; color: var(--gold); font-weight: 850; font-style: italic; }
 
 .passport { position: relative; overflow: hidden; padding: 30px; border-radius: 32px; color: #fff; background: var(--navy); box-shadow: var(--shadow); }
@@ -863,3 +863,21 @@ a[target='_blank']:not([class])::after { content: ' ↗'; font-size: .85em; }
 .react-flow__node.flow-sample { border-color: #252b73; background: rgba(37, 43, 115, .06); }
 .react-flow__node.flow-off { border-color: #a92e2a; background: rgba(169, 46, 42, .07); }
 .react-flow__node.flow-info { border-color: #6b7280; border-style: dashed; }
+
+/* One look for every text field, dropdown and textarea; labels sit above, bold. Low specificity so local sizing still wins. */
+:where(input:not([type="checkbox"], [type="radio"], [type="file"], [type="hidden"], [type="range"], [type="submit"], [type="button"]), select, textarea) {
+  min-height: 44px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background-color: #fff; color: inherit; font: inherit; max-width: 100%;
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+:where(select) {
+  appearance: none; padding-right: 38px; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23252b73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+}
+:where(input, select, textarea):hover { border-color: rgba(16, 26, 36, .35); }
+:where(input, select, textarea):focus-visible { outline: 0; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(37, 43, 115, .18); }
+:where(input, select, textarea):disabled { background-color: rgba(16, 26, 36, .05); cursor: not-allowed; }
+:where(input, select, textarea)[aria-invalid="true"] { border-color: var(--red); }
+.year-picker label, .admin-filterbar label, .finder label, .records label { font-weight: 800; }
+
+.year-picker { align-items: flex-end; }
