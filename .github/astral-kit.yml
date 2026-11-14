@@ -1,0 +1,7 @@
+# Agentic SDLC kit config: `kit-sync` renders agents, skills and instructions from it.
+kit: v0
+runtimes: [copilot, claude-code]
+stack: [typescript-react]
+gate: npm run check
+agents: [planner, coding, review, test, release, sre, feedback]
+templates: [issue-forms]
