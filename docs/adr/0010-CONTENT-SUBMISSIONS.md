@@ -26,6 +26,8 @@ Several public pages are fixed text in code (the site map marks them Sample copy
 - Membership facts (fees, requirements) can be submitted and approved by BOT and ExeCom only (confirm).
 - Owner picked both "approve everything" and "approve one area" for BOT and ExeCom; the wider right is taken. Narrow it here if that was not meant.
 - **Admin** is the caretaker of the site, a role apart from the groups (`role: admin`, as today). Admins are drawn from BOT, ExeCom and TCom, so one person can be an admin and in a group. Admins keep full access to content, users and settings; the group sets what a non-admin officer may do.
+- Only reviewers set `reviewedBy`. A TCom entry the submitter publishes has none; the audit log still records it.
+- Entry `data` holds only each page's known fields, with the same length limits in the rules and the form.
 - Every submit, approve and reject writes to the audit log.
 
 ## Why

@@ -6,7 +6,7 @@ import PageHero from '../components/PageHero';
 import SignInForm from '../components/SignInForm';
 import { STATUS_LABEL, entryActions, entrySummary, type Entry } from '../data/contentEntries';
 import { CONTENT_PAGES, hasContentRights, isContentReviewer, rightsFor } from '../data/contentRights';
-import { loadEntries, removeEntry, reviewEntry, saveEntry } from '../services/contentEntries';
+import { ENTRY_LIMIT, loadEntries, removeEntry, reviewEntry, saveEntry } from '../services/contentEntries';
 import type { Account } from '../services/auth';
 import { useAccount } from '../services/useAccount';
 
@@ -23,9 +23,9 @@ function Row({ entry, account, busy, canReview, onEdit, run }: { entry: Entry; a
       {entry.note && <p className="climb-notice" role="note">Reviewer note: {entry.note}</p>}
       <div className="editor-actions">
         {can.edit && <button type="button" className="chip" disabled={busy} onClick={onEdit}>Edit</button>}
-        {can.publish && <button type="button" className="chip" disabled={busy} onClick={() => void run(() => reviewEntry(account, entry, 'published'))}>Publish</button>}
-        {can.reject && <button type="button" className="chip" disabled={busy} onClick={() => void run(() => reviewEntry(account, entry, 'rejected', window.prompt('Why is it rejected? The submitter sees this.') ?? ''))}>Reject</button>}
-        {can.unpublish && <button type="button" className="chip" disabled={busy} onClick={() => void run(() => reviewEntry(account, entry, 'draft'))}>Unpublish</button>}
+        {can.publish && <button type="button" className="chip" disabled={busy} onClick={() => void run(() => reviewEntry(account, entry, 'published', canReview))}>Publish</button>}
+        {can.reject && <button type="button" className="chip" disabled={busy} onClick={() => { const why = window.prompt('Why is it rejected? The submitter sees this.'); if (why !== null) void run(() => reviewEntry(account, entry, 'rejected', canReview, why)); }}>Reject</button>}
+        {can.unpublish && <button type="button" className="chip" disabled={busy} onClick={() => void run(() => reviewEntry(account, entry, 'draft', canReview))}>Unpublish</button>}
         {can.remove && <button type="button" className="chip" disabled={busy} onClick={() => void run(() => removeEntry(entry))}>Delete</button>}
       </div>
     </li>
@@ -50,6 +50,7 @@ function Entries({ account }: { account: Account }) {
       )}
       {message && <p role="status">{message}</p>}
       {canReview && <p className="climb-muted">{waiting.length === 0 ? 'Nothing is waiting for review.' : `${waiting.length} waiting for review.`}</p>}
+      {rows.length >= ENTRY_LIMIT && <p className="climb-notice" role="note">Showing the first {ENTRY_LIMIT} entries; some are not listed.</p>}
       {rows.length === 0 ? <p>No entries yet.</p> : (
         <ul className="my-climbs">
           {rows.map((e) => <Row key={e.id} entry={e} account={account} busy={busy} canReview={canReview} onEdit={() => setEditing(e)} run={run} />)}
