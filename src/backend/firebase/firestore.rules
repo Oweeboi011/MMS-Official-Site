@@ -157,6 +157,39 @@ service cloud.firestore {
         (isSignedIn() && resource.data.submittedBy == request.auth.uid && resource.data.status in ['draft', 'pending']);
     }
 
+    // ADR 0012: ExeCom and TCom task tracker. Admins and any group member read and write every task.
+    function isOfficer() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('groups', []).size() > 0);
+    }
+    function isoDate(d, k) {
+      return d.get(k, '') == '' || (d[k] is string && d[k].matches('^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$'));
+    }
+    function taskIsValid(d) {
+      return d.keys().hasOnly(['title', 'committee', 'status', 'ownerUid', 'ownerName', 'startDate', 'dueDate', 'notes', 'createdBy', 'createdAt', 'updatedAt']) &&
+        d.committee in ['execom', 'tcom'] && d.status in ['todo', 'doing', 'blocked', 'done'] &&
+        text(d, 'title', 1, 200) && shortText(d, 'ownerUid', 128) && shortText(d, 'ownerName', 200) && shortText(d, 'notes', 2000) &&
+        isoDate(d, 'startDate') && isoDate(d, 'dueDate') &&
+        (d.get('startDate', '') == '' || d.get('dueDate', '') == '' || d.startDate <= d.dueDate);
+    }
+    match /tasks/{taskId} {
+      allow read, delete: if isOfficer();
+      allow create: if isOfficer() && taskIsValid(request.resource.data) && request.resource.data.createdBy == request.auth.uid &&
+        request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time;
+      allow update: if isOfficer() && taskIsValid(request.resource.data) && !affected().hasAny(['createdBy', 'createdAt']) &&
+        request.resource.data.updatedAt == request.time;
+    }
+    // Who can own a task: a copy of name and groups, so private user records stay private. setGroups writes it.
+    match /groupMembers/{userId} {
+      allow read: if isOfficer();
+      allow create, update: if (isAdmin() || hasGroup('bot')) &&
+        request.resource.data.keys().hasOnly(['name', 'groups', 'updatedAt']) &&
+        request.resource.data.groups is list && request.resource.data.groups.size() > 0 &&
+        groupsAreValid(request.resource.data) && shortText(request.resource.data, 'name', 200);
+      allow delete: if isAdmin() || hasGroup('bot');
+    }
+
     // Sportfest and Beachineering scoreboard: signed-in members read, admins write (placements 1-4, four tribes).
     function sportfestGameIsValid(d) {
       return d.keys().hasOnly(['name', 'category', 'date', 'status', 'gameClass', 'maxPoints', 'year']) &&
@@ -478,9 +511,10 @@ service cloud.firestore {
 
     match /auditLog/{id} {
       allow read: if isAdmin();
-      // Content officers log their own submissions and decisions; admins log everything.
+      // Content officers log their own submissions and decisions, group members their task changes; admins log everything.
       allow create: if isAdmin() ||
-        ((isContentReviewer() || hasGroup('tcom')) && request.resource.data.targetType == 'content');
+        ((isContentReviewer() || hasGroup('tcom')) && request.resource.data.targetType == 'content') ||
+        (isOfficer() && request.resource.data.targetType == 'task' && request.resource.data.actorUid == request.auth.uid);
       allow update, delete: if false;
     }
 

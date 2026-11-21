@@ -1,7 +1,7 @@
 // #135 admin user management: list accounts and set roles (rules: admins update any users/{uid} except
 // canEmailMembers / createdAt; the syncAdminClaim trigger mirrors role into the token claim).
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { collection, doc, getDocs, limit, query, serverTimestamp, updateDoc, where } from 'firebase/firestore/lite';
+import { collection, doc, getDocs, limit, query, serverTimestamp, updateDoc, where, writeBatch } from 'firebase/firestore/lite';
 import { toMyClimb, newestFirst, type MyClimb } from '../data/myClimbs';
 import { cleanGroups } from '../data/contentRights';
 import type { UserRow } from '../data/users';
@@ -25,10 +25,17 @@ export async function setRole(uid: string, role: 'member' | 'admin', label = '')
   await logAudit({ action: 'role changed', targetType: 'user', targetId: uid, targetLabel: label, details: role });
 }
 
-export async function setGroups(uid: string, groups: string[], label = ''): Promise<void> {
+// Also keeps groupMembers (the task owner list) in step, in one batch (ADR 0012).
+export async function setGroups(uid: string, groups: string[], label = '', name = ''): Promise<void> {
   if (!writesEnabled) throw new Error(readOnlyMessage);
   const clean = cleanGroups(groups);
-  await updateDoc(doc(firebase().db, 'users', uid), { groups: clean, updatedAt: serverTimestamp() });
+  const { db } = firebase();
+  const batch = writeBatch(db);
+  batch.update(doc(db, 'users', uid), { groups: clean, updatedAt: serverTimestamp() });
+  const member = doc(db, 'groupMembers', uid);
+  if (clean.length > 0) batch.set(member, { name: name.trim() || 'Unnamed member', groups: clean, updatedAt: serverTimestamp() });
+  else batch.delete(member);
+  await batch.commit();
   await logAudit({ action: 'groups changed', targetType: 'user', targetId: uid, targetLabel: label, details: clean.join(', ') || 'none' });
 }
 

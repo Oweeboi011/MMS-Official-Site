@@ -49,6 +49,7 @@ const MyActivitiesPage = lazy(() => import('./pages/MyActivitiesPage'));
 const SportfestBoard = lazy(() => import('./components/SportfestBoard'));
 const AdminSportfestPage = lazy(() => import('./pages/AdminSportfestPage'));
 const ContentEntriesPage = lazy(() => import('./pages/ContentEntriesPage'));
+const TasksPage = lazy(() => import('./pages/TasksPage'));
 const WhatsNewPage = lazy(() => import('./pages/WhatsNewPage'));
 const AdminRegistrationsPage = lazy(() => import('./pages/AdminRegistrationsPage'));
 const AdminAuditPage = lazy(() => import('./pages/AdminAuditPage'));
@@ -130,6 +131,7 @@ export default function App() {
         <Route path="/account/details" element={<RouteErrorBoundary key="my-details"><Suspense fallback={loading}><MyDetailsPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/activities" element={<RouteErrorBoundary key="my-activities"><Suspense fallback={loading}><MyActivitiesPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/content" element={<RouteErrorBoundary key="content"><Suspense fallback={loading}><ContentEntriesPage /></Suspense></RouteErrorBoundary>} />
+        <Route path="/account/tasks" element={<RouteErrorBoundary key="tasks"><Suspense fallback={loading}><TasksPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/account/whats-new" element={<RouteErrorBoundary key="whats-new"><Suspense fallback={loading}><WhatsNewPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/help" element={<RouteErrorBoundary key="help"><Suspense fallback={loading}><HelpPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/privacy" element={<RouteErrorBoundary key="privacy"><Suspense fallback={loading}><PrivacyPage /></Suspense></RouteErrorBoundary>} />

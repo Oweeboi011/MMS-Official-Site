@@ -471,8 +471,27 @@ describe("updateUserProfile callable", () => {
     ).rejects.toMatchObject({ code: "invalid-argument" });
   });
 
+  it("renames the task owner entry when the person holds a group", async () => {
+    mockDb.get
+      .mockResolvedValueOnce({ exists: true, data: () => ({ role: "admin" }) })
+      .mockResolvedValueOnce({ exists: true });
+    await indexModule.updateUserProfile({ auth: { uid: "admin-1" }, data: { uid: "target", displayName: "New Name" } });
+    expect(mockDb.doc).toHaveBeenCalledWith("groupMembers/target");
+    expect(mockDb.update).toHaveBeenCalledWith(expect.objectContaining({ name: "New Name" }));
+  });
+
+  it("leaves the owner list alone when the person has no group", async () => {
+    mockDb.get
+      .mockResolvedValueOnce({ exists: true, data: () => ({ role: "admin" }) })
+      .mockResolvedValueOnce({ exists: false });
+    await indexModule.updateUserProfile({ auth: { uid: "admin-1" }, data: { uid: "target", displayName: "New Name" } });
+    expect(mockDb.update).not.toHaveBeenCalledWith(expect.objectContaining({ name: "New Name" }));
+  });
+
   it("updates Auth and the Firestore profile together", async () => {
-    mockDb.get.mockResolvedValueOnce({ exists: true, data: () => ({ role: "admin" }) });
+    mockDb.get
+      .mockResolvedValueOnce({ exists: true, data: () => ({ role: "admin" }) })
+      .mockResolvedValueOnce({ exists: false });
     const handler = indexModule.updateUserProfile;
     const result = await handler({
       auth: { uid: "admin-1" },
@@ -544,6 +563,21 @@ describe("deleteUserAccount callable", () => {
     expect(result).toEqual({ success: true });
     expect(mockAdminAuth.deleteUser).toHaveBeenCalledWith("target");
     expect(mockDb.delete).toHaveBeenCalled();
+  });
+
+  it("removes the person's task owner entry with their other personal data", async () => {
+    mockDb.get.mockResolvedValueOnce({ exists: true, data: () => ({ role: "admin" }) });
+    const scrub = vi.fn().mockResolvedValue();
+    mockDb.collection = (name) => ({
+      where: () => ({ get: async () => ({ docs: name === "tasks" ? [{ ref: { update: scrub } }] : [] }) }),
+    });
+    try {
+      await indexModule.deleteUserAccount({ auth: { uid: "admin-1" }, data: { uid: "target" } });
+    } finally {
+      delete mockDb.collection;
+    }
+    expect(mockDb.doc).toHaveBeenCalledWith("groupMembers/target");
+    expect(scrub).toHaveBeenCalledWith({ ownerUid: "", ownerName: "" });
   });
 
   it("still deletes the Firestore profile when the Auth account is already gone", async () => {

@@ -61,6 +61,7 @@ function features(f: PageFacts): MapPage[] {
     { path: '/account/details', label: 'My details', area: ACCOUNTS, ...live() },
     { path: '/account/activities', label: 'My activities', area: ACCOUNTS, ...live() },
     { path: '/account/content', label: 'Page content', area: ACCOUNTS, ...live() },
+    { path: '/account/tasks', label: 'Committee tasks', area: ACCOUNTS, ...live() },
     { path: '/account/climbs', label: 'My climbs', area: ACCOUNTS, ...live() },
     { path: '/account/whats-new', label: 'What is new', area: ACCOUNTS, ...live() },
     { path: '/climbs/:id/register', label: 'Register for a climb', area: ACCOUNTS, ...reg },
