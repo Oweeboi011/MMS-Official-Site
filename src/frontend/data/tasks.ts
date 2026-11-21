@@ -68,3 +68,42 @@ export function validateTask(t: TaskInput): string {
   if (t.notes.length > 2000) return 'Notes are too long (max 2000 characters).';
   return '';
 }
+
+interface Bar { task: Task; left: number; width: number }
+export interface Timeline {
+  from: string; to: string; months: { label: string; left: number }[];
+  groups: { committee: Committee; label: string; bars: Bar[] }[]; undated: Task[];
+}
+
+const DAY_MS = 86_400_000;
+const dayOf = (iso: string) => Date.parse(`${iso}T00:00:00Z`) / DAY_MS;
+const monthLabel = (y: number, m: number) => new Date(Date.UTC(y, m, 1)).toLocaleDateString('en', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+
+// Bars as percentages of the whole range (both end days count). A task with one date is a one-day marker.
+export function timelineOf(tasks: Task[]): Timeline {
+  const span = (t: Task) => [t.startDate || t.dueDate, t.dueDate || t.startDate].sort() as [string, string];
+  const dated = tasks.filter((t) => t.startDate || t.dueDate);
+  const undated = tasks.filter((t) => !t.startDate && !t.dueDate);
+  if (dated.length === 0) return { from: '', to: '', months: [], groups: [], undated };
+  const from = dated.map((t) => span(t)[0]).sort()[0];
+  const to = dated.map((t) => span(t)[1]).sort().at(-1) as string;
+  const total = dayOf(to) - dayOf(from) + 1;
+  const pct = (days: number) => (days / total) * 100;
+  const groups = COMMITTEES.map(([committee, label]) => ({
+    committee, label,
+    bars: dated.filter((t) => t.committee === committee).map((task): Bar => {
+      const [s, e] = span(task);
+      return { task, left: pct(dayOf(s) - dayOf(from)), width: pct(dayOf(e) - dayOf(s) + 1) };
+    }).sort((x, y) => span(x.task)[0].localeCompare(span(y.task)[0]) || x.task.title.localeCompare(y.task.title)),
+  })).filter((g) => g.bars.length > 0);
+  const [fy, fm] = from.split('-').map(Number);
+  const [ty, tm] = to.split('-').map(Number);
+  const months = [{ label: monthLabel(fy, fm - 1), left: 0 }];
+  for (let y = fy, m = fm; y * 12 + m < ty * 12 + tm; ) {
+    [y, m] = m === 12 ? [y + 1, 1] : [y, m + 1];
+    const left = pct(dayOf(`${y}-${String(m).padStart(2, '0')}-01`) - dayOf(from));
+    // Skip labels that would touch the previous one or run off the right edge.
+    if (left <= 90 && left - months[months.length - 1].left >= 8) months.push({ label: monthLabel(y, m - 1), left });
+  }
+  return { from, to, months, groups, undated };
+}

@@ -5,6 +5,7 @@ import PageHero from '../components/PageHero';
 import SignInForm from '../components/SignInForm';
 import TaskForm from '../components/tasks/TaskForm';
 import TaskTable from '../components/tasks/TaskTable';
+import TaskTimeline from '../components/tasks/TaskTimeline';
 import { COMMITTEES, STATUSES, canUseTasks, viewTasks, type Task, type TaskView } from '../data/tasks';
 import type { Account } from '../services/auth';
 import { TASK_LIMIT, loadOwners, loadTasks, removeTask, saveTask, type TaskOwner } from '../services/tasks';
@@ -25,10 +26,17 @@ function Filter({ id, label, value, onChange, options }: { id: string; label: st
   );
 }
 
+function Results({ tasks, mode, busy, onEdit, onDelete }: { tasks: Task[]; mode: 'table' | 'timeline'; busy: boolean; onEdit: (t: Task) => void; onDelete: (t: Task) => void }) {
+  if (tasks.length === 0) return <p>No tasks match.</p>;
+  if (mode === 'timeline') return <TaskTimeline tasks={tasks} today={today()} busy={busy} onEdit={onEdit} />;
+  return <TaskTable tasks={tasks} today={today()} busy={busy} onEdit={onEdit} onDelete={onDelete} />;
+}
+
 function Tasks({ account }: { account: Account }) {
   const { rows, message, busy, run } = useAdminList(loadTasks);
   const [owners, setOwners] = useState<TaskOwner[]>([]);
   const [editing, setEditing] = useState<Task | 'new' | null>(null);
+  const [mode, setMode] = useState<'table' | 'timeline'>('table');
   const [view, setView] = useState<TaskView>({ committee: '', status: '', ownerUid: '', sort: 'due' });
   useEffect(() => { void loadOwners().then(setOwners, () => setOwners([])); }, []);
   if (!rows) return <p role="status">{message || 'Loading…'}</p>;
@@ -46,23 +54,28 @@ function Tasks({ account }: { account: Account }) {
   return (
     <>
       <p><button type="button" className="btn btn-primary" onClick={() => setEditing('new')}>New task</button></p>
+      <div className="trail-tabs" role="group" aria-label="View">
+        {(['table', 'timeline'] as const).map((m) => (
+          <button key={m} type="button" className="chip" aria-pressed={mode === m} onClick={() => setMode(m)}>{m === 'table' ? 'Table' : 'Timeline'}</button>
+        ))}
+      </div>
       <div className="register-form">
         <Filter id="tf-committee" label="Committee" value={view.committee} onChange={(committee) => set({ committee })} options={COMMITTEES} />
         <Filter id="tf-status" label="Status" value={view.status} onChange={(status) => set({ status })} options={STATUSES} />
         <Filter id="tf-owner" label="Owner" value={view.ownerUid} onChange={(ownerUid) => set({ ownerUid })} options={owners.map((o) => [o.uid, o.name] as const)} />
-        <div className="editor-field">
-          <label htmlFor="tf-sort">Sort by</label>
-          <select id="tf-sort" value={view.sort} onChange={(e) => set({ sort: e.target.value as TaskView['sort'] })}>
-            {SORTS.map(([key, text]) => <option key={key} value={key}>{text}</option>)}
-          </select>
-        </div>
+        {mode === 'table' && (
+          <div className="editor-field">
+            <label htmlFor="tf-sort">Sort by</label>
+            <select id="tf-sort" value={view.sort} onChange={(e) => set({ sort: e.target.value as TaskView['sort'] })}>
+              {SORTS.map(([key, text]) => <option key={key} value={key}>{text}</option>)}
+            </select>
+          </div>
+        )}
       </div>
       {message && <p role="status">{message}</p>}
       <p className="climb-muted">{shown.length} of {rows.length} tasks</p>
       {rows.length >= TASK_LIMIT && <p className="climb-notice" role="note">Showing the {TASK_LIMIT} most recently changed tasks; older ones are not listed.</p>}
-      {shown.length === 0 ? <p>No tasks match.</p> : (
-        <TaskTable tasks={shown} today={today()} busy={busy} onEdit={setEditing} onDelete={(t) => void run(() => removeTask(t))} />
-      )}
+      <Results tasks={shown} mode={mode} busy={busy} onEdit={setEditing} onDelete={(t) => void run(() => removeTask(t))} />
     </>
   );
 }

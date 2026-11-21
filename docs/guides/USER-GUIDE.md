@@ -50,7 +50,7 @@ Upload to the MMS Google Drive `Albums/YYYY-MM climb` folder, remove photos of a
 
 ## Committee tasks (ExeCom, TCom, BOT, admins)
 
-Sign in, open **Account → Tasks** (`/account/tasks`). Only admins and members of BOT, ExeCom or TCom see it. **New task**: title, committee, status (To do, Doing, Blocked, Done), owner, start and due dates, notes. Owners are people who hold a group; an admin gives groups under **Accounts and roles**. The table filters by committee, status and owner and sorts by due date, title, status or committee; unfinished tasks past their due date are marked **Overdue**. Everyone in these groups can edit any task. Decision: [ADR 0012](../adr/0012-COMMITTEE-TASK-TRACKER.md).
+Sign in, open **Account → Tasks** (`/account/tasks`). Only admins and members of BOT, ExeCom or TCom see it. **New task**: title, committee, status (To do, Doing, Blocked, Done), owner, start and due dates, notes. Owners are people who hold a group; an admin gives groups under **Accounts and roles**. The table filters by committee, status and owner and sorts by due date, title, status or committee; unfinished tasks past their due date are marked **Overdue**. **Timeline** shows the same tasks (with the same filters) as bars from start to due, grouped by committee; a task with one date is a one-day marker, and tasks with no dates are listed under **No dates yet**. Everyone in these groups can edit any task. Decision: [ADR 0012](../adr/0012-COMMITTEE-TASK-TRACKER.md).
 
 ## Open Climbs
 

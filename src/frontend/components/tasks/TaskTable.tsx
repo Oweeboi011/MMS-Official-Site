@@ -17,7 +17,7 @@ export default function TaskTable({ tasks, today, busy, onEdit, onDelete }: {
           <td>{label(COMMITTEES, t.committee)}</td>
           <td>{label(STATUSES, t.status)}</td>
           <td>{t.ownerName || 'Unassigned'}</td>
-          <td>{t.dueDate || '—'}{isOverdue(t, today) && <> <span className="my-climb-chip">Overdue</span></>}</td>
+          <td>{t.dueDate || '—'}{isOverdue(t, today) && <> <span className="task-overdue">Overdue</span></>}</td>
           <td>
             <button type="button" className="chip" disabled={busy} onClick={() => onEdit(t)}>Edit</button>
             {confirming === t.id ? (

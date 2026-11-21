@@ -10,6 +10,7 @@ vi.mock('../../src/frontend/services/tasks', () => ({
     { id: 't1', title: 'Book venue', committee: 'execom', status: 'doing', ownerUid: 'u1', ownerName: 'Ana', startDate: '2020-01-01', dueDate: '2020-02-01', notes: '', updatedAt: 2 },
     { id: 't2', title: 'Plan training', committee: 'tcom', status: 'todo', ownerUid: 'u2', ownerName: 'Ben', startDate: '', dueDate: '2999-01-01', notes: '', updatedAt: 1 },
     { id: 't3', title: 'Old chore', committee: 'tcom', status: 'done', ownerUid: '', ownerName: '', startDate: '', dueDate: '2020-03-01', notes: '', updatedAt: 0 },
+    { id: 't4', title: 'Sort gear', committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', updatedAt: -1 },
   ],
   loadOwners: async () => [{ uid: 'u1', name: 'Ana' }, { uid: 'u2', name: 'Ben' }],
   saveTask: async (_a: unknown, input: unknown, id?: string) => {
@@ -89,5 +90,53 @@ describe('task tracker table', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save task' }));
     expect(await screen.findByText(/Not saved: Missing or insufficient permissions/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save task' })).toBeInTheDocument();
+  });
+
+  describe('timeline view', () => {
+    const openTimeline = async () => {
+      renderAt('/account/tasks');
+      await screen.findByText('Book venue', {}, { timeout: 5000 });
+      fireEvent.click(screen.getByRole('button', { name: 'Timeline' }));
+      return screen.getByRole('region', { name: 'Timeline' });
+    };
+
+    it('replaces the table with bars grouped by committee, undated tasks listed apart', async () => {
+      const timeline = await openTimeline();
+      expect(screen.queryByRole('table')).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Timeline' })).toHaveAttribute('aria-pressed', 'true');
+      expect(within(timeline).getByRole('heading', { name: 'ExeCom' })).toBeInTheDocument();
+      expect(within(timeline).getByRole('heading', { name: 'TCom' })).toBeInTheDocument();
+      expect(within(timeline).getByText('Book venue')).toBeInTheDocument();
+      expect(within(timeline).getByRole('heading', { name: 'No dates yet' })).toBeInTheDocument();
+      expect(within(timeline).getByText('Sort gear')).toBeInTheDocument();
+      expect(within(timeline).getByText('Overdue')).toBeInTheDocument();
+    });
+
+    it('words single-date tasks plainly and hides the sort that does not apply', async () => {
+      const timeline = await openTimeline();
+      expect(within(timeline).getByText(/Due 2999-01-01/)).toBeInTheDocument();
+      expect(within(timeline).getByText(/2020-01-01 to 2020-02-01/)).toBeInTheDocument();
+      expect(screen.queryByLabelText('Sort by')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: 'Table' }));
+      expect(screen.getByLabelText('Sort by')).toBeInTheDocument();
+    });
+
+    it('follows the filters and goes back to the table', async () => {
+      renderAt('/account/tasks');
+      await screen.findByText('Book venue', {}, { timeout: 5000 });
+      fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'todo' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Timeline' }));
+      const timeline = screen.getByRole('region', { name: 'Timeline' });
+      expect(within(timeline).queryByText('Book venue')).not.toBeInTheDocument();
+      expect(within(timeline).getByText('Plan training')).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: 'Table' }));
+      expect(screen.getByRole('table')).toBeInTheDocument();
+    });
+
+    it('opens the edit form from a bar', async () => {
+      const timeline = await openTimeline();
+      fireEvent.click(within(timeline).getByRole('button', { name: 'Edit Plan training' }));
+      expect(screen.getByRole('button', { name: 'Save task' })).toBeInTheDocument();
+    });
   });
 });
