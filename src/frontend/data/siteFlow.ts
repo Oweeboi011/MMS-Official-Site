@@ -37,7 +37,7 @@ export function buildFlow(pages: MapPage[], f: PageFacts): { nodes: FlowNode[]; 
 
   const sourceNodes: FlowNode[] = [
     ...col(SOURCES, (s, y) => ({ id: s.id, x: COL[0], y, title: s.label, sub: s.detail(f), state: s.ok(f) ? 'live' : 'partial' })),
-    { id: 'switch', x: COL[0], y: SOURCES.length * GAP, title: 'Switch from the old site', sub: f.registrationOpen ? 'done' : 'not yet', state: f.registrationOpen ? 'live' : 'off' },
+    { id: 'switch', x: COL[0], y: SOURCES.length * GAP, title: 'Registration and payments', sub: f.registrationOpen ? 'open on this site' : 'off until the switch', state: f.registrationOpen ? 'live' : 'off' },
     { id: 'brevo', x: COL[0], y: (SOURCES.length + 1) * GAP, title: 'Brevo email account', sub: 'not set up', state: 'off' },
   ];
   const edges: FlowEdge[] = [];

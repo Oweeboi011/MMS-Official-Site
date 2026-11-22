@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { averageRating, canPublish } from '../../data/feedbackReviews';
+import DataTable from '../DataTable';
 import { climbFeedback, setReviewPublished } from '../../services/reviewsFromFeedback';
 import { useAdminList } from './useAdminList';
 
@@ -13,19 +14,22 @@ export default function FeedbackPanel({ climbId, climbTitle }: { climbId: string
     <details className="register-section">
       <summary><strong>Ratings</strong> · {rows.length} · average {averageRating(rows)} of 5</summary>
       {message && <p role="status">{message}</p>}
-      <ul className="my-climbs">
+      <DataTable caption="Ratings for this climb" head={['Rating', 'Name', 'Comment', 'Review']}>
         {rows.map((f) => (
-          <li key={f.id} className="my-climb">
-            <p className="my-climb-meta"><span className="my-climb-chip">{f.rating} of 5</span><strong>{f.name || 'Anonymous'}</strong></p>
-            <p>{f.comments || <span className="climb-muted">No comment, so it can’t be published.</span>}</p>
-            {canPublish(f) && (
-              <button type="button" className="chip" disabled={busy} onClick={() => void run(() => setReviewPublished(f, climbId, climbTitle, !f.published))}>
-                {f.published ? 'Unpublish review' : 'Publish as review'}
-              </button>
-            )}
-          </li>
+          <tr key={f.id}>
+            <th scope="row">{f.rating} of 5</th>
+            <td>{f.name || 'Anonymous'}</td>
+            <td>{f.comments || <span className="climb-muted">No comment, so it can’t be published.</span>}</td>
+            <td>
+              {canPublish(f) && (
+                <button type="button" className="chip" disabled={busy} onClick={() => void run(() => setReviewPublished(f, climbId, climbTitle, !f.published))}>
+                  {f.published ? 'Unpublish review' : 'Publish as review'}
+                </button>
+              )}
+            </td>
+          </tr>
         ))}
-      </ul>
+      </DataTable>
     </details>
   );
 }

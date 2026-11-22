@@ -1,3 +1,4 @@
+import DataTable from '../components/DataTable';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import PageHero from '../components/PageHero';
@@ -51,7 +52,7 @@ function Traffic() {
           <>
             <AdminStats items={[['Views (30 days)', String(t.views)], ['Visits', String(t.sessions)], ['Views per day', String(Math.round(t.views / 30))]]} />
             <Panel title="Views per day, last 30 days"><Bars rows={t.perDay.map(([d, n]) => [d.slice(5), n])} /></Panel>
-            <Panel title="Most viewed pages"><ol className="plain-list">{t.top.map(([path, n]) => <li key={path}>{path} <small>{n} views</small></li>)}</ol></Panel>
+            <Panel title="Most viewed pages"><DataTable caption="Most viewed pages" head={['Page', 'Views']}>{t.top.map(([path, n]) => <tr key={path}><th scope="row">{path}</th><td className="num">{n}</td></tr>)}</DataTable></Panel>
           </>
         );
       }}
@@ -64,7 +65,7 @@ function RecentErrors() {
     <Panel title="Recent errors">
       <Loaded load={recentErrors} what="errors">
         {(rows) => (rows.length
-          ? <ul className="plain-list">{rows.map((e) => <li key={e.id}>{when(e.at)} · {e.type} · {e.source}: {e.message} <small>({e.path})</small></li>)}</ul>
+          ? <DataTable caption="Recent errors" head={['When', 'Type', 'Source', 'Message', 'Page']}>{rows.map((e) => <tr key={e.id}><td>{when(e.at)}</td><td>{e.type}</td><td>{e.source}</td><td>{e.message}</td><td>{e.path}</td></tr>)}</DataTable>
           : <p className="climb-muted">No errors logged.</p>)}
       </Loaded>
     </Panel>

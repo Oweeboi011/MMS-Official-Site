@@ -10,7 +10,7 @@ const LEGEND: PageState[] = ['live', 'partial', 'sample', 'off'];
 export default function SiteFlow({ pages, facts }: { pages: MapPage[]; facts: PageFacts }) {
   const flow = buildFlow(pages, facts);
   const nodes: Node[] = flow.nodes.map((n) => ({
-    id: n.id, position: { x: n.x, y: n.y }, className: `flow-node flow-${n.state}`, style: { width: 270 }, draggable: false, selectable: false, connectable: false,
+    id: n.id, position: { x: n.x, y: n.y }, className: `flow-node flow-${n.state}`, style: { width: 300 }, draggable: false, selectable: false, connectable: false,
     data: { label: <><strong>{n.title}</strong><small>{n.sub}</small></> },
     sourcePosition: Position.Right, targetPosition: Position.Left,
   }));
@@ -24,7 +24,7 @@ export default function SiteFlow({ pages, facts }: { pages: MapPage[]; facts: Pa
       </ul>
       <p className="climb-muted">Read left to right: content you enter in Admin (left) feeds the pages that show it (middle). A dashed line means nothing real is flowing yet. Pages that never get admin data stay on sample copy until officers confirm or replace it (right).</p>
       <div className="site-flow-canvas">
-        <ReactFlow nodes={nodes} edges={edges} fitView fitViewOptions={{ padding: 0.1 }} nodesDraggable={false} nodesConnectable={false} elementsSelectable={false} zoomOnScroll={false} minZoom={0.3}>
+        <ReactFlow nodes={nodes} edges={edges} fitView fitViewOptions={{ padding: 0.02 }} nodesDraggable={false} nodesConnectable={false} elementsSelectable={false} zoomOnScroll={false} minZoom={0.3}>
           <Background gap={24} />
           <Controls showInteractive={false} />
         </ReactFlow>

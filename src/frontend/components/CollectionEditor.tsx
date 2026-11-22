@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { lockedKeys, toForm, validate, type CollectionSpec, type Field, type FormValues } from '../data/siteSchemas';
+import { listColumns, lockedKeys, toForm, validate, type CollectionSpec, type Field, type FormValues } from '../data/siteSchemas';
 import { MAX_ROWS, removeRow, saveRow, type Row } from '../services/siteData';
 import RecordsInput from './RecordsInput';
 import { useCollectionRows } from './useCollectionRows';
@@ -60,18 +60,30 @@ function RowLink({ spec, selected }: { spec: CollectionSpec; selected: string | 
 }
 
 function RowList({ spec, rows, selected, busy, onPick }: { spec: CollectionSpec; rows: Row[]; selected: string | null; busy: boolean; onPick: (id: string | null) => void }) {
+  const columns = listColumns(spec);
   return (
     <div className="editor-list">
       {!spec.readOnly && <button type="button" className="btn btn-primary" disabled={busy} onClick={() => onPick(null)}>New</button>}
-      <ul>
-        {rows.map((r) => (
-          <li key={r.id}>
-            <button type="button" className={`link-button${r.id === selected ? ' is-active' : ''}`} disabled={busy} onClick={() => onPick(r.id)}>
-              {spec.rowLabel ? spec.rowLabel(r.data) : String(r.data[spec.titleField] ?? r.id)}
-            </button>
-          </li>
-        ))}
-      </ul>
+      {rows.length > 0 && (
+        <div className="admin-table">
+          <table>
+            <caption className="sr-only">{spec.label}</caption>
+            <thead><tr>{columns.map((c) => <th key={c.label} scope="col">{c.label}</th>)}</tr></thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.id} className={r.id === selected ? 'is-active' : undefined}>
+                  {columns.map((c, i) => {
+                    const text = c.get(r.data) || (i === 0 ? r.id : '');
+                    return i === 0
+                      ? <th key={c.label} scope="row"><button type="button" className="link-button" aria-current={r.id === selected} disabled={busy} onClick={() => onPick(r.id)}>{text}</button></th>
+                      : <td key={c.label}>{text}</td>;
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
       {!rows.length && <p>No {spec.label.toLowerCase()} yet.</p>}
       {rows.length >= MAX_ROWS && <p>Showing the first {MAX_ROWS}. Older entries: Firebase console.</p>}
     </div>

@@ -4,47 +4,46 @@ import {
 } from '../data/sportfest';
 import { loadGames, loadScores } from '../services/sportfest';
 import { useAccount } from '../services/useAccount';
+import DataTable from './DataTable';
 import SignInForm from './SignInForm';
 
 const MEDAL: Record<Placement, string> = { 1: '🥇 1st', 2: '🥈 2nd', 3: '🥉 3rd', 4: '4th' };
 const ORDINAL = ['1st', '2nd', '3rd', '4th'];
+const tribeStyle = (tribe: Tribe) => ({ '--tribe': TRIBE_COLORS[tribe] }) as React.CSSProperties;
 
 function Standings({ scores }: { scores: Score[] }) {
   const totals = computeTribeTotals(scores);
   if (!scores.length) return <p className="climb-muted">No scores yet. Check back soon.</p>;
   return (
-    <ol className="sf-standings">
+    <DataTable caption="Overall standings" head={['Rank', 'Tribe', '🥇 Gold', '🥈 Silver', '🥉 Bronze', '4th', 'Points']}>
       {totals.map((t, i) => (
-        <li key={t.tribe} className="sf-tribe" style={{ '--tribe': TRIBE_COLORS[t.tribe] } as React.CSSProperties}>
-          <span className="sf-rank">{ORDINAL[i]}</span>
-          <span className="sf-name">{t.tribe}</span>
-          <span className="sf-medals" aria-label={`${t.gold} gold, ${t.silver} silver, ${t.bronze} bronze, ${t.fourth} fourth`}>🥇 {t.gold} · 🥈 {t.silver} · 🥉 {t.bronze} · 4th {t.fourth}</span>
-          <span className="sf-pts"><strong>{t.totalPoints}</strong> pts</span>
-        </li>
+        <tr key={t.tribe} className="sf-tribe" style={tribeStyle(t.tribe)}>
+          <th scope="row">{ORDINAL[i]}</th>
+          <td className="sf-name">{t.tribe}</td>
+          <td className="num">{t.gold}</td><td className="num">{t.silver}</td><td className="num">{t.bronze}</td><td className="num">{t.fourth}</td>
+          <td className="num"><strong>{t.totalPoints}</strong></td>
+        </tr>
       ))}
-    </ol>
+    </DataTable>
   );
 }
 
-function GameCard({ game, scores }: { game: Game; scores: Score[] }) {
-  const byTribe = new Map<Tribe, Score>(scores.map((s) => [s.tribe, s]));
-  const ordered = [...TRIBES].sort((a, b) => (byTribe.get(b)?.points ?? -1) - (byTribe.get(a)?.points ?? -1));
+function GameResults({ games, scores }: { games: Game[]; scores: Score[] }) {
   return (
-    <li className="my-climb">
-      <h3>{game.name}</h3>
-      <p className="my-climb-meta"><span className="my-climb-chip">{game.status}</span><span className="my-climb-chip">{game.category}</span>{game.date && <span className="my-climb-date">{game.date}</span>}</p>
-      <ul className="sf-rows">
-        {ordered.map((tribe) => {
-          const s = byTribe.get(tribe);
-          return (
-            <li key={tribe} style={{ '--tribe': TRIBE_COLORS[tribe] } as React.CSSProperties}>
-              <span className="sf-name">{tribe}</span>
-              <span>{s ? `${MEDAL[s.placement]} · ${s.points} pts` : '—'}</span>
-            </li>
-          );
-        })}
-      </ul>
-    </li>
+    <DataTable caption="Game results by tribe" head={['Game', 'Category', 'Status', 'Date', ...TRIBES]}>
+      {games.map((g) => {
+        const byTribe = new Map<Tribe, Score>(scores.filter((s) => s.gameId === g.id).map((s) => [s.tribe, s]));
+        return (
+          <tr key={g.id}>
+            <th scope="row">{g.name}</th><td>{g.category}</td><td>{g.status}</td><td>{g.date}</td>
+            {TRIBES.map((tribe) => {
+              const s = byTribe.get(tribe);
+              return <td key={tribe}>{s ? `${MEDAL[s.placement]} · ${s.points} pts` : '—'}</td>;
+            })}
+          </tr>
+        );
+      })}
+    </DataTable>
   );
 }
 
@@ -53,16 +52,14 @@ function ScoringSystem() {
     <>
       <h2>Scoring system</h2>
       <p className="climb-muted">Class A pays 5 : 3 : 2 : 1 of the game’s top points, Class B pays fixed points, and Classes C and D pay 100, 75, 50 and 25 percent. Tied tribes share a place.</p>
-      <div className="sf-scoring">
+      <DataTable caption="Points per place" head={['Class', ...ORDINAL]}>
         {SCORING_TABLE.map((row) => (
-          <div key={row.label} className="my-climb">
-            <h3>{row.label}</h3>
-            <ul className="sf-rows">
-              {([1, 2, 3, 4] as const).map((p) => <li key={p}><span>{ORDINAL[p - 1]}</span><span>{pointsFromPlacement(p, row.maxPoints, row.gameClass)} pts</span></li>)}
-            </ul>
-          </div>
+          <tr key={row.label}>
+            <th scope="row">{row.label}</th>
+            {([1, 2, 3, 4] as const).map((p) => <td key={p} className="num">{pointsFromPlacement(p, row.maxPoints, row.gameClass)}</td>)}
+          </tr>
         ))}
-      </div>
+      </DataTable>
     </>
   );
 }
@@ -91,7 +88,7 @@ function Board() {
       )}
       <h2>Overall standings</h2>
       <Standings scores={scores} />
-      {played.length > 0 && <><h2>Game results</h2><ul className="my-climbs">{played.map((g) => <GameCard key={g.id} game={g} scores={scores.filter((s) => s.gameId === g.id)} />)}</ul></>}
+      {played.length > 0 && <><h2>Game results</h2><GameResults games={played} scores={scores} /></>}
       <ScoringSystem />
     </div></section>
   );

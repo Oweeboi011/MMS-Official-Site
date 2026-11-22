@@ -19,15 +19,15 @@ describe('Sportfest scoreboard', () => {
     who.state = { status: 'signedOut' };
     renderAt('/activities/sportfest');
     expect(await screen.findByText(/for signed-in members/, {}, { timeout: 5000 })).toBeInTheDocument();
-    expect(screen.queryByText('Overall standings')).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Overall standings' })).not.toBeInTheDocument();
   });
 
   it('shows standings, results of played games and the scoring system to a signed-in member', async () => {
     who.state = { status: 'signedIn', account: { uid: 'u1', email: 'a@x.com', role: 'member', emailVerified: true } };
     renderAt('/activities/sportfest');
-    expect(await screen.findByText('Overall standings', {}, { timeout: 5000 })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Tug of war' })).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Fire making' })).not.toBeInTheDocument(); // upcoming: no results yet
+    expect(await screen.findByRole('heading', { name: 'Overall standings' }, { timeout: 5000 })).toBeInTheDocument();
+    expect(screen.getByRole('row', { name: /Tug of war/ })).toBeInTheDocument();
+    expect(screen.queryByRole('row', { name: /Fire making/ })).not.toBeInTheDocument(); // upcoming: no results yet
     expect(screen.getByText('Scoring system')).toBeInTheDocument();
     expect(screen.getAllByText(/20 pts/).length).toBeGreaterThan(0);
   });

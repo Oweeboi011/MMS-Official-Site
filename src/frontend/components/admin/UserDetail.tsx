@@ -1,3 +1,4 @@
+import DataTable from '../DataTable';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import type { MyClimb } from '../../data/myClimbs';
@@ -29,9 +30,9 @@ function Climbs({ uid }: { uid: string }) {
   if (!rows) return <p role="status">Loading climbs…</p>;
   if (!rows.length) return <p className="climb-muted">No registrations yet.</p>;
   return (
-    <ul className="plain-list">
-      {rows.map((r) => <li key={r.id}><Link to={`/admin/climbs/${r.climbId}`}>{r.title}</Link> <small>{[r.date, r.statusLabel].filter(Boolean).join(' · ')}</small></li>)}
-    </ul>
+    <DataTable caption="Registrations" head={['Climb', 'Date', 'Status']}>
+      {rows.map((r) => <tr key={r.id}><th scope="row"><Link to={`/admin/climbs/${r.climbId}`}>{r.title}</Link></th><td>{r.date}</td><td>{r.statusLabel}</td></tr>)}
+    </DataTable>
   );
 }
 

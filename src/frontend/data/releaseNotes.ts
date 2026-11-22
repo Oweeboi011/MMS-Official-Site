@@ -1,5 +1,5 @@
 // #147 release notes ("What's new"): old app shape { title, body, status, publishedAt }. Signed-in members read published ones.
-import type { CollectionSpec, FormValues } from './siteSchemas';
+import { column, dayColumn, type CollectionSpec, type FormValues } from './siteSchemas';
 
 type Doc = Record<string, unknown>;
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
@@ -7,6 +7,7 @@ const str = (v: unknown) => (typeof v === 'string' ? v : '');
 export const releaseNotesSpec: CollectionSpec = {
   id: 'releaseNotes', label: 'Release notes', titleField: 'title',
   orderBy: { field: 'publishedAt', desc: true },
+  columns: [column('Title', 'title'), column('Status', 'status'), dayColumn('Published', 'publishedAt')],
   fields: [
     { key: 'title', label: 'Title', kind: 'text', required: true, max: 200 },
     { key: 'body', label: 'What changed (blank line between paragraphs; lines starting “- ” are a list; **bold** allowed)', kind: 'longText', required: true, max: 5000 },

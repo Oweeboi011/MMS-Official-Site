@@ -2,7 +2,7 @@
 import { flatCodec, groupedCodec, type Column } from './records';
 import { setupGaps } from './climbSetup';
 import { REQUIRED_DOCS } from './requiredDocs';
-import type { CollectionSpec, Doc, Field, FormValues } from './siteSchemas';
+import { column, dayColumn, type CollectionSpec, type Field, type FormValues } from './siteSchemas';
 
 // Old app's shapes: fees[{label, amount, note, optional, isGuestFee}], officers[{role, name}], itinerary[{day, entries[{time, activity}]}].
 const feeColumns: Column[] = [
@@ -33,12 +33,6 @@ const routeColumns: Column[] = [
   { key: 'googleMapsUrl', label: 'Google Maps link', kind: 'link', max: 500 },
 ];
 
-const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit' });
-const dayOf = (v: unknown) => {
-  if (v && typeof v === 'object' && 'toDate' in v) return day.format((v as { toDate: () => Date }).toDate());
-  return typeof v === 'string' ? v : 'no date';
-};
-
 function check(v: FormValues): string | null {
   const rating = String(v.difficulty ?? '').trim();
   if (rating && !/^[1-9]\/9$/.test(rating)) return 'Difficulty: write it as N/9, e.g. 4/9.';
@@ -51,7 +45,7 @@ export const climbsSpec: CollectionSpec = {
   orderBy: { field: 'startDate', desc: true },
   todo: setupGaps,
   rowLink: (id) => ({ to: `/admin/climbs/${id}`, label: 'Registrations, payments, CSV →' }),
-  rowLabel: (d: Doc) => `${dayOf(d.startDate)} · ${String(d.title ?? '(untitled)')} · ${String(d.status ?? '')}`,
+  columns: [dayColumn('Date', 'startDate'), column('Climb', 'title'), column('Type', 'type'), column('Status', 'status'), column('Slots', 'maxParticipants')],
   fields: [
     { key: 'title', label: 'Mountain / climb name', kind: 'text', required: true, max: 200 },
     { key: 'location', label: 'Location (town, province)', kind: 'text', required: true, max: 200, hint: 'Also used to find the weather forecast.' },
