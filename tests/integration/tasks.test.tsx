@@ -8,7 +8,7 @@ vi.mock('../../src/frontend/services/useAccount', () => ({ useAccount: () => ({ 
 vi.mock('../../src/frontend/services/tasks', () => ({
   loadTasks: async () => [
     { id: 't1', title: 'Book venue', committee: 'execom', status: 'doing', ownerUid: 'u1', ownerName: 'Ana', startDate: '2020-01-01', dueDate: '2020-02-01', notes: '', updatedAt: 2 },
-    { id: 't2', title: 'Plan training', committee: 'tcom', status: 'todo', ownerUid: 'u2', ownerName: 'Ben', startDate: '', dueDate: '2999-01-01', notes: '', updatedAt: 1 },
+    { id: 't2', title: 'Plan training', committee: 'tcom', status: 'todo', ownerUid: 'u2', ownerName: 'Ben', startDate: '', dueDate: '2039-01-01', notes: '', updatedAt: 1 },
     { id: 't3', title: 'Old chore', committee: 'tcom', status: 'done', ownerUid: '', ownerName: '', startDate: '', dueDate: '2020-03-01', notes: '', updatedAt: 0 },
     { id: 't4', title: 'Sort gear', committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', updatedAt: -1 },
   ],
@@ -78,7 +78,7 @@ describe('task tracker table', () => {
     // Exactly the stored fields: id and updatedAt in the payload would be rejected by the rules.
     expect(calls.saved[0]).toEqual({
       id: 't2',
-      input: { title: 'Plan training', committee: 'tcom', status: 'blocked', ownerUid: 'u2', ownerName: 'Ben', startDate: '', dueDate: '2999-01-01', notes: '' },
+      input: { title: 'Plan training', committee: 'tcom', status: 'blocked', ownerUid: 'u2', ownerName: 'Ben', startDate: '', dueDate: '2039-01-01', notes: '' },
     });
   });
 
@@ -114,7 +114,7 @@ describe('task tracker table', () => {
 
     it('words single-date tasks plainly and hides the sort that does not apply', async () => {
       const timeline = await openTimeline();
-      expect(within(timeline).getByText(/Due 2999-01-01/)).toBeInTheDocument();
+      expect(within(timeline).getByText(/Due 2039-01-01/)).toBeInTheDocument();
       expect(within(timeline).getByText(/2020-01-01 to 2020-02-01/)).toBeInTheDocument();
       expect(screen.queryByLabelText('Sort by')).not.toBeInTheDocument();
       fireEvent.click(screen.getByRole('button', { name: 'Table' }));

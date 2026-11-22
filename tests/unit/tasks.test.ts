@@ -63,6 +63,11 @@ describe('validateTask', () => {
     expect(validateTask({ ...ok, dueDate: '2026-02-30' })).toMatch(/date/i);
     expect(validateTask({ ...ok, startDate: '', dueDate: '2028-02-29' })).toBe('');
   });
+  it('rejects years outside 2020-2039 so one stray date cannot squash the timeline', () => {
+    expect(validateTask({ ...ok, startDate: '', dueDate: '2099-01-01' })).toMatch(/2020.*2039/);
+    expect(validateTask({ ...ok, startDate: '2019-12-31', dueDate: '' })).toMatch(/2020.*2039/);
+    expect(validateTask({ ...ok, startDate: '2020-01-01', dueDate: '2039-12-31' })).toBe('');
+  });
   it('rejects a blank or long title, bad committee or status, bad or reversed dates', () => {
     expect(validateTask({ ...ok, title: '  ' })).toMatch(/title/i);
     expect(validateTask({ ...ok, title: 'x'.repeat(201) })).toMatch(/title/i);

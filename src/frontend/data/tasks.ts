@@ -58,12 +58,20 @@ function isRealDate(s: string): boolean {
   return ISO.test(s) && !Number.isNaN(d.getTime()) && d.toISOString().startsWith(s);
 }
 
+// Same 2020-2039 window as the rules: a stray 2099 would squash every bar on the timeline.
+function dateError(date: string): string {
+  if (!date) return '';
+  if (!isRealDate(date)) return 'Dates must look like 2026-12-31.';
+  return date < '2020' || date >= '2040' ? 'Dates must fall between 2020 and 2039.' : '';
+}
+
 // Returns the first problem in plain words, or '' when the task is fine.
 export function validateTask(t: TaskInput): string {
   if (!t.title.trim() || t.title.length > 200) return 'Title is required (max 200 characters).';
   if (!COMMITTEES.some(([key]) => key === t.committee)) return 'Pick a committee.';
   if (!STATUSES.some(([key]) => key === t.status)) return 'Pick a status.';
-  for (const date of [t.startDate, t.dueDate]) if (date && !isRealDate(date)) return 'Dates must look like 2026-12-31.';
+  const dateProblem = [t.startDate, t.dueDate].map(dateError).find(Boolean);
+  if (dateProblem) return dateProblem;
   if (t.startDate && t.dueDate && t.startDate > t.dueDate) return 'Start must be before the due date.';
   if (t.notes.length > 2000) return 'Notes are too long (max 2000 characters).';
   return '';
