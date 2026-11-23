@@ -897,7 +897,6 @@ input[type="file"]::file-selector-button:hover { background: var(--ink-solid); }
 .tl-bar.is-todo { background: var(--muted); }
 .tl-bar.is-blocked { background: var(--red); }
 .tl-bar.is-done { background: var(--green, #2f7d4f); }
-.task-overdue { padding: 3px 10px; border-radius: 999px; background: var(--red); color: #fff; font-size: .72rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
 
 /* Dark theme: follows the visitor's system setting; nothing to switch. Contrast is checked by tests/e2e/a11y-dark.spec.ts. */
 @media screen and (prefers-color-scheme: dark) { /* screen only: a printed waiver or day sheet stays dark text on white */
@@ -925,3 +924,5 @@ input[type="file"]::file-selector-button:hover { background: var(--ink-solid); }
   .tl-bar.is-blocked { background: var(--red-ink); }
   .tl-bar.is-done { background: var(--green-ink); }
 }
+
+.task-overdue { padding: 3px 10px; border-radius: 999px; background: var(--red); color: #fff; font-size: .72rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
