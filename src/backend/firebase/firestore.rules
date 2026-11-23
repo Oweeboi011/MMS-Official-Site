@@ -134,20 +134,34 @@ service cloud.firestore {
     }
 
     // Page data submitted by officers and published after review (ADR 0010).
+    // Known field keys and max lengths mirror FIELDS in data/contentEntries.ts.
+    function entryDataIsValid(f) {
+      return f.keys().hasOnly(['date', 'endDate', 'place', 'kind', 'details', 'url', 'section', 'body', 'mountain', 'region']) &&
+        shortText(f, 'date', 10) && shortText(f, 'endDate', 10) && shortText(f, 'place', 200) && shortText(f, 'kind', 20) &&
+        shortText(f, 'details', 2000) && shortText(f, 'url', 500) && shortText(f, 'section', 20) && shortText(f, 'body', 2000) &&
+        shortText(f, 'mountain', 200) && shortText(f, 'region', 200);
+    }
     function contentEntryIsValid(d) {
       return d.keys().hasOnly(['page', 'title', 'data', 'status', 'submittedBy', 'submittedByName', 'reviewedBy', 'note', 'createdAt', 'updatedAt', 'publishedAt']) &&
         d.page in ['calendar', 'media', 'membership', 'trails', 'destinations'] &&
         d.status in ['draft', 'pending', 'published', 'rejected'] &&
         d.data is map && text(d, 'title', 1, 200) && shortText(d, 'note', 500);
     }
+    // Checked on create and when data or the name changes, so older entries can still be reviewed.
+    function entryContentIsClean(d, touched) {
+      return (!touched.hasAny(['data']) || entryDataIsValid(d.data)) &&
+        (!touched.hasAny(['submittedByName']) || shortText(d, 'submittedByName', 200));
+    }
     match /contentEntries/{entryId} {
       allow read: if resource.data.status == 'published' || isContentReviewer() ||
         (isSignedIn() && resource.data.submittedBy == request.auth.uid);
       allow create: if isSignedIn() && contentEntryIsValid(request.resource.data) &&
+        entryContentIsClean(request.resource.data, request.resource.data.keys().toSet()) &&
         request.resource.data.submittedBy == request.auth.uid &&
         request.resource.data.status != 'rejected' &&
         (isContentReviewer() || (hasGroup('tcom') && isTcomPage(request.resource.data.page)));
       allow update: if contentEntryIsValid(request.resource.data) &&
+        entryContentIsClean(request.resource.data, affected()) &&
         request.resource.data.page == resource.data.page &&
         !affected().hasAny(['submittedBy', 'createdAt']) &&
         (isContentReviewer() ||

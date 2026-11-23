@@ -334,6 +334,9 @@ await no("guest cannot submit", () => anon().collection("contentEntries").add(en
 await no("entry rejects a made-up page", () => admin().collection("contentEntries").add(entry("admin", "secrets")));
 await no("entry rejects an empty title", () => admin().collection("contentEntries").add(entry("admin", "calendar", { title: "" })));
 await no("entry rejects unknown fields", () => admin().collection("contentEntries").add(entry("admin", "calendar", { extra: 1 })));
+await no("entry rejects unknown data keys", () => admin().collection("contentEntries").add(entry("admin", "calendar", { data: { date: "2026-12-05", junk: "x" } })));
+await no("entry rejects oversized data", () => admin().collection("contentEntries").add(entry("admin", "calendar", { data: { date: "2026-12-05", details: "x".repeat(2001) } })));
+await no("entry rejects a long submitter name", () => admin().collection("contentEntries").add(entry("admin", "calendar", { submittedByName: "x".repeat(201) })));
 await env.withSecurityRulesDisabled(async (c) => {
   const db = c.firestore();
   await db.doc("contentEntries/pub").set(entry("tcom1", "calendar", { status: "published" }));
@@ -350,6 +353,10 @@ await ok("ExeCom approves a TCom entry", () => as("exec1").doc("contentEntries/p
 await ok("BOT rejects with a note", () => as("bot1").doc("contentEntries/memb").update({ status: "rejected", reviewedBy: "bot1", note: "Check the fee" }));
 await no("reviewer cannot change who submitted", () => as("bot1").doc("contentEntries/pub").update({ submittedBy: "bot1" }));
 await ok("TCom edits its own entry", () => as("tcom1").doc("contentEntries/pub").update({ title: "Pulag climb (moved)" }));
+await ok("TCom publishes and unpublishes its own entry (no reviewedBy)", async () => {
+  await as("tcom1").doc("contentEntries/mine").update({ status: "published", note: "", updatedAt: FV.serverTimestamp(), publishedAt: FV.serverTimestamp() });
+  await as("tcom1").doc("contentEntries/mine").update({ status: "draft", note: "", updatedAt: FV.serverTimestamp() });
+});
 await no("TCom cannot touch reviewedBy", () => as("tcom1").doc("contentEntries/pub").update({ reviewedBy: "tcom1" }));
 await no("TCom cannot edit a membership entry", () => as("tcom1").doc("contentEntries/memb").update({ title: "Changed" }));
 await no("member cannot delete a published entry", () => as("tcom1").doc("contentEntries/pub").delete());
