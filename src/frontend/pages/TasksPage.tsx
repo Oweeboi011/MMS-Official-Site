@@ -6,7 +6,8 @@ import SignInForm from '../components/SignInForm';
 import TaskForm from '../components/tasks/TaskForm';
 import TaskTable from '../components/tasks/TaskTable';
 import TaskTimeline from '../components/tasks/TaskTimeline';
-import { COMMITTEES, STATUSES, UNASSIGNED, canUseTasks, manilaToday, viewTasks, type Task, type TaskView } from '../data/tasks';
+import { downloadCsv } from '../lib/download';
+import { COMMITTEES, STATUSES, UNASSIGNED, canUseTasks, manilaToday, tasksToCsv, viewTasks, type Task, type TaskView } from '../data/tasks';
 import type { Account } from '../services/auth';
 import { TASK_LIMIT, loadOwners, loadTasks, removeTask, saveTask, type TaskOwner } from '../services/tasks';
 import { useAccount } from '../services/useAccount';
@@ -54,7 +55,10 @@ function Tasks({ account }: { account: Account }) {
   const set = (patch: Partial<TaskView>) => setView({ ...view, ...patch });
   return (
     <>
-      <p><button type="button" className="btn btn-primary" onClick={() => setEditing('new')}>New task</button></p>
+      <p>
+        <button type="button" className="btn btn-primary" onClick={() => setEditing('new')}>New task</button>{' '}
+        <button type="button" className="btn" disabled={!shown.length} onClick={() => downloadCsv('committee-tasks', tasksToCsv(shown))}>Download CSV ({shown.length})</button>
+      </p>
       <div className="trail-tabs" role="group" aria-label="View">
         {(['table', 'timeline'] as const).map((m) => (
           <button key={m} type="button" className="chip" aria-pressed={mode === m} onClick={() => setMode(m)}>{m === 'table' ? 'Table' : 'Timeline'}</button>

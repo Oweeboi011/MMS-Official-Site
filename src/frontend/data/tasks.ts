@@ -1,4 +1,5 @@
 // ExeCom and TCom tasks (ADR 0012; collection tasks). Plain data: no Firebase here. Mirrors firestore.rules.
+import { csvRows } from '../lib/csv';
 interface Person { role: string; groups: readonly string[] }
 
 export const COMMITTEES = [['execom', 'ExeCom'], ['tcom', 'TCom']] as const;
@@ -132,3 +133,11 @@ export function timelineOf(tasks: Task[]): Timeline {
   }
   return { from, to, months, groups, undated };
 }
+
+const label = (options: readonly (readonly [string, string])[], key: string) => options.find(([k]) => k === key)?.[1] ?? key;
+
+export const tasksToCsv = (tasks: Task[]): string =>
+  csvRows([
+    ['Task', 'Committee', 'Status', 'Owner', 'Start', 'Due', 'Notes'],
+    ...tasks.map((t) => [t.title, label(COMMITTEES, t.committee), label(STATUSES, t.status), t.ownerName, t.startDate, t.dueDate, t.notes]),
+  ]);
