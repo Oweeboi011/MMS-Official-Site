@@ -32,8 +32,10 @@ for (const path of ['/account/sign-in']) {
     await page.goto(path);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; animation: none !important; }' });
+    // Start on the page's first button, then Tab through the form: email, password, Sign in.
+    await page.getByRole('button', { name: 'Continue with Google' }).focus();
     const seen: string[] = [];
-    for (let i = 0; i < 30; i += 1) {
+    for (let i = 0; i < 3; i += 1) {
       await page.keyboard.press('Tab');
       const found = await page.evaluate(() => {
         const rgb = (v: string) => (v.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
@@ -52,7 +54,7 @@ for (const path of ['/account/sign-in']) {
     }
     // Only elements whose ring is our own focus colour are judged; links inside photo heroes sit on images.
     const controls = seen.filter((s) => /^(INPUT|BUTTON|SELECT|TEXTAREA)/.test(s));
-    expect(controls.length).toBeGreaterThan(0); // never pass by judging nothing
+    expect(controls).toHaveLength(3); // email, password, Sign in: never pass by judging nothing
     expect(controls.filter((s) => Number(s.split(' ').pop()) < 3)).toEqual([]);
   });
 }

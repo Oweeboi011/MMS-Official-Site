@@ -428,7 +428,7 @@ footer { padding: 44px 0 95px; color: rgba(255,255,255,.72); background: #09121b
 /* Surveys */
 .survey-list { display: grid; gap: 14px; }
 .survey-card .btn { align-self: start; margin-top: 8px; }
-.survey-card.is-closed { opacity: .6; }
+.survey-card.is-closed { border-style: dashed; }
 .btn-dark { color: #fff; background: var(--ink-solid); }
 .survey-closed { margin-top: 8px; color: var(--muted); font-size: .85rem; font-weight: 700; }
 
