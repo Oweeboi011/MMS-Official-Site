@@ -1,5 +1,6 @@
-import { COMMITTEES, STATUSES, dueNote, isOverdue, type Task } from '../../data/tasks';
+import { COMMITTEES, STATUSES, isOverdue, type Task } from '../../data/tasks';
 import DataTable from '../DataTable';
+import DueNote from './DueNote';
 import TaskDetails from './TaskDetails';
 
 const label = (options: readonly (readonly [string, string])[], key: string) => options.find(([k]) => k === key)?.[1] ?? key;
@@ -23,7 +24,7 @@ export default function TaskTable({ tasks, today, busy, staleOwner, onEdit, onDe
             </select>
           </td>
           <td data-label="Owner">{t.ownerName || 'Unassigned'}{staleOwner(t) && <> <span className="climb-muted">(no longer in a group)</span></>}</td>
-          <td data-label="Due">{t.dueDate || '—'}{isOverdue(t, today) && <> <span className="task-overdue">Overdue</span></>}{dueNote(t, today) && <> <span className="climb-muted">{dueNote(t, today)}</span></>}</td>
+          <td data-label="Due">{t.dueDate || '—'}{isOverdue(t, today) && <> <span className="task-overdue">Overdue</span></>}<DueNote task={t} today={today} /></td>
           <td data-label="Actions">
             <button type="button" className="chip" disabled={busy} onClick={() => onEdit(t)}>Edit</button>
             <button type="button" className="chip" disabled={busy} onClick={() => onDelete(t)}>Delete</button>

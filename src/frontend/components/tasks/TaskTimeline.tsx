@@ -1,6 +1,7 @@
 import { useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { dragDays, todayMarker } from '../../data/taskExtras';
 import { COMMITTEES, STATUSES, isOverdue, timelineOf, type Task } from '../../data/tasks';
+import DueNote from './DueNote';
 
 const statusLabel = (key: string) => STATUSES.find(([k]) => k === key)?.[1] ?? key;
 const ZOOMS = [1, 2, 4];
@@ -18,6 +19,7 @@ function Meta({ task, today, busy, onEdit }: { task: Task; today: string; busy: 
       <span className="tl-title">{task.title}</span>
       <span className="climb-muted">{[dates, statusLabel(task.status), task.ownerName].filter(Boolean).join(' · ')}</span>
       {isOverdue(task, today) && <span className="task-overdue">Overdue</span>}
+      <DueNote task={task} today={today} />
       <button type="button" className="chip" disabled={busy} aria-label={`Edit ${task.title}`} onClick={() => onEdit(task)}>Edit</button>
     </div>
   );

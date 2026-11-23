@@ -379,6 +379,15 @@ describe('task tracker table', () => {
       } finally { rect.mockRestore(); }
     });
 
+    it('says how soon a task is due in the timeline too', async () => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date('2038-12-30T04:00:00Z'));
+      try {
+        const timeline = await openTimeline();
+        expect(within(timeline).getByText('Due in 2 days')).toBeInTheDocument();
+      } finally { vi.useRealTimers(); }
+    });
+
     it('opens the edit form from a bar', async () => {
       const timeline = await openTimeline();
       fireEvent.click(within(timeline).getByRole('button', { name: 'Edit Plan training' }));
