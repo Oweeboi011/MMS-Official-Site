@@ -10,8 +10,9 @@ vi.mock('../../src/frontend/services/contentEntries', () => ({
     { id: 'e2', page: 'trails', title: 'Batulao', data: {}, status: 'published', submittedBy: 'u9', submittedByName: 'Ben', reviewedBy: '', note: '', updatedAt: 1 },
   ],
   saveEntry: async (_a: unknown, input: unknown) => { calls.saved.push(input); },
-  reviewEntry: async (_a: unknown, e: { id: string }, status: string) => { calls.reviewed.push(`${e.id}:${status}`); },
+  reviewEntry: async (_a: unknown, e: { id: string }, status: string, reviewer: boolean) => { calls.reviewed.push(`${e.id}:${status}:${reviewer}`); },
   removeEntry: async () => undefined,
+  ENTRY_LIMIT: 300,
 }));
 
 describe('page content', () => {
@@ -34,7 +35,15 @@ describe('page content', () => {
     renderAt('/account/content');
     expect(await screen.findByText('1 waiting for review.', {}, { timeout: 5000 })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Publish' }));
-    await vi.waitFor(() => expect(calls.reviewed).toEqual(['e1:published']));
+    await vi.waitFor(() => expect(calls.reviewed).toEqual(['e1:published:true']));
+  });
+
+  it('lets TCom publish their own entry without acting as a reviewer', async () => {
+    calls.reviewed = [];
+    who.account = { ...who.account, uid: 'u1', groups: ['tcom'] };
+    renderAt('/account/content');
+    fireEvent.click(await screen.findByRole('button', { name: 'Publish' }, { timeout: 5000 }));
+    await vi.waitFor(() => expect(calls.reviewed).toEqual(['e1:published:false']));
   });
 
   it('tells a member without rights to ask an admin', async () => {
