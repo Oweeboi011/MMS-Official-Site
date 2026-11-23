@@ -1,5 +1,7 @@
 // Pure helpers around committee tasks: checklist text, links in notes, summary counts, date moves, repeats.
-import { COMMITTEES, STATUSES, isOverdue, type Task, type TaskInput, type TaskView } from './tasks';
+import type { Doc } from '../lib/firestoreRest';
+import { toClimb } from './climbs';
+import { COMMITTEES, REPEATS, STATUSES, isOverdue, type Task, type TaskInput, type TaskView } from './tasks';
 
 export interface CheckItem { text: string; done: boolean }
 
@@ -112,4 +114,44 @@ export function parseStoredView(raw: string | null): StoredView {
   } catch {
     return fallback;
   }
+}
+
+export interface ClimbChoice { path: string; label: string }
+
+// Climbs the public site lists (isPublic: not draft, not cancelled), newest first, past ones too; docs without an id are left out.
+export function climbChoices(docs: Doc[], now: Date): ClimbChoice[] {
+  return docs
+    .map((d) => toClimb(d, now))
+    .filter((c) => c?.id)
+    .sort((a, b) => (b?.start?.getTime() ?? 0) - (a?.start?.getTime() ?? 0))
+    .map((c) => ({ path: `/climbs/${c?.id}`, label: `${c?.title} (${c?.dates})` }));
+}
+
+const none = (v: string) => v || '(none)';
+const labelOf = (options: readonly (readonly [string, string])[], key: string) => options.find(([k]) => k === key)?.[1] ?? key;
+
+type Describe = (a: TaskInput, b: TaskInput) => string;
+const moved = (label: string, show: (t: TaskInput) => string): Describe => (a, b) => (show(a) === show(b) ? '' : `${label} ${none(show(a))} → ${none(show(b))}`);
+const edited = (text: string, get: (t: TaskInput) => string): Describe => (a, b) => (get(a) === get(b) ? '' : text);
+
+const CHANGES: Describe[] = [
+  edited('Title changed', (t) => t.title),
+  moved('Committee', (t) => labelOf(COMMITTEES, t.committee)),
+  moved('Status', (t) => labelOf(STATUSES, t.status)),
+  (a, b) => (a.ownerUid === b.ownerUid ? '' : `Owner ${none(a.ownerName)} → ${none(b.ownerName)}`),
+  moved('Start', (t) => t.startDate),
+  moved('Due', (t) => t.dueDate),
+  edited('Notes edited', (t) => t.notes),
+  edited('Checklist edited', (t) => t.checklist),
+  moved('Repeat', (t) => labelOf(REPEATS, t.repeat)),
+  edited('Link changed', (t) => t.link),
+];
+
+// One line for the task's history: what changed, in plain words. Long text is only said to have changed.
+export const NO_CHANGE = 'Saved with no changes';
+
+export function changeSummary(prev: TaskInput | null, next: TaskInput): string {
+  if (!prev) return 'Created';
+  const parts = CHANGES.map((describe) => describe(prev, next)).filter(Boolean);
+  return parts.length ? parts.join('; ') : NO_CHANGE;
 }

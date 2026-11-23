@@ -378,6 +378,15 @@ for (const who of ["tcom1", "exec1", "bot1"]) {
   await ok(`${who} adds a task`, () => as(who).collection("tasks").add(task(who)));
   await ok(`${who} edits a task`, () => as(who).doc("tasks/t1").update({ status: "doing", updatedAt: FV.serverTimestamp() }));
 }
+const event = (uid, extra = {}) => ({ at: FV.serverTimestamp(), byUid: uid, byName: "Ana", summary: "Status To do → Done", ...extra });
+await ok("officer adds a task history entry", () => as("exec1").collection("tasks/t1/history").add(event("exec1")));
+await ok("officer reads task history", () => as("tcom1").collection("tasks/t1/history").get());
+await no("history entry cannot name another person", () => as("exec1").collection("tasks/t1/history").add(event("tcom1")));
+await no("history entry needs the server time", () => as("exec1").collection("tasks/t1/history").add(event("exec1", { at: "yesterday" })));
+await no("history entry rejects unknown fields", () => as("exec1").collection("tasks/t1/history").add(event("exec1", { extra: 1 })));
+await no("plain member cannot read task history", () => m2().collection("tasks/t1/history").get());
+await no("history entries cannot be edited", async () => { const r = await as("exec1").collection("tasks/t1/history").add(event("exec1")); await r.update({ summary: "x" }); });
+await no("history entries stay while their task exists", async () => { const r = await as("exec1").collection("tasks/t1/history").add(event("exec1")); await r.delete(); });
 await ok("admin adds a task", () => admin().collection("tasks").add(task("admin")));
 await no("plain member cannot read tasks", () => m2().doc("tasks/t1").get());
 await no("plain member cannot add a task", () => m2().collection("tasks").add(task("m2")));

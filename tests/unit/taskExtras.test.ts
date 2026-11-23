@@ -1,5 +1,5 @@
 import type { Task, TaskInput } from '../../src/frontend/data/tasks';
-import { parseStoredView, checklistProgress, dragDays, todayMarker, formatChecklist, linkify, nextOccurrence, parseChecklist, shiftDates, summaryOf } from '../../src/frontend/data/taskExtras';
+import { changeSummary, climbChoices, parseStoredView, checklistProgress, dragDays, todayMarker, formatChecklist, linkify, nextOccurrence, parseChecklist, shiftDates, summaryOf } from '../../src/frontend/data/taskExtras';
 
 const input = (extra: Partial<TaskInput> = {}): TaskInput => ({
   title: 'Prep meeting', committee: 'execom', status: 'done', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', checklist: '', repeat: '', link: '', ...extra,
@@ -104,4 +104,37 @@ describe('parseStoredView', () => {
     expect(parseStoredView('not json')).toEqual(fallback);
     expect(parseStoredView(JSON.stringify({ mode: 'grid', view: { committee: 5, sort: 'chaos' } }))).toEqual(fallback);
   });
+});
+
+describe('climbChoices', () => {
+  const now = new Date('2026-11-23T00:00:00Z');
+  it('lists public climbs by name and dates with the site path a task can link to, newest first', () => {
+    const docs = [
+      { id: 'a', title: 'Mt. Pulag', startDate: '2026-12-05', endDate: '2026-12-06', status: 'open' },
+      { id: 'b', title: 'Mt. Ulap', startDate: '2026-12-20', status: 'open' },
+      { id: 'c', title: 'Secret draft', startDate: '2026-12-25', status: 'draft' },
+      { id: 'e', title: 'Called off', startDate: '2026-12-27', status: 'open', cancellationStatus: 'cancelled' },
+      { title: 'No id', startDate: '2026-12-26', status: 'open' },
+    ];
+    expect(climbChoices(docs, now)).toEqual([
+      { path: '/climbs/b', label: 'Mt. Ulap (Dec 20)' },
+      { path: '/climbs/a', label: 'Mt. Pulag (Dec 5–6)' },
+    ]);
+  });
+});
+
+describe('changeSummary', () => {
+  const before = input({ status: 'todo', ownerName: 'Ana', ownerUid: 'u1', dueDate: '2026-12-01' });
+  it('says a task was created when there is nothing before it', () => expect(changeSummary(null, input())).toBe('Created'));
+  it('names each change in plain words, joined', () => {
+    expect(changeSummary(before, { ...before, status: 'done', dueDate: '2026-12-05' })).toBe('Status To do → Done; Due 2026-12-01 → 2026-12-05');
+    expect(changeSummary(before, { ...before, ownerName: 'Ben', ownerUid: 'u2' })).toBe('Owner Ana → Ben');
+  });
+  it('shows (none) for an empty side', () => {
+    expect(changeSummary(before, { ...before, ownerName: '', ownerUid: '', dueDate: '' })).toBe('Owner Ana → (none); Due 2026-12-01 → (none)');
+  });
+  it('notes edits to long text without copying it', () => {
+    expect(changeSummary(before, { ...before, notes: 'new', checklist: '[ ] a', link: '/x', repeat: 'weekly', title: 'Renamed' })).toBe('Title changed; Notes edited; Checklist edited; Repeat Does not repeat → Every week; Link changed');
+  });
+  it('says so when nothing changed', () => expect(changeSummary(before, before)).toBe('Saved with no changes'));
 });

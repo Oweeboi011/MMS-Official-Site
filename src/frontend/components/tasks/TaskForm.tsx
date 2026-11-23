@@ -1,13 +1,15 @@
 import { useState, type FormEvent } from 'react';
+import type { ClimbChoice } from '../../data/taskExtras';
 import { COMMITTEES, REPEATS, STATUSES, taskInput, validateTask, type Task, type TaskInput } from '../../data/tasks';
 import type { TaskOwner } from '../../services/tasks';
 import ChecklistEditor from './ChecklistEditor';
+import TaskHistory from './TaskHistory';
 
 const BLANK: TaskInput = { title: '', committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', checklist: '', repeat: '', link: '' };
 
 // New or edited task. The owner list is people who hold a group; an owner who left it stays selectable on their old tasks.
-export default function TaskForm({ task, owners, busy, onSave, onCancel }: {
-  task?: Task; owners: TaskOwner[]; busy: boolean; onSave: (input: TaskInput, id?: string) => Promise<boolean>; onCancel: () => void;
+export default function TaskForm({ task, owners, climbs, busy, onSave, onCancel }: {
+  task?: Task; owners: TaskOwner[]; climbs: ClimbChoice[]; busy: boolean; onSave: (input: TaskInput, id?: string) => Promise<boolean>; onCancel: () => void;
 }) {
   const [v, setV] = useState<TaskInput>(task ? taskInput(task) : BLANK);
   const [error, setError] = useState('');
@@ -51,8 +53,18 @@ export default function TaskForm({ task, owners, busy, onSave, onCancel }: {
           {REPEATS.map(([key, label]) => <option key={key} value={key}>{label}</option>)}
         </select>
       </div>
+      {climbs.length > 0 && (
+        <div className="editor-field">
+          <label htmlFor="tk-climb">Related climb</label>
+          <select id="tk-climb" value={climbs.some((c) => c.path === v.link) ? v.link : ''} onChange={(e) => set({ link: e.target.value })}>
+            <option value="">None</option>
+            {climbs.map((c) => <option key={c.path} value={c.path}>{c.label}</option>)}
+          </select>
+        </div>
+      )}
       <div className="editor-field"><label htmlFor="tk-link">Related link</label><input id="tk-link" maxLength={300} placeholder="https://… or /activities/open-climbs" value={v.link} onChange={(e) => set({ link: e.target.value })} /></div>
       {task?.updatedByName && <p className="climb-muted">Last changed by {task.updatedByName}.</p>}
+      {task && <TaskHistory key={task.id} taskId={task.id} />}
       {error && <p role="alert" className="field-error">{error}</p>}
       <div className="editor-actions">
         <button type="submit" className="btn btn-primary" disabled={busy}>Save task</button>

@@ -11,10 +11,11 @@ import TaskTimeline from '../components/tasks/TaskTimeline';
 import { useStoredView } from '../components/tasks/useStoredView';
 import { useTaskShortcuts } from '../components/tasks/useTaskShortcuts';
 import { useUndoDelete } from '../components/tasks/useUndoDelete';
-import { shiftDates } from '../data/taskExtras';
+import { climbChoices, shiftDates, type ClimbChoice } from '../data/taskExtras';
 import { canUseTasks, manilaToday, taskInput, tasksToCsv, viewTasks, type Task, type TaskView } from '../data/tasks';
 import { downloadCsv } from '../lib/download';
 import type { Account } from '../services/auth';
+import { loadClimbLog } from '../services/publicData';
 import { TASK_LIMIT, loadOwners, loadTasks, removeTask, saveTask, type TaskOwner } from '../services/tasks';
 import { useAccount } from '../services/useAccount';
 
@@ -46,29 +47,30 @@ function Tasks({ account }: { account: Account }) {
   const load = useCallback(() => loadTasks(max), [max]);
   const { rows, message, busy, run } = useAdminList(load);
   const [owners, setOwners] = useState<TaskOwner[] | null>(null);
+  const [climbs, setClimbs] = useState<ClimbChoice[]>([]);
   const [editing, setEditing] = useState<Task | 'new' | null>(null);
   const [{ mode, view }, setStored] = useStoredView(account.uid);
   const undo = useUndoDelete((t) => run(() => removeTask(t)));
   useEffect(() => { void loadOwners().then(setOwners, () => setOwners(null)); }, []);
+  useEffect(() => { void loadClimbLog().then((docs) => setClimbs(climbChoices(docs ?? [], new Date())), () => setClimbs([])); }, []);
   const shortcuts = useMemo(() => ({
     n: () => setEditing('new'), t: () => setStored((s) => ({ ...s, mode: 'table' })), l: () => setStored((s) => ({ ...s, mode: 'timeline' })),
   }), [setStored]);
   useTaskShortcuts(!editing, shortcuts);
   if (!rows) return <p role="status">{message || 'Loading…'}</p>;
   if (editing) {
-    const wasDone = editing !== 'new' && editing.status === 'done';
     return (
       <>
         {message && <p role="status">{message}</p>}
-        <TaskForm task={editing === 'new' ? undefined : editing} owners={owners ?? []} busy={busy} onCancel={() => setEditing(null)}
-          onSave={(input, id) => run(() => saveTask(account, input, id, wasDone))} />
+        <TaskForm task={editing === 'new' ? undefined : editing} owners={owners ?? []} climbs={climbs} busy={busy} onCancel={() => setEditing(null)}
+          onSave={(input, id) => run(() => saveTask(account, input, id, editing === 'new' ? undefined : editing))} />
       </>
     );
   }
   const visible = rows.filter((t) => t.id !== undo.pending?.id);
   const shown = viewTasks(visible, view);
   const set = (patch: Partial<TaskView>) => setStored((s) => ({ ...s, view: { ...s.view, ...patch } }));
-  const change = (t: Task, patch: Partial<ReturnType<typeof taskInput>>) => void run(() => saveTask(account, { ...taskInput(t), ...patch }, t.id, t.status === 'done'));
+  const change = (t: Task, patch: Partial<ReturnType<typeof taskInput>>) => void run(() => saveTask(account, { ...taskInput(t), ...patch }, t.id, t));
   return (
     <>
       <p>

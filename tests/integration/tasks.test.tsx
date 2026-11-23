@@ -2,8 +2,12 @@ import { act, fireEvent, screen, within } from '@testing-library/react';
 import axe from 'axe-core';
 import { renderAt } from '../helpers';
 
-const calls = vi.hoisted(() => ({ saved: [] as unknown[], removed: [] as string[], csv: [] as string[][], wasDone: [] as boolean[], limits: [] as number[] }));
+const calls = vi.hoisted(() => ({ saved: [] as unknown[], removed: [] as string[], csv: [] as string[][], previous: [] as (string | undefined)[], limits: [] as number[] }));
 vi.mock('../../src/frontend/lib/download', () => ({ downloadCsv: (name: string, text: string) => { calls.csv.push([name, text]); } }));
+vi.mock('../../src/frontend/services/publicData', async (orig) => ({
+  ...(await orig<typeof import('../../src/frontend/services/publicData')>()),
+  loadClimbLog: async () => [{ id: 'c1', title: 'Mt. Pulag', startDate: '2026-12-05', status: 'open' }],
+}));
 const fail = vi.hoisted(() => ({ next: '' }));
 const who = vi.hoisted(() => ({ account: { uid: 'u1', email: 'exec@x.com', role: 'member', emailVerified: true, groups: ['execom'] as string[] } }));
 vi.mock('../../src/frontend/services/useAccount', () => ({ useAccount: () => ({ status: 'signedIn', account: who.account }) }));
@@ -15,11 +19,12 @@ vi.mock('../../src/frontend/services/tasks', () => ({
     { id: 't4', title: 'Sort gear', committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', checklist: '', repeat: '', link: '', updatedByName: '', updatedAt: -1 },
     { id: 't5', title: 'Print forms', committee: 'execom', status: 'doing', ownerUid: 'u9', ownerName: 'Gone Guy', startDate: '2030-01-01', dueDate: '2030-01-02', notes: 'Venue https://example.com/venue and javascript:alert(1)', checklist: '[x] Book hall\n[ ] Print', repeat: 'weekly', link: '/activities/open-climbs', updatedByName: 'Cara', updatedAt: -2 },
   ]; },
+  loadHistory: async (id: string) => (id === 't2' ? [{ id: 'h1', byName: 'Cara', summary: 'Status To do → Doing', at: Date.parse('2026-11-23T04:00:00Z') }] : []),
   loadOwners: async () => [{ uid: 'u1', name: 'Ana' }, { uid: 'u2', name: 'Ben' }],
-  saveTask: async (_a: unknown, input: unknown, id?: string, wasDone = false) => {
+  saveTask: async (_a: unknown, input: unknown, id?: string, previous?: { status: string }) => {
     if (fail.next) { const message = fail.next; fail.next = ''; throw new Error(message); }
     calls.saved.push({ input, id });
-    calls.wasDone.push(wasDone);
+    calls.previous.push(previous?.status);
   },
   TASK_LIMIT: 5,
   removeTask: async (t: { id: string }) => { calls.removed.push(t.id); },
@@ -137,6 +142,29 @@ describe('task tracker table', () => {
     expect(calls.saved[0]).toMatchObject({ input: { title: 'Prep meeting', checklist: '[ ] Call venue', repeat: 'weekly', link: '/activities/open-climbs' } });
   });
 
+  it('links a task to a climb chosen from the list', async () => {
+    calls.saved = [];
+    renderAt('/account/tasks');
+    fireEvent.click(await screen.findByRole('button', { name: 'New task' }, { timeout: 5000 }));
+    fireEvent.change(screen.getByLabelText('Title *'), { target: { value: 'Pack list' } });
+    fireEvent.change(await screen.findByLabelText('Related climb'), { target: { value: '/climbs/c1' } });
+    expect(screen.getByLabelText('Related link')).toHaveValue('/climbs/c1');
+    fireEvent.click(screen.getByRole('button', { name: 'Save task' }));
+    await vi.waitFor(() => expect(calls.saved).toHaveLength(1));
+    expect(calls.saved[0]).toMatchObject({ input: { title: 'Pack list', link: '/climbs/c1' } });
+  });
+
+  it('shows who changed a task and what, when editing it, and nothing for a new task', async () => {
+    renderAt('/account/tasks');
+    await screen.findByText('Plan training', {}, { timeout: 5000 });
+    fireEvent.click(within(rowFor('Plan training')).getByRole('button', { name: 'Edit' }));
+    const history = await screen.findByRole('region', { name: 'History' });
+    expect(within(history).getByText(/Cara: Status To do → Doing/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    fireEvent.click(screen.getByRole('button', { name: 'New task' }));
+    expect(screen.queryByRole('region', { name: 'History' })).not.toBeInTheDocument();
+  });
+
   it('edits a task through the same form', async () => {
     calls.saved = [];
     renderAt('/account/tasks');
@@ -183,15 +211,15 @@ describe('task tracker table', () => {
       expect(within(rowFor('Plan training')).queryByText('(no longer in a group)')).not.toBeInTheDocument();
     });
 
-    it('changes status from the row and tells the service if it was already done', async () => {
-      calls.saved = []; calls.wasDone = [];
+    it('changes status from the row and hands the service the task as it was', async () => {
+      calls.saved = []; calls.previous = [];
       renderAt('/account/tasks');
       await screen.findByText('Plan training', {}, { timeout: 5000 });
       fireEvent.change(screen.getByLabelText('Status of Plan training'), { target: { value: 'done' } });
       await vi.waitFor(() => expect(calls.saved).toHaveLength(1));
       expect(calls.saved[0]).toMatchObject({ id: 't2', input: { status: 'done', title: 'Plan training' } });
       fireEvent.change(screen.getByLabelText('Status of Old chore'), { target: { value: 'todo' } });
-      await vi.waitFor(() => expect(calls.wasDone).toEqual([false, true]));
+      await vi.waitFor(() => expect(calls.previous).toEqual(['todo', 'done']));
     });
 
     it('switches views and starts a task from the keyboard', async () => {
