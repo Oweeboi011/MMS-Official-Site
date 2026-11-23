@@ -1,4 +1,4 @@
-import { canUseTasks, isOverdue, timelineOf, toTask, validateTask, viewTasks, type Task, type TaskInput } from '../../src/frontend/data/tasks';
+import { canUseTasks, isOverdue, timelineOf, toTask, validateTask, viewTasks, tasksToCsv, type Task, type TaskInput } from '../../src/frontend/data/tasks';
 
 const mk = (id: string, extra: Partial<Task> = {}): Task => ({ id, title: id, committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', updatedAt: 0, ...extra });
 const none = { committee: '', status: '', ownerUid: '', sort: 'due' } as const;
@@ -131,5 +131,17 @@ describe('timelineOf', () => {
   });
   it('is empty when nothing has a date', () => {
     expect(timelineOf([c])).toEqual({ from: '', to: '', months: [], groups: [], undated: [c] });
+  });
+});
+
+describe('tasksToCsv', () => {
+  it('writes a header, readable labels, quoted notes, and defuses spreadsheet formulas', () => {
+    const csv = tasksToCsv([
+      mk('a', { title: 'Book "venue"', committee: 'tcom', status: 'doing', ownerName: 'Ana', startDate: '2026-12-01', dueDate: '2026-12-05', notes: 'one, two' }),
+      mk('b', { title: '=SUM(A1)' }),
+    ]).split('\r\n');
+    expect(csv[0]).toBe('"Task","Committee","Status","Owner","Start","Due","Notes"');
+    expect(csv[1]).toBe('"Book ""venue""","TCom","Doing","Ana","2026-12-01","2026-12-05","one, two"');
+    expect(csv[2]).toBe(`"'=SUM(A1)","ExeCom","To do","","","",""`);
   });
 });

@@ -2,7 +2,8 @@ import { fireEvent, screen, within } from '@testing-library/react';
 import axe from 'axe-core';
 import { renderAt } from '../helpers';
 
-const calls = vi.hoisted(() => ({ saved: [] as unknown[], removed: [] as string[] }));
+const calls = vi.hoisted(() => ({ saved: [] as unknown[], removed: [] as string[], csv: [] as string[][] }));
+vi.mock('../../src/frontend/lib/download', () => ({ downloadCsv: (name: string, text: string) => { calls.csv.push([name, text]); } }));
 const fail = vi.hoisted(() => ({ next: '' }));
 const who = vi.hoisted(() => ({ account: { uid: 'u1', email: 'exec@x.com', role: 'member', emailVerified: true, groups: ['execom'] as string[] } }));
 vi.mock('../../src/frontend/services/useAccount', () => ({ useAccount: () => ({ status: 'signedIn', account: who.account }) }));
@@ -50,6 +51,18 @@ describe('task tracker table', () => {
     fireEvent.change(screen.getByLabelText('Committee'), { target: { value: 'execom' } });
     expect(screen.queryByText('Plan training')).not.toBeInTheDocument();
     expect(screen.getByText('Book venue')).toBeInTheDocument();
+  });
+
+  it('downloads the tasks the filters show as CSV', async () => {
+    calls.csv = [];
+    renderAt('/account/tasks');
+    await screen.findByText('Book venue', {}, { timeout: 5000 });
+    fireEvent.change(screen.getByLabelText('Committee'), { target: { value: 'tcom' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Download CSV (2)' }));
+    expect(calls.csv).toHaveLength(1);
+    expect(calls.csv[0][0]).toBe('committee-tasks');
+    expect(calls.csv[0][1]).toContain('Plan training');
+    expect(calls.csv[0][1]).not.toContain('Book venue');
   });
 
   it('adds a task, asking for a title first', async () => {
