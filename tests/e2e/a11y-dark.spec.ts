@@ -73,5 +73,6 @@ test('the dropdown arrow and the table row highlight follow the dark theme', asy
     return { chevron: root.getPropertyValue('--chevron'), hover: root.getPropertyValue('--row-hover').trim() };
   });
   expect(tokens.chevron).toContain('b3b8ff'); // light periwinkle, not the light theme's navy 252b73
-  expect(tokens.hover).toBe('rgba(255,255,255,.07)'); // a faint light wash, not the cream one that turns grey on dark
+  // A faint white wash (the build may spell it #ffffff12), not the cream one that turns grey on dark.
+  expect(['rgba(255,255,255,.07)', '#ffffff12']).toContain(tokens.hover);
 });
