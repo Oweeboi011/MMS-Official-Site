@@ -8,56 +8,52 @@ const pages = ['/', '/activities/open-climbs', '/about/leadership', '/explore/mo
   // One page per section and per page type, since the accent colours differ by section.
   '/about', '/about/history', '/explore', '/activities', '/training', '/community', '/media', '/membership', '/surveys', '/search?q=pulag', '/about/glossary', '/media/news'];
 
+const FREEZE = '*, *::before, *::after { transition: none !important; animation: none !important; }';
+
 for (const path of pages) {
   test(`no axe violations in dark mode on ${path}`, async ({ page }) => {
     await page.goto(path);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     // Frozen first: axe would otherwise read a colour half-way through a fade.
-    await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; animation: none !important; }' });
+    await page.addStyleTag({ content: FREEZE });
     const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     const lines = violations.map((v) => v.id + ': ' + v.nodes.length + ' x ' + v.help + ' -> ' + v.nodes.slice(0, 4).map((n) => n.target.join(' ')).join(' | '));
     expect(lines).toEqual([]);
   });
 }
 
-// Axe does not tab through a page or look at print, so these two checks cover what it cannot.
+// Axe does not tab through a page or look at print, so these checks cover what it cannot.
 const luminance = ([r, g, b]: number[]) => {
   const [x, y, z] = [r, g, b].map((c) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
   return 0.2126 * x + 0.7152 * y + 0.0722 * z;
 };
 const contrast = (a: number[], b: number[]) => { const [hi, lo] = [luminance(a), luminance(b)].sort((m, n) => n - m); return (hi + 0.05) / (lo + 0.05); };
 
-for (const path of ['/account/sign-in']) {
-  test(`keyboard focus stays visible (3:1) in dark mode on ${path}`, async ({ page }) => {
-    await page.goto(path);
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; animation: none !important; }' });
-    // Start on the page's first button, then Tab through the form: email, password, Sign in.
-    await page.getByRole('button', { name: 'Continue with Google' }).focus();
-    const seen: string[] = [];
-    for (let i = 0; i < 3; i += 1) {
-      await page.keyboard.press('Tab');
-      const found = await page.evaluate(() => {
-        const rgb = (v: string) => (v.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
-        const el = document.activeElement as HTMLElement;
-        if (!el || el === document.body) return null;
-        const cs = getComputedStyle(el);
-        const ring = cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0 ? rgb(cs.outlineColor) : rgb(cs.borderTopColor);
-        let bg = [14, 19, 26];
-        for (let e: HTMLElement | null = el.parentElement; e; e = e.parentElement) {
-          const m = getComputedStyle(e).backgroundColor.match(/[\d.]+/g) ?? [];
-          if (m.length >= 3 && (m.length === 3 || Number(m[3]) === 1)) { bg = m.slice(0, 3).map(Number); break; }
-        }
-        return { name: el.tagName + '.' + el.className + ' ' + (el.getAttribute('aria-label') ?? el.textContent ?? '').slice(0, 24), ring, bg };
-      });
-      if (found) seen.push(found.name + ' ' + contrast(found.ring, found.bg).toFixed(2));
+// The site search field exists in every build (the sign-in form needs Firebase config, which CI builds lack) and uses
+// the shared field focus style. Its focus indicator is its border, so that is what is measured against the page.
+test('keyboard focus on a text field stays visible (3:1) in dark mode', async ({ page }) => {
+  await page.goto('/search?q=pulag');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await page.addStyleTag({ content: FREEZE });
+  const field = page.locator('#site-search');
+  await field.focus();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab'); // a key press, so the browser treats the focus as keyboard focus (:focus-visible)
+  await expect(field).toBeFocused();
+  const { ring, bg } = await field.evaluate((el) => {
+    const rgb = (v: string) => (v.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
+    let behind = [14, 19, 26];
+    for (let e: HTMLElement | null = el.parentElement; e; e = e.parentElement) {
+      const m = getComputedStyle(e).backgroundColor.match(/[\d.]+/g) ?? [];
+      if (m.length >= 3 && (m.length === 3 || Number(m[3]) === 1)) { behind = m.slice(0, 3).map(Number); break; }
     }
-    // Only elements whose ring is our own focus colour are judged; links inside photo heroes sit on images.
-    const controls = seen.filter((s) => /^(INPUT|BUTTON|SELECT|TEXTAREA)/.test(s));
-    expect(controls).toHaveLength(3); // email, password, Sign in: never pass by judging nothing
-    expect(controls.filter((s) => Number(s.split(' ').pop()) < 3)).toEqual([]);
+    // A translucent border (the unfocused one is) only shows as far as its alpha, so blend it over what is behind.
+    const parts = (getComputedStyle(el).borderTopColor.match(/[\d.]+/g) ?? []).map(Number);
+    const alpha = parts.length > 3 ? parts[3] : 1;
+    return { ring: rgb(getComputedStyle(el).borderTopColor).map((c, i) => c * alpha + behind[i] * (1 - alpha)), bg: behind };
   });
-}
+  expect(contrast(ring, bg)).toBeGreaterThanOrEqual(3);
+});
 
 test('a waiver or day sheet printed from a dark-mode device is still dark text on white', async ({ page }) => {
   await page.goto('/');

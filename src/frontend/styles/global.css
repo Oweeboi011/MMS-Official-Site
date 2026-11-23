@@ -528,6 +528,7 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .search-form { display: grid; gap: 8px; max-width: 640px; }
 .search-form label { font-weight: 800; }
 .search-form input { padding: 14px 18px; border: 1px solid var(--line); border-radius: 999px; font: inherit; font-size: 1rem; }
+.search-form input:focus-visible { border-color: var(--focus); box-shadow: 0 0 0 3px rgba(37, 43, 115, .18); } /* the shared field focus rule has no specificity, so this field's own border would hide it */
 .search-count { margin: 18px 0 0; color: var(--muted); }
 .search-results { display: grid; gap: 4px; margin: 12px 0 0; padding: 0; list-style: none; }
 .search-results li { padding: 16px 0; border-bottom: 1px solid var(--line); }
