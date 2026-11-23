@@ -890,11 +890,11 @@ input[type="file"]::file-selector-button:hover { background: var(--ink); }
 /* Task tracker: zoomable timeline, today line, legend, phone cards (ADR 0012). */
 .tl-scroll { overflow-x: auto; }
 .tl-inner { position: relative; min-width: 100%; }
-.tl-today { position: absolute; top: 0; bottom: 0; width: 2px; background: #171913; z-index: 1; pointer-events: none; }
+.tl-today { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink); z-index: 1; pointer-events: none; }
 .tl-bar { cursor: grab; touch-action: none; }
-.tl-bar:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
-.tl-bar.is-execom { box-shadow: inset 4px 0 0 #fff; }
-.tl-bar.is-tcom { box-shadow: inset 0 3px 0 #fff; }
+.tl-bar:focus-visible { outline: 3px solid var(--focus, var(--navy)); outline-offset: 2px; }
+.tl-bar.is-execom { box-shadow: inset 4px 0 0 var(--stripe, #fff); }
+.tl-bar.is-tcom { box-shadow: inset 0 3px 0 var(--stripe, #fff); }
 .tl-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 6px 0; padding: 0; list-style: none; font-size: .8rem; }
 .tl-legend .tl-swatch { position: static; display: inline-block; width: 18px; height: 10px; vertical-align: middle; cursor: default; }
 .tl-legend .tl-stripe { background: var(--muted); }
