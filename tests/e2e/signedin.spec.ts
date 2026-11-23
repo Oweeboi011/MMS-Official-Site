@@ -86,3 +86,30 @@ test('a signed-in member without a group is told they have no access', async ({ 
   await signIn(page, email);
   await expect(page.getByText(/doesn’t have access to the task tracker/)).toBeVisible();
 });
+
+// The dark theme lives in its own PR; until it lands this runs on the light styles and still has to pass.
+test.describe('dark mode', () => {
+  test.use({ colorScheme: 'dark' });
+
+  test('the signed-in tracker keeps WCAG AA contrast in the table, the timeline and the edit form', async ({ page }) => {
+    const email = await seedUser('darkexec', ['execom']);
+    await signIn(page, email);
+    await page.getByRole('button', { name: 'New task' }).click();
+    await page.getByLabel('Title *').fill('Dark venue booking');
+    await page.getByLabel('Start').fill(manilaDay(0));
+    await page.getByLabel('Due').fill(manilaDay(3));
+    await page.getByRole('button', { name: 'Add item' }).click();
+    await page.getByLabel('Item 1').fill('Call the hall');
+    await page.getByRole('button', { name: 'Save task' }).click();
+    await expect(page.getByRole('row', { name: /Dark venue booking/ })).toBeVisible();
+    expect(await violations(page)).toEqual([]);
+
+    await page.getByRole('button', { name: 'Timeline' }).click();
+    await expect(page.getByRole('button', { name: /^Move Dark venue booking/ })).toBeVisible();
+    expect(await violations(page)).toEqual([]);
+
+    await page.getByRole('button', { name: 'Edit Dark venue booking' }).click();
+    await expect(page.getByRole('region', { name: 'History' })).toBeVisible();
+    expect(await violations(page)).toEqual([]);
+  });
+});
