@@ -18,6 +18,7 @@ Setup: [GETTING-STARTED](../GETTING-STARTED.md). Claude Code rules: `.claude/CLA
 | `npm run test:parity` | live site serves local `dist/` |
 | `npm run check:audit` | high+ vulnerabilities (site + backend) |
 | `npm run test:rules` | Firestore + Storage rules on emulators (needs Java) |
+| `npm run test:e2e:signedin` | real sign-in on the Auth + Firestore emulators, Playwright on the dev server (needs Java); Java without admin rights: unzip Microsoft's OpenJDK zip, set `JAVA_HOME` and `PATH` for the shell |
 | `npm run deploy:preview` / `deploy:prod` | [DEPLOYMENT](DEPLOYMENT.md) |
 | `cd src/backend && npx firebase-tools@15 deploy --only …` | backend ([DEPLOYMENT](DEPLOYMENT.md#backend-firebase)) |
 
