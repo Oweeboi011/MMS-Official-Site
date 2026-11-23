@@ -19,6 +19,7 @@ ExeCom and TCom have no shared place for tasks and deadlines. Groups and their r
 - **Owner picker.** Collection `groupMembers/{uid}` (`name`, `groups`), readable by the same people, written by admins and BOT. `setGroups` writes it with the user record, so private user records stay private. Renaming a user (`updateUserProfile`) updates it; deleting an account removes it and clears the owner on that person's tasks. Existing group holders are filled in once by `tools/admin/backfill-group-members.mjs`.
 - **Page.** `/account/tasks`, tab shown to those with access. One data set, two views: a sortable, filterable table (overdue marked) and a timeline (bars from start to due, grouped by committee; undated tasks listed apart).
 - Every create, edit and delete writes to the audit log.
+- **Added after the first release** (2026-11-23): optional `checklist` (text lines, `[x]` marks done), `repeat` (`weekly` or `monthly`: finishing the task adds the next copy, to do, dates moved), `link` (https or a site path), `updatedByName` (who last changed it, display name only), dates limited to 2020-2039. The rules bound each. Delete waits a few seconds so it can be undone. The view and filters are remembered on the device; Overdue uses the Manila date.
 
 ## Consequences
 

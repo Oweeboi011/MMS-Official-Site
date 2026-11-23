@@ -1,5 +1,6 @@
 // tasks: ExeCom and TCom tracker; groupMembers: who can own a task (rules: firestore.rules, ADR 0012).
 import { addDoc, collection, deleteDoc, doc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from 'firebase/firestore/lite';
+import { nextOccurrence } from '../data/taskExtras';
 import { toTask, validateTask, type Task, type TaskInput } from '../data/tasks';
 import { logAudit } from './auditLog';
 import type { Account } from './auth';
@@ -10,8 +11,8 @@ const tasks = () => collection(firebase().db, 'tasks');
 export const TASK_LIMIT = 500;
 
 // Newest changes first, so the limit drops the oldest tasks, never the latest.
-export async function loadTasks(): Promise<Task[]> {
-  return (await getDocs(query(tasks(), orderBy('updatedAt', 'desc'), limit(TASK_LIMIT)))).docs.map((d) => toTask(d.id, d.data()));
+export async function loadTasks(max = TASK_LIMIT): Promise<Task[]> {
+  return (await getDocs(query(tasks(), orderBy('updatedAt', 'desc'), limit(max)))).docs.map((d) => toTask(d.id, d.data()));
 }
 
 export interface TaskOwner { uid: string; name: string }
@@ -21,15 +22,23 @@ export async function loadOwners(): Promise<TaskOwner[]> {
   return snap.docs.map((d) => ({ uid: d.id, name: String(d.data().name ?? '') })).sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export async function saveTask(account: Account, input: TaskInput, id?: string): Promise<void> {
+const stored = (account: Account, input: TaskInput) =>
+  ({ ...input, title: input.title.trim(), notes: input.notes.trim(), updatedByName: account.name || 'An officer', updatedAt: serverTimestamp() });
+
+// wasDone: the task was already Done before this save, so a repeating task does not spawn a second copy.
+export async function saveTask(account: Account, input: TaskInput, id?: string, wasDone = false): Promise<void> {
   if (!writesEnabled) throw new Error(readOnlyMessage);
   const problem = validateTask(input);
   if (problem) throw new Error(problem);
-  const body = { ...input, title: input.title.trim(), notes: input.notes.trim(), updatedAt: serverTimestamp() };
+  const body = stored(account, input);
   let taskId = id ?? '';
   if (id) await updateDoc(doc(firebase().db, 'tasks', id), body);
   else taskId = (await addDoc(tasks(), { ...body, createdBy: account.uid, createdAt: serverTimestamp() })).id;
   await logAudit({ action: id ? 'task edited' : 'task added', targetType: 'task', targetId: taskId, targetLabel: input.title, details: `${input.committee} · ${input.status}` });
+  const next = wasDone ? null : nextOccurrence(input);
+  if (!next) return;
+  const copy = await addDoc(tasks(), { ...stored(account, next), createdBy: account.uid, createdAt: serverTimestamp() });
+  await logAudit({ action: 'task added', targetType: 'task', targetId: copy.id, targetLabel: next.title, details: `${next.committee} · repeat of ${taskId}` });
 }
 
 export async function removeTask(task: Task): Promise<void> {

@@ -1,86 +1,91 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import AccountTabs from '../components/AccountTabs';
 import { useAdminList } from '../components/admin/useAdminList';
 import PageHero from '../components/PageHero';
 import SignInForm from '../components/SignInForm';
+import TaskFilters from '../components/tasks/TaskFilters';
 import TaskForm from '../components/tasks/TaskForm';
+import TaskSummary from '../components/tasks/TaskSummary';
 import TaskTable from '../components/tasks/TaskTable';
 import TaskTimeline from '../components/tasks/TaskTimeline';
+import { useStoredView } from '../components/tasks/useStoredView';
+import { useTaskShortcuts } from '../components/tasks/useTaskShortcuts';
+import { useUndoDelete } from '../components/tasks/useUndoDelete';
+import { shiftDates } from '../data/taskExtras';
+import { canUseTasks, manilaToday, taskInput, tasksToCsv, viewTasks, type Task, type TaskView } from '../data/tasks';
 import { downloadCsv } from '../lib/download';
-import { COMMITTEES, STATUSES, UNASSIGNED, canUseTasks, manilaToday, tasksToCsv, viewTasks, type Task, type TaskView } from '../data/tasks';
 import type { Account } from '../services/auth';
 import { TASK_LIMIT, loadOwners, loadTasks, removeTask, saveTask, type TaskOwner } from '../services/tasks';
 import { useAccount } from '../services/useAccount';
 
-const SORTS: [TaskView['sort'], string][] = [['due', 'Due date'], ['title', 'Title'], ['status', 'Status'], ['committee', 'Committee']];
+interface ResultsProps {
+  tasks: Task[]; total: number; mode: 'table' | 'timeline'; busy: boolean; staleOwner: (t: Task) => boolean;
+  onEdit: (t: Task) => void; onDelete: (t: Task) => void; onStatus: (t: Task, s: Task['status']) => void; onMove: (t: Task, days: number) => void; onClear: () => void;
+}
 
-function Filter({ id, label, value, onChange, options }: { id: string; label: string; value: string; onChange: (v: string) => void; options: readonly (readonly [string, string])[] }) {
+function Results({ tasks, total, mode, busy, staleOwner, onEdit, onDelete, onStatus, onMove, onClear }: ResultsProps) {
+  if (total === 0) return <p>No tasks yet. Add the first with New task.</p>;
+  if (tasks.length === 0) return <p>No tasks match these filters. <button type="button" className="chip" onClick={onClear}>Clear filters</button></p>;
+  const today = manilaToday();
+  if (mode === 'timeline') return <TaskTimeline tasks={tasks} today={today} busy={busy} onEdit={onEdit} onMove={onMove} />;
+  return <TaskTable tasks={tasks} today={today} busy={busy} staleOwner={staleOwner} onEdit={onEdit} onDelete={onDelete} onStatus={onStatus} />;
+}
+
+function ViewToggle({ mode, onChange }: { mode: 'table' | 'timeline'; onChange: (m: 'table' | 'timeline') => void }) {
   return (
-    <div className="editor-field">
-      <label htmlFor={id}>{label}</label>
-      <select id={id} value={value} onChange={(e) => onChange(e.target.value)}>
-        <option value="">All</option>
-        {options.map(([key, text]) => <option key={key} value={key}>{text}</option>)}
-      </select>
+    <div className="trail-tabs" role="group" aria-label="View">
+      {(['table', 'timeline'] as const).map((m) => (
+        <button key={m} type="button" className="chip" aria-pressed={mode === m} onClick={() => onChange(m)}>{m === 'table' ? 'Table' : 'Timeline'}</button>
+      ))}
     </div>
   );
 }
 
-function Results({ tasks, total, mode, busy, onEdit, onDelete, onClear }: { tasks: Task[]; total: number; mode: 'table' | 'timeline'; busy: boolean; onEdit: (t: Task) => void; onDelete: (t: Task) => void; onClear: () => void }) {
-  if (total === 0) return <p>No tasks yet. Add the first with New task.</p>;
-  if (tasks.length === 0) return <p>No tasks match these filters. <button type="button" className="chip" onClick={onClear}>Clear filters</button></p>;
-  const today = manilaToday();
-  if (mode === 'timeline') return <TaskTimeline tasks={tasks} today={today} busy={busy} onEdit={onEdit} />;
-  return <TaskTable tasks={tasks} today={today} busy={busy} onEdit={onEdit} onDelete={onDelete} />;
-}
-
 function Tasks({ account }: { account: Account }) {
-  const { rows, message, busy, run } = useAdminList(loadTasks);
-  const [owners, setOwners] = useState<TaskOwner[]>([]);
+  const [max, setMax] = useState(TASK_LIMIT);
+  const load = useCallback(() => loadTasks(max), [max]);
+  const { rows, message, busy, run } = useAdminList(load);
+  const [owners, setOwners] = useState<TaskOwner[] | null>(null);
   const [editing, setEditing] = useState<Task | 'new' | null>(null);
-  const [mode, setMode] = useState<'table' | 'timeline'>('table');
-  const [view, setView] = useState<TaskView>({ committee: '', status: '', ownerUid: '', sort: 'due' });
-  useEffect(() => { void loadOwners().then(setOwners, () => setOwners([])); }, []);
+  const [{ mode, view }, setStored] = useStoredView(account.uid);
+  const undo = useUndoDelete((t) => run(() => removeTask(t)));
+  useEffect(() => { void loadOwners().then(setOwners, () => setOwners(null)); }, []);
+  const shortcuts = useMemo(() => ({
+    n: () => setEditing('new'), t: () => setStored((s) => ({ ...s, mode: 'table' })), l: () => setStored((s) => ({ ...s, mode: 'timeline' })),
+  }), [setStored]);
+  useTaskShortcuts(!editing, shortcuts);
   if (!rows) return <p role="status">{message || 'Loading…'}</p>;
   if (editing) {
+    const wasDone = editing !== 'new' && editing.status === 'done';
     return (
       <>
         {message && <p role="status">{message}</p>}
-        <TaskForm task={editing === 'new' ? undefined : editing} owners={owners} busy={busy} onCancel={() => setEditing(null)}
-          onSave={(input, id) => run(() => saveTask(account, input, id))} />
+        <TaskForm task={editing === 'new' ? undefined : editing} owners={owners ?? []} busy={busy} onCancel={() => setEditing(null)}
+          onSave={(input, id) => run(() => saveTask(account, input, id, wasDone))} />
       </>
     );
   }
-  const shown = viewTasks(rows, view);
-  const set = (patch: Partial<TaskView>) => setView({ ...view, ...patch });
+  const visible = rows.filter((t) => t.id !== undo.pending?.id);
+  const shown = viewTasks(visible, view);
+  const set = (patch: Partial<TaskView>) => setStored((s) => ({ ...s, view: { ...s.view, ...patch } }));
+  const change = (t: Task, patch: Partial<ReturnType<typeof taskInput>>) => void run(() => saveTask(account, { ...taskInput(t), ...patch }, t.id, t.status === 'done'));
   return (
     <>
       <p>
         <button type="button" className="btn btn-primary" onClick={() => setEditing('new')}>New task</button>{' '}
         <button type="button" className="btn" disabled={!shown.length} onClick={() => downloadCsv('committee-tasks', tasksToCsv(shown))}>Download CSV ({shown.length})</button>
       </p>
-      <div className="trail-tabs" role="group" aria-label="View">
-        {(['table', 'timeline'] as const).map((m) => (
-          <button key={m} type="button" className="chip" aria-pressed={mode === m} onClick={() => setMode(m)}>{m === 'table' ? 'Table' : 'Timeline'}</button>
-        ))}
-      </div>
-      <div className="register-form">
-        <Filter id="tf-committee" label="Committee" value={view.committee} onChange={(committee) => set({ committee })} options={COMMITTEES} />
-        <Filter id="tf-status" label="Status" value={view.status} onChange={(status) => set({ status })} options={STATUSES} />
-        <Filter id="tf-owner" label="Owner" value={view.ownerUid} onChange={(ownerUid) => set({ ownerUid })} options={[[account.uid, 'My tasks'], [UNASSIGNED, 'Unassigned'], ...owners.filter((o) => o.uid !== account.uid).map((o) => [o.uid, o.name] as const)]} />
-        {mode === 'table' && (
-          <div className="editor-field">
-            <label htmlFor="tf-sort">Sort by</label>
-            <select id="tf-sort" value={view.sort} onChange={(e) => set({ sort: e.target.value as TaskView['sort'] })}>
-              {SORTS.map(([key, text]) => <option key={key} value={key}>{text}</option>)}
-            </select>
-          </div>
-        )}
-      </div>
+      <p className="climb-muted">Shortcuts: N new task, T table, L timeline.</p>
+      <TaskSummary tasks={visible} today={manilaToday()} />
+      <ViewToggle mode={mode} onChange={(m) => setStored((s) => ({ ...s, mode: m }))} />
+      <TaskFilters view={view} owners={owners ?? []} myUid={account.uid} showSort={mode === 'table'} onChange={set} />
       {message && <p role="status">{message}</p>}
-      <p className="climb-muted">{shown.length} of {rows.length} tasks</p>
-      {rows.length >= TASK_LIMIT && <p className="climb-notice" role="note">Showing the {TASK_LIMIT} most recently changed tasks; older ones are not listed.</p>}
-      <Results tasks={shown} total={rows.length} mode={mode} busy={busy} onEdit={setEditing} onDelete={(t) => void run(() => removeTask(t))} onClear={() => setView({ ...view, committee: '', status: '', ownerUid: '' })} />
+      {undo.pending && <p role="status" className="climb-notice">Deleted “{undo.pending.title}”. <button type="button" className="chip" onClick={undo.undo}>Undo</button></p>}
+      <p className="climb-muted">{shown.length} of {visible.length} tasks</p>
+      {rows.length >= max && <p className="climb-notice" role="note">Showing the {max} most recently changed tasks. <button type="button" className="chip" onClick={() => setMax(max + TASK_LIMIT)}>Show more tasks</button></p>}
+      <Results tasks={shown} total={visible.length} mode={mode} busy={busy} onEdit={setEditing} onDelete={undo.request} onClear={() => set({ committee: '', status: '', ownerUid: '' })}
+        staleOwner={(t) => owners !== null && Boolean(t.ownerUid) && !owners.some((o) => o.uid === t.ownerUid)}
+        onStatus={(t, status) => change(t, { status })} onMove={(t, days) => change(t, shiftDates(t, days))} />
     </>
   );
 }

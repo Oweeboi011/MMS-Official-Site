@@ -1,6 +1,6 @@
 import { UNASSIGNED, canUseTasks, dueNote, isOverdue, manilaToday, tasksToCsv, timelineOf, toTask, validateTask, viewTasks, type Task, type TaskInput } from '../../src/frontend/data/tasks';
 
-const mk = (id: string, extra: Partial<Task> = {}): Task => ({ id, title: id, committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', updatedAt: 0, ...extra });
+const mk = (id: string, extra: Partial<Task> = {}): Task => ({ id, title: id, committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', checklist: '', repeat: '', link: '', updatedAt: 0, updatedByName: '', ...extra });
 const none = { committee: '', status: '', ownerUid: '', sort: 'due' } as const;
 
 describe('isOverdue', () => {
@@ -62,15 +62,28 @@ describe('viewTasks', () => {
 describe('toTask', () => {
   it('reads a stored task with its id and update time', () => {
     const stamp = { toMillis: () => 5000 };
-    expect(toTask('t1', { title: 'Book venue', committee: 'tcom', status: 'doing', ownerUid: 'u1', ownerName: 'Ana', startDate: '2026-12-01', dueDate: '2026-12-10', notes: 'n', updatedAt: stamp }))
-      .toEqual({ id: 't1', title: 'Book venue', committee: 'tcom', status: 'doing', ownerUid: 'u1', ownerName: 'Ana', startDate: '2026-12-01', dueDate: '2026-12-10', notes: 'n', updatedAt: 5000 });
+    expect(toTask('t1', { title: 'Book venue', committee: 'tcom', status: 'doing', ownerUid: 'u1', ownerName: 'Ana', startDate: '2026-12-01', dueDate: '2026-12-10', notes: 'n', checklist: '[ ] a', repeat: 'weekly', link: '/x', updatedAt: stamp, updatedByName: 'Ben' }))
+      .toEqual({ id: 't1', title: 'Book venue', committee: 'tcom', status: 'doing', ownerUid: 'u1', ownerName: 'Ana', startDate: '2026-12-01', dueDate: '2026-12-10', notes: 'n', checklist: '[ ] a', repeat: 'weekly', link: '/x', updatedAt: 5000, updatedByName: 'Ben' });
   });
   it('survives missing or wrong-typed fields', () => {
-    expect(toTask('t2', { title: 7, status: 'later' })).toEqual({ id: 't2', title: '', committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', updatedAt: 0 });
+    expect(toTask('t2', { title: 7, status: 'later' })).toEqual({ id: 't2', title: '', committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', checklist: '', repeat: '', link: '', updatedAt: 0, updatedByName: '' });
   });
 });
 
-const ok: TaskInput = { title: 'Book venue', committee: 'execom', status: 'todo', ownerUid: 'u1', ownerName: 'Ana', startDate: '2026-12-01', dueDate: '2026-12-10', notes: '' };
+const ok: TaskInput = { title: 'Book venue', committee: 'execom', status: 'todo', ownerUid: 'u1', ownerName: 'Ana', startDate: '2026-12-01', dueDate: '2026-12-10', notes: '', checklist: '', repeat: '', link: '' };
+
+describe('validateTask extras', () => {
+  const base: TaskInput = { title: 'Book venue', committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', checklist: '', repeat: '', link: '' };
+  it('accepts https and site-path links, a checklist and a repeat', () => {
+    expect(validateTask({ ...base, link: 'https://example.com/x', checklist: '[ ] a', repeat: 'weekly' })).toBe('');
+    expect(validateTask({ ...base, link: '/activities/open-climbs' })).toBe('');
+  });
+  it('rejects other link schemes, protocol-relative links, a long checklist and an unknown repeat', () => {
+    for (const link of ['javascript:alert(1)', 'http://example.com', '//evil.example', 'data:text/html,x']) expect(validateTask({ ...base, link })).toMatch(/link/i);
+    expect(validateTask({ ...base, checklist: 'x'.repeat(2001) })).toMatch(/checklist/i);
+    expect(validateTask({ ...base, repeat: 'daily' as never })).toMatch(/repeats/i);
+  });
+});
 
 describe('validateTask', () => {
   it('accepts a complete task and one with no owner or dates', () => {

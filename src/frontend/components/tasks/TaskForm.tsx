@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from 'react';
-import { COMMITTEES, STATUSES, taskInput, validateTask, type Task, type TaskInput } from '../../data/tasks';
+import { COMMITTEES, REPEATS, STATUSES, taskInput, validateTask, type Task, type TaskInput } from '../../data/tasks';
 import type { TaskOwner } from '../../services/tasks';
+import ChecklistEditor from './ChecklistEditor';
 
-const BLANK: TaskInput = { title: '', committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '' };
+const BLANK: TaskInput = { title: '', committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', checklist: '', repeat: '', link: '' };
 
 // New or edited task. The owner list is people who hold a group; an owner who left it stays selectable on their old tasks.
 export default function TaskForm({ task, owners, busy, onSave, onCancel }: {
@@ -43,6 +44,15 @@ export default function TaskForm({ task, owners, busy, onSave, onCancel }: {
       <div className="editor-field"><label htmlFor="tk-start">Start</label><input id="tk-start" type="date" value={v.startDate} onChange={(e) => set({ startDate: e.target.value })} /></div>
       <div className="editor-field"><label htmlFor="tk-due">Due</label><input id="tk-due" type="date" value={v.dueDate} onChange={(e) => set({ dueDate: e.target.value })} /></div>
       <div className="editor-field"><label htmlFor="tk-notes">Notes</label><textarea id="tk-notes" maxLength={2000} value={v.notes} onChange={(e) => set({ notes: e.target.value })} /></div>
+      <ChecklistEditor value={v.checklist} onChange={(checklist) => set({ checklist })} />
+      <div className="editor-field">
+        <label htmlFor="tk-repeat">Repeat</label>
+        <select id="tk-repeat" value={v.repeat} onChange={(e) => set({ repeat: e.target.value as TaskInput['repeat'] })}>
+          {REPEATS.map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+        </select>
+      </div>
+      <div className="editor-field"><label htmlFor="tk-link">Related link</label><input id="tk-link" maxLength={300} placeholder="https://… or /activities/open-climbs" value={v.link} onChange={(e) => set({ link: e.target.value })} /></div>
+      {task?.updatedByName && <p className="climb-muted">Last changed by {task.updatedByName}.</p>}
       {error && <p role="alert" className="field-error">{error}</p>}
       <div className="editor-actions">
         <button type="submit" className="btn btn-primary" disabled={busy}>Save task</button>

@@ -1,31 +1,35 @@
-import { fireEvent, screen, within } from '@testing-library/react';
+import { act, fireEvent, screen, within } from '@testing-library/react';
 import axe from 'axe-core';
 import { renderAt } from '../helpers';
 
-const calls = vi.hoisted(() => ({ saved: [] as unknown[], removed: [] as string[], csv: [] as string[][] }));
+const calls = vi.hoisted(() => ({ saved: [] as unknown[], removed: [] as string[], csv: [] as string[][], wasDone: [] as boolean[], limits: [] as number[] }));
 vi.mock('../../src/frontend/lib/download', () => ({ downloadCsv: (name: string, text: string) => { calls.csv.push([name, text]); } }));
 const fail = vi.hoisted(() => ({ next: '' }));
 const who = vi.hoisted(() => ({ account: { uid: 'u1', email: 'exec@x.com', role: 'member', emailVerified: true, groups: ['execom'] as string[] } }));
 vi.mock('../../src/frontend/services/useAccount', () => ({ useAccount: () => ({ status: 'signedIn', account: who.account }) }));
 vi.mock('../../src/frontend/services/tasks', () => ({
-  loadTasks: async () => [
-    { id: 't1', title: 'Book venue', committee: 'execom', status: 'doing', ownerUid: 'u1', ownerName: 'Ana', startDate: '2020-01-01', dueDate: '2020-02-01', notes: '', updatedAt: 2 },
-    { id: 't2', title: 'Plan training', committee: 'tcom', status: 'todo', ownerUid: 'u2', ownerName: 'Ben', startDate: '', dueDate: '2039-01-01', notes: '', updatedAt: 1 },
-    { id: 't3', title: 'Old chore', committee: 'tcom', status: 'done', ownerUid: '', ownerName: '', startDate: '', dueDate: '2020-03-01', notes: '', updatedAt: 0 },
-    { id: 't4', title: 'Sort gear', committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', updatedAt: -1 },
-  ],
+  loadTasks: async (max: number) => { calls.limits.push(max); return [
+    { id: 't1', title: 'Book venue', committee: 'execom', status: 'doing', ownerUid: 'u1', ownerName: 'Ana', startDate: '2020-01-01', dueDate: '2020-02-01', notes: '', checklist: '', repeat: '', link: '', updatedByName: '', updatedAt: 2 },
+    { id: 't2', title: 'Plan training', committee: 'tcom', status: 'todo', ownerUid: 'u2', ownerName: 'Ben', startDate: '', dueDate: '2039-01-01', notes: '', checklist: '', repeat: '', link: '', updatedByName: '', updatedAt: 1 },
+    { id: 't3', title: 'Old chore', committee: 'tcom', status: 'done', ownerUid: '', ownerName: '', startDate: '', dueDate: '2020-03-01', notes: '', checklist: '', repeat: '', link: '', updatedByName: '', updatedAt: 0 },
+    { id: 't4', title: 'Sort gear', committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', checklist: '', repeat: '', link: '', updatedByName: '', updatedAt: -1 },
+    { id: 't5', title: 'Print forms', committee: 'execom', status: 'doing', ownerUid: 'u9', ownerName: 'Gone Guy', startDate: '2030-01-01', dueDate: '2030-01-02', notes: 'Venue https://example.com/venue and javascript:alert(1)', checklist: '[x] Book hall\n[ ] Print', repeat: 'weekly', link: '/activities/open-climbs', updatedByName: 'Cara', updatedAt: -2 },
+  ]; },
   loadOwners: async () => [{ uid: 'u1', name: 'Ana' }, { uid: 'u2', name: 'Ben' }],
-  saveTask: async (_a: unknown, input: unknown, id?: string) => {
+  saveTask: async (_a: unknown, input: unknown, id?: string, wasDone = false) => {
     if (fail.next) { const message = fail.next; fail.next = ''; throw new Error(message); }
     calls.saved.push({ input, id });
+    calls.wasDone.push(wasDone);
   },
-  TASK_LIMIT: 500,
+  TASK_LIMIT: 5,
   removeTask: async (t: { id: string }) => { calls.removed.push(t.id); },
 }));
 
 const rowFor = (title: string) => screen.getByRole('row', { name: new RegExp(title) });
 
 describe('task tracker table', () => {
+  beforeEach(() => { window.localStorage.clear(); });
+
   it('tells someone without a group they have no access', async () => {
     who.account = { ...who.account, groups: [] };
     renderAt('/account/tasks');
@@ -109,8 +113,26 @@ describe('task tracker table', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save task' }));
     await vi.waitFor(() => expect(calls.saved).toEqual([{
       id: undefined,
-      input: { title: 'Order patches', committee: 'tcom', status: 'todo', ownerUid: 'u2', ownerName: 'Ben', startDate: '', dueDate: '', notes: '' },
+      input: { title: 'Order patches', committee: 'tcom', status: 'todo', ownerUid: 'u2', ownerName: 'Ben', startDate: '', dueDate: '', notes: '', checklist: '', repeat: '', link: '' },
     }]));
+  });
+
+  it('saves a checklist, a repeat and a related link, and refuses a bad link', async () => {
+    calls.saved = [];
+    renderAt('/account/tasks');
+    fireEvent.click(await screen.findByRole('button', { name: 'New task' }, { timeout: 5000 }));
+    fireEvent.change(screen.getByLabelText('Title *'), { target: { value: 'Prep meeting' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Add item' }));
+    fireEvent.change(screen.getByLabelText('Item 1'), { target: { value: 'Call venue' } });
+    fireEvent.change(screen.getByLabelText('Repeat'), { target: { value: 'weekly' } });
+    fireEvent.change(screen.getByLabelText('Related link'), { target: { value: 'javascript:alert(1)' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save task' }));
+    expect(await screen.findByText(/Link must start with https/)).toBeInTheDocument();
+    expect(calls.saved).toEqual([]);
+    fireEvent.change(screen.getByLabelText('Related link'), { target: { value: '/activities/open-climbs' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save task' }));
+    await vi.waitFor(() => expect(calls.saved).toHaveLength(1));
+    expect(calls.saved[0]).toMatchObject({ input: { title: 'Prep meeting', checklist: '[ ] Call venue', repeat: 'weekly', link: '/activities/open-climbs' } });
   });
 
   it('edits a task through the same form', async () => {
@@ -124,7 +146,7 @@ describe('task tracker table', () => {
     // Exactly the stored fields: id and updatedAt in the payload would be rejected by the rules.
     expect(calls.saved[0]).toEqual({
       id: 't2',
-      input: { title: 'Plan training', committee: 'tcom', status: 'blocked', ownerUid: 'u2', ownerName: 'Ben', startDate: '', dueDate: '2039-01-01', notes: '' },
+      input: { title: 'Plan training', committee: 'tcom', status: 'blocked', ownerUid: 'u2', ownerName: 'Ben', startDate: '', dueDate: '2039-01-01', notes: '', checklist: '', repeat: '', link: '' },
     });
   });
 
@@ -138,6 +160,97 @@ describe('task tracker table', () => {
     expect(screen.getByRole('button', { name: 'Save task' })).toBeInTheDocument();
   });
 
+  describe('summary, details and shortcuts', () => {
+    it('counts tasks per committee, including overdue', async () => {
+      renderAt('/account/tasks');
+      await screen.findByText('Book venue', {}, { timeout: 5000 });
+      const row = within(screen.getByRole('table', { name: 'Summary by committee' })).getByRole('row', { name: /ExeCom/ });
+      expect(within(row).getAllByRole('cell').map((c) => c.textContent)).toEqual(['1', '2', '0', '0', '1', '0']);
+    });
+
+    it('folds notes, checklist progress, link and who changed it under the title, linking only http(s)', async () => {
+      renderAt('/account/tasks');
+      await screen.findByText('Print forms', {}, { timeout: 5000 });
+      const row = rowFor('Print forms');
+      expect(within(row).getByText('Details (1/2 done)')).toBeInTheDocument();
+      expect(within(row).getByRole('link', { name: 'https://example.com/venue' })).toHaveAttribute('href', 'https://example.com/venue');
+      expect(within(row).queryByRole('link', { name: /javascript/ })).not.toBeInTheDocument();
+      expect(within(row).getByRole('link', { name: '/activities/open-climbs' })).toHaveAttribute('href', '/activities/open-climbs');
+      expect(within(row).getByText('Last changed by Cara.')).toBeInTheDocument();
+      expect(within(row).getByText('(no longer in a group)')).toBeInTheDocument();
+      expect(within(rowFor('Plan training')).queryByText('(no longer in a group)')).not.toBeInTheDocument();
+    });
+
+    it('changes status from the row and tells the service if it was already done', async () => {
+      calls.saved = []; calls.wasDone = [];
+      renderAt('/account/tasks');
+      await screen.findByText('Plan training', {}, { timeout: 5000 });
+      fireEvent.change(screen.getByLabelText('Status of Plan training'), { target: { value: 'done' } });
+      await vi.waitFor(() => expect(calls.saved).toHaveLength(1));
+      expect(calls.saved[0]).toMatchObject({ id: 't2', input: { status: 'done', title: 'Plan training' } });
+      fireEvent.change(screen.getByLabelText('Status of Old chore'), { target: { value: 'todo' } });
+      await vi.waitFor(() => expect(calls.wasDone).toEqual([false, true]));
+    });
+
+    it('switches views and starts a task from the keyboard', async () => {
+      renderAt('/account/tasks');
+      await screen.findByText('Book venue', {}, { timeout: 5000 });
+      fireEvent.keyDown(document.body, { key: 'l' });
+      expect(screen.getByRole('button', { name: 'Timeline' })).toHaveAttribute('aria-pressed', 'true');
+      fireEvent.keyDown(document.body, { key: 't' });
+      expect(screen.getByRole('button', { name: 'Table' })).toHaveAttribute('aria-pressed', 'true');
+      fireEvent.keyDown(screen.getByLabelText('Status'), { key: 'n' });
+      expect(screen.queryByRole('button', { name: 'Save task' })).not.toBeInTheDocument();
+      fireEvent.keyDown(document.body, { key: 'n' });
+      expect(screen.getByRole('button', { name: 'Save task' })).toBeInTheDocument();
+    });
+
+    it('remembers the view and filters next time', async () => {
+      const first = renderAt('/account/tasks');
+      await screen.findByText('Book venue', {}, { timeout: 5000 });
+      fireEvent.click(screen.getByRole('button', { name: 'Timeline' }));
+      fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'todo' } });
+      first.unmount();
+      renderAt('/account/tasks');
+      await screen.findByText('Plan training', {}, { timeout: 5000 });
+      expect(screen.getByRole('button', { name: 'Timeline' })).toHaveAttribute('aria-pressed', 'true');
+      expect(screen.getByLabelText('Status')).toHaveValue('todo');
+    });
+
+    it('offers more tasks when the limit is reached', async () => {
+      calls.limits = [];
+      renderAt('/account/tasks');
+      fireEvent.click(await screen.findByRole('button', { name: 'Show more tasks' }, { timeout: 5000 }));
+      await vi.waitFor(() => expect(calls.limits).toEqual([5, 10]));
+    });
+  });
+
+  describe('delete with undo', () => {
+    it('brings the task back on Undo and deletes nothing', async () => {
+      calls.removed = [];
+      renderAt('/account/tasks');
+      await screen.findByText('Old chore', {}, { timeout: 5000 });
+      fireEvent.click(within(rowFor('Old chore')).getByRole('button', { name: 'Delete' }));
+      expect(screen.queryByRole('row', { name: /Old chore/ })).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+      expect(rowFor('Old chore')).toBeInTheDocument();
+      expect(calls.removed).toEqual([]);
+    });
+
+    it('deletes after a few seconds if not undone', async () => {
+      calls.removed = [];
+      renderAt('/account/tasks');
+      await screen.findByText('Old chore', {}, { timeout: 5000 });
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+      try {
+        fireEvent.click(within(rowFor('Old chore')).getByRole('button', { name: 'Delete' }));
+        expect(calls.removed).toEqual([]);
+        await act(async () => { vi.advanceTimersByTime(6100); });
+      } finally { vi.useRealTimers(); }
+      expect(calls.removed).toEqual(['t3']);
+    });
+  });
+
   describe('timeline view', () => {
     const openTimeline = async () => {
       renderAt('/account/tasks');
@@ -148,7 +261,7 @@ describe('task tracker table', () => {
 
     it('replaces the table with bars grouped by committee, undated tasks listed apart', async () => {
       const timeline = await openTimeline();
-      expect(screen.queryByRole('table')).not.toBeInTheDocument();
+      expect(screen.queryByRole('table', { name: 'Tasks' })).not.toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Timeline' })).toHaveAttribute('aria-pressed', 'true');
       expect(within(timeline).getByRole('heading', { name: 'ExeCom' })).toBeInTheDocument();
       expect(within(timeline).getByRole('heading', { name: 'TCom' })).toBeInTheDocument();
@@ -176,7 +289,28 @@ describe('task tracker table', () => {
       expect(within(timeline).queryByText('Book venue')).not.toBeInTheDocument();
       expect(within(timeline).getByText('Plan training')).toBeInTheDocument();
       fireEvent.click(screen.getByRole('button', { name: 'Table' }));
-      expect(screen.getByRole('table')).toBeInTheDocument();
+      expect(screen.getByRole('table', { name: 'Tasks' })).toBeInTheDocument();
+    });
+
+    it('shows today, a legend and zoom', async () => {
+      const timeline = await openTimeline();
+      expect(within(timeline).getByRole('img', { name: /^Today, \d{4}-\d{2}-\d{2}$/ })).toBeInTheDocument();
+      expect(within(within(timeline).getByRole('list', { name: 'Legend' })).getByText('Blocked')).toBeInTheDocument();
+      expect(within(timeline).getByRole('button', { name: 'Zoom out' })).toBeDisabled();
+      fireEvent.click(within(timeline).getByRole('button', { name: 'Zoom in' }));
+      expect(within(timeline).getByRole('button', { name: 'Zoom out' })).toBeEnabled();
+    });
+
+    it('moves a task’s dates a day, or a week with Shift, from the keyboard', async () => {
+      calls.saved = [];
+      const timeline = await openTimeline();
+      const bar = within(timeline).getByRole('button', { name: /^Move Book venue/ });
+      fireEvent.keyDown(bar, { key: 'ArrowRight' });
+      await vi.waitFor(() => expect(calls.saved).toHaveLength(1));
+      expect(calls.saved[0]).toMatchObject({ id: 't1', input: { startDate: '2020-01-02', dueDate: '2020-02-02' } });
+      fireEvent.keyDown(bar, { key: 'ArrowLeft', shiftKey: true });
+      await vi.waitFor(() => expect(calls.saved).toHaveLength(2));
+      expect(calls.saved[1]).toMatchObject({ input: { startDate: '2019-12-25', dueDate: '2020-01-25' } });
     });
 
     it('opens the edit form from a bar', async () => {
