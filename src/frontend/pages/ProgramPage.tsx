@@ -1,3 +1,4 @@
+import { accentVars } from '../lib/accent';
 import type { CSSProperties, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import ContentBlocks from '../components/ContentBlocks';
@@ -15,7 +16,7 @@ export default function ProgramPage({ page, children }: Props) {
     <>
       <PageHero eyebrow={page.eyebrow} title={page.title} intro={page.intro} image={page.image} />
 
-      <main style={{ '--accent': page.accent } as CSSProperties}>
+      <main style={accentVars(page.accent) as CSSProperties}>
         <section className="section page-facts">
           <div className="shell stats">
             {page.facts.map((f) => (

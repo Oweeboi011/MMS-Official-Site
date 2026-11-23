@@ -19,3 +19,48 @@ for (const path of pages) {
     expect(lines).toEqual([]);
   });
 }
+
+// Axe does not tab through a page or look at print, so these two checks cover what it cannot.
+const luminance = ([r, g, b]: number[]) => {
+  const [x, y, z] = [r, g, b].map((c) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+  return 0.2126 * x + 0.7152 * y + 0.0722 * z;
+};
+const contrast = (a: number[], b: number[]) => { const [hi, lo] = [luminance(a), luminance(b)].sort((m, n) => n - m); return (hi + 0.05) / (lo + 0.05); };
+
+for (const path of ['/account/sign-in']) {
+  test(`keyboard focus stays visible (3:1) in dark mode on ${path}`, async ({ page }) => {
+    await page.goto(path);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; animation: none !important; }' });
+    const seen: string[] = [];
+    for (let i = 0; i < 30; i += 1) {
+      await page.keyboard.press('Tab');
+      const found = await page.evaluate(() => {
+        const rgb = (v: string) => (v.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
+        const el = document.activeElement as HTMLElement;
+        if (!el || el === document.body) return null;
+        const cs = getComputedStyle(el);
+        const ring = cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0 ? rgb(cs.outlineColor) : rgb(cs.borderTopColor);
+        let bg = [14, 19, 26];
+        for (let e: HTMLElement | null = el.parentElement; e; e = e.parentElement) {
+          const m = getComputedStyle(e).backgroundColor.match(/[\d.]+/g) ?? [];
+          if (m.length >= 3 && (m.length === 3 || Number(m[3]) === 1)) { bg = m.slice(0, 3).map(Number); break; }
+        }
+        return { name: el.tagName + '.' + el.className + ' ' + (el.getAttribute('aria-label') ?? el.textContent ?? '').slice(0, 24), ring, bg };
+      });
+      if (found) seen.push(found.name + ' ' + contrast(found.ring, found.bg).toFixed(2));
+    }
+    // Only elements whose ring is our own focus colour are judged; links inside photo heroes sit on images.
+    const controls = seen.filter((s) => /^(INPUT|BUTTON|SELECT|TEXTAREA)/.test(s));
+    expect(controls.length).toBeGreaterThan(0); // never pass by judging nothing
+    expect(controls.filter((s) => Number(s.split(' ').pop()) < 3)).toEqual([]);
+  });
+}
+
+test('a waiver or day sheet printed from a dark-mode device is still dark text on white', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await page.emulateMedia({ media: 'print', colorScheme: 'dark' });
+  const text = await page.evaluate(() => (getComputedStyle(document.body).color.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number));
+  expect(luminance(text)).toBeLessThan(0.2);
+});
