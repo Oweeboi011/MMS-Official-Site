@@ -33,7 +33,7 @@ export default function TaskTimeline({ tasks, today, busy, onEdit }: { tasks: Ta
       )}
       {tl.groups.map((g) => (
         <div key={g.committee}>
-          <h3>{g.label}</h3>
+          <h2>{g.label}</h2>
           <ul className="tl-rows">
             {g.bars.map((b) => (
               <li key={b.task.id} className="tl-row">
@@ -46,7 +46,7 @@ export default function TaskTimeline({ tasks, today, busy, onEdit }: { tasks: Ta
       ))}
       {tl.undated.length > 0 && (
         <div>
-          <h3>No dates yet</h3>
+          <h2>No dates yet</h2>
           <ul className="tl-rows">
             {tl.undated.map((t) => <li key={t.id} className="tl-row"><Meta task={t} today={today} busy={busy} onEdit={onEdit} /></li>)}
           </ul>

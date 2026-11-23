@@ -1,4 +1,5 @@
 import { fireEvent, screen, within } from '@testing-library/react';
+import axe from 'axe-core';
 import { renderAt } from '../helpers';
 
 const calls = vi.hoisted(() => ({ saved: [] as unknown[], removed: [] as string[] }));
@@ -137,6 +138,21 @@ describe('task tracker table', () => {
       const timeline = await openTimeline();
       fireEvent.click(within(timeline).getByRole('button', { name: 'Edit Plan training' }));
       expect(screen.getByRole('button', { name: 'Save task' })).toBeInTheDocument();
+    });
+  });
+
+  // Signed-in structure (labels, roles, names); colour contrast needs a real browser, so jsdom skips it.
+  describe('accessibility', () => {
+    const violations = async () => (await axe.run(document.body, { rules: { 'color-contrast': { enabled: false } } })).violations.map((v) => v.id + ': ' + v.help);
+
+    it('has no axe violations in the table, timeline or form', async () => {
+      renderAt('/account/tasks');
+      await screen.findByText('Book venue', {}, { timeout: 5000 });
+      expect(await violations()).toEqual([]);
+      fireEvent.click(screen.getByRole('button', { name: 'Timeline' }));
+      expect(await violations()).toEqual([]);
+      fireEvent.click(screen.getByRole('button', { name: 'Edit Plan training' }));
+      expect(await violations()).toEqual([]);
     });
   });
 });
