@@ -6,13 +6,12 @@ import SignInForm from '../components/SignInForm';
 import TaskForm from '../components/tasks/TaskForm';
 import TaskTable from '../components/tasks/TaskTable';
 import TaskTimeline from '../components/tasks/TaskTimeline';
-import { COMMITTEES, STATUSES, canUseTasks, viewTasks, type Task, type TaskView } from '../data/tasks';
+import { COMMITTEES, STATUSES, UNASSIGNED, canUseTasks, manilaToday, viewTasks, type Task, type TaskView } from '../data/tasks';
 import type { Account } from '../services/auth';
 import { TASK_LIMIT, loadOwners, loadTasks, removeTask, saveTask, type TaskOwner } from '../services/tasks';
 import { useAccount } from '../services/useAccount';
 
 const SORTS: [TaskView['sort'], string][] = [['due', 'Due date'], ['title', 'Title'], ['status', 'Status'], ['committee', 'Committee']];
-const today = () => new Date().toLocaleDateString('en-CA');
 
 function Filter({ id, label, value, onChange, options }: { id: string; label: string; value: string; onChange: (v: string) => void; options: readonly (readonly [string, string])[] }) {
   return (
@@ -26,10 +25,12 @@ function Filter({ id, label, value, onChange, options }: { id: string; label: st
   );
 }
 
-function Results({ tasks, mode, busy, onEdit, onDelete }: { tasks: Task[]; mode: 'table' | 'timeline'; busy: boolean; onEdit: (t: Task) => void; onDelete: (t: Task) => void }) {
-  if (tasks.length === 0) return <p>No tasks match.</p>;
-  if (mode === 'timeline') return <TaskTimeline tasks={tasks} today={today()} busy={busy} onEdit={onEdit} />;
-  return <TaskTable tasks={tasks} today={today()} busy={busy} onEdit={onEdit} onDelete={onDelete} />;
+function Results({ tasks, total, mode, busy, onEdit, onDelete, onClear }: { tasks: Task[]; total: number; mode: 'table' | 'timeline'; busy: boolean; onEdit: (t: Task) => void; onDelete: (t: Task) => void; onClear: () => void }) {
+  if (total === 0) return <p>No tasks yet. Add the first with New task.</p>;
+  if (tasks.length === 0) return <p>No tasks match these filters. <button type="button" className="chip" onClick={onClear}>Clear filters</button></p>;
+  const today = manilaToday();
+  if (mode === 'timeline') return <TaskTimeline tasks={tasks} today={today} busy={busy} onEdit={onEdit} />;
+  return <TaskTable tasks={tasks} today={today} busy={busy} onEdit={onEdit} onDelete={onDelete} />;
 }
 
 function Tasks({ account }: { account: Account }) {
@@ -62,7 +63,7 @@ function Tasks({ account }: { account: Account }) {
       <div className="register-form">
         <Filter id="tf-committee" label="Committee" value={view.committee} onChange={(committee) => set({ committee })} options={COMMITTEES} />
         <Filter id="tf-status" label="Status" value={view.status} onChange={(status) => set({ status })} options={STATUSES} />
-        <Filter id="tf-owner" label="Owner" value={view.ownerUid} onChange={(ownerUid) => set({ ownerUid })} options={owners.map((o) => [o.uid, o.name] as const)} />
+        <Filter id="tf-owner" label="Owner" value={view.ownerUid} onChange={(ownerUid) => set({ ownerUid })} options={[[account.uid, 'My tasks'], [UNASSIGNED, 'Unassigned'], ...owners.filter((o) => o.uid !== account.uid).map((o) => [o.uid, o.name] as const)]} />
         {mode === 'table' && (
           <div className="editor-field">
             <label htmlFor="tf-sort">Sort by</label>
@@ -75,7 +76,7 @@ function Tasks({ account }: { account: Account }) {
       {message && <p role="status">{message}</p>}
       <p className="climb-muted">{shown.length} of {rows.length} tasks</p>
       {rows.length >= TASK_LIMIT && <p className="climb-notice" role="note">Showing the {TASK_LIMIT} most recently changed tasks; older ones are not listed.</p>}
-      <Results tasks={shown} mode={mode} busy={busy} onEdit={setEditing} onDelete={(t) => void run(() => removeTask(t))} />
+      <Results tasks={shown} total={rows.length} mode={mode} busy={busy} onEdit={setEditing} onDelete={(t) => void run(() => removeTask(t))} onClear={() => setView({ ...view, committee: '', status: '', ownerUid: '' })} />
     </>
   );
 }

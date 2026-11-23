@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { COMMITTEES, STATUSES, isOverdue, type Task } from '../../data/tasks';
+import { COMMITTEES, STATUSES, dueNote, isOverdue, type Task } from '../../data/tasks';
 import DataTable from '../DataTable';
 
 const label = (options: readonly (readonly [string, string])[], key: string) => options.find(([k]) => k === key)?.[1] ?? key;
@@ -17,7 +17,7 @@ export default function TaskTable({ tasks, today, busy, onEdit, onDelete }: {
           <td>{label(COMMITTEES, t.committee)}</td>
           <td>{label(STATUSES, t.status)}</td>
           <td>{t.ownerName || 'Unassigned'}</td>
-          <td>{t.dueDate || '—'}{isOverdue(t, today) && <> <span className="task-overdue">Overdue</span></>}</td>
+          <td>{t.dueDate || '—'}{isOverdue(t, today) && <> <span className="task-overdue">Overdue</span></>}{dueNote(t, today) && <> <span className="climb-muted">{dueNote(t, today)}</span></>}</td>
           <td>
             <button type="button" className="chip" disabled={busy} onClick={() => onEdit(t)}>Edit</button>
             {confirming === t.id ? (
