@@ -14,6 +14,7 @@ Developers: [DEVELOPER-GUIDE](DEVELOPER-GUIDE.md).
 | Section pages (`/about`, `/explore`, …) | every page in that section |
 | About · Explore · Activities · Training · Community · Media | subpages (history, mountains Top 100, BMC, Outreach, SART, albums, videos, surveys, glossary…) |
 | Banner | "Preview site": content is sample until officers confirm it |
+| Dark theme | follows your device's light or dark setting automatically; there is no switch on the site |
 
 ### Screenshots
 

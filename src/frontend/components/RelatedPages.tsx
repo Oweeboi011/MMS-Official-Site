@@ -12,7 +12,7 @@ export default function RelatedPages({ section, page }: Props) {
     <aside className="section related" aria-label={`More in ${section.label}`}>
       <div className="shell">
         <div className="section-head">
-          <div><div className="eyebrow" style={{ color: 'var(--red)' }}>More in {section.label}</div><h2>Keep exploring.</h2></div>
+          <div><div className="eyebrow" style={{ color: 'var(--red-ink)' }}>More in {section.label}</div><h2>Keep exploring.</h2></div>
           <Link className="text-link" to={sectionPath(section)}>← Back to {section.label}</Link>
         </div>
         <div className="section-grid">

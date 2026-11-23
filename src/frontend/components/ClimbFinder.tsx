@@ -14,7 +14,7 @@ export default function ClimbFinder() {
     <section className="section climb-finder" id="find-a-climb">
       <div className="shell">
         <div className="section-head">
-          <div><div className="eyebrow" style={{ color: 'var(--green)' }}>Find your climb</div><h2>Which climb fits you?</h2></div>
+          <div><div className="eyebrow" style={{ color: 'var(--green-ink)' }}>Find your climb</div><h2>Which climb fits you?</h2></div>
           <p>Answer one question and we will suggest open climbs that match your experience.</p>
         </div>
         <fieldset className="finder-options">

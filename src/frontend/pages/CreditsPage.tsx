@@ -11,7 +11,7 @@ export default function CreditsPage() {
         <section className="section">
           <div className="shell">
             <div className="section-head">
-              <div><div className="eyebrow" style={{ color: 'var(--red)' }}>Credits</div><h2>Photo credits.</h2></div>
+              <div><div className="eyebrow" style={{ color: 'var(--red-ink)' }}>Credits</div><h2>Photo credits.</h2></div>
               <p>Photos are from Wikimedia Commons, resized and cropped for this site. Thank you to the photographers.</p>
             </div>
             <ul className="credits">
@@ -33,7 +33,7 @@ export default function CreditsPage() {
         <section className="section">
           <div className="shell">
             <div className="section-head">
-              <div><div className="eyebrow" style={{ color: 'var(--red)' }}>Credits</div><h2>Data credits.</h2></div>
+              <div><div className="eyebrow" style={{ color: 'var(--red-ink)' }}>Credits</div><h2>Data credits.</h2></div>
               <p>
                 Mountain names, elevations, and provinces on the <Link to="/explore/mountains">Mountains</Link> page are adapted from{' '}
                 “<a href="https://en.wikipedia.org/wiki/List_of_mountains_in_the_Philippines" target="_blank" rel="noopener noreferrer">List of mountains in the Philippines</a>” by Wikipedia contributors,{' '}
