@@ -67,6 +67,15 @@ npx firebase-tools@15 deploy --only functions           # all functions (after f
 npx firebase-tools@15 deploy --only functions:<name>    # one function
 ```
 
+### Release checklist
+
+1. Release PR `development` → `main`: notes, risk, rollback target (previous tag). A human approves and merges.
+2. CD deploys the app. It does not deploy Firebase: run the backend deploy above, **rules first, then functions**, when either changed.
+3. One-time scripts the release needs (for example `tools/admin/backfill-group-members.mjs`), then smoke checks signed out and as an officer.
+4. Rollback: redeploy the previous tag's app; redeploy that tag's `firestore.rules` if rules changed.
+
+Rules tests locally need Java (`winget install Microsoft.OpenJDK.21`), then `npm run test:rules`; without it, Quality Gates runs **Security Rules Tests**.
+
 | Resource | Setting |
 |----------|---------|
 | Firestore | named DB `openclimbs`, `asia-southeast1` |
