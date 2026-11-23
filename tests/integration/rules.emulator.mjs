@@ -387,6 +387,9 @@ await no("history entry rejects unknown fields", () => as("exec1").collection("t
 await no("plain member cannot read task history", () => m2().collection("tasks/t1/history").get());
 await no("history entries cannot be edited", async () => { const r = await as("exec1").collection("tasks/t1/history").add(event("exec1")); await r.update({ summary: "x" }); });
 await no("history entries stay while their task exists", async () => { const r = await as("exec1").collection("tasks/t1/history").add(event("exec1")); await r.delete(); });
+await env.withSecurityRulesDisabled(async (c) => { await c.firestore().doc("tasks/gone/history/h1").set({ at: new Date(), byUid: "exec1", byName: "Ana", summary: "x" }); });
+await ok("history entries can go once their task is gone", () => as("exec1").doc("tasks/gone/history/h1").delete());
+await no("a plain member cannot delete history", async () => { await env.withSecurityRulesDisabled(async (c) => { await c.firestore().doc("tasks/gone/history/h2").set({ at: new Date(), byUid: "exec1", byName: "Ana", summary: "x" }); }); await m2().doc("tasks/gone/history/h2").delete(); });
 await ok("admin adds a task", () => admin().collection("tasks").add(task("admin")));
 await no("plain member cannot read tasks", () => m2().doc("tasks/t1").get());
 await no("plain member cannot add a task", () => m2().collection("tasks").add(task("m2")));
