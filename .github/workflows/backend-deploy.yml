@@ -1,0 +1,57 @@
+name: Backend Deploy
+
+# Manual only, never on push. Deploys the Firebase backend from main: rules first, then functions (DEPLOYMENT.md).
+# Runs only after a reviewer approves the `production` environment, and skips itself until the secret below exists.
+on:
+  workflow_dispatch:
+    inputs:
+      what:
+        description: Which part to deploy
+        type: choice
+        options: [rules-and-indexes, functions, both]
+        default: both
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy ${{ inputs.what }} to production
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    steps:
+      - name: Guard
+        id: guard
+        env:
+          KEY: ${{ secrets.FIREBASE_DEPLOY_KEY }}
+          REF: ${{ github.ref_name }}
+        run: |
+          if [ "$REF" != main ]; then echo "backend deploys run from main only"; exit 1; fi
+          if [ -z "$KEY" ]; then echo "::warning::FIREBASE_DEPLOY_KEY not set; nothing deployed (see DEPLOYMENT.md)"; echo "skip=1" >> "$GITHUB_OUTPUT"; fi
+      - name: Checkout
+        if: steps.guard.outputs.skip != '1'
+        uses: actions/checkout@v7
+      - name: Setup Toolchain
+        if: steps.guard.outputs.skip != '1'
+        uses: ./.github/actions/setup
+      - name: Sign in to Google
+        if: steps.guard.outputs.skip != '1'
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_DEPLOY_KEY }}
+      - name: Rules and indexes
+        if: steps.guard.outputs.skip != '1' && inputs.what != 'functions'
+        working-directory: src/backend
+        run: npx -y firebase-tools@15.35.0 deploy --only firestore,storage --project mms-official-site-513809
+      - name: Functions (after rules: new queries need their indexes built first)
+        if: steps.guard.outputs.skip != '1' && inputs.what != 'rules-and-indexes'
+        working-directory: src/backend
+        run: npx -y firebase-tools@15.35.0 deploy --only functions --project mms-official-site-513809
+      - name: Check production rules match the repo
+        if: steps.guard.outputs.skip != '1' && inputs.what != 'functions'
+        run: node tools/admin/check-rules-drift.mjs --project mms-official-site-513809

@@ -74,6 +74,8 @@ npx firebase-tools@15 deploy --only functions:<name>    # one function
 3. One-time scripts the release needs (for example `tools/admin/backfill-group-members.mjs`), then `node tools/admin/check-rules-drift.mjs` (read-only: production rules must match the repo), then smoke checks as an officer (the automatic smoke only covers signed-out pages).
 4. Rollback: redeploy the previous tag's app; redeploy that tag's `firestore.rules` if rules changed.
 
+**Optional: deploy the backend from GitHub.** Workflow `Backend Deploy` (manual only, from `main`, needs a reviewer to approve the `production` environment) runs the two commands above in order, then the drift check. It does nothing until the repo secret `FIREBASE_DEPLOY_KEY` exists, which is a **write-capable** service-account key for the project: only add it if you accept that risk, scope the account to what `firebase deploy` needs, and prefer keeping deploys by hand if unsure. Never run in GitHub yet.
+
 **Weekly drift check (owner step to switch on):** workflow `Rules Drift` runs `check-rules-drift.mjs` every Monday and fails if production rules differ from the repo. It skips itself until the repo secret `GCP_RULES_READER_KEY` exists: create a service account in project `mms-official-site-513809` with only the role **Firebase Rules Viewer**, make a JSON key, and store it as that secret (never in chat or the repo). Not yet run in GitHub; the script itself is checked against production.
 
 Rules tests locally need Java (`winget install Microsoft.OpenJDK.21`), then `npm run test:rules`; without it, Quality Gates runs **Security Rules Tests**.
