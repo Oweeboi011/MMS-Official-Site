@@ -8,6 +8,9 @@ const DOCS = 'http://127.0.0.1:8080/v1/projects/demo-mms/databases/openclimbs/do
 const PASSWORD = 'Test-pass-123';
 const stamp = Date.now();
 
+// Manila calendar days, like the app uses, so the due-soon note is on screen when axe runs.
+const manilaDay = (plusDays: number) => new Date(Date.now() + plusDays * 86_400_000).toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' });
+
 const str = (v: string) => ({ stringValue: v });
 
 async function seedUser(label: string, groups: string[]): Promise<string> {
@@ -52,8 +55,8 @@ test('an ExeCom member adds, changes and views a task, and the signed-in page pa
   await page.getByRole('button', { name: 'New task' }).click();
   await page.getByLabel('Title *').fill('Book the venue');
   await page.getByLabel('Owner').selectOption({ label: 'execom' });
-  await page.getByLabel('Start').fill('2026-12-01');
-  await page.getByLabel('Due').fill('2026-12-10');
+  await page.getByLabel('Start').fill(manilaDay(0));
+  await page.getByLabel('Due').fill(manilaDay(3));
   await page.getByRole('button', { name: 'Add item' }).click();
   await page.getByLabel('Item 1').fill('Call the hall');
   await page.getByRole('button', { name: 'Save task' }).click();
@@ -61,6 +64,7 @@ test('an ExeCom member adds, changes and views a task, and the signed-in page pa
   const row = page.getByRole('row', { name: /Book the venue/ });
   await expect(row).toBeVisible();
   await expect(row.getByRole('cell', { name: 'execom', exact: true })).toBeVisible();
+  await expect(page.getByText('You have 1 task due in the next 7 days.')).toBeVisible();
   expect(await violations(page)).toEqual([]);
 
   await page.getByLabel('Status of Book the venue').selectOption('done');

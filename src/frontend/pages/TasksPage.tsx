@@ -11,7 +11,7 @@ import TaskTimeline from '../components/tasks/TaskTimeline';
 import { useStoredView } from '../components/tasks/useStoredView';
 import { useTaskShortcuts } from '../components/tasks/useTaskShortcuts';
 import { useUndoDelete } from '../components/tasks/useUndoDelete';
-import { climbChoices, shiftDates, type ClimbChoice } from '../data/taskExtras';
+import { climbChoices, reminderText, shiftDates, type ClimbChoice } from '../data/taskExtras';
 import { canUseTasks, manilaToday, taskInput, tasksToCsv, viewTasks, type Task, type TaskView } from '../data/tasks';
 import { downloadCsv } from '../lib/download';
 import type { Account } from '../services/auth';
@@ -69,6 +69,7 @@ function Tasks({ account }: { account: Account }) {
   }
   const visible = rows.filter((t) => t.id !== undo.pending?.id);
   const shown = viewTasks(visible, view);
+  const reminder = reminderText(visible, account.uid, manilaToday());
   const set = (patch: Partial<TaskView>) => setStored((s) => ({ ...s, view: { ...s.view, ...patch } }));
   const change = (t: Task, patch: Partial<ReturnType<typeof taskInput>>) => void run(() => saveTask(account, { ...taskInput(t), ...patch }, t.id, t));
   return (
@@ -78,6 +79,7 @@ function Tasks({ account }: { account: Account }) {
         <button type="button" className="btn" disabled={!shown.length} onClick={() => downloadCsv('committee-tasks', tasksToCsv(shown))}>Download CSV ({shown.length})</button>
       </p>
       <p className="climb-muted">Shortcuts: N new task, T table, L timeline.</p>
+      {reminder && <p role="status" className="climb-notice">{reminder} <button type="button" className="chip" onClick={() => set({ ownerUid: account.uid, committee: '', status: '' })}>Show my tasks</button></p>}
       <TaskSummary tasks={visible} today={manilaToday()} />
       <ViewToggle mode={mode} onChange={(m) => setStored((s) => ({ ...s, mode: m }))} />
       <TaskFilters view={view} owners={owners ?? []} myUid={account.uid} showSort={mode === 'table'} onChange={set} />

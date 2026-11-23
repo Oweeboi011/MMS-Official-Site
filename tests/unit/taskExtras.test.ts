@@ -1,5 +1,5 @@
 import type { Task, TaskInput } from '../../src/frontend/data/tasks';
-import { changeSummary, climbChoices, parseStoredView, checklistProgress, dragDays, todayMarker, formatChecklist, linkify, nextOccurrence, parseChecklist, shiftDates, summaryOf } from '../../src/frontend/data/taskExtras';
+import { reminderText, changeSummary, climbChoices, parseStoredView, checklistProgress, dragDays, todayMarker, formatChecklist, linkify, nextOccurrence, parseChecklist, shiftDates, summaryOf } from '../../src/frontend/data/taskExtras';
 
 const input = (extra: Partial<TaskInput> = {}): TaskInput => ({
   title: 'Prep meeting', committee: 'execom', status: 'done', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', checklist: '', repeat: '', link: '', ...extra,
@@ -137,4 +137,23 @@ describe('changeSummary', () => {
     expect(changeSummary(before, { ...before, notes: 'new', checklist: '[ ] a', link: '/x', repeat: 'weekly', title: 'Renamed' })).toBe('Title changed; Notes edited; Checklist edited; Repeat Does not repeat → Every week; Link changed');
   });
   it('says so when nothing changed', () => expect(changeSummary(before, before)).toBe('Saved with no changes'));
+});
+
+describe('reminderText', () => {
+  const today = '2026-11-23';
+  const mine = (id: string, extra: Partial<Task>) => mk(id, { ownerUid: 'u1', status: 'doing', ...extra });
+  it('is empty when nothing of mine is late or due soon', () => {
+    expect(reminderText([mine('a', { dueDate: '2026-12-30' }), mine('b', { dueDate: '' }), mk('c', { ownerUid: 'u2', dueDate: '2026-11-20' })], 'u1', today)).toBe('');
+  });
+  it('counts my overdue tasks and the ones due in the next 7 days, never done ones or other people’s', () => {
+    const rows = [
+      mine('late', { dueDate: '2026-11-01' }), mine('today', { dueDate: '2026-11-23' }), mine('edge', { dueDate: '2026-11-30' }),
+      mine('far', { dueDate: '2026-12-01' }), mine('done', { dueDate: '2026-11-01', status: 'done' }), mk('theirs', { ownerUid: 'u2', dueDate: '2026-11-01' }),
+    ];
+    expect(reminderText(rows, 'u1', today)).toBe('You have 1 overdue task and 2 due in the next 7 days.');
+  });
+  it('uses plain plurals', () => {
+    expect(reminderText([mine('a', { dueDate: '2026-11-01' }), mine('b', { dueDate: '2026-11-02' })], 'u1', today)).toBe('You have 2 overdue tasks.');
+    expect(reminderText([mine('a', { dueDate: '2026-11-25' })], 'u1', today)).toBe('You have 1 task due in the next 7 days.');
+  });
 });

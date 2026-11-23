@@ -25,7 +25,8 @@ ExeCom and TCom have no shared place for tasks and deadlines. Groups and their r
 
 - No new cost: same Firebase project and free tier.
 - `groupMembers` can go stale if groups are edited outside `setGroups`; the admin tools only use `setGroups`. Rules do not cross-check it against the user record: writers are admins and BOT, who are trusted with groups already.
-- Reminders by email wait on Brevo (open item 8); out of scope here.
+- Reminders: an in-app note shows each person their own overdue and due-this-week tasks. Reminders by email wait on Brevo (open item 8).
+- **Open question for the owner and the DPO:** account deletion clears a person's task ownership and group listing, but their display name stays in a task's history entries and its "last changed by" line, as it does in the audit log. If that should be erased too, the history entries need a collection-group index on `byUid`, and tasks need an `updatedBy` uid. Not built: no policy is written for it yet.
 - Rules tests cover each group and a plain member; they run in Quality Gates.
 
 ## Alternatives

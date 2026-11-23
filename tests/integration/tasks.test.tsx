@@ -191,6 +191,15 @@ describe('task tracker table', () => {
   });
 
   describe('summary, details and shortcuts', () => {
+    it('reminds the signed-in person of their own late tasks and shows only those on request', async () => {
+      renderAt('/account/tasks');
+      expect(await screen.findByText(/You have 1 overdue task./, {}, { timeout: 5000 })).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: 'Show my tasks' }));
+      expect(screen.getByLabelText('Owner')).toHaveValue('u1');
+      expect(screen.getByText('Book venue')).toBeInTheDocument();
+      expect(screen.queryByText('Plan training')).not.toBeInTheDocument();
+    });
+
     it('counts tasks per committee, including overdue', async () => {
       renderAt('/account/tasks');
       await screen.findByText('Book venue', {}, { timeout: 5000 });

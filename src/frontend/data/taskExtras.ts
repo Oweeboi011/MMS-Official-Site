@@ -155,3 +155,14 @@ export function changeSummary(prev: TaskInput | null, next: TaskInput): string {
   const parts = CHANGES.map((describe) => describe(prev, next)).filter(Boolean);
   return parts.length ? parts.join('; ') : NO_CHANGE;
 }
+
+const plural = (n: number, word: string) => (n === 1 ? `1 ${word}` : `${n} ${word}s`);
+
+// An in-app nudge for the signed-in person: their unfinished tasks that are late or due within a week.
+export function reminderText(tasks: Task[], uid: string, today: string): string {
+  const mine = tasks.filter((t) => t.ownerUid === uid && t.status !== 'done' && t.dueDate);
+  const late = mine.filter((t) => isOverdue(t, today)).length;
+  const soon = mine.filter((t) => t.dueDate >= today && t.dueDate <= shift(today, 7)).length;
+  const parts = [late && `${plural(late, 'overdue task')}`, soon && (late ? `${soon} due in the next 7 days` : `${plural(soon, 'task')} due in the next 7 days`)].filter(Boolean);
+  return parts.length ? `You have ${parts.join(' and ')}.` : '';
+}
