@@ -181,9 +181,11 @@ service cloud.firestore {
       return d.get(k, '') == '' || (d[k] is string && d[k].matches('^20[23][0-9]-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$'));
     }
     function taskIsValid(d) {
-      return d.keys().hasOnly(['title', 'committee', 'status', 'ownerUid', 'ownerName', 'startDate', 'dueDate', 'notes', 'createdBy', 'createdAt', 'updatedAt']) &&
-        d.committee in ['execom', 'tcom'] && d.status in ['todo', 'doing', 'blocked', 'done'] &&
+      return d.keys().hasOnly(['title', 'committee', 'status', 'ownerUid', 'ownerName', 'startDate', 'dueDate', 'notes', 'checklist', 'repeat', 'link', 'updatedByName', 'createdBy', 'createdAt', 'updatedAt']) &&
+        d.committee in ['execom', 'tcom'] && d.get('repeat', '') in ['', 'weekly', 'monthly'] && d.status in ['todo', 'doing', 'blocked', 'done'] &&
         text(d, 'title', 1, 200) && shortText(d, 'ownerUid', 128) && shortText(d, 'ownerName', 200) && shortText(d, 'notes', 2000) &&
+        shortText(d, 'checklist', 2000) && shortText(d, 'updatedByName', 200) && shortText(d, 'link', 300) &&
+        (d.get('link', '') == '' || d.link.matches('^(https://[^ ]+|/[^/ ][^ ]*|/)$')) &&
         isoDate(d, 'startDate') && isoDate(d, 'dueDate') &&
         (d.get('startDate', '') == '' || d.get('dueDate', '') == '' || d.startDate <= d.dueDate);
     }
@@ -193,6 +195,14 @@ service cloud.firestore {
         request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time;
       allow update: if isOfficer() && taskIsValid(request.resource.data) && !affected().hasAny(['createdBy', 'createdAt']) &&
         request.resource.data.updatedAt == request.time;
+      // What changed and who did it. Append-only; entries go only once their task is gone.
+      match /history/{eventId} {
+        allow read: if isOfficer();
+        allow create: if isOfficer() && request.resource.data.keys().hasOnly(['at', 'byUid', 'byName', 'summary']) &&
+          request.resource.data.at == request.time && request.resource.data.byUid == request.auth.uid &&
+          shortText(request.resource.data, 'byName', 200) && text(request.resource.data, 'summary', 1, 500);
+        allow delete: if isOfficer() && !exists(/databases/$(database)/documents/tasks/$(taskId));
+      }
     }
     // Who can own a task: a copy of name and groups, so private user records stay private. setGroups writes it.
     match /groupMembers/{userId} {

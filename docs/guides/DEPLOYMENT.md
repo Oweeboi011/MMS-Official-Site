@@ -11,14 +11,14 @@
 ```sh
 npx wrangler login        # once; wrangler is a pinned devDependency
 npm run deploy:preview    # check → build → perf → https://preview.mms-official-site-1qd.pages.dev
-npm run deploy:prod       # check → build → perf → production → prod parity
+npm run deploy:prod       # check → build → perf → production → prod parity → smoke
 ```
 
 - No Cloudflare Git integration: deploys run from `scripts/deploy.mjs`, locally or via GitHub Actions ([branches](#branches--environments)).
 - Pages URL: `https://mms-official-site-1qd.pages.dev` (`-1qd` suffix: the plain name was taken).
 - No top-level `404.html` → Pages serves `index.html` for deep links (SPA). `public/{assets,images}/404.html` make missing files there a real 404, not cached HTML.
 - Headers/cache: `public/_headers` (security headers, CSP enforced, `/assets` 1 yr immutable, `/images` 1 week).
-- Guards (`scripts/deploy.mjs`): check → build → bundle budget → deploy → prod parity (`main`).
+- Guards (`scripts/deploy.mjs`): check → build → bundle budget → deploy → prod parity → smoke (`main`). Smoke = the signed-out `tests/e2e/smoke.spec.ts` run against the live site (`npm run test:smoke`, `SMOKE_URL` to aim elsewhere); a failure fails the release run.
 - CI/CD per branch: [below](#branches--environments).
 - New account only: create the project once with `npx wrangler pages project create mms-official-site --production-branch main --force`. `--force` keeps it on classic Pages; without it wrangler delegates to Workers, rewrites `vite.config.ts`/`package.json`, adds `wrangler.jsonc`, and (4.151–4.157) crashes. Never pass `--force` again after. New `*.pages.dev` hostnames take a few minutes to get TLS.
 
@@ -71,8 +71,12 @@ npx firebase-tools@15 deploy --only functions:<name>    # one function
 
 1. Release PR `development` → `main`: notes, risk, rollback target (previous tag). A human approves and merges.
 2. CD deploys the app. It does not deploy Firebase: run the backend deploy above, **rules first, then functions**, when either changed.
-3. One-time scripts the release needs (for example `tools/admin/backfill-group-members.mjs`), then smoke checks signed out and as an officer.
+3. One-time scripts the release needs (for example `tools/admin/backfill-group-members.mjs`), then `node tools/admin/check-rules-drift.mjs` (read-only: production rules must match the repo), then smoke checks as an officer (the automatic smoke only covers signed-out pages).
 4. Rollback: redeploy the previous tag's app; redeploy that tag's `firestore.rules` if rules changed.
+
+**Optional: deploy the backend from GitHub.** Workflow `Backend Deploy` (manual only, from `main`, needs a reviewer to approve the `production` environment) runs the two commands above in order, then the drift check. It does nothing until the repo secret `FIREBASE_DEPLOY_KEY` exists, which is a **write-capable** service-account key for the project: only add it if you accept that risk, scope the account to what `firebase deploy` needs, and prefer keeping deploys by hand if unsure. Never run in GitHub yet.
+
+**Weekly drift check (owner step to switch on):** workflow `Rules Drift` runs `check-rules-drift.mjs` every Monday and fails if production rules differ from the repo. It skips itself until the repo secret `GCP_RULES_READER_KEY` exists: create a service account in project `mms-official-site-513809` with only the role **Firebase Rules Viewer**, make a JSON key, and store it as that secret (never in chat or the repo). Not yet run in GitHub; the script itself is checked against production.
 
 Rules tests locally need Java (`winget install Microsoft.OpenJDK.21`), then `npm run test:rules`; without it, Quality Gates runs **Security Rules Tests**.
 

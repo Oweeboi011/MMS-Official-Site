@@ -19,12 +19,14 @@ ExeCom and TCom have no shared place for tasks and deadlines. Groups and their r
 - **Owner picker.** Collection `groupMembers/{uid}` (`name`, `groups`), readable by the same people, written by admins and BOT. `setGroups` writes it with the user record, so private user records stay private. Renaming a user (`updateUserProfile`) updates it; deleting an account removes it and clears the owner on that person's tasks. Existing group holders are filled in once by `tools/admin/backfill-group-members.mjs`.
 - **Page.** `/account/tasks`, tab shown to those with access. One data set, two views: a sortable, filterable table (overdue marked) and a timeline (bars from start to due, grouped by committee; undated tasks listed apart).
 - Every create, edit and delete writes to the audit log.
+- **Added after the first release** (2026-11-23): optional `checklist` (text lines, `[x]` marks done), `repeat` (`weekly` or `monthly`: finishing the task adds the next copy, to do, dates moved), `link` (https or a site path), `updatedByName` (who last changed it, display name only), dates limited to 2020-2039. The rules bound each. Each task keeps a history in `tasks/{id}/history` (what changed, who, when): officers read and add, entries are never edited, and they go only after their task is deleted; a failed history note never fails a save. The related-climb picker reads the public climbs and stores the climb's page path in `link`. Delete waits a few seconds so it can be undone. The view and filters are remembered on the device; Overdue uses the Manila date.
 
 ## Consequences
 
 - No new cost: same Firebase project and free tier.
 - `groupMembers` can go stale if groups are edited outside `setGroups`; the admin tools only use `setGroups`. Rules do not cross-check it against the user record: writers are admins and BOT, who are trusted with groups already.
-- Reminders by email wait on Brevo (open item 8); out of scope here.
+- Reminders: an in-app note shows each person their own overdue and due-this-week tasks. Reminders by email wait on Brevo (open item 8).
+- **Open question for the owner and the DPO:** account deletion clears a person's task ownership and group listing, but their display name stays in a task's history entries and its "last changed by" line, as it does in the audit log. If that should be erased too, the history entries need a collection-group index on `byUid`, and tasks need an `updatedBy` uid. Not built: no policy is written for it yet.
 - Rules tests cover each group and a plain member; they run in Quality Gates.
 
 ## Alternatives

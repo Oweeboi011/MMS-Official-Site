@@ -43,7 +43,10 @@ jobs:
       - name: Setup Toolchain
         if: steps.guard.outputs.skip != '1'
         uses: ./.github/actions/setup
-      - name: Quality Gates, Build, Deploy & Parity Check
+      - name: Install browser for the post-deploy smoke check
+        if: steps.guard.outputs.skip != '1' && env.TARGET == 'main'
+        run: npx playwright install --with-deps chromium
+      - name: Quality Gates, Build, Deploy, Parity & Smoke Check
         if: steps.guard.outputs.skip != '1'
         run: node scripts/deploy.mjs "$TARGET"
         env:

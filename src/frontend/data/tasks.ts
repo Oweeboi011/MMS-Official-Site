@@ -1,4 +1,5 @@
 // ExeCom and TCom tasks (ADR 0012; collection tasks). Plain data: no Firebase here. Mirrors firestore.rules.
+import { csvRows } from '../lib/csv';
 interface Person { role: string; groups: readonly string[] }
 
 export const COMMITTEES = [['execom', 'ExeCom'], ['tcom', 'TCom']] as const;
@@ -9,15 +10,18 @@ type TaskStatus = (typeof STATUSES)[number][0];
 
 export interface TaskInput {
   title: string; committee: Committee; status: TaskStatus; ownerUid: string; ownerName: string;
-  startDate: string; dueDate: string; notes: string;
+  startDate: string; dueDate: string; notes: string; checklist: string; repeat: Repeat; link: string;
 }
 
-export interface Task extends TaskInput { id: string; updatedAt: number }
+export const REPEATS = [['', 'Does not repeat'], ['weekly', 'Every week'], ['monthly', 'Every month']] as const;
+type Repeat = (typeof REPEATS)[number][0];
+
+export interface Task extends TaskInput { id: string; updatedAt: number; updatedByName: string }
 
 // Only the stored fields: the rules reject any other key, such as id or updatedAt.
 export const taskInput = (t: Task): TaskInput => ({
   title: t.title, committee: t.committee, status: t.status, ownerUid: t.ownerUid, ownerName: t.ownerName,
-  startDate: t.startDate, dueDate: t.dueDate, notes: t.notes,
+  startDate: t.startDate, dueDate: t.dueDate, notes: t.notes, checklist: t.checklist, repeat: t.repeat, link: t.link,
 });
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
@@ -27,7 +31,8 @@ const pick = <T extends string>(options: readonly (readonly [T, string])[], v: u
 export const toTask = (id: string, d: Record<string, unknown>): Task => ({
   id, title: str(d.title), committee: pick(COMMITTEES, d.committee, 'execom'), status: pick(STATUSES, d.status, 'todo'),
   ownerUid: str(d.ownerUid), ownerName: str(d.ownerName), startDate: str(d.startDate), dueDate: str(d.dueDate),
-  notes: str(d.notes), updatedAt: millis(d.updatedAt),
+  notes: str(d.notes), checklist: str(d.checklist), repeat: pick(REPEATS, d.repeat, ''), link: str(d.link),
+  updatedAt: millis(d.updatedAt), updatedByName: str(d.updatedByName),
 });
 
 export const isOverdue = (t: Task, today: string) => Boolean(t.dueDate) && t.dueDate < today && t.status !== 'done';
@@ -82,6 +87,15 @@ function dateError(date: string): string {
   return date < '2020' || date >= '2040' ? 'Dates must fall between 2020 and 2039.' : '';
 }
 
+// https only, or a path on this site (never //host, which a browser reads as another site).
+const LINK = /^(https:\/\/\S+|\/(?!\/)\S*)$/;
+
+function extraError(t: TaskInput): string {
+  if (t.checklist.length > 2000) return 'Checklist is too long (max 2000 characters).';
+  if (t.link && (t.link.length > 300 || !LINK.test(t.link))) return 'Link must start with https:// or be a site path such as /activities/open-climbs.';
+  return REPEATS.some(([key]) => key === t.repeat) ? '' : 'Pick how often it repeats.';
+}
+
 // Returns the first problem in plain words, or '' when the task is fine.
 export function validateTask(t: TaskInput): string {
   if (!t.title.trim() || t.title.length > 200) return 'Title is required (max 200 characters).';
@@ -91,7 +105,7 @@ export function validateTask(t: TaskInput): string {
   if (dateProblem) return dateProblem;
   if (t.startDate && t.dueDate && t.startDate > t.dueDate) return 'Start must be before the due date.';
   if (t.notes.length > 2000) return 'Notes are too long (max 2000 characters).';
-  return '';
+  return extraError(t);
 }
 
 interface Bar { task: Task; left: number; width: number }
@@ -132,3 +146,14 @@ export function timelineOf(tasks: Task[]): Timeline {
   }
   return { from, to, months, groups, undated };
 }
+
+const label = (options: readonly (readonly [string, string])[], key: string) => options.find(([k]) => k === key)?.[1] ?? key;
+
+export const tasksToCsv = (tasks: Task[]): string =>
+  csvRows([
+    ['Task', 'Committee', 'Status', 'Owner', 'Start', 'Due', 'Notes', 'Checklist', 'Repeat', 'Link', 'Last changed by'],
+    ...tasks.map((t) => [
+      t.title, label(COMMITTEES, t.committee), label(STATUSES, t.status), t.ownerName, t.startDate, t.dueDate, t.notes,
+      t.checklist.split('\n').filter(Boolean).join('; '), t.repeat && label(REPEATS, t.repeat), t.link, t.updatedByName,
+    ]),
+  ]);

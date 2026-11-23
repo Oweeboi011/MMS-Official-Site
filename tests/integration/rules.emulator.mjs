@@ -378,6 +378,18 @@ for (const who of ["tcom1", "exec1", "bot1"]) {
   await ok(`${who} adds a task`, () => as(who).collection("tasks").add(task(who)));
   await ok(`${who} edits a task`, () => as(who).doc("tasks/t1").update({ status: "doing", updatedAt: FV.serverTimestamp() }));
 }
+const event = (uid, extra = {}) => ({ at: FV.serverTimestamp(), byUid: uid, byName: "Ana", summary: "Status To do → Done", ...extra });
+await ok("officer adds a task history entry", () => as("exec1").collection("tasks/t1/history").add(event("exec1")));
+await ok("officer reads task history", () => as("tcom1").collection("tasks/t1/history").get());
+await no("history entry cannot name another person", () => as("exec1").collection("tasks/t1/history").add(event("tcom1")));
+await no("history entry needs the server time", () => as("exec1").collection("tasks/t1/history").add(event("exec1", { at: "yesterday" })));
+await no("history entry rejects unknown fields", () => as("exec1").collection("tasks/t1/history").add(event("exec1", { extra: 1 })));
+await no("plain member cannot read task history", () => m2().collection("tasks/t1/history").get());
+await no("history entries cannot be edited", async () => { const r = await as("exec1").collection("tasks/t1/history").add(event("exec1")); await r.update({ summary: "x" }); });
+await no("history entries stay while their task exists", async () => { const r = await as("exec1").collection("tasks/t1/history").add(event("exec1")); await r.delete(); });
+await env.withSecurityRulesDisabled(async (c) => { await c.firestore().doc("tasks/gone/history/h1").set({ at: new Date(), byUid: "exec1", byName: "Ana", summary: "x" }); });
+await ok("history entries can go once their task is gone", () => as("exec1").doc("tasks/gone/history/h1").delete());
+await no("a plain member cannot delete history", async () => { await env.withSecurityRulesDisabled(async (c) => { await c.firestore().doc("tasks/gone/history/h2").set({ at: new Date(), byUid: "exec1", byName: "Ana", summary: "x" }); }); await m2().doc("tasks/gone/history/h2").delete(); });
 await ok("admin adds a task", () => admin().collection("tasks").add(task("admin")));
 await no("plain member cannot read tasks", () => m2().doc("tasks/t1").get());
 await no("plain member cannot add a task", () => m2().collection("tasks").add(task("m2")));
@@ -391,6 +403,10 @@ await no("task rejects start after due", () => as("exec1").collection("tasks").a
 await no("task rejects unknown fields", () => as("exec1").collection("tasks").add(task("exec1", { extra: 1 })));
 await ok("task may have no dates", () => as("exec1").collection("tasks").add(task("exec1", { startDate: "", dueDate: "" })));
 await no("task rejects an impossible date", () => as("exec1").collection("tasks").add(task("exec1", { dueDate: "2026-13-45" })));
+await ok("task may carry a checklist, repeat, link and updater", () => as("exec1").collection("tasks").add(task("exec1", { checklist: "[ ] a", repeat: "weekly", link: "/activities/open-climbs", updatedByName: "Ana" })));
+await no("task rejects an unknown repeat", () => as("exec1").collection("tasks").add(task("exec1", { repeat: "daily" })));
+await no("task rejects a javascript link", () => as("exec1").collection("tasks").add(task("exec1", { link: "javascript:alert(1)" })));
+await no("task rejects a protocol-relative link", () => as("exec1").collection("tasks").add(task("exec1", { link: "//evil.example" })));
 await no("task rejects a date outside 2020-2039", () => as("exec1").collection("tasks").add(task("exec1", { dueDate: "2099-01-01" })));
 await no("task rejects a forged createdAt", () => as("exec1").collection("tasks").add(task("exec1", { createdAt: "yesterday" })));
 await no("task update must stamp updatedAt", () => as("exec1").doc("tasks/t1").update({ status: "done" }));

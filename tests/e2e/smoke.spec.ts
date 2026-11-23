@@ -29,3 +29,8 @@ test('mountains table pages through the top 100', async ({ page }) => {
   await page.getByRole('button', { name: 'Next page' }).click();
   await expect(page.getByText('21–40 of 100')).toBeVisible();
 });
+
+test('committee tasks asks signed-out visitors to sign in', async ({ page }) => {
+  await page.goto('/account/tasks');
+  await expect(page.getByText('Sign in to see the committee tasks.')).toBeVisible();
+});
