@@ -45,7 +45,7 @@ function Users({ admin }: { admin: Account }) {
                     <option value="admin">admin</option>
                   </select>
                 </td>
-                <td><GroupBoxes user={u} busy={busy} onChange={(groups) => void run(() => setGroups(u.uid, groups, u.email))} /></td>
+                <td><GroupBoxes user={u} busy={busy} onChange={(groups) => void run(() => setGroups(u.uid, groups, u.email, u.name))} /></td>
                 <td>{addedByLabel(u, rows)}</td>
                 <td>{joinedLabel(u.createdAt)}</td>
                 <td><button type="button" className="chip" onClick={() => setOpenUid(u.uid)}>Details</button>{u.uid !== admin.uid && <> <DeleteAccount user={u} run={run} busy={busy} /></>}</td>

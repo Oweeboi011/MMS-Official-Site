@@ -334,6 +334,9 @@ await no("guest cannot submit", () => anon().collection("contentEntries").add(en
 await no("entry rejects a made-up page", () => admin().collection("contentEntries").add(entry("admin", "secrets")));
 await no("entry rejects an empty title", () => admin().collection("contentEntries").add(entry("admin", "calendar", { title: "" })));
 await no("entry rejects unknown fields", () => admin().collection("contentEntries").add(entry("admin", "calendar", { extra: 1 })));
+await no("entry rejects unknown data keys", () => admin().collection("contentEntries").add(entry("admin", "calendar", { data: { date: "2026-12-05", junk: "x" } })));
+await no("entry rejects oversized data", () => admin().collection("contentEntries").add(entry("admin", "calendar", { data: { date: "2026-12-05", details: "x".repeat(2001) } })));
+await no("entry rejects a long submitter name", () => admin().collection("contentEntries").add(entry("admin", "calendar", { submittedByName: "x".repeat(201) })));
 await env.withSecurityRulesDisabled(async (c) => {
   const db = c.firestore();
   await db.doc("contentEntries/pub").set(entry("tcom1", "calendar", { status: "published" }));
@@ -350,6 +353,10 @@ await ok("ExeCom approves a TCom entry", () => as("exec1").doc("contentEntries/p
 await ok("BOT rejects with a note", () => as("bot1").doc("contentEntries/memb").update({ status: "rejected", reviewedBy: "bot1", note: "Check the fee" }));
 await no("reviewer cannot change who submitted", () => as("bot1").doc("contentEntries/pub").update({ submittedBy: "bot1" }));
 await ok("TCom edits its own entry", () => as("tcom1").doc("contentEntries/pub").update({ title: "Pulag climb (moved)" }));
+await ok("TCom publishes and unpublishes its own entry (no reviewedBy)", async () => {
+  await as("tcom1").doc("contentEntries/mine").update({ status: "published", note: "", updatedAt: FV.serverTimestamp(), publishedAt: FV.serverTimestamp() });
+  await as("tcom1").doc("contentEntries/mine").update({ status: "draft", note: "", updatedAt: FV.serverTimestamp() });
+});
 await no("TCom cannot touch reviewedBy", () => as("tcom1").doc("contentEntries/pub").update({ reviewedBy: "tcom1" }));
 await no("TCom cannot edit a membership entry", () => as("tcom1").doc("contentEntries/memb").update({ title: "Changed" }));
 await no("member cannot delete a published entry", () => as("tcom1").doc("contentEntries/pub").delete());
@@ -361,6 +368,48 @@ await no("TCom cannot log a non-content action", () => as("tcom1").collection("a
 await no("plain member cannot log a content action", () => m2().collection("auditLog").add(logEntry("m2", "content")));
 await no("TCom cannot read the audit log", () => as("tcom1").collection("auditLog").limit(1).get());
 await ok("admin deletes any entry", () => admin().doc("contentEntries/pub").delete());
+
+console.log("Firestore: ExeCom and TCom task tracker (ADR 0012)");
+await seed();
+const task = (uid, extra = {}) => ({ title: "Book venue", committee: "execom", status: "todo", ownerUid: "", ownerName: "", startDate: "2026-12-01", dueDate: "2026-12-10", notes: "", createdBy: uid, createdAt: FV.serverTimestamp(), updatedAt: FV.serverTimestamp(), ...extra });
+await env.withSecurityRulesDisabled(async (c) => { await c.firestore().doc("tasks/t1").set(task("exec1")); });
+for (const who of ["tcom1", "exec1", "bot1"]) {
+  await ok(`${who} reads tasks`, () => as(who).doc("tasks/t1").get());
+  await ok(`${who} adds a task`, () => as(who).collection("tasks").add(task(who)));
+  await ok(`${who} edits a task`, () => as(who).doc("tasks/t1").update({ status: "doing", updatedAt: FV.serverTimestamp() }));
+}
+await ok("admin adds a task", () => admin().collection("tasks").add(task("admin")));
+await no("plain member cannot read tasks", () => m2().doc("tasks/t1").get());
+await no("plain member cannot add a task", () => m2().collection("tasks").add(task("m2")));
+await no("guest cannot read tasks", () => anon().doc("tasks/t1").get());
+await no("task cannot be created in someone else's name", () => as("tcom1").collection("tasks").add(task("exec1")));
+await no("task rejects a blank title", () => as("exec1").collection("tasks").add(task("exec1", { title: " " })));
+await no("task rejects an unknown committee", () => as("exec1").collection("tasks").add(task("exec1", { committee: "bot" })));
+await no("task rejects an unknown status", () => as("exec1").collection("tasks").add(task("exec1", { status: "later" })));
+await no("task rejects a badly formatted date", () => as("exec1").collection("tasks").add(task("exec1", { dueDate: "10/12/2026" })));
+await no("task rejects start after due", () => as("exec1").collection("tasks").add(task("exec1", { startDate: "2026-12-11" })));
+await no("task rejects unknown fields", () => as("exec1").collection("tasks").add(task("exec1", { extra: 1 })));
+await ok("task may have no dates", () => as("exec1").collection("tasks").add(task("exec1", { startDate: "", dueDate: "" })));
+await no("task rejects an impossible date", () => as("exec1").collection("tasks").add(task("exec1", { dueDate: "2026-13-45" })));
+await no("task rejects a date outside 2020-2039", () => as("exec1").collection("tasks").add(task("exec1", { dueDate: "2099-01-01" })));
+await no("task rejects a forged createdAt", () => as("exec1").collection("tasks").add(task("exec1", { createdAt: "yesterday" })));
+await no("task update must stamp updatedAt", () => as("exec1").doc("tasks/t1").update({ status: "done" }));
+await no("task creator cannot be changed", () => as("exec1").doc("tasks/t1").update({ createdBy: "tcom1", updatedAt: FV.serverTimestamp() }));
+await ok("group member deletes a task", () => as("tcom1").doc("tasks/t1").delete());
+await no("plain member cannot delete a task", () => m2().doc("tasks/t1").delete());
+const taskLog = (uid, type) => ({ actorUid: uid, actorName: uid, action: "task added", targetType: type, targetId: "t1", createdAt: FV.serverTimestamp() });
+await ok("group member logs a task action", () => as("tcom1").collection("auditLog").add(taskLog("tcom1", "task")));
+await no("group member cannot log a task action as someone else", () => as("tcom1").collection("auditLog").add(taskLog("exec1", "task")));
+await no("plain member cannot log a task action", () => m2().collection("auditLog").add(taskLog("m2", "task")));
+await env.withSecurityRulesDisabled(async (c) => { await c.firestore().doc("groupMembers/exec1").set({ name: "Ben", groups: ["execom"] }); });
+await ok("group member reads the owner list", () => as("tcom1").doc("groupMembers/exec1").get());
+await no("plain member cannot read the owner list", () => m2().doc("groupMembers/exec1").get());
+await ok("admin writes an owner entry", () => admin().doc("groupMembers/tcom1").set({ name: "Ana", groups: ["tcom"], updatedAt: FV.serverTimestamp() }));
+await ok("BOT writes an owner entry", () => as("bot1").doc("groupMembers/m1").set({ name: "Cy", groups: ["tcom"], updatedAt: FV.serverTimestamp() }));
+await no("TCom cannot write an owner entry", () => as("tcom1").doc("groupMembers/m2").set({ name: "Di", groups: ["tcom"], updatedAt: FV.serverTimestamp() }));
+await no("owner entry rejects an unknown group", () => admin().doc("groupMembers/m2").set({ name: "Di", groups: ["king"], updatedAt: FV.serverTimestamp() }));
+await no("owner entry rejects empty groups", () => admin().doc("groupMembers/m2").set({ name: "Di", groups: [], updatedAt: FV.serverTimestamp() }));
+await ok("BOT removes an owner entry", () => as("bot1").doc("groupMembers/m1").delete());
 
 console.log("Firestore: sportfest scoreboard (signed-in read, admin write)");
 await seed();

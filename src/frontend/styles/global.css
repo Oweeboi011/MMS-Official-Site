@@ -873,3 +873,16 @@ input[type="file"]::file-selector-button:hover { background: var(--ink); }
 .admin-table th[scope="row"] { color: inherit; background: none; font-size: .95rem; letter-spacing: 0; text-transform: none; font-weight: 700; border-top: 1px solid var(--line); }
 .admin-table tr.sf-tribe th[scope="row"] { border-left: 8px solid var(--tribe); }
 .admin-table .sf-name { font-weight: 700; }
+
+/* Committee task timeline (ADR 0012): bars on one shared scale; the text beside each bar says the same in words. */
+.tl-axis { position: relative; height: 1.4rem; margin: 10px 0 4px; border-bottom: 1px solid var(--line); font-size: .75rem; color: var(--muted); }
+.tl-axis span { position: absolute; top: 0; white-space: nowrap; }
+.tl-rows { display: grid; gap: 14px; margin: 0 0 18px; padding: 0; list-style: none; }
+.tl-meta { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.tl-title { font-weight: 800; }
+.tl-track { position: relative; height: 12px; margin-top: 6px; border-radius: 6px; background: rgba(16,26,36,.06); }
+.tl-bar { position: absolute; top: 0; bottom: 0; min-width: 4px; border-radius: 6px; background: var(--navy); }
+.tl-bar.is-todo { background: var(--muted); }
+.tl-bar.is-blocked { background: var(--red); }
+.tl-bar.is-done { background: var(--green, #2f7d4f); }
+.task-overdue { padding: 3px 10px; border-radius: 999px; background: var(--red); color: #fff; font-size: .72rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
