@@ -14,6 +14,7 @@
   --tint: rgba(16,26,36,.06);
   --ink-solid: #101a24;
   --focus: var(--navy);
+  --stripe: #fff;
   --line-strong: rgba(16,26,36,.22);
   --line-hover: rgba(16,26,36,.35);
   --tint-faint: rgba(16,26,36,.05);
@@ -910,6 +911,7 @@ input[type="file"]::file-selector-button:hover { background: var(--ink-solid); }
     --tint: rgba(255,255,255,.1);
     --ink-solid: #2b3644;
     --focus: #b3b8ff;
+    --stripe: #0e131a;
     --line-strong: rgba(255,255,255,.34);
     --line-hover: rgba(255,255,255,.5);
     --tint-faint: rgba(255,255,255,.06);
@@ -917,4 +919,9 @@ input[type="file"]::file-selector-button:hover { background: var(--ink-solid); }
     --red-ink: #ff9d97;
     --green-ink: #86dc9d;
   }
+  /* Task timeline bars: the light-theme fills are too dark against a dark track. */
+  .tl-bar { background: var(--navy-ink); }
+  .tl-bar.is-todo { background: var(--muted); }
+  .tl-bar.is-blocked { background: var(--red-ink); }
+  .tl-bar.is-done { background: var(--green-ink); }
 }
