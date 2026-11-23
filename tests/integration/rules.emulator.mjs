@@ -384,6 +384,7 @@ await no("task rejects start after due", () => as("exec1").collection("tasks").a
 await no("task rejects unknown fields", () => as("exec1").collection("tasks").add(task("exec1", { extra: 1 })));
 await ok("task may have no dates", () => as("exec1").collection("tasks").add(task("exec1", { startDate: "", dueDate: "" })));
 await no("task rejects an impossible date", () => as("exec1").collection("tasks").add(task("exec1", { dueDate: "2026-13-45" })));
+await no("task rejects a date outside 2020-2039", () => as("exec1").collection("tasks").add(task("exec1", { dueDate: "2099-01-01" })));
 await no("task rejects a forged createdAt", () => as("exec1").collection("tasks").add(task("exec1", { createdAt: "yesterday" })));
 await no("task update must stamp updatedAt", () => as("exec1").doc("tasks/t1").update({ status: "done" }));
 await no("task creator cannot be changed", () => as("exec1").doc("tasks/t1").update({ createdBy: "tcom1", updatedAt: FV.serverTimestamp() }));
