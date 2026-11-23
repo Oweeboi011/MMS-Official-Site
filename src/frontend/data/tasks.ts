@@ -151,6 +151,9 @@ const label = (options: readonly (readonly [string, string])[], key: string) => 
 
 export const tasksToCsv = (tasks: Task[]): string =>
   csvRows([
-    ['Task', 'Committee', 'Status', 'Owner', 'Start', 'Due', 'Notes'],
-    ...tasks.map((t) => [t.title, label(COMMITTEES, t.committee), label(STATUSES, t.status), t.ownerName, t.startDate, t.dueDate, t.notes]),
+    ['Task', 'Committee', 'Status', 'Owner', 'Start', 'Due', 'Notes', 'Checklist', 'Repeat', 'Link', 'Last changed by'],
+    ...tasks.map((t) => [
+      t.title, label(COMMITTEES, t.committee), label(STATUSES, t.status), t.ownerName, t.startDate, t.dueDate, t.notes,
+      t.checklist.split('\n').filter(Boolean).join('; '), t.repeat && label(REPEATS, t.repeat), t.link, t.updatedByName,
+    ]),
   ]);

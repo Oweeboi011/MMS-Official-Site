@@ -170,11 +170,11 @@ describe('timelineOf', () => {
 describe('tasksToCsv', () => {
   it('writes a header, readable labels, quoted notes, and defuses spreadsheet formulas', () => {
     const csv = tasksToCsv([
-      mk('a', { title: 'Book "venue"', committee: 'tcom', status: 'doing', ownerName: 'Ana', startDate: '2026-12-01', dueDate: '2026-12-05', notes: 'one, two' }),
+      mk('a', { title: 'Book "venue"', committee: 'tcom', status: 'doing', ownerName: 'Ana', startDate: '2026-12-01', dueDate: '2026-12-05', notes: 'one, two', checklist: '[x] a\n[ ] b', repeat: 'weekly', link: '/x', updatedByName: 'Cara' }),
       mk('b', { title: '=SUM(A1)' }),
     ]).split('\r\n');
-    expect(csv[0]).toBe('"Task","Committee","Status","Owner","Start","Due","Notes"');
-    expect(csv[1]).toBe('"Book ""venue""","TCom","Doing","Ana","2026-12-01","2026-12-05","one, two"');
-    expect(csv[2]).toBe(`"'=SUM(A1)","ExeCom","To do","","","",""`);
+    expect(csv[0]).toBe('"Task","Committee","Status","Owner","Start","Due","Notes","Checklist","Repeat","Link","Last changed by"');
+    expect(csv[1]).toBe('"Book ""venue""","TCom","Doing","Ana","2026-12-01","2026-12-05","one, two","[x] a; [ ] b","Every week","/x","Cara"');
+    expect(csv[2]).toBe(`"'=SUM(A1)","ExeCom","To do","","","","","","","",""`);
   });
 });

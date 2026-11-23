@@ -96,7 +96,7 @@ export default function TasksPage() {
   let body = <p role="status">Checking your sign-in…</p>;
   if (state.status === 'signedIn') {
     body = canUseTasks({ role: state.account.role, groups: state.account.groups ?? [] })
-      ? <Tasks account={state.account} />
+      ? <Tasks key={state.account.uid} account={state.account} />
       : <p>Your account doesn’t have access to the task tracker. Ask an admin to add you to BOT, ExeCom or TCom.</p>;
   } else if (state.status !== 'loading') body = <><p>Sign in to see the committee tasks.</p><SignInForm /></>;
   return (

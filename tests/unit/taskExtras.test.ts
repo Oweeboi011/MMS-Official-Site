@@ -12,6 +12,10 @@ describe('checklist', () => {
     expect(items).toEqual([{ text: 'Book hall', done: true }, { text: 'Print forms', done: false }, { text: 'plain line', done: false }]);
     expect(formatChecklist(items)).toBe('[x] Book hall\n[ ] Print forms\n[ ] plain line');
   });
+  it('keeps a trailing space in item text so a multi-word item can be typed', () => {
+    expect(parseChecklist('[ ] Book ')).toEqual([{ text: 'Book ', done: false }]);
+    expect(formatChecklist(parseChecklist('[ ] Book '))).toBe('[ ] Book ');
+  });
   it('shows progress only when there are items', () => {
     expect(checklistProgress('[x] a\n[ ] b\n[x] c')).toBe('2/3');
     expect(checklistProgress('')).toBe('');
@@ -23,6 +27,10 @@ describe('linkify', () => {
     expect(linkify('See https://example.com/a?b=1, then javascript:alert(1) and ftp://x')).toEqual([
       { text: 'See ' }, { text: 'https://example.com/a?b=1', href: 'https://example.com/a?b=1' }, { text: ', then javascript:alert(1) and ftp://x' },
     ]);
+  });
+  it('keeps balanced parentheses in an address but not the one that closes a sentence', () => {
+    expect(linkify('https://en.wikipedia.org/wiki/Foo_(bar) ok')[0].href).toBe('https://en.wikipedia.org/wiki/Foo_(bar)');
+    expect(linkify('(see https://example.com/a).')).toEqual([{ text: '(see ' }, { text: 'https://example.com/a', href: 'https://example.com/a' }, { text: ').' }]);
   });
   it('returns one plain segment when there is no link', () => expect(linkify('nothing here')).toEqual([{ text: 'nothing here' }]));
 });

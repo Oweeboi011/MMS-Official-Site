@@ -45,7 +45,7 @@ function BarHandle({ task, left, width, from, to, busy, trackRef, onMove }: BarP
     <span
       className={`tl-bar is-${task.status} is-${task.committee}`} style={{ left: `${left}%`, width: `${width}%` }}
       role="button" tabIndex={busy ? -1 : 0} aria-disabled={busy} aria-label={`Move ${task.title}: arrow keys change its dates by a day, Shift by a week`}
-      onKeyDown={key} onPointerDown={(e) => { startX.current = e.clientX; }} onPointerUp={up} onPointerCancel={() => { startX.current = null; }}
+      onKeyDown={key} onPointerDown={(e) => { startX.current = e.clientX; e.currentTarget.setPointerCapture?.(e.pointerId); }} onPointerUp={up} onPointerCancel={() => { startX.current = null; }}
     />
   );
 }

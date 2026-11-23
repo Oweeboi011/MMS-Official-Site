@@ -123,6 +123,8 @@ describe('task tracker table', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'New task' }, { timeout: 5000 }));
     fireEvent.change(screen.getByLabelText('Title *'), { target: { value: 'Prep meeting' } });
     fireEvent.click(screen.getByRole('button', { name: 'Add item' }));
+    fireEvent.change(screen.getByLabelText('Item 1'), { target: { value: 'Call ' } });
+    expect(screen.getByLabelText('Item 1')).toHaveValue('Call ');
     fireEvent.change(screen.getByLabelText('Item 1'), { target: { value: 'Call venue' } });
     fireEvent.change(screen.getByLabelText('Repeat'), { target: { value: 'weekly' } });
     fireEvent.change(screen.getByLabelText('Related link'), { target: { value: 'javascript:alert(1)' } });
@@ -215,6 +217,15 @@ describe('task tracker table', () => {
       await screen.findByText('Plan training', {}, { timeout: 5000 });
       expect(screen.getByRole('button', { name: 'Timeline' })).toHaveAttribute('aria-pressed', 'true');
       expect(screen.getByLabelText('Status')).toHaveValue('todo');
+    });
+
+    it('still opens when the browser blocks storage', async () => {
+      const read = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('blocked'); });
+      const write = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('blocked'); });
+      try {
+        renderAt('/account/tasks');
+        expect(await screen.findByText('Book venue', {}, { timeout: 5000 })).toBeInTheDocument();
+      } finally { read.mockRestore(); write.mockRestore(); }
     });
 
     it('offers more tasks when the limit is reached', async () => {
@@ -311,6 +322,24 @@ describe('task tracker table', () => {
       fireEvent.keyDown(bar, { key: 'ArrowLeft', shiftKey: true });
       await vi.waitFor(() => expect(calls.saved).toHaveLength(2));
       expect(calls.saved[1]).toMatchObject({ input: { startDate: '2019-12-25', dueDate: '2020-01-25' } });
+    });
+
+    it('moves a task by dragging its bar, even when released away from it', async () => {
+      calls.saved = [];
+      const width = 1000;
+      const rect = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width, height: 12, top: 0, left: 0, right: width, bottom: 12, x: 0, y: 0, toJSON: () => ({}) });
+      try {
+        const timeline = await openTimeline();
+        const bar = within(timeline).getByRole('button', { name: /^Move Book venue/ });
+        const captured: number[] = [];
+        bar.setPointerCapture = (id: number) => { captured.push(id); };
+        const total = (Date.parse('2039-01-01') - Date.parse('2020-01-01')) / 86_400_000 + 1;
+        fireEvent.pointerDown(bar, { pointerId: 7, clientX: 0 });
+        expect(captured).toEqual([7]);
+        fireEvent.pointerUp(bar, { pointerId: 7, clientX: (width / total) * 3 });
+        await vi.waitFor(() => expect(calls.saved).toHaveLength(1));
+        expect(calls.saved[0]).toMatchObject({ id: 't1', input: { startDate: '2020-01-04', dueDate: '2020-02-04' } });
+      } finally { rect.mockRestore(); }
     });
 
     it('opens the edit form from a bar', async () => {

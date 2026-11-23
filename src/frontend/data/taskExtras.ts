@@ -5,9 +5,11 @@ export interface CheckItem { text: string; done: boolean }
 
 // One line per item: "[x] done thing" or "[ ] open thing"; a plain line counts as open.
 export const parseChecklist = (s: string): CheckItem[] =>
-  s.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
+  s.split('\n').filter((l) => l.trim()).map((line) => {
+    const l = line.trimStart();
     const m = /^\[([ xX])\] ?(.*)$/.exec(l);
-    return m ? { text: m[2].trim(), done: m[1] !== ' ' } : { text: l, done: false };
+    // Item text keeps its trailing space so a person can type a multi-word item in the editor.
+    return m ? { text: m[2], done: m[1] !== ' ' } : { text: l.trimEnd(), done: false };
   });
 
 export const formatChecklist = (items: CheckItem[]): string => items.map((i) => `[${i.done ? 'x' : ' '}] ${i.text}`).join('\n');
@@ -19,14 +21,27 @@ export function checklistProgress(s: string): string {
 
 export type Segment = { text: string; href?: string };
 
+// Sentence punctuation after an address is not part of it; a closing ")" is, when the address opened one.
+function trimUrlEnd(url: string): string {
+  let end = url.length;
+  while (end > 0) {
+    const c = url[end - 1];
+    const unbalanced = c === ')' && url.slice(0, end).split(')').length > url.slice(0, end).split('(').length;
+    if (!('.,;:!?'.includes(c) || unbalanced)) break;
+    end -= 1;
+  }
+  return url.slice(0, end);
+}
+
 // Only http(s) addresses become links; other schemes (javascript:, ftp:) stay plain text.
 export function linkify(text: string): Segment[] {
   const out: Segment[] = [];
   let last = 0;
-  for (const m of text.matchAll(/https?:\/\/[^\s<>"']+[^\s<>"'.,;:!?)]/g)) {
+  for (const m of text.matchAll(/https?:\/\/[^\s<>"']+/g)) {
+    const url = trimUrlEnd(m[0]);
     if (m.index > last) out.push({ text: text.slice(last, m.index) });
-    out.push({ text: m[0], href: m[0] });
-    last = m.index + m[0].length;
+    out.push({ text: url, href: url });
+    last = m.index + url.length;
   }
   if (last < text.length || out.length === 0) out.push({ text: text.slice(last) });
   return out;

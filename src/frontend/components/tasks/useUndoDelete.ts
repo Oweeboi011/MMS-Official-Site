@@ -9,7 +9,11 @@ export function useUndoDelete(remove: (t: Task) => Promise<boolean>, delayMs = 6
   useEffect(() => { removeRef.current = remove; current.current = pending; });
   useEffect(() => {
     if (!pending) return;
-    const timer = setTimeout(() => { setPending(null); void removeRef.current(pending); }, delayMs);
+    const timer = setTimeout(() => {
+      current.current = null; // so an unmount or another Delete before the re-render does not remove it twice
+      setPending(null);
+      void removeRef.current(pending);
+    }, delayMs);
     return () => clearTimeout(timer);
   }, [pending, delayMs]);
   useEffect(() => () => { if (current.current) void removeRef.current(current.current); }, []);
