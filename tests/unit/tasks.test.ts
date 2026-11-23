@@ -1,6 +1,6 @@
-import { canUseTasks, isOverdue, timelineOf, toTask, validateTask, viewTasks, type Task, type TaskInput } from '../../src/frontend/data/tasks';
+import { UNASSIGNED, canUseTasks, dueNote, isOverdue, manilaToday, tasksToCsv, timelineOf, toTask, validateTask, viewTasks, type Task, type TaskInput } from '../../src/frontend/data/tasks';
 
-const mk = (id: string, extra: Partial<Task> = {}): Task => ({ id, title: id, committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', updatedAt: 0, ...extra });
+const mk = (id: string, extra: Partial<Task> = {}): Task => ({ id, title: id, committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', checklist: '', repeat: '', link: '', updatedAt: 0, updatedByName: '', ...extra });
 const none = { committee: '', status: '', ownerUid: '', sort: 'due' } as const;
 
 describe('isOverdue', () => {
@@ -12,6 +12,25 @@ describe('isOverdue', () => {
   });
 });
 
+describe('manilaToday', () => {
+  it('uses the Manila calendar day whatever the machine timezone', () => {
+    expect(manilaToday(new Date('2026-11-22T17:00:00Z'))).toBe('2026-11-23');
+    expect(manilaToday(new Date('2026-11-22T15:59:00Z'))).toBe('2026-11-22');
+  });
+});
+
+describe('dueNote', () => {
+  it('says how soon an unfinished task is due, only within two weeks', () => {
+    expect(dueNote(mk('a', { dueDate: '2026-11-22' }), '2026-11-22')).toBe('Due today');
+    expect(dueNote(mk('a', { dueDate: '2026-11-23' }), '2026-11-22')).toBe('Due tomorrow');
+    expect(dueNote(mk('a', { dueDate: '2026-11-27' }), '2026-11-22')).toBe('Due in 5 days');
+    expect(dueNote(mk('a', { dueDate: '2026-12-30' }), '2026-11-22')).toBe('');
+    expect(dueNote(mk('a', { dueDate: '2026-11-01' }), '2026-11-22')).toBe('');
+    expect(dueNote(mk('a', { dueDate: '2026-11-23', status: 'done' }), '2026-11-22')).toBe('');
+    expect(dueNote(mk('a'), '2026-11-22')).toBe('');
+  });
+});
+
 describe('viewTasks', () => {
   const rows = [
     mk('late', { dueDate: '2026-12-20', committee: 'tcom', ownerUid: 'u1', status: 'doing' }),
@@ -20,6 +39,7 @@ describe('viewTasks', () => {
     mk('zed', { dueDate: '2026-12-10', status: 'blocked' }),
   ];
   const ids = (list: Task[]) => list.map((t) => t.id);
+  it('filters to tasks nobody owns', () => expect(ids(viewTasks(rows, { ...none, ownerUid: UNASSIGNED }))).toEqual(['zed', 'open']));
   it('sorts by due date with undated tasks last', () => expect(ids(viewTasks(rows, none))).toEqual(['soon', 'zed', 'late', 'open']));
   it('sorts by title, status order or committee', () => {
     expect(ids(viewTasks(rows, { ...none, sort: 'title' }))).toEqual(['late', 'open', 'soon', 'zed']);
@@ -42,15 +62,28 @@ describe('viewTasks', () => {
 describe('toTask', () => {
   it('reads a stored task with its id and update time', () => {
     const stamp = { toMillis: () => 5000 };
-    expect(toTask('t1', { title: 'Book venue', committee: 'tcom', status: 'doing', ownerUid: 'u1', ownerName: 'Ana', startDate: '2026-12-01', dueDate: '2026-12-10', notes: 'n', updatedAt: stamp }))
-      .toEqual({ id: 't1', title: 'Book venue', committee: 'tcom', status: 'doing', ownerUid: 'u1', ownerName: 'Ana', startDate: '2026-12-01', dueDate: '2026-12-10', notes: 'n', updatedAt: 5000 });
+    expect(toTask('t1', { title: 'Book venue', committee: 'tcom', status: 'doing', ownerUid: 'u1', ownerName: 'Ana', startDate: '2026-12-01', dueDate: '2026-12-10', notes: 'n', checklist: '[ ] a', repeat: 'weekly', link: '/x', updatedAt: stamp, updatedByName: 'Ben' }))
+      .toEqual({ id: 't1', title: 'Book venue', committee: 'tcom', status: 'doing', ownerUid: 'u1', ownerName: 'Ana', startDate: '2026-12-01', dueDate: '2026-12-10', notes: 'n', checklist: '[ ] a', repeat: 'weekly', link: '/x', updatedAt: 5000, updatedByName: 'Ben' });
   });
   it('survives missing or wrong-typed fields', () => {
-    expect(toTask('t2', { title: 7, status: 'later' })).toEqual({ id: 't2', title: '', committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', updatedAt: 0 });
+    expect(toTask('t2', { title: 7, status: 'later' })).toEqual({ id: 't2', title: '', committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', checklist: '', repeat: '', link: '', updatedAt: 0, updatedByName: '' });
   });
 });
 
-const ok: TaskInput = { title: 'Book venue', committee: 'execom', status: 'todo', ownerUid: 'u1', ownerName: 'Ana', startDate: '2026-12-01', dueDate: '2026-12-10', notes: '' };
+const ok: TaskInput = { title: 'Book venue', committee: 'execom', status: 'todo', ownerUid: 'u1', ownerName: 'Ana', startDate: '2026-12-01', dueDate: '2026-12-10', notes: '', checklist: '', repeat: '', link: '' };
+
+describe('validateTask extras', () => {
+  const base: TaskInput = { title: 'Book venue', committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', checklist: '', repeat: '', link: '' };
+  it('accepts https and site-path links, a checklist and a repeat', () => {
+    expect(validateTask({ ...base, link: 'https://example.com/x', checklist: '[ ] a', repeat: 'weekly' })).toBe('');
+    expect(validateTask({ ...base, link: '/activities/open-climbs' })).toBe('');
+  });
+  it('rejects other link schemes, protocol-relative links, a long checklist and an unknown repeat', () => {
+    for (const link of ['javascript:alert(1)', 'http://example.com', '//evil.example', 'data:text/html,x']) expect(validateTask({ ...base, link })).toMatch(/link/i);
+    expect(validateTask({ ...base, checklist: 'x'.repeat(2001) })).toMatch(/checklist/i);
+    expect(validateTask({ ...base, repeat: 'daily' as never })).toMatch(/repeats/i);
+  });
+});
 
 describe('validateTask', () => {
   it('accepts a complete task and one with no owner or dates', () => {
@@ -131,5 +164,17 @@ describe('timelineOf', () => {
   });
   it('is empty when nothing has a date', () => {
     expect(timelineOf([c])).toEqual({ from: '', to: '', months: [], groups: [], undated: [c] });
+  });
+});
+
+describe('tasksToCsv', () => {
+  it('writes a header, readable labels, quoted notes, and defuses spreadsheet formulas', () => {
+    const csv = tasksToCsv([
+      mk('a', { title: 'Book "venue"', committee: 'tcom', status: 'doing', ownerName: 'Ana', startDate: '2026-12-01', dueDate: '2026-12-05', notes: 'one, two', checklist: '[x] a\n[ ] b', repeat: 'weekly', link: '/x', updatedByName: 'Cara' }),
+      mk('b', { title: '=SUM(A1)' }),
+    ]).split('\r\n');
+    expect(csv[0]).toBe('"Task","Committee","Status","Owner","Start","Due","Notes","Checklist","Repeat","Link","Last changed by"');
+    expect(csv[1]).toBe('"Book ""venue""","TCom","Doing","Ana","2026-12-01","2026-12-05","one, two","[x] a; [ ] b","Every week","/x","Cara"');
+    expect(csv[2]).toBe(`"'=SUM(A1)","ExeCom","To do","","","","","","","",""`);
   });
 });

@@ -1,3 +1,4 @@
+import { accentVars } from '../lib/accent';
 import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { asset } from '../lib/asset';
@@ -16,7 +17,7 @@ interface Props {
 export default function HomeSection({ section, limit, banner = true }: Props) {
   const pages = limit ? section.pages.slice(0, limit) : section.pages;
   return (
-    <section className="section home-section" id={section.slug} style={{ '--accent': section.accent } as CSSProperties}>
+    <section className="section home-section" id={section.slug} style={accentVars(section.accent) as CSSProperties}>
       <div className="shell">
         {banner && (
           <>

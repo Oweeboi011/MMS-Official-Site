@@ -56,3 +56,9 @@ export async function main(run) {
     process.exit(1);
   }
 }
+
+// Google API access token from the same Application Default Credentials (for REST calls the SDK does not wrap).
+export async function accessToken() {
+  const { applicationDefault } = require('firebase-admin/app');
+  return (await applicationDefault().getAccessToken()).access_token;
+}

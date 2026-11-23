@@ -6,7 +6,7 @@ export default function Videos() {
     <section className="section" id="videos">
       <div className="shell">
         <div className="section-head">
-          <div><div className="eyebrow" style={{ color: 'var(--green)' }}>Videos</div><h2>See the mountains.</h2></div>
+          <div><div className="eyebrow" style={{ color: 'var(--green-ink)' }}>Videos</div><h2>See the mountains.</h2></div>
           <p>Climb highlights and event recordings from MMS will be posted here.</p>
         </div>
         <div className="video-list">

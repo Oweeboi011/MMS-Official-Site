@@ -1,3 +1,4 @@
+import { accentVars } from '../lib/accent';
 import type { CSSProperties, ReactNode } from 'react';
 import ContentBlocks from '../components/ContentBlocks';
 import PageHero from '../components/PageHero';
@@ -19,7 +20,7 @@ export default function SubPage({ section, page, children }: Props) {
   return (
     <>
       <PageHero eyebrow={section.label} title={page.label} intro={page.summary} image={page.image ?? section.image} />
-      <main style={{ '--accent': section.accent } as CSSProperties}>
+      <main style={accentVars(section.accent) as CSSProperties}>
         {children}
         {blocks && <ContentBlocks blocks={blocks} />}
         {!children && !blocks && (

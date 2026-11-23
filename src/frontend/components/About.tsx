@@ -7,7 +7,7 @@ export default function About() {
       <div className="shell">
         <div className="about-grid">
           <div>
-            <div className="eyebrow" style={{ color: 'var(--red)' }}>About MMS</div>
+            <div className="eyebrow" style={{ color: 'var(--red-ink)' }}>About MMS</div>
             <h2 className="about-title">Climbing together since 1994.</h2>
           </div>
           <div className="about-copy">

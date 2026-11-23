@@ -1,0 +1,38 @@
+name: Rules Drift
+
+# Read-only: fails (GitHub emails the owner) when the Firestore rules released in production differ from the repo,
+# for example after a merge that was never deployed. Skipped with a notice until the secret below exists.
+on:
+  schedule:
+    - cron: "23 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    name: Production rules match the repo
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Credential guard
+        id: guard
+        env:
+          KEY: ${{ secrets.GCP_RULES_READER_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then echo "::notice::GCP_RULES_READER_KEY not set; drift check skipped (see DEPLOYMENT.md)"; echo "skip=1" >> "$GITHUB_OUTPUT"; fi
+      - name: Checkout
+        if: steps.guard.outputs.skip != '1'
+        uses: actions/checkout@v7
+      - name: Setup Toolchain
+        if: steps.guard.outputs.skip != '1'
+        uses: ./.github/actions/setup
+      - name: Sign in to Google (read-only service account)
+        if: steps.guard.outputs.skip != '1'
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_RULES_READER_KEY }}
+      - name: Compare released rules with the repo
+        if: steps.guard.outputs.skip != '1'
+        run: node tools/admin/check-rules-drift.mjs --project mms-official-site-513809

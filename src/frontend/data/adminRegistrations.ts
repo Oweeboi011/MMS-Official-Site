@@ -1,4 +1,5 @@
 // Officer view of one climb's registrations (old Open Climbs shapes; payment logic from its utils/payments.js).
+import { csvRows } from '../lib/csv';
 import type { Doc } from '../lib/firestoreRest';
 import { toMyClimb, type MyClimb } from './myClimbs';
 
@@ -69,12 +70,6 @@ export function summary(regs: AdminReg[]) {
 
 // CSV for the LGU / jump-off (old app columns). Cells starting = + - @ are prefixed so spreadsheets never run them.
 const day = (v: unknown) => (v && typeof v === 'object' && 'toDate' in v ? (v as { toDate: () => Date }).toDate().toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }) : '');
-const cell = (v: unknown) => {
-  const text = String(v ?? '');
-  const safe = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
-  return `"${safe.replace(/"/g, '""')}"`;
-};
-
 export const CSV_HEADERS = ['#', 'Name', 'Email', 'Mobile', 'Date of Birth', 'Address', 'Experience', 'Type', 'EC Name', 'EC Relationship', 'EC Mobile', 'Medical Conditions', 'Status', 'Payment Status', 'Amount Paid', 'Payment Breakdown', 'Registration Form Uploaded', 'Medical Cert Uploaded', 'Waiver Signed As', 'Waiver Date', 'Registered'];
 
 export function toCsv(regs: AdminReg[]): string {
@@ -88,7 +83,7 @@ export function toCsv(regs: AdminReg[]): string {
       d.waiverSignedName, day(d.waiverSignedAt), day(d.createdAt),
     ];
   });
-  return [CSV_HEADERS, ...rows].map((row) => row.map(cell).join(',')).join('\r\n');
+  return csvRows([CSV_HEADERS, ...rows]);
 }
 
 export interface WalkIn { name: string; mobile: string; email: string; memberType: 'member' | 'joiner'; status: 'confirmed' | 'pending' | 'waitlisted'; cash: string; notes: string }

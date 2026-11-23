@@ -78,3 +78,36 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v7
         with: { name: e2e-test-results, path: test-results, retention-days: 7 }
+
+  # Real sign-in on the Auth and Firestore emulators: the tracker as an officer, with axe incl. colour contrast.
+  # Not in the required checks yet; add it to branch protection once it has run clean a few times.
+  e2e-signed-in:
+    name: Signed-in E2E
+    needs: code-quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Toolchain
+        uses: ./.github/actions/setup
+      - name: Setup Java (Firebase Emulators)
+        uses: actions/setup-java@v6
+        with: { distribution: temurin, java-version: '21' }
+      - name: Cache Browser
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Install Browser
+        run: npx playwright install chromium
+      - name: Install Browser Libraries
+        timeout-minutes: 3
+        continue-on-error: true
+        run: timeout 150 npx playwright install-deps chromium
+      - name: Signed-in Suite
+        run: npm run test:e2e:signedin
+      - name: Upload Test Results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with: { name: e2e-signed-in-results, path: test-results, retention-days: 7 }
