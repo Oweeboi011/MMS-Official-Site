@@ -48,7 +48,7 @@ jobs:
         if: steps.guard.outputs.skip != '1' && inputs.what != 'functions'
         working-directory: src/backend
         run: npx -y firebase-tools@15.35.0 deploy --only firestore,storage --project mms-official-site-513809
-      - name: Functions (after rules: new queries need their indexes built first)
+      - name: "Functions (after rules, so new queries have their indexes)"
         if: steps.guard.outputs.skip != '1' && inputs.what != 'rules-and-indexes'
         working-directory: src/backend
         run: npx -y firebase-tools@15.35.0 deploy --only functions --project mms-official-site-513809
