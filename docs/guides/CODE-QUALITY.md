@@ -42,6 +42,7 @@ Generated `src/frontend/data/{credits,topMountains}.ts`: excluded from lint + du
 | Component | `tests/component` | vitest + Testing Library | ContentBlocks, Gallery, Nav |
 | Integration | `tests/integration` | vitest + Testing Library | every route, redirects, page flows |
 | Security rules | `tests/integration/rules.emulator.mjs` | Firebase emulators (Java), `npm run test:rules` | Firestore + Storage rules: money, roster, private files; Quality Gates only |
+| Signed-in e2e | `tests/e2e/signedin.spec.ts` | Playwright on the Vite dev server + Auth and Firestore emulators (Java), `npm run test:e2e:signedin` | Real sign-in as an officer and as a plain member; the tracker with axe incl. colour contrast (jsdom cannot see contrast); Quality Gates job **Signed-in E2E** (not required yet) |
 | Parity | `tests/parity`, `scripts/prod-parity.mjs` | vitest todos, node | Open Climbs feature gaps; live = local build |
 | E2E | `tests/e2e` | Playwright (Chromium) | smoke on the real build; axe WCAG 2.1 AA on key pages (`a11y.spec.ts`) |
 | Performance | `tests/performance` | node | initial JS ≤ 120 KB gz, largest on-demand file ≤ 80 KB gz (per file, not total: owner decision 2026-11-09), CSS ≤ 20 KB gz, images ≤ 1.2 MB / 15 MB |

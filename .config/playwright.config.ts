@@ -4,6 +4,7 @@ import { defineConfig, devices } from '@playwright/test';
 // E2E runs against the production build (vite preview). Chromium only to keep it fast.
 export default defineConfig({
   testDir: '../tests/e2e',
+  testIgnore: 'signedin.spec.ts', // needs the emulators: npm run test:e2e:signedin
   outputDir: '../test-results',
   fullyParallel: true,
   workers: 2, // more parallel tabs overload `vite preview` locally (goto aborts)
