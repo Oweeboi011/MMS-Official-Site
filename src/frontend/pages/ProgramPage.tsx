@@ -30,7 +30,7 @@ export default function ProgramPage({ page, children }: Props) {
           <section className="section page-section" key={section.title}>
             <div className="shell">
               <div className="section-head">
-                <div><div className="eyebrow" style={{ color: 'var(--red)' }}>{section.eyebrow}</div><h2>{section.title}</h2></div>
+                <div><div className="eyebrow" style={{ color: 'var(--red-ink)' }}>{section.eyebrow}</div><h2>{section.title}</h2></div>
                 {section.intro && <p>{section.intro}</p>}
               </div>
               {section.variant === 'steps' ? (

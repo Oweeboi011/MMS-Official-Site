@@ -13,7 +13,7 @@ export default function Announcements({ limit }: Props) {
     <section className="section" id="announcements">
       <div className="shell">
         <div className="section-head">
-          <div><div className="eyebrow" style={{ color: 'var(--red)' }}>Announcements</div><h2>{limit ? 'Latest from MMS.' : 'All announcements.'}</h2></div>
+          <div><div className="eyebrow" style={{ color: 'var(--red-ink)' }}>Announcements</div><h2>{limit ? 'Latest from MMS.' : 'All announcements.'}</h2></div>
           <p>Climb updates, training schedules, outreach calls, and club news.</p>
         </div>
         <div className="news-grid">

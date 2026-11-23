@@ -8,7 +8,7 @@ export default function Gallery() {
     <section className="section" id="gallery">
       <div className="shell">
         <div className="section-head">
-          <div><div className="eyebrow" style={{ color: 'var(--green)' }}>Gallery</div><h2>Moments on the trail.</h2></div>
+          <div><div className="eyebrow" style={{ color: 'var(--green-ink)' }}>Gallery</div><h2>Moments on the trail.</h2></div>
           <p>Snapshots from our climbs, trainings, and outreach.</p>
         </div>
         <div className="gallery">

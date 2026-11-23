@@ -11,7 +11,7 @@ function Head({ eyebrow, title, intro }: { eyebrow?: string; title?: string; int
   return (
     <div className="section-head">
       <div>
-        {eyebrow && <div className="eyebrow" style={{ color: 'var(--red)' }}>{eyebrow}</div>}
+        {eyebrow && <div className="eyebrow" style={{ color: 'var(--red-ink)' }}>{eyebrow}</div>}
         {title && <h2>{title}</h2>}
       </div>
       {intro && <p>{intro}</p>}

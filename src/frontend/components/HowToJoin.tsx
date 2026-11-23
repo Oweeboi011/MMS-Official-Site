@@ -5,7 +5,7 @@ export default function HowToJoin() {
     <section className="section" id="membership">
       <div className="shell">
         <div className="section-head">
-          <div><div className="eyebrow" style={{ color: 'var(--red)' }}>How to join</div><h2>Four steps to MMS.</h2></div>
+          <div><div className="eyebrow" style={{ color: 'var(--red-ink)' }}>How to join</div><h2>Four steps to MMS.</h2></div>
           <p>Every member starts as a guest. Here is the path from your first open climb to induction.</p>
         </div>
         <ol className="steps">

@@ -7,7 +7,7 @@ export default function Mountains() {
     <section className="section" id="mountains">
       <div className="shell">
         <div className="section-head">
-          <div><div className="eyebrow" style={{ color: 'var(--red)' }}>Mountain explorer</div><h2>Choose your next horizon.</h2></div>
+          <div><div className="eyebrow" style={{ color: 'var(--red-ink)' }}>Mountain explorer</div><h2>Choose your next horizon.</h2></div>
           <p>Swipe on mobile to browse a sample collection of Philippine mountain destinations.</p>
         </div>
         <div className="mountain-row">

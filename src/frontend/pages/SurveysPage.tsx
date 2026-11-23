@@ -23,7 +23,7 @@ export default function SurveysPage() {
         <section className="section" id="surveys">
           <div className="shell">
             <div className="section-head">
-              <div><div className="eyebrow" style={{ color: 'var(--green)' }}>Surveys</div><h2>Open surveys.</h2></div>
+              <div><div className="eyebrow" style={{ color: 'var(--green-ink)' }}>Surveys</div><h2>Open surveys.</h2></div>
               <p>Responses are used only to improve MMS activities.</p>
             </div>
             <div className="survey-list">
