@@ -32,6 +32,23 @@ export const toTask = (id: string, d: Record<string, unknown>): Task => ({
 
 export const isOverdue = (t: Task, today: string) => Boolean(t.dueDate) && t.dueDate < today && t.status !== 'done';
 
+// Officers are in the Philippines; the same task is overdue for everyone on the same day.
+export const manilaToday = (now = new Date()) => now.toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' });
+
+const DAY = 86_400_000;
+const daysBetween = (from: string, to: string) => Math.round((Date.parse(to) - Date.parse(from)) / DAY);
+
+// "Due in 5 days" for an unfinished task due within two weeks; overdue tasks carry their own chip.
+export function dueNote(t: Task, today: string): string {
+  if (!t.dueDate || t.status === 'done') return '';
+  const days = daysBetween(today, t.dueDate);
+  if (days < 0 || days > 14) return '';
+  if (days === 0) return 'Due today';
+  return days === 1 ? 'Due tomorrow' : `Due in ${days} days`;
+}
+
+export const UNASSIGNED = '__unassigned';
+
 export interface TaskView { committee: string; status: string; ownerUid: string; sort: 'due' | 'title' | 'status' | 'committee' }
 
 const rank = (options: readonly (readonly [string, string])[], key: string) => options.findIndex(([k]) => k === key);
@@ -45,7 +62,7 @@ const SORTS: Record<TaskView['sort'], (a: Task, b: Task) => number> = {
 // Filters then sorts a copy; blank filters match everything.
 export const viewTasks = (tasks: Task[], v: TaskView): Task[] =>
   tasks
-    .filter((t) => (!v.committee || t.committee === v.committee) && (!v.status || t.status === v.status) && (!v.ownerUid || t.ownerUid === v.ownerUid))
+    .filter((t) => (!v.committee || t.committee === v.committee) && (!v.status || t.status === v.status) && (!v.ownerUid || (v.ownerUid === UNASSIGNED ? !t.ownerUid : t.ownerUid === v.ownerUid)))
     .sort(SORTS[v.sort]);
 
 // Admins and any group member (BOT, ExeCom, TCom) use the tracker; nobody else.

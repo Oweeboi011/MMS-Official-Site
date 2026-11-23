@@ -1,4 +1,4 @@
-import { canUseTasks, isOverdue, timelineOf, toTask, validateTask, viewTasks, type Task, type TaskInput } from '../../src/frontend/data/tasks';
+import { UNASSIGNED, canUseTasks, dueNote, isOverdue, manilaToday, timelineOf, toTask, validateTask, viewTasks, type Task, type TaskInput } from '../../src/frontend/data/tasks';
 
 const mk = (id: string, extra: Partial<Task> = {}): Task => ({ id, title: id, committee: 'execom', status: 'todo', ownerUid: '', ownerName: '', startDate: '', dueDate: '', notes: '', updatedAt: 0, ...extra });
 const none = { committee: '', status: '', ownerUid: '', sort: 'due' } as const;
@@ -12,6 +12,25 @@ describe('isOverdue', () => {
   });
 });
 
+describe('manilaToday', () => {
+  it('uses the Manila calendar day whatever the machine timezone', () => {
+    expect(manilaToday(new Date('2026-11-22T17:00:00Z'))).toBe('2026-11-23');
+    expect(manilaToday(new Date('2026-11-22T15:59:00Z'))).toBe('2026-11-22');
+  });
+});
+
+describe('dueNote', () => {
+  it('says how soon an unfinished task is due, only within two weeks', () => {
+    expect(dueNote(mk('a', { dueDate: '2026-11-22' }), '2026-11-22')).toBe('Due today');
+    expect(dueNote(mk('a', { dueDate: '2026-11-23' }), '2026-11-22')).toBe('Due tomorrow');
+    expect(dueNote(mk('a', { dueDate: '2026-11-27' }), '2026-11-22')).toBe('Due in 5 days');
+    expect(dueNote(mk('a', { dueDate: '2026-12-30' }), '2026-11-22')).toBe('');
+    expect(dueNote(mk('a', { dueDate: '2026-11-01' }), '2026-11-22')).toBe('');
+    expect(dueNote(mk('a', { dueDate: '2026-11-23', status: 'done' }), '2026-11-22')).toBe('');
+    expect(dueNote(mk('a'), '2026-11-22')).toBe('');
+  });
+});
+
 describe('viewTasks', () => {
   const rows = [
     mk('late', { dueDate: '2026-12-20', committee: 'tcom', ownerUid: 'u1', status: 'doing' }),
@@ -20,6 +39,7 @@ describe('viewTasks', () => {
     mk('zed', { dueDate: '2026-12-10', status: 'blocked' }),
   ];
   const ids = (list: Task[]) => list.map((t) => t.id);
+  it('filters to tasks nobody owns', () => expect(ids(viewTasks(rows, { ...none, ownerUid: UNASSIGNED }))).toEqual(['zed', 'open']));
   it('sorts by due date with undated tasks last', () => expect(ids(viewTasks(rows, none))).toEqual(['soon', 'zed', 'late', 'open']));
   it('sorts by title, status order or committee', () => {
     expect(ids(viewTasks(rows, { ...none, sort: 'title' }))).toEqual(['late', 'open', 'soon', 'zed']);

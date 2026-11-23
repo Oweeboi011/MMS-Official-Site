@@ -52,6 +52,38 @@ describe('task tracker table', () => {
     expect(screen.getByText('Book venue')).toBeInTheDocument();
   });
 
+  it('offers My tasks and Unassigned in the owner filter', async () => {
+    renderAt('/account/tasks');
+    await screen.findByText('Book venue', {}, { timeout: 5000 });
+    fireEvent.change(screen.getByLabelText('Owner'), { target: { value: 'u1' } });
+    expect(screen.getByRole('option', { name: 'My tasks' })).toBeInTheDocument();
+    expect(screen.getByText('Book venue')).toBeInTheDocument();
+    expect(screen.queryByText('Plan training')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Owner'), { target: { value: '__unassigned' } });
+    expect(screen.getByText('Old chore')).toBeInTheDocument();
+    expect(screen.getByText('Sort gear')).toBeInTheDocument();
+    expect(screen.queryByText('Book venue')).not.toBeInTheDocument();
+  });
+
+  it('explains an empty result and clears the filters', async () => {
+    renderAt('/account/tasks');
+    await screen.findByText('Book venue', {}, { timeout: 5000 });
+    fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'blocked' } });
+    expect(screen.getByText(/No tasks match these filters/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
+    expect(screen.getByText('Book venue')).toBeInTheDocument();
+  });
+
+  it('says how soon an unfinished task is due', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2038-12-30T04:00:00Z'));
+    try {
+      renderAt('/account/tasks');
+      await screen.findByText('Plan training', {}, { timeout: 5000 });
+      expect(within(rowFor('Plan training')).getByText('Due in 2 days')).toBeInTheDocument();
+    } finally { vi.useRealTimers(); }
+  });
+
   it('adds a task, asking for a title first', async () => {
     calls.saved = [];
     renderAt('/account/tasks');
