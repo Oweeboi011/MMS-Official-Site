@@ -10,7 +10,7 @@
     "**/src/frontend/data/**"
   ],
   "minTokens": 60,
-  "threshold": 3,
+  "threshold": 1.5,
   "reporters": [
     "console"
   ],
