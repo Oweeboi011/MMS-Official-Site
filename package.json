@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test -c .config/playwright.config.ts",
+    "test:smoke": "playwright test -c .config/playwright.smoke.config.ts",
     "test:e2e:signedin": "npx -y firebase-tools@15.35.0 emulators:exec --config src/backend/firebase.json --only auth,firestore --project demo-mms \"npx playwright test -c .config/playwright.signedin.config.ts\"",
     "test:perf": "node tests/performance/bundle-budget.mjs",
     "lint": "eslint .",

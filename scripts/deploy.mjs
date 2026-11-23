@@ -1,4 +1,4 @@
-// Cloudflare Pages deploy with build guards: check → build → perf budget → deploy → prod parity.
+// Cloudflare Pages deploy with build guards: check → build → perf budget → deploy → prod parity → smoke (main).
 // Usage: node scripts/deploy.mjs preview|main
 import { execSync } from 'node:child_process';
 
@@ -19,4 +19,7 @@ run('npm run build', preview ? { VITE_REGISTRATION_ENABLED: 'true' } : {});
 run('node scripts/snapshot.mjs'); // R5c: last good public content for when Firestore can't be read
 run('npm run test:perf');
 run(`npx wrangler pages deploy dist --project-name mms-official-site --branch ${branch}`);
-if (branch === 'main') run('npm run test:parity');
+if (branch === 'main') {
+  run('npm run test:parity');
+  run('npm run test:smoke'); // key signed-out pages on the live site; fails the release run visibly
+}
