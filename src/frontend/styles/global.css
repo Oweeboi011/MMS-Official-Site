@@ -15,6 +15,8 @@
   --ink-solid: #101a24;
   --focus: var(--navy);
   --stripe: #fff;
+  --row-hover: rgba(247,244,236,.6);
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23252b73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   --line-strong: rgba(16,26,36,.22);
   --line-hover: rgba(16,26,36,.35);
   --tint-faint: rgba(16,26,36,.05);
@@ -671,7 +673,7 @@ abbr[title]:focus::after { content: " (" attr(title) ")"; font-weight: 400; } /*
 .admin-table table { width: 100%; border-collapse: collapse; }
 .admin-table th { padding: 12px 14px; border-bottom: 0; background: var(--paper); color: var(--muted); font-size: .72rem; font-weight: 850; letter-spacing: .08em; text-align: left; text-transform: uppercase; }
 .admin-table td { padding: 12px 14px; border-top: 1px solid var(--line); border-bottom: 0; vertical-align: top; }
-.admin-table tbody tr:hover { background: rgba(247, 244, 236, .6); }
+.admin-table tbody tr:hover { background: var(--row-hover); }
 .status-chip { display: inline-block; padding: 3px 10px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); color: var(--muted); font-size: .72rem; font-weight: 850; letter-spacing: .06em; text-transform: uppercase; }
 .status-chip.is-open { background: rgba(47, 125, 79, .12); border-color: rgba(47, 125, 79, .3); color: #1f6a3e; }
 .status-chip.is-closed { background: rgba(169, 46, 42, .1); border-color: rgba(169, 46, 42, .25); color: var(--red-ink); }
@@ -866,7 +868,7 @@ a[target='_blank']:not([class])::after { content: ' ↗'; font-size: .85em; }
 }
 :where(select) {
   appearance: none; padding-right: 38px; cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23252b73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: var(--chevron);
   background-repeat: no-repeat; background-position: right 14px center;
 }
 :where(input, select, textarea):hover { border-color: var(--line-hover); }
@@ -911,6 +913,8 @@ input[type="file"]::file-selector-button:hover { background: var(--ink-solid); }
     --ink-solid: #2b3644;
     --focus: #b3b8ff;
     --stripe: #0e131a;
+    --row-hover: rgba(255,255,255,.07);
+    --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23b3b8ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     --line-strong: rgba(255,255,255,.34);
     --line-hover: rgba(255,255,255,.5);
     --tint-faint: rgba(255,255,255,.06);

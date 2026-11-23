@@ -64,3 +64,14 @@ test('a waiver or day sheet printed from a dark-mode device is still dark text o
   const text = await page.evaluate(() => (getComputedStyle(document.body).color.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number));
   expect(luminance(text)).toBeLessThan(0.2);
 });
+
+test('the dropdown arrow and the table row highlight follow the dark theme', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  const tokens = await page.evaluate(() => {
+    const root = getComputedStyle(document.documentElement);
+    return { chevron: root.getPropertyValue('--chevron'), hover: root.getPropertyValue('--row-hover').trim() };
+  });
+  expect(tokens.chevron).toContain('b3b8ff'); // light periwinkle, not the light theme's navy 252b73
+  expect(tokens.hover).toBe('rgba(255,255,255,.07)'); // a faint light wash, not the cream one that turns grey on dark
+});
