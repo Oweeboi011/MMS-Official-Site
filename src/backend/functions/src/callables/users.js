@@ -126,6 +126,12 @@ async function requireAdmin(callerUid) {
   return callerSnap.data();
 }
 
+// The task owner list keeps a copy of the name (ADR 0012); only people who hold a group have one.
+async function renameGroupMember(uid, name) {
+  const ref = db.doc(`groupMembers/${uid}`);
+  if ((await ref.get()).exists) await ref.update({ name, updatedAt: FieldValue.serverTimestamp() });
+}
+
 // ── Callable: admin corrects a user's name and/or email ───────────────────────
 export const updateUserProfile = onCall(async (request) => {
   try {
@@ -138,6 +144,7 @@ export const updateUserProfile = onCall(async (request) => {
       throw authUpdateError(err);
     });
     await db.doc(`users/${uid}`).update({ updatedAt: FieldValue.serverTimestamp(), ...changes });
+    if (changes.displayName) await renameGroupMember(uid, changes.displayName);
 
     logger.info("[updateUserProfile] Updated", { uid, email: !!changes.email, displayName: !!changes.displayName });
     return { success: true };
@@ -177,6 +184,9 @@ async function purgeUserPersonalData(uid) {
     );
 
     await db.doc(`memberDetails/${uid}`).delete();
+    await db.doc(`groupMembers/${uid}`).delete();
+    const owned = await db.collection("tasks").where("ownerUid", "==", uid).get();
+    await Promise.all(owned.docs.map((d) => d.ref.update({ ownerUid: "", ownerName: "" })));
 
     const notifs = await db.collection("notifications").where("userId", "==", uid).get();
     await Promise.all(notifs.docs.map((d) => d.ref.delete()));

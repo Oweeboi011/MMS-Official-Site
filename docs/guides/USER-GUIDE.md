@@ -48,6 +48,10 @@ Waiting on officers: [content needed](../solution-plan/SOLUTION-PLAN.md#content-
 
 Upload to the MMS Google Drive `Albums/YYYY-MM climb` folder, remove photos of anyone who opted out, share as "anyone with link, Viewer", send the folder link. Details: [SOLUTION-PLAN media](../solution-plan/SOLUTION-PLAN.md#media).
 
+## Committee tasks (ExeCom, TCom, BOT, admins)
+
+Sign in, open **Account → Tasks** (`/account/tasks`). Only admins and members of BOT, ExeCom or TCom see it. **New task**: title, committee, status (To do, Doing, Blocked, Done), owner, start and due dates, notes. Owners are people who hold a group; an admin gives groups under **Accounts and roles**. The table filters by committee, status and owner and sorts by due date, title, status or committee; unfinished tasks past their due date are marked **Overdue**. Everyone in these groups can edit any task. Decision: [ADR 0012](../adr/0012-COMMITTEE-TASK-TRACKER.md).
+
 ## Open Climbs
 
 The schedule on `/activities/open-climbs` lists upcoming climbs, climbs completed this year, and any past year (**Past years** picker). Each live climb has its own page, `/climbs/<id>`: dates, stats, photos (tap for full screen), weather forecast from 16 days before (plus PAGASA / Windy links), trail maps (AllTrails, Komoot or Google Maps; tabs for alternate routes), water-source note, day-by-day itinerary, packing list, Leave No Trace, and **Share this climb** (phone: Share… for Messenger, Viber and others, plus Instagram story; any device: Facebook, Copy link). **Add to calendar** downloads an all-day calendar entry for upcoming climbs. Climbs come from the Open Climbs database; until climbs are loaded the schedule shows labelled samples.
