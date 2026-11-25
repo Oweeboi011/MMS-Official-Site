@@ -1,0 +1,24 @@
+name: Kit Drift
+
+# Read-only: fails when files rendered by kit-sync (agentic-sdlc-kit) are missing, stale or hand-edited.
+# The weekly run also catches a new kit release under the `kit: v0` pin. Fix: re-run kit-sync and commit.
+on:
+  pull_request:
+    paths:
+      - ".github/astral-kit.yml"
+      - ".github/agents/**"
+      - ".github/instructions/**"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/pull_request_template.md"
+      - ".claude/**"
+      - "AGENTS.md"
+  schedule:
+    - cron: "41 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kit-drift:
+    uses: Oweeboi011/agentic-sdlc-kit/.github/workflows/kit-drift.yml@v0
