@@ -25,7 +25,7 @@ flowchart LR
 | High | Cyclomatic ≤ 12, cognitive ≤ 15 | eslint | `eslint.config.js` | ✅ |
 | High | Cycles, layers, orphans, dev deps in src | dependency-cruiser | `.config/dependency-cruiser.cjs` | ✅ |
 | High | Dead code, exports, types (models), deps | knip | `.config/knip.json` | ✅ |
-| High | Duplication > 3% | jscpd | `.config/jscpd.json` | ✅ |
+| High | Duplication > 1.5% (baseline 1.30%, 31 clones, 2026-11-24) | jscpd | `.config/jscpd.json` | ✅ |
 | High | Vulnerable packages (high+), site + backend | `npm audit` | — | ✅ Quality Gates |
 | High | Build guards: types, bundle + image budgets, prod parity | tsc, `tests/performance`, `scripts/prod-parity.mjs` | — | ✅ build/deploy |
 | High | Reuse, SOLID, long comments | `/code-review` | `.claude/CLAUDE.md` | review |
