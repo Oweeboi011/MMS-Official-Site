@@ -76,7 +76,7 @@ npx firebase-tools@15 deploy --only functions:<name>    # one function
 
 **Optional: deploy the backend from GitHub.** Workflow `Backend Deploy` (manual only, from `main`, needs a reviewer to approve the `production` environment) runs the two commands above in order, then the drift check. It does nothing until the repo secret `FIREBASE_DEPLOY_KEY` exists, which is a **write-capable** service-account key for the project: only add it if you accept that risk, scope the account to what `firebase deploy` needs, and prefer keeping deploys by hand if unsure. Never run in GitHub yet.
 
-**Weekly drift check (owner step to switch on):** workflow `Rules Drift` runs `check-rules-drift.mjs` every Monday and fails if production rules differ from the repo. It skips itself until the repo secret `GCP_RULES_READER_KEY` exists: create a service account in project `mms-official-site-513809` with only the role **Firebase Rules Viewer**, make a JSON key, and store it as that secret (never in chat or the repo). Not yet run in GitHub; the script itself is checked against production.
+**Weekly drift check (on since 2026-11-24):** workflow `Rules Drift` runs `check-rules-drift.mjs` every Monday and fails if production rules differ from the repo. It uses repo secret `GCP_RULES_READER_KEY`, the key of service account `rules-drift-reader` (only **Firebase Rules Viewer**; never in chat or the repo). First run passed; a 403 right after granting the role is IAM propagation, retry. Rotate: make a new key, `gh secret set`, delete the old key.
 
 Rules tests locally need Java (`winget install Microsoft.OpenJDK.21`), then `npm run test:rules`; without it, Quality Gates runs **Security Rules Tests**.
 
