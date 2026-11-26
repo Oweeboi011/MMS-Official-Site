@@ -2,12 +2,13 @@ import * as logger from "firebase-functions/logger";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { FieldValue } from "firebase-admin/firestore";
 import { sendEmail } from "../email/sendEmail.js";
-import { tplThankYou, tplOfficerOutstandingSummary } from "../email/templates.js";
+import { tplTaskDigest, tplThankYou, tplOfficerOutstandingSummary } from "../email/templates.js";
 import { shortName, getOfficerContacts, createNotification } from "../shared/registrationOps.js";
 import { db } from "../shared/admin.js";
 import { isClimbCancelled, isClimbOver } from "../shared/climbStatus.js";
 import { remindOutstandingPaperwork } from "../shared/paperworkReminders.js";
 import { isThankYouDue, officerSummary, paymentReminder, upcomingReminder } from "./reminderMessages.js";
+import { digestSubject, manilaToday, taskDigests } from "./taskReminderMessages.js";
 
 const appUrl = () => process.env.APP_URL || "https://mms-open-climbs.web.app";
 const logFailure = (what, details) => (err) =>
@@ -136,6 +137,26 @@ async function sendThankYous(regs, climbIds, climbs, now, counts) {
   }
 }
 
+// Each task owner gets one email with their overdue and due-this-week tasks. Tasks are new to this site, so it
+// does not wait for REMINDERS_ENABLED; sendEmail itself stays off until EMAILS_ENABLED.
+async function sendTaskDigests(now) {
+  const open = await db.collection("tasks").where("status", "in", ["todo", "doing", "blocked"]).get();
+  const digests = taskDigests(open.docs.map((d) => d.data()), manilaToday(now));
+  let handled = 0;
+  for (const [uid, digest] of digests) {
+    try {
+      const user = (await db.doc(`users/${uid}`).get()).data();
+      if (!user?.email) continue;
+      const name = user.name || user.displayName || "there";
+      await sendEmail({ to: user.email, toName: name, subject: digestSubject(digest), html: tplTaskDigest({ name, ...digest, appUrl: appUrl() }) });
+      handled++;
+    } catch (err) {
+      logFailure("Task digest email failed", { uid })(err);
+    }
+  }
+  logger.info("[sendReminderNotifications] task digests", { owners: digests.size, handled });
+}
+
 export const sendReminderNotifications = onSchedule(
   {
     schedule: "every day 09:00",
@@ -143,6 +164,7 @@ export const sendReminderNotifications = onSchedule(
     secrets: ["BREVO_API_KEY", "BREVO_FROM_EMAIL"],
   },
   async () => {
+    await sendTaskDigests(Date.now()).catch(logFailure("Task digests failed", {}));
     // Off until the switch (like EMAILS_ENABLED): until then the old site runs reminders, and this copy of the data
     // would only produce stale in-app notices.
     if (process.env.REMINDERS_ENABLED !== "true") {

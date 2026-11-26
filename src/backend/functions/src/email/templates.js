@@ -265,4 +265,22 @@ function tplWaitlistPromotedRaw({ name, climbTitle, appUrl }) {
 }
 const tplWaitlistPromoted = escaped(tplWaitlistPromotedRaw);
 
-export { tplClimbCancellation, tplOfficerClimbCancellation, tplOfficerNewRegistration, tplOfficerOutstandingSummary, tplOfficerStatusUpdate, tplRegistrationConfirmation, tplReleaseNote, tplStatusUpdate, tplThankYou, tplWaitlistPromoted, tplWelcome };
+const taskLines = (items) =>
+  items.map((t) => `<li style="margin:4px 0;">${escapeHtml(t.title)} <span style="color:#6b6b6b;">(${escapeHtml(t.dueDate)})</span></li>`).join("");
+
+function tplTaskDigestRaw({ name, overdue, soon, appUrl }) {
+  const block = (heading, items) =>
+    items.length
+      ? `<h3 style="color:#0d2b12;font-size:15px;margin:20px 0 6px;">${heading}</h3><ul style="color:#4a4a4a;font-size:15px;line-height:1.5;padding-left:20px;margin:0;">${taskLines(items)}</ul>`
+      : "";
+  return tplBase(`
+    <h2 style="color:#0d2b12;font-size:20px;margin:0 0 16px;">Your committee tasks</h2>
+    <p style="color:#4a4a4a;font-size:15px;">Hi <strong>${name}</strong>, here is what needs your attention:</p>
+    ${block("Overdue", overdue)}${block("Due in the next 7 days", soon)}
+    <p style="margin:24px 0;">
+      <a href="${appUrl}/account/tasks" style="background:#0d2b12;color:#f0c800;padding:12px 24px;text-decoration:none;border-radius:6px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;display:inline-block;">Open the task tracker</a>
+    </p>`);
+}
+const tplTaskDigest = escaped(tplTaskDigestRaw);
+
+export { tplClimbCancellation, tplOfficerClimbCancellation, tplOfficerNewRegistration, tplOfficerOutstandingSummary, tplOfficerStatusUpdate, tplRegistrationConfirmation, tplReleaseNote, tplStatusUpdate, tplTaskDigest, tplThankYou, tplWaitlistPromoted, tplWelcome };
