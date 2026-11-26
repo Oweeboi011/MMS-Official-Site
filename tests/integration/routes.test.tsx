@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { renderAt } from '../helpers';
 import { announcements, openClimbs, surveys } from '../../src/frontend/data/content';
 import { surveyState } from '../../src/frontend/lib/survey';
@@ -116,3 +116,20 @@ describe('Site structure', () => {
   });
 });
 
+
+describe('Unknown URLs', () => {
+  it('show a not-found page with a way home and noindex, not the home page', () => {
+    renderAt('/no-such-page');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Page not found');
+    const main = within(screen.getByRole('main'));
+    expect(main.getByRole('link', { name: /go to the home page/i })).toHaveAttribute('href', '/');
+    expect(main.getByRole('link', { name: /search the site/i })).toHaveAttribute('href', '/search');
+    expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute('content', 'noindex');
+  });
+
+  it('drops noindex once the visitor leaves the not-found page', () => {
+    const { unmount } = renderAt('/no-such-page');
+    unmount();
+    expect(document.head.querySelector('meta[name="robots"]')).toBeNull();
+  });
+});

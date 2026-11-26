@@ -62,6 +62,7 @@ const loading = <main className="section"><div className="shell"><p>Loading…</
 const SubPage = lazyPage(() => import('./pages/SubPage'));
 const SearchPage = lazyPage(() => import('./pages/SearchPage'));
 const CreditsPage = lazyPage(() => import('./pages/CreditsPage'));
+const NotFoundPage = lazyPage(() => import('./pages/NotFoundPage'));
 
 // Subpages with their own full page layout.
 const programExtras: Record<string, ReactNode> = {
@@ -156,7 +157,7 @@ export default function App() {
         <Route path="/admin/climbs/:id/sheet" element={<RouteErrorBoundary key="day-sheet"><Suspense fallback={loading}><ClimbDaySheetPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin/climbs/:id" element={<RouteErrorBoundary key="admin-climb"><Suspense fallback={loading}><AdminClimbPage /></Suspense></RouteErrorBoundary>} />
         <Route path="/admin" element={<RouteErrorBoundary key="admin"><Suspense fallback={loading}><AdminPage /></Suspense></RouteErrorBoundary>} />
-        <Route path="*" element={<HomePage />} />
+        <Route path="*" element={<RouteErrorBoundary key="not-found"><Suspense fallback={loading}><NotFoundPage /></Suspense></RouteErrorBoundary>} />
       </Routes>
       <Footer />
       <NotificationsHost />
