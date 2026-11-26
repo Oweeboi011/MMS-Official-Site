@@ -133,3 +133,28 @@ describe('Unknown URLs', () => {
     expect(document.head.querySelector('meta[name="robots"]')).toBeNull();
   });
 });
+
+describe('Page titles', () => {
+  const home = document.title;
+  it.each([
+    ['/search', 'Find a page | MMS'],
+    ['/no-such-page', 'Page not found | MMS'],
+    [bmcPage.path, `${bmcPage.title} | MMS`],
+  ])('%s sets the tab title', (path, title) => {
+    renderAt(path);
+    expect(document.title).toBe(title);
+  });
+
+  it('sets the meta description from the page intro and restores both on leaving', () => {
+    const meta = document.createElement('meta');
+    meta.name = 'description';
+    meta.content = 'site default';
+    document.head.append(meta);
+    const { unmount } = renderAt('/search');
+    expect(meta.content).toBe('Search climbs, courses, programs, news, and MMS terms.');
+    unmount();
+    expect(meta.content).toBe('site default');
+    expect(document.title).toBe(home);
+    meta.remove();
+  });
+});
