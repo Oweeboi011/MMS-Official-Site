@@ -34,3 +34,16 @@ test('committee tasks asks signed-out visitors to sign in', async ({ page }) => 
   await page.goto('/account/tasks');
   await expect(page.getByText('Sign in to see the committee tasks.')).toBeVisible();
 });
+
+for (const [path, title] of [
+  ['/', 'MMS | Metropolitan Mountaineering Society'],
+  ['/search', 'Find a page | MMS'],
+  ['/credits', 'Credits | MMS'],
+  ['/privacy', 'Privacy Notice | MMS'],
+  ['/no-such-page', 'Page not found | MMS'],
+] as const) {
+  test(`${path} has its own tab title`, async ({ page }) => {
+    await page.goto(path);
+    await expect(page).toHaveTitle(title);
+  });
+}

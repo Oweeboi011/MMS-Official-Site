@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { asset } from '../lib/asset';
 import { sectionPath, sitemap } from '../data/sitemap';
+import { useDocumentMeta } from './useDocumentMeta';
 
 interface Props {
   eyebrow: string;
@@ -29,6 +30,7 @@ function Breadcrumbs({ title }: { title: string }) {
 }
 
 export default function PageHero({ eyebrow, title, intro, image, compact, crumb }: Props) {
+  useDocumentMeta(title, intro);
   return (
     <header className={`hero page-hero${compact ? ' page-hero--compact' : ''}`} style={{ '--hero-image': `url("${asset(image)}")` } as CSSProperties}>
       <div className="shell hero-content">
